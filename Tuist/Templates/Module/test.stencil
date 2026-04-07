@@ -1,0 +1,27 @@
+//
+//  {{ name }}Tests.swift
+//  {{ layer }}.{{ name }}Tests
+//
+//  Created by {{ author }} on {{ currentDate }}.
+//
+
+import Testing
+@testable import {{ name }}
+
+struct {{ name }}Tests {
+
+    @Test
+    func {{ name | lowercase }}Example() {
+        // This is an example of a test case.
+        #expect(true)
+    }
+
+    @Test
+    func {{ name | lowercase }}LogicTest() {
+        // Add your test logic here.
+        let result = true
+        #expect(result == true)
+    }
+
+}
+

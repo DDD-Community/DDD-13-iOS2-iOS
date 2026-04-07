@@ -1,0 +1,17 @@
+//
+//  Shared.xcconfig
+//  GoGo
+//
+//  Created by ha sungyong on 10/29/24.
+//
+
+PROJECT_NAME = Multi
+BUNDLE_ID_PREFIX = io.Roy.Module
+BUNDLE_DISPLAY_NAME = $(PROJECT_NAME)  // 🎯 앱 화면에 표시될 이름
+
+MARKETING_VERSION = 1.0.0
+CURRENT_PROJECT_VERSION = 20
+SWIFT_OPTIMIZATION_LEVEL = -Osize
+DEAD_CODE_STRIPPING = YES
+STRIP_INSTALLED_PRODUCT = YES
+

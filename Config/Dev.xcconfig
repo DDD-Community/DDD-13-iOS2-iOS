@@ -1,0 +1,27 @@
+//
+//  Dev.xcconfig
+//  MultiModule
+//
+//  Created by Wonji Suh on 10/29/24.
+//
+
+#include "./Shared.xcconfig"
+
+PRODUCT_NAME = $(PROJECT_NAME)-Dev
+PRODUCT_BUNDLE_IDENTIFIER = $(BUNDLE_ID_PREFIX).dev
+
+// 홈 화면 표시 이름
+BUNDLE_DISPLAY_NAME = $(PROJECT_NAME)(Dev)
+INFOPLIST_KEY_CFBundleDisplayName = $(BUNDLE_DISPLAY_NAME)
+
+// Swift 조건부 컴파일: DEV 토큰 제공
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) DEV
+// Debug일 때는 DEBUG도 추가
+SWIFT_ACTIVE_COMPILATION_CONDITIONS[config=Debug] = $(inherited) DEV DEBUG
+
+// Obj-C 매크로가 필요하면(선택)
+GCC_PREPROCESSOR_DEFINITIONS = $(inherited) DEV=1
+GCC_PREPROCESSOR_DEFINITIONS[config=Debug] = $(inherited) DEV=1 DEBUG=1
+
+// 불필요한 -D 제거
+OTHER_SWIFT_FLAGS = $(inherited)

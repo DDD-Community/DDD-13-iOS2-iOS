@@ -1,0 +1,23 @@
+//
+//  Release.xcconfig
+//  MultiModule
+//
+//  Created by Wonji Suh on 10/29/24.
+//
+
+#include "./Shared.xcconfig"
+
+PRODUCT_NAME = $(PROJECT_NAME)
+PRODUCT_BUNDLE_IDENTIFIER = $(BUNDLE_ID_PREFIX)
+
+BUNDLE_DISPLAY_NAME = $(PROJECT_NAME)
+INFOPLIST_KEY_CFBundleDisplayName = $(BUNDLE_DISPLAY_NAME)
+
+# 여기만 다르게
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) PROD
+SWIFT_ACTIVE_COMPILATION_CONDITIONS[config=Debug] = $(inherited) PROD DEBUG
+
+OTHER_SWIFT_FLAGS = $(inherited)
+
+
+
