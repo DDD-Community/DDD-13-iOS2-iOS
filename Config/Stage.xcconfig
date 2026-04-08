@@ -1,0 +1,27 @@
+//
+//  Stage.xcconfig
+//  MultiModule
+//
+//  Created by Wonji Suh on 10/29/24.
+//
+
+#include "./Shared.xcconfig"
+
+/// 제품명/번들ID (Stage)
+PRODUCT_NAME = $(PROJECT_NAME)-Stage
+PRODUCT_BUNDLE_IDENTIFIER = $(BUNDLE_ID_PREFIX).stage
+
+/// 홈 화면 표시 이름
+BUNDLE_DISPLAY_NAME = $(PROJECT_NAME)(Stage)
+INFOPLIST_KEY_CFBundleDisplayName = $(BUNDLE_DISPLAY_NAME)
+
+/// Swift 조건부 컴파일
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) STAGE
+SWIFT_ACTIVE_COMPILATION_CONDITIONS[config=Debug] = $(inherited) STAGE DEBUG
+
+/// (선택) Obj-C 매크로
+GCC_PREPROCESSOR_DEFINITIONS = $(inherited) STAGE=1
+GCC_PREPROCESSOR_DEFINITIONS[config=Debug] = $(inherited) STAGE=1 DEBUG=1
+
+/// 불필요한 -D 제거
+OTHER_SWIFT_FLAGS = $(inherited)
