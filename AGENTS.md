@@ -25,6 +25,29 @@
 - CPU 작업은 Effect 내에서 처리
 - 테스트: TestStore 패턴 사용
 
-## Git Workflow
+## Git Rules
+
+### Branch Strategy
 - main: 배포 / develop: 통합 / feature/{issue-number}: 작업
-- PR → develop 머지, 리뷰어 1명 필수, Assignee는 PR 작성자
+- PR → develop 머지
+
+### Commit Message
+- 형식: `[{Header}]: {Message}`
+- Header
+  - FEAT: 기능 개발
+  - REFACTOR: 코드 변경, 리팩토링
+  - ADD: 리소스 파일 추가
+  - FIX: 에러 및 버그 수정
+  - HOTFIX: 긴급수정
+  - DOCS: 문서 작성
+  - TEST: 테스트코드 작성
+  - CHORE: 기타
+- Message
+  - 한국어로 작성
+  - 한줄, 최대 50자
+  - 마침표 및 특수기호 미사용
+  - 간결하고 요점적으로 작성
+- Body
+  - 필요시 작성
+  - 어떻게보다 무엇을 왜 변경했는지 작성
+- 예시: `[FEAT]: 로그인 화면 UI 구현`
