@@ -10,8 +10,7 @@ let project = Project.makeModule(
   product: .staticFramework,
   settings:  .settings(),
   dependencies: [
-    .SPM.asyncMoya,
-    .SPM.weaveDI
+    .SPM.asyncMoya
   ],
   sources: ["Sources/**"],
   hasTests: false

@@ -1,5 +1,5 @@
 {
-  "originHash" : "470619d71e87cdabba583de3c9751c3dc80110235d14a8b6cde241975310ba64",
+  "originHash" : "81ef63373329edbbb0c00d54bf2b35e6c5bc11eb22cb5ad6b3e4340ccc473f52",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -26,15 +26,6 @@
       "state" : {
         "revision" : "5928286acce13def418ec36d05a001a9641086f2",
         "version" : "1.0.3"
-      }
-    },
-    {
-      "identity" : "flowstacks",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/johnpatrickmorgan/FlowStacks",
-      "state" : {
-        "revision" : "a2b974b81612e1e8ee3ecd757d936a2919527356",
-        "version" : "0.4.1"
       }
     },
     {
@@ -105,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-composable-architecture",
       "state" : {
-        "revision" : "76c4411e02cc7768a3f27ca058bd2143c342e5b2",
-        "version" : "1.18.0"
+        "revision" : "52bcdf2cbf284a5df3363227f98f818ac72f9d28",
+        "version" : "1.25.0"
       }
     },
     {
@@ -179,24 +170,6 @@
       "state" : {
         "revision" : "0687f71944021d616d34d922343dcef086855920",
         "version" : "600.0.1"
-      }
-    },
-    {
-      "identity" : "tcacoordinators",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/johnpatrickmorgan/TCACoordinators.git",
-      "state" : {
-        "revision" : "f5ce6850bb104d627b53577ecc352fdd44ee1318",
-        "version" : "0.11.1"
-      }
-    },
-    {
-      "identity" : "weavedi",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Roy-wonji/WeaveDI.git",
-      "state" : {
-        "revision" : "f2d44c6788d3fc8bf60314041ef2d77c86a394ad",
-        "version" : "3.4.0"
       }
     },
     {
