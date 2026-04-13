@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		78911C6E462B87C91C44BD2F /* Base.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94DF26FC571CCDF104E7773B /* Base.swift */; };
+		8F04EA52160AB1213C334036 /* BaseResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503F55E623271CCA17915AAD /* BaseResponse.swift */; };
 		DEFBC66085F867D23E0345CB /* Entity.framework in Dependencies */ = {isa = PBXBuildFile; fileRef = D22072369C7A243701AC331A /* Entity.framework */; };
 /* End PBXBuildFile section */
 
@@ -35,6 +36,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		503F55E623271CCA17915AAD /* BaseResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseResponse.swift; sourceTree = "<group>"; };
 		94DF26FC571CCDF104E7773B /* Base.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Base.swift; sourceTree = "<group>"; };
 		9861501D039B06394C2A7E64 /* Model-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Model-Info.plist"; sourceTree = "<group>"; };
 		BD19E51E52BA74F9617F5F81 /* Model.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Model.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -90,6 +92,7 @@
 			isa = PBXGroup;
 			children = (
 				94DF26FC571CCDF104E7773B /* Base.swift */,
+				503F55E623271CCA17915AAD /* BaseResponse.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -170,6 +173,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				78911C6E462B87C91C44BD2F /* Base.swift in Sources */,
+				8F04EA52160AB1213C334036 /* BaseResponse.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

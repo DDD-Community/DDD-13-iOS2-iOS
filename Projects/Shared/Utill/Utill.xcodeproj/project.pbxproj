@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		933E9F97F8675217757FFA51 /* Base.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64B0F7C37B5A0D5ED954E77D /* Base.swift */; };
+		AB19D0946E1589CE0397ED61 /* KeyChainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89E7D1A9BDD74C2701BD38EC /* KeyChainManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -27,6 +28,7 @@
 		136D114982ED83CB9F5177A1 /* Utill.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Utill.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		64B0F7C37B5A0D5ED954E77D /* Base.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Base.swift; sourceTree = "<group>"; };
 		7B9A8A431FB3EEAE4AE3FB1D /* Utill-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Utill-Info.plist"; sourceTree = "<group>"; };
+		89E7D1A9BDD74C2701BD38EC /* KeyChainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyChainManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,6 +87,7 @@
 			isa = PBXGroup;
 			children = (
 				64B0F7C37B5A0D5ED954E77D /* Base.swift */,
+				89E7D1A9BDD74C2701BD38EC /* KeyChainManager.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -156,6 +159,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				933E9F97F8675217757FFA51 /* Base.swift in Sources */,
+				AB19D0946E1589CE0397ED61 /* KeyChainManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

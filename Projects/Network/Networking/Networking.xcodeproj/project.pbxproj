@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		C53259D07C7921BDE686DE35 /* Foundations.framework in Dependencies */ = {isa = PBXBuildFile; fileRef = 45FD71438C1E6E73F49CA99F /* Foundations.framework */; };
+		D5A46F544BB4639E3E9FAA7C /* Interceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F6EC385D19578D3F2602FF4 /* Interceptor.swift */; };
 		F7C7E5A24D542E8027B329DA /* NetworkExported.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80142F4B9AD1A6168ED953EE /* NetworkExported.swift */; };
 /* End PBXBuildFile section */
 
@@ -36,6 +37,7 @@
 
 /* Begin PBXFileReference section */
 		00D5AC172276CD51B4D7B6CA /* Networking.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Networking.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		3F6EC385D19578D3F2602FF4 /* Interceptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interceptor.swift; sourceTree = "<group>"; };
 		45FD71438C1E6E73F49CA99F /* Foundations.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Foundations.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		80142F4B9AD1A6168ED953EE /* NetworkExported.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkExported.swift; sourceTree = "<group>"; };
 		95586702619AFCD66C00D94E /* Networking-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Networking-Info.plist"; sourceTree = "<group>"; };
@@ -106,6 +108,7 @@
 			isa = PBXGroup;
 			children = (
 				9D14E7A747B12AB9A274617A /* Exorted */,
+				3F6EC385D19578D3F2602FF4 /* Interceptor.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -178,6 +181,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F7C7E5A24D542E8027B329DA /* NetworkExported.swift in Sources */,
+				D5A46F544BB4639E3E9FAA7C /* Interceptor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -193,6 +197,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
+				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Networking-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -202,6 +210,17 @@
 					"@loader_path/Frameworks",
 				);
 				MACH_O_TYPE = staticlib;
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-fmodule-map-file=$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
+				);
+				OTHER_SWIFT_FLAGS = (
+					"$(inherited)",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo.Networking";
 				PRODUCT_NAME = Networking;
 				SDKROOT = iphoneos;
@@ -284,6 +303,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
+				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Networking-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -293,6 +316,17 @@
 					"@loader_path/Frameworks",
 				);
 				MACH_O_TYPE = staticlib;
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-fmodule-map-file=$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
+				);
+				OTHER_SWIFT_FLAGS = (
+					"$(inherited)",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo.Networking";
 				PRODUCT_NAME = Networking;
 				SDKROOT = iphoneos;

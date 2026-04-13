@@ -25,7 +25,7 @@ public struct ProjectConfig {
 
     // MARK: - 🔧 기타 설정
     public static let bundleIdPrefix = "com.ddd-ios2.Bangawo"
-    public static let teamId = "DH9CS7PA5D"
+    public static let teamId = "8NJPCU8Y7S"
     public static let deploymentTarget: ProjectDescription.DeploymentTargets = .iOS("17.0")
     public static let deploymentDestination: ProjectDescription.Destinations = [.iPhone]
     public static let appVersion = "1.0.0"
