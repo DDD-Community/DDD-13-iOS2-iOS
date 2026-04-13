@@ -65,3 +65,12 @@ fastlane/test_output
 
 # Compiled binaries
 tuisttool
+
+
+# Config (may contain secrets)
+Config/
+*.xcconfig
+
+# Claude Code
+CLAUDE.md
+.claude/
