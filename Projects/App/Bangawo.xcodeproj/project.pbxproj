@@ -19,11 +19,9 @@
 		0516E7F2B5AC0D954DD32CBD /* TuistFonts+Bangawo.swift in Sources */ = {isa = PBXBuildFile; fileRef = E90D94B9DF7D50C09B671878 /* TuistFonts+Bangawo.swift */; };
 		05FA2FE5A60CFD9AE7982AEB /* DataInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E721C7E63953BD446653BC40 /* DataInterface.framework */; };
 		06198A41D1D014E4190A50A1 /* UIKitNavigation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8086E61AF74B835D5FA227D0 /* UIKitNavigation.framework */; };
-		06DB6A27AAD5C571F3893CDD /* WeaveDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AA931DB4E92AF4355A4679 /* WeaveDI.framework */; };
 		08369DC313F88F0C31DE7DB4 /* UseCase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0E592FC14590BBF0BD7DE23F /* UseCase.framework */; };
 		09DFAD4507C3798B653D2804 /* TuistAssets+BangawoDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = E882E61AE0539644321CD174 /* TuistAssets+BangawoDebug.swift */; };
 		0A2FD72E37198CDF1F6B41C7 /* BangawoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3657EEDDB069BC04C1808E /* BangawoApp.swift */; };
-		0AC5167B60E456DDDA9A6784 /* LogMacro.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 13D789EF991E7CBEAA51740B /* LogMacro.framework */; };
 		0E988E57A80A233ED5874851 /* XCTestDynamicOverlay.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 462D5371FE44F94162F3B51A /* XCTestDynamicOverlay.framework */; };
 		0F1B954379AD48C94A547EA3 /* Model.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3331E5903CD8A0A81A33338B /* Model.framework */; };
 		0F4DE903110E5A7170BF70EC /* OrderedCollections.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A5421ED7E526F38520B52A2 /* OrderedCollections.framework */; };
@@ -45,18 +43,14 @@
 		29BDC2F3FB06D8806B0E2DC6 /* CasePathsCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B7CFA342D1C3F014E295A58 /* CasePathsCore.framework */; };
 		29FAA9B0DB7B68A10B6CBD5E /* Foundations.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD7E38252D22390F2ED82261 /* Foundations.framework */; };
 		2AF1F7DB10A8E0306E293747 /* UIKitNavigation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8086E61AF74B835D5FA227D0 /* UIKitNavigation.framework */; };
-		2F00A6DEB36B42BE66FDBFBD /* WeaveDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AA931DB4E92AF4355A4679 /* WeaveDI.framework */; };
 		30BB0511432CF508D339D2CA /* Model.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3331E5903CD8A0A81A33338B /* Model.framework */; };
 		320710F9420D535135691138 /* CasePathsCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B7CFA342D1C3F014E295A58 /* CasePathsCore.framework */; };
 		3446857417CDAEF5AB6B2881 /* InternalCollectionsUtilities.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04D0952423F76DEF78CB1221 /* InternalCollectionsUtilities.framework */; };
 		3449CD121DF43CB068D79596 /* Dependencies.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29D819438A47979054BC6DAC /* Dependencies.framework */; };
-		34F123518A7B14A74788A467 /* WeaveDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AA931DB4E92AF4355A4679 /* WeaveDI.framework */; };
 		3671BE6506F1D54E22B8F930 /* Model.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3331E5903CD8A0A81A33338B /* Model.framework */; };
 		387F6AAC5123FECA493AFA7D /* Foundations.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD7E38252D22390F2ED82261 /* Foundations.framework */; };
-		39D80474D521ECFB77534A27 /* OSLog.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE68D4C4F39B4AE405ADBB7E /* OSLog.framework */; };
 		3A1D63344FBD6FE632278E50 /* IssueReporting.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6108A4E21485A7C7233D227 /* IssueReporting.framework */; };
 		3CD409C2337A0E4F1E9EEFDA /* IssueReportingPackageSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5FF209F8D80F33684784A9B4 /* IssueReportingPackageSupport.framework */; };
-		3D2027308C96994C225F3D6E /* OSLog.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE68D4C4F39B4AE405ADBB7E /* OSLog.framework */; };
 		3D88E78C7007BA1C9BB68042 /* TuistFonts+BangawoStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48AE71F57B9881353FC6F89D /* TuistFonts+BangawoStage.swift */; };
 		3DA33EB35E4C5199DEB19B2D /* swift-sharing_Sharing.bundle in Dependencies */ = {isa = PBXBuildFile; fileRef = A68AA2A98B76D10CE538FF88 /* swift-sharing_Sharing.bundle */; };
 		3DF371ED537CF3DEE709B6BF /* UIKitNavigationShim.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E3E529753D769C6D4E501C /* UIKitNavigationShim.framework */; };
@@ -64,9 +58,7 @@
 		3F90893C5C4E303DE951DA3C /* IdentifiedCollections.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0A1BE0AC3C1D3386F7B88EDD /* IdentifiedCollections.framework */; };
 		40D8B0927E6FB30E584E1A41 /* InternalCollectionsUtilities.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04D0952423F76DEF78CB1221 /* InternalCollectionsUtilities.framework */; };
 		40FF9DB9A1E3FA2A230B1651 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD80591ED0247EBC978EA90 /* ContentView.swift */; };
-		43008C29FE203FDE3270F0F0 /* WeaveDICore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4357F7232F79D3D76479915 /* WeaveDICore.framework */; };
 		452C813AFEA7EF2D091F17F8 /* Entity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EB021004904FC0BC0693A965 /* Entity.framework */; };
-		46E7EB2654A8BDA0DD9F8A44 /* OSLog.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE68D4C4F39B4AE405ADBB7E /* OSLog.framework */; };
 		4723C23A3B29C4D9E7297283 /* UIKitNavigationShim.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E3E529753D769C6D4E501C /* UIKitNavigationShim.framework */; };
 		47719C4DCBE2EB18EC9048C0 /* DependenciesMacros.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84BD81FB92334A2BE51F03F4 /* DependenciesMacros.framework */; };
 		48B390D581D5F6D2AED0BB2C /* Shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 77F76D9E4C3C165627C6A49A /* Shared.framework */; };
@@ -77,12 +69,10 @@
 		507EA27028671E98EDBAD311 /* CasePathsCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B7CFA342D1C3F014E295A58 /* CasePathsCore.framework */; };
 		52C8F9295A000A08363A0CF0 /* DomainInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A43A50B926F67FDB8C7C5129 /* DomainInterface.framework */; };
 		531E494ACFCEE11D03EFCDCA /* DomainInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A43A50B926F67FDB8C7C5129 /* DomainInterface.framework */; };
-		535C7A3C5B20D539A157B947 /* LogMacro.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 13D789EF991E7CBEAA51740B /* LogMacro.framework */; };
 		5427481A7C5D2CF365BAD048 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC756959D9071B3202660C14 /* Assets.xcassets */; };
 		54C5FEA02ACBDA6CBD9549BC /* swift-composable-architecture_ComposableArchitecture.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 7A875D946455A8070B60820F /* swift-composable-architecture_ComposableArchitecture.bundle */; };
 		55D39E9EAC9AF4071B689DCD /* TuistFonts+BangawoProd.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6D57FFF7C98C2636AAF0AA7 /* TuistFonts+BangawoProd.swift */; };
 		583A7932AEA48E3354118D6A /* IdentifiedCollections.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0A1BE0AC3C1D3386F7B88EDD /* IdentifiedCollections.framework */; };
-		583F922C143FED4DA42D2906 /* OSLog.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE68D4C4F39B4AE405ADBB7E /* OSLog.framework */; };
 		59E59131A6B3323A94431229 /* Sharing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D0833B6B11A52CB07B2BCB3 /* Sharing.framework */; };
 		5AA56FA1E6668190C5B79539 /* swift-composable-architecture_ComposableArchitecture.bundle in Dependencies */ = {isa = PBXBuildFile; fileRef = 7A875D946455A8070B60820F /* swift-composable-architecture_ComposableArchitecture.bundle */; };
 		5AC3E320D1E33300C4E62103 /* DependenciesMacros.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84BD81FB92334A2BE51F03F4 /* DependenciesMacros.framework */; };
@@ -91,13 +81,11 @@
 		5D19F3626111E2648C83F523 /* BangawoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3657EEDDB069BC04C1808E /* BangawoApp.swift */; };
 		5D42F470A2BF36CDF88C8D10 /* Clocks.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45234DE6FD907DA09A3F8F85 /* Clocks.framework */; };
 		5F1F1BB387EF28E04132C3AF /* Sharing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D0833B6B11A52CB07B2BCB3 /* Sharing.framework */; };
-		65B28DEA451CF639EB3A3926 /* WeaveDICore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4357F7232F79D3D76479915 /* WeaveDICore.framework */; };
 		679AE062FAC5B09748690572 /* Shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 77F76D9E4C3C165627C6A49A /* Shared.framework */; };
 		6819210431B343C7A8CBB3AE /* Dependencies.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29D819438A47979054BC6DAC /* Dependencies.framework */; };
 		6A9BD6E561631747BB3C454E /* swift-composable-architecture_ComposableArchitecture.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 7A875D946455A8070B60820F /* swift-composable-architecture_ComposableArchitecture.bundle */; };
 		6BABDFEE8C479CE00D88D4EB /* TuistBundle+Bangawo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02DB57742B409453C82EA79A /* TuistBundle+Bangawo.swift */; };
 		6C08E2BA8759936614377611 /* DependenciesMacros.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84BD81FB92334A2BE51F03F4 /* DependenciesMacros.framework */; };
-		6CB5128A79116A3A09691EBF /* WeaveDICore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4357F7232F79D3D76479915 /* WeaveDICore.framework */; };
 		6F348171114C47DE013127DC /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD80591ED0247EBC978EA90 /* ContentView.swift */; };
 		70E46907A072250A55DCC648 /* Shared.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 77F76D9E4C3C165627C6A49A /* Shared.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		7239F0D2A640353BDFB77ECE /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8D64641A673A5184FE8C077F /* Preview Assets.xcassets */; };
@@ -114,7 +102,6 @@
 		7E6174493A14E4C7EFED4308 /* UIKitNavigationShim.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E3E529753D769C6D4E501C /* UIKitNavigationShim.framework */; };
 		7EE4B41CCD46079970074D1B /* DataInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E721C7E63953BD446653BC40 /* DataInterface.framework */; };
 		7F51F759D1F65B3017CFBAC0 /* Presentation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A29A92C803BBEF9ADA9031E /* Presentation.framework */; };
-		832FA1512C96D5F7A75CEAA3 /* LogMacro.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 13D789EF991E7CBEAA51740B /* LogMacro.framework */; };
 		8581AF71F362CD0F35A769C9 /* Sharing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D0833B6B11A52CB07B2BCB3 /* Sharing.framework */; };
 		873613102293C8F13CF9FFF5 /* Entity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EB021004904FC0BC0693A965 /* Entity.framework */; };
 		87B309AC11F8713D91EF20C9 /* TuistAssets+BangawoProd.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDFD8A8A9B2C053982ADA4D2 /* TuistAssets+BangawoProd.swift */; };
@@ -167,7 +154,6 @@
 		C48081F72CA32CDD6A57531B /* PerceptionCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F30F7606920BA74459A75455 /* PerceptionCore.framework */; };
 		C50BB1D5307BD08E55B2A04C /* Shared.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 77F76D9E4C3C165627C6A49A /* Shared.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C6523DC7D6BB42E496CFBA2A /* Sharing1.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BDB34E76BED7EC98708D4FCF /* Sharing1.framework */; };
-		C944EAAD4CCC5E7DDEDECE52 /* WeaveDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AA931DB4E92AF4355A4679 /* WeaveDI.framework */; };
 		CAD52F480BCD37686D2183F3 /* swift-composable-architecture_ComposableArchitecture.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 7A875D946455A8070B60820F /* swift-composable-architecture_ComposableArchitecture.bundle */; };
 		CB33C4AE01ECB5B336F441B3 /* UIKitNavigationShim.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E3E529753D769C6D4E501C /* UIKitNavigationShim.framework */; };
 		CC4352C88FDCDAD7FADD041A /* PerceptionCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F30F7606920BA74459A75455 /* PerceptionCore.framework */; };
@@ -182,10 +168,8 @@
 		D3145843B57E9BF9FD52A10C /* UIKitNavigation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8086E61AF74B835D5FA227D0 /* UIKitNavigation.framework */; };
 		D46852FFFCFE97FD18734834 /* Networking.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9605D64008DC1C1CEFEBAF7 /* Networking.framework */; };
 		D4AB0432FB440F54CF8BDE50 /* XCTestDynamicOverlay.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 462D5371FE44F94162F3B51A /* XCTestDynamicOverlay.framework */; };
-		D4FB626AA13E50B44713265B /* WeaveDICore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4357F7232F79D3D76479915 /* WeaveDICore.framework */; };
 		D88664E2609C8AE30AFF905D /* Shared.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 77F76D9E4C3C165627C6A49A /* Shared.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		DA07250E94073133B4F0CF91 /* Perception.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A76F5409027F278B0373D4F1 /* Perception.framework */; };
-		DD1CB636C8965512B706F232 /* LogMacro.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 13D789EF991E7CBEAA51740B /* LogMacro.framework */; };
 		DD1FD511D829EBF9B2EE6A6A /* Repository.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9CB4E6CAC006993A7B6D68BD /* Repository.framework */; };
 		DE93E4361B461FE6E2E633D4 /* BangawoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3657EEDDB069BC04C1808E /* BangawoApp.swift */; };
 		E0FB586985B22920A044557A /* Presentation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A29A92C803BBEF9ADA9031E /* Presentation.framework */; };
@@ -337,7 +321,6 @@
 		0A956CDA73A911E51ECA3527 /* Bangawo-Stage-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Bangawo-Stage-Info.plist"; sourceTree = "<group>"; };
 		0E592FC14590BBF0BD7DE23F /* UseCase.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = UseCase.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		12D2265ACC470FCE57789398 /* TuistAssets+Bangawo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TuistAssets+Bangawo.swift"; sourceTree = "<group>"; };
-		13D789EF991E7CBEAA51740B /* LogMacro.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = LogMacro.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		142069E341FFF050460F894C /* Bangawo_Stage.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bangawo_Stage.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		160A9405DB71EE17FF10726D /* BangawoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BangawoTests.swift; sourceTree = "<group>"; };
 		1DD80591ED0247EBC978EA90 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -375,7 +358,6 @@
 		A76F5409027F278B0373D4F1 /* Perception.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Perception.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9605D64008DC1C1CEFEBAF7 /* Networking.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Networking.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9A24308E710594FCEBDD00E /* CombineSchedulers.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CombineSchedulers.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		B4357F7232F79D3D76479915 /* WeaveDICore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = WeaveDICore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4FFF4118A5E3B4B7C441C05 /* PretendardVariable.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = PretendardVariable.ttf; sourceTree = "<group>"; };
 		B7709E452C55A8486272F6C1 /* ComposableArchitecture.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ComposableArchitecture.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BDB34E76BED7EC98708D4FCF /* Sharing1.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Sharing1.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -383,8 +365,6 @@
 		BEB294C4E7236CCD01FDA447 /* Bangawo-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Bangawo-Info.plist"; sourceTree = "<group>"; };
 		BF82197E4E96649EA5CAA793 /* SwiftUINavigation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftUINavigation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE0C23D6BEE253467D0D191F /* TuistAssets+BangawoStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TuistAssets+BangawoStage.swift"; sourceTree = "<group>"; };
-		CE68D4C4F39B4AE405ADBB7E /* OSLog.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSLog.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/OSLog.framework; sourceTree = DEVELOPER_DIR; };
-		D2AA931DB4E92AF4355A4679 /* WeaveDI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = WeaveDI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D2F17D711273A268F0FAA165 /* Bangawo_Prod.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bangawo_Prod.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4D25FEEEB792C743749B4AE /* Stage.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Stage.xcconfig; sourceTree = "<group>"; };
 		D5F432967C961652794CEB9F /* MultiModuleTemplateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiModuleTemplateTests.swift; sourceTree = "<group>"; };
@@ -410,7 +390,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3D2027308C96994C225F3D6E /* OSLog.framework in Frameworks */,
 				EBE03B3934CE363D2C4874D4 /* CasePaths.framework in Frameworks */,
 				507EA27028671E98EDBAD311 /* CasePathsCore.framework in Frameworks */,
 				A08027918126E0447DB88779 /* Clocks.framework in Frameworks */,
@@ -428,7 +407,6 @@
 				0044B1B5407D1A6BB74EA8F0 /* InternalCollectionsUtilities.framework in Frameworks */,
 				E5685E77EF86633B4D04BF5B /* IssueReporting.framework in Frameworks */,
 				5C4638B60A15B266D0478BE6 /* IssueReportingPackageSupport.framework in Frameworks */,
-				DD1CB636C8965512B706F232 /* LogMacro.framework in Frameworks */,
 				3671BE6506F1D54E22B8F930 /* Model.framework in Frameworks */,
 				90765B81F6F1F0AC22F9E0A5 /* Networking.framework in Frameworks */,
 				0F4DE903110E5A7170BF70EC /* OrderedCollections.framework in Frameworks */,
@@ -444,8 +422,6 @@
 				2AF1F7DB10A8E0306E293747 /* UIKitNavigation.framework in Frameworks */,
 				CB33C4AE01ECB5B336F441B3 /* UIKitNavigationShim.framework in Frameworks */,
 				08369DC313F88F0C31DE7DB4 /* UseCase.framework in Frameworks */,
-				34F123518A7B14A74788A467 /* WeaveDI.framework in Frameworks */,
-				6CB5128A79116A3A09691EBF /* WeaveDICore.framework in Frameworks */,
 				D4AB0432FB440F54CF8BDE50 /* XCTestDynamicOverlay.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -454,7 +430,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				583F922C143FED4DA42D2906 /* OSLog.framework in Frameworks */,
 				D2846751686A461F4AEFB438 /* CasePaths.framework in Frameworks */,
 				29BDC2F3FB06D8806B0E2DC6 /* CasePathsCore.framework in Frameworks */,
 				E991BF0CBE11534FF4AF918A /* Clocks.framework in Frameworks */,
@@ -472,7 +447,6 @@
 				3446857417CDAEF5AB6B2881 /* InternalCollectionsUtilities.framework in Frameworks */,
 				0123516B5EE729A9FD4A2FFC /* IssueReporting.framework in Frameworks */,
 				C40537828A2A93B4128BFA2F /* IssueReportingPackageSupport.framework in Frameworks */,
-				0AC5167B60E456DDDA9A6784 /* LogMacro.framework in Frameworks */,
 				30BB0511432CF508D339D2CA /* Model.framework in Frameworks */,
 				D46852FFFCFE97FD18734834 /* Networking.framework in Frameworks */,
 				F1312777E98A5E70FFC389E0 /* OrderedCollections.framework in Frameworks */,
@@ -488,8 +462,6 @@
 				D3145843B57E9BF9FD52A10C /* UIKitNavigation.framework in Frameworks */,
 				4723C23A3B29C4D9E7297283 /* UIKitNavigationShim.framework in Frameworks */,
 				CEE96386A24D6A3030F09B00 /* UseCase.framework in Frameworks */,
-				06DB6A27AAD5C571F3893CDD /* WeaveDI.framework in Frameworks */,
-				43008C29FE203FDE3270F0F0 /* WeaveDICore.framework in Frameworks */,
 				0E988E57A80A233ED5874851 /* XCTestDynamicOverlay.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -498,7 +470,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46E7EB2654A8BDA0DD9F8A44 /* OSLog.framework in Frameworks */,
 				A777677DBED0CCBD34FBAF80 /* CasePaths.framework in Frameworks */,
 				A42DCAC7B79B75B37FCE0548 /* CasePathsCore.framework in Frameworks */,
 				5D42F470A2BF36CDF88C8D10 /* Clocks.framework in Frameworks */,
@@ -516,7 +487,6 @@
 				40D8B0927E6FB30E584E1A41 /* InternalCollectionsUtilities.framework in Frameworks */,
 				3A1D63344FBD6FE632278E50 /* IssueReporting.framework in Frameworks */,
 				981493132FB545FABF6DE4FB /* IssueReportingPackageSupport.framework in Frameworks */,
-				535C7A3C5B20D539A157B947 /* LogMacro.framework in Frameworks */,
 				E37D7A237F0CB42372C83DA9 /* Model.framework in Frameworks */,
 				973D725839479EF6EC483E61 /* Networking.framework in Frameworks */,
 				8B4B603F58D502BBB5C807BB /* OrderedCollections.framework in Frameworks */,
@@ -532,8 +502,6 @@
 				18854273C9117601D650A445 /* UIKitNavigation.framework in Frameworks */,
 				3DF371ED537CF3DEE709B6BF /* UIKitNavigationShim.framework in Frameworks */,
 				AF5958A2F52624348C9042AF /* UseCase.framework in Frameworks */,
-				C944EAAD4CCC5E7DDEDECE52 /* WeaveDI.framework in Frameworks */,
-				65B28DEA451CF639EB3A3926 /* WeaveDICore.framework in Frameworks */,
 				4DB37E26F1A280613D4AC4AF /* XCTestDynamicOverlay.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -542,7 +510,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				39D80474D521ECFB77534A27 /* OSLog.framework in Frameworks */,
 				166B3796AC34B4088AB716E6 /* CasePaths.framework in Frameworks */,
 				320710F9420D535135691138 /* CasePathsCore.framework in Frameworks */,
 				E24FDCF5890F32DE9648BBB3 /* Clocks.framework in Frameworks */,
@@ -560,7 +527,6 @@
 				EC7FBC41F7A78198238F7BE3 /* InternalCollectionsUtilities.framework in Frameworks */,
 				A51FFF79B636623F2048B3ED /* IssueReporting.framework in Frameworks */,
 				3CD409C2337A0E4F1E9EEFDA /* IssueReportingPackageSupport.framework in Frameworks */,
-				832FA1512C96D5F7A75CEAA3 /* LogMacro.framework in Frameworks */,
 				0F1B954379AD48C94A547EA3 /* Model.framework in Frameworks */,
 				A3E409A07605E91DA216D813 /* Networking.framework in Frameworks */,
 				0089DC50FADF3A547FFDAB9B /* OrderedCollections.framework in Frameworks */,
@@ -576,8 +542,6 @@
 				06198A41D1D014E4190A50A1 /* UIKitNavigation.framework in Frameworks */,
 				7E6174493A14E4C7EFED4308 /* UIKitNavigationShim.framework in Frameworks */,
 				E53686DCA2B18F04393B867B /* UseCase.framework in Frameworks */,
-				2F00A6DEB36B42BE66FDBFBD /* WeaveDI.framework in Frameworks */,
-				D4FB626AA13E50B44713265B /* WeaveDICore.framework in Frameworks */,
 				BCB14E1E64399A1C6AE93794 /* XCTestDynamicOverlay.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -650,7 +614,6 @@
 				04D0952423F76DEF78CB1221 /* InternalCollectionsUtilities.framework */,
 				F6108A4E21485A7C7233D227 /* IssueReporting.framework */,
 				5FF209F8D80F33684784A9B4 /* IssueReportingPackageSupport.framework */,
-				13D789EF991E7CBEAA51740B /* LogMacro.framework */,
 				3331E5903CD8A0A81A33338B /* Model.framework */,
 				A9605D64008DC1C1CEFEBAF7 /* Networking.framework */,
 				5A5421ED7E526F38520B52A2 /* OrderedCollections.framework */,
@@ -668,8 +631,6 @@
 				8086E61AF74B835D5FA227D0 /* UIKitNavigation.framework */,
 				78E3E529753D769C6D4E501C /* UIKitNavigationShim.framework */,
 				0E592FC14590BBF0BD7DE23F /* UseCase.framework */,
-				D2AA931DB4E92AF4355A4679 /* WeaveDI.framework */,
-				B4357F7232F79D3D76479915 /* WeaveDICore.framework */,
 				462D5371FE44F94162F3B51A /* XCTestDynamicOverlay.framework */,
 			);
 			name = Products;
@@ -733,14 +694,6 @@
 			name = Project;
 			sourceTree = "<group>";
 		};
-		92B104BF077563BD0712A9F9 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				CE68D4C4F39B4AE405ADBB7E /* OSLog.framework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 		A30D0638F16069E0A4DCAE6B /* Sources */ = {
 			isa = PBXGroup;
 			children = (
@@ -763,7 +716,6 @@
 			children = (
 				1EF9A9A700A56B7E70E3A84C /* Products */,
 				8455F93F1111D63D46040682 /* Project */,
-				92B104BF077563BD0712A9F9 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1067,7 +1019,7 @@
 					"$(SRCROOT)/../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
 				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Bangawo-Stage-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1094,11 +1046,7 @@
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
 					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
-					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
-					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/WeaveDIMacros#WeaveDIMacros",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo";
 				PRODUCT_NAME = Bangawo_Stage;
@@ -1125,7 +1073,7 @@
 					"$(SRCROOT)/../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
 				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Bangawo-Prod-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1152,11 +1100,7 @@
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
 					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
-					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
-					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/WeaveDIMacros#WeaveDIMacros",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo";
 				PRODUCT_NAME = Bangawo_Prod;
@@ -1258,7 +1202,7 @@
 					"$(SRCROOT)/../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
 				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Bangawo-Debug-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1285,11 +1229,7 @@
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
 					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
-					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
-					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/WeaveDIMacros#WeaveDIMacros",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo";
 				PRODUCT_NAME = Bangawo_Debug;
@@ -1320,7 +1260,7 @@
 					"$(SRCROOT)/../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
 				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Bangawo-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1347,11 +1287,7 @@
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
 					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
-					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
-					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/WeaveDIMacros#WeaveDIMacros",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo";
 				PRODUCT_NAME = Bangawo;
@@ -1378,7 +1314,7 @@
 					"$(SRCROOT)/../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
 				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Bangawo-Stage-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1405,11 +1341,7 @@
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
 					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
-					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
-					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/WeaveDIMacros#WeaveDIMacros",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo";
 				PRODUCT_NAME = Bangawo_Stage;
@@ -1505,7 +1437,7 @@
 					"$(SRCROOT)/../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
 				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Bangawo-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1532,11 +1464,7 @@
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
 					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
-					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
-					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/WeaveDIMacros#WeaveDIMacros",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo";
 				PRODUCT_NAME = Bangawo;
@@ -1561,7 +1489,7 @@
 					"$(SRCROOT)/../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
 				);
 				INFOPLIST_FILE = "Derived/InfoPlists/BangawoTests-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1589,11 +1517,7 @@
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
 					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
-					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
-					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/WeaveDIMacros#WeaveDIMacros",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo.BangawoTests";
 				PRODUCT_NAME = BangawoTests;
@@ -1760,7 +1684,7 @@
 					"$(SRCROOT)/../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
 				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Bangawo-Debug-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1787,11 +1711,7 @@
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
 					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
-					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
-					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/WeaveDIMacros#WeaveDIMacros",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo";
 				PRODUCT_NAME = Bangawo_Debug;
@@ -1818,7 +1738,7 @@
 					"$(SRCROOT)/../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
 				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Bangawo-Prod-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1845,11 +1765,7 @@
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
 					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
-					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
-					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/WeaveDIMacros#WeaveDIMacros",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo";
 				PRODUCT_NAME = Bangawo_Prod;
@@ -1880,7 +1796,7 @@
 					"$(SRCROOT)/../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
 				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Bangawo-Prod-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1907,11 +1823,7 @@
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
 					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
-					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
-					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/WeaveDIMacros#WeaveDIMacros",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo";
 				PRODUCT_NAME = Bangawo_Prod;
@@ -1938,7 +1850,7 @@
 					"$(SRCROOT)/../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
 				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Bangawo-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1965,11 +1877,7 @@
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
 					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
-					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
-					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/WeaveDIMacros#WeaveDIMacros",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo";
 				PRODUCT_NAME = Bangawo;
@@ -1996,7 +1904,7 @@
 					"$(SRCROOT)/../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
 				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Bangawo-Stage-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2023,11 +1931,7 @@
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
 					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
-					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
-					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/WeaveDIMacros#WeaveDIMacros",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo";
 				PRODUCT_NAME = Bangawo_Stage;
@@ -2054,7 +1958,7 @@
 					"$(SRCROOT)/../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
 				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Bangawo-Stage-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2081,11 +1985,7 @@
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
 					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
-					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
-					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/WeaveDIMacros#WeaveDIMacros",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo";
 				PRODUCT_NAME = Bangawo_Stage;
@@ -2116,7 +2016,7 @@
 					"$(SRCROOT)/../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
 				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Bangawo-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2143,11 +2043,7 @@
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
 					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
-					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
-					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/WeaveDIMacros#WeaveDIMacros",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo";
 				PRODUCT_NAME = Bangawo;
@@ -2176,7 +2072,7 @@
 					"$(SRCROOT)/../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
 				);
 				INFOPLIST_FILE = "Derived/InfoPlists/BangawoTests-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2204,11 +2100,7 @@
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
 					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
-					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
-					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/WeaveDIMacros#WeaveDIMacros",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo.BangawoTests";
 				PRODUCT_NAME = BangawoTests;
@@ -2235,7 +2127,7 @@
 					"$(SRCROOT)/../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
 				);
 				INFOPLIST_FILE = "Derived/InfoPlists/BangawoTests-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2263,11 +2155,7 @@
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
 					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
-					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
-					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/WeaveDIMacros#WeaveDIMacros",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo.BangawoTests";
 				PRODUCT_NAME = BangawoTests;
@@ -2294,7 +2182,7 @@
 					"$(SRCROOT)/../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
 				);
 				INFOPLIST_FILE = "Derived/InfoPlists/BangawoTests-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2322,11 +2210,7 @@
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
 					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
-					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
-					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/WeaveDIMacros#WeaveDIMacros",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo.BangawoTests";
 				PRODUCT_NAME = BangawoTests;
@@ -2359,7 +2243,7 @@
 					"$(SRCROOT)/../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
 				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Bangawo-Debug-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2386,11 +2270,7 @@
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
 					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
-					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
-					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/WeaveDIMacros#WeaveDIMacros",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo";
 				PRODUCT_NAME = Bangawo_Debug;
@@ -2417,7 +2297,7 @@
 					"$(SRCROOT)/../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
 				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Bangawo-Prod-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2444,11 +2324,7 @@
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
 					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
-					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
-					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/WeaveDIMacros#WeaveDIMacros",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo";
 				PRODUCT_NAME = Bangawo_Prod;
@@ -2475,7 +2351,7 @@
 					"$(SRCROOT)/../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
 				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Bangawo-Debug-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2502,11 +2378,7 @@
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
 					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
-					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
-					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/WeaveDIMacros#WeaveDIMacros",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo";
 				PRODUCT_NAME = Bangawo_Debug;

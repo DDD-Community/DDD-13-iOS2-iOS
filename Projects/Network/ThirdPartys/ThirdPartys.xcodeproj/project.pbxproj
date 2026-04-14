@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		84F545E663424CBC30FEFF3E /* WeaveDI.framework in Dependencies */ = {isa = PBXBuildFile; fileRef = 85281779B12DB7BD6BD706E9 /* WeaveDI.framework */; };
 		CFDD45A550AFC3397966EF50 /* AsyncMoya.framework in Dependencies */ = {isa = PBXBuildFile; fileRef = 418E5288CB0BEAE3E0DD1B2F /* AsyncMoya.framework */; };
 /* End PBXBuildFile section */
 
@@ -28,7 +27,6 @@
 			dstSubfolderSpec = 16;
 			files = (
 				CFDD45A550AFC3397966EF50 /* AsyncMoya.framework in Dependencies */,
-				84F545E663424CBC30FEFF3E /* WeaveDI.framework in Dependencies */,
 			);
 			name = Dependencies;
 			runOnlyForDeploymentPostprocessing = 1;
@@ -39,7 +37,6 @@
 		35E3C7DBC481003424E66686 /* ThirdPartys.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ThirdPartys.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		418E5288CB0BEAE3E0DD1B2F /* AsyncMoya.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AsyncMoya.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		792C821D5C6073B1A4E85FD0 /* ThirdPartys-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "ThirdPartys-Info.plist"; sourceTree = "<group>"; };
-		85281779B12DB7BD6BD706E9 /* WeaveDI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = WeaveDI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,7 +87,6 @@
 			children = (
 				418E5288CB0BEAE3E0DD1B2F /* AsyncMoya.framework */,
 				35E3C7DBC481003424E66686 /* ThirdPartys.framework */,
-				85281779B12DB7BD6BD706E9 /* WeaveDI.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -183,7 +179,7 @@
 				);
 				INFOPLIST_FILE = "Derived/InfoPlists/ThirdPartys-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -200,8 +196,6 @@
 					"-fmodule-map-file=$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
-					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/WeaveDIMacros#WeaveDIMacros",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo.ThirdPartys";
 				PRODUCT_NAME = ThirdPartys;
@@ -234,7 +228,7 @@
 				);
 				INFOPLIST_FILE = "Derived/InfoPlists/ThirdPartys-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -251,8 +245,6 @@
 					"-fmodule-map-file=$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
-					"-load-plugin-executable",
-					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/WeaveDIMacros#WeaveDIMacros",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo.ThirdPartys";
 				PRODUCT_NAME = ThirdPartys;
