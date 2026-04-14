@@ -13,7 +13,8 @@ let packageSettings = PackageSettings(
     "XCTestDynamicOverlay": .staticFramework,
     "Clocks": .staticFramework,
     "ConcurrencyExtras": .staticFramework,
-    "Sharing": .staticFramework
+    "Sharing": .staticFramework,
+    "KakaoMapsSDK-SPM": .staticFramework
   ]
 )
 #endif
@@ -23,6 +24,7 @@ let package = Package(
   dependencies: [
     .package(url: "https://github.com/pointfreeco/swift-composable-architecture", exact: "1.25.0"),
     .package(url: "https://github.com/Roy-wonji/AsyncMoya", from: "1.1.8"),
-    .package(url: "https://github.com/pointfreeco/swift-sharing", from: "1.0.0")
+    .package(url: "https://github.com/pointfreeco/swift-sharing", from: "1.0.0"),
+    .package(url: "https://github.com/kakao-mapsSDK/KakaoMapsSDK-SPM", from: "2.12.0")
   ]
 )

@@ -21,6 +21,7 @@
 		BCA453C0D05C32C4A63CB8C4 /* UIColor+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F71885338F6DE555D4751C4 /* UIColor+.swift */; };
 		C83CACD5B5F275224A93814E /* ImageAsset.swift in Sources */ = {isa = PBXBuildFile; fileRef = D199440E65D8D401EDC98511 /* ImageAsset.swift */; };
 		CEC36DC0BC8D2AF0871D6E58 /* Color+.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE4AC63533057A09401E9ACB /* Color+.swift */; };
+		E367662901E0F401ACB60488 /* KakaoMapsSDK_SPM.framework in Dependencies */ = {isa = PBXBuildFile; fileRef = 42A051D576F50390B143C516 /* KakaoMapsSDK_SPM.framework */; };
 		E79FE8601AE837DBF04B8E00 /* ImageAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 365911FA35B2B70671D60856 /* ImageAssets.xcassets */; };
 		F6018B5F7748E322214C52D6 /* TuistBundle+DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE4AD9735556ECA8C8008FEC /* TuistBundle+DesignSystem.swift */; };
 		F80C933AD43E1B03AD6D666E /* UIScreen+.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7244267FD9E30E6D6ACDDB2 /* UIScreen+.swift */; };
@@ -37,6 +38,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		261A68F06D4B4813FC5879A5 /* Dependencies */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 8;
+			dstSubfolderSpec = 16;
+			files = (
+				E367662901E0F401ACB60488 /* KakaoMapsSDK_SPM.framework in Dependencies */,
+			);
+			name = Dependencies;
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 		3FBA6A1C0FF2C099107F7C40 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -64,6 +75,7 @@
 		1FE7959C58FBD17C719858D1 /* ShapeStyle+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ShapeStyle+.swift"; sourceTree = "<group>"; };
 		365911FA35B2B70671D60856 /* ImageAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = ImageAssets.xcassets; sourceTree = "<group>"; };
 		41EFBC8F3B807CE0659AA912 /* UIImage+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+.swift"; sourceTree = "<group>"; };
+		42A051D576F50390B143C516 /* KakaoMapsSDK_SPM.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = KakaoMapsSDK_SPM.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		42D7C40704F4FCBCDB855667 /* DesignSystem_DesignSystem.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DesignSystem_DesignSystem.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		593CD7BFBE22E5E79F338306 /* Image+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Image+.swift"; sourceTree = "<group>"; };
 		5DFDEE116A67E6C3606007A2 /* PretendardFontFamily.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PretendardFontFamily.swift; sourceTree = "<group>"; };
@@ -169,6 +181,7 @@
 			children = (
 				42D7C40704F4FCBCDB855667 /* DesignSystem_DesignSystem.bundle */,
 				69B7BBEAD5472C7195924AC8 /* DesignSystem.framework */,
+				42A051D576F50390B143C516 /* KakaoMapsSDK_SPM.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -273,6 +286,7 @@
 				510D3A5EADC65A3BE366D353 /* Resources */,
 				21D2E38EFDFDB350406F7982 /* Frameworks */,
 				49C4A8593835DDF36FBC2A05 /* Embed Frameworks */,
+				261A68F06D4B4813FC5879A5 /* Dependencies */,
 			);
 			buildRules = (
 			);
