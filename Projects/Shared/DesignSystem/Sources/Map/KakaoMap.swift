@@ -6,6 +6,8 @@ public struct KakaoMap: View {
     private let initialCenter: MapCoordinate
     private let initialZoomLevel: Int
     private var onPinTapped: ((MapPin) -> Void)?
+    
+    @State private var isVisible: Bool = false
 
     public init(
         routes: [MapRoute] = [],
@@ -27,11 +29,18 @@ public struct KakaoMap: View {
 
     public var body: some View {
         KakaoMapRepresentable(
+            isVisible: $isVisible,
             routes: routes,
             pins: pins,
             initialCenter: initialCenter,
             initialZoomLevel: initialZoomLevel,
             onPinTapped: onPinTapped
         )
+        .onAppear {
+            self.isVisible = true
+        }
+        .onDisappear {
+            self.isVisible = false
+        }
     }
 }

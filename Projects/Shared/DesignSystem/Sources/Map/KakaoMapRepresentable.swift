@@ -2,6 +2,7 @@
 import SwiftUI
 
 struct KakaoMapRepresentable: UIViewRepresentable {
+    @Binding var isVisible: Bool
     let routes: [MapRoute]
     let pins: [MapPin]
     let initialCenter: MapCoordinate
@@ -21,8 +22,26 @@ struct KakaoMapRepresentable: UIViewRepresentable {
         coordinator.pendingPins = pins
         coordinator.onPinTapped = onPinTapped
 
-        if coordinator.isMapReady {
-            coordinator.applyOverlays()
+        if isVisible {
+            // KakaoMapSDK는 KMViewContainer의 bounds 기반으로 렌더 서피스를 생성한다.
+            // onAppear 시점에도 Auto Layout + CALayer 커밋이 완료되지 않을 수 있어
+            // 0.5초 지연 후 SDK 자체 상태를 확인하여 엔진을 초기화한다.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                if coordinator.controller?.isEnginePrepared == false {
+                    coordinator.controller?.prepareEngine()
+                }
+
+                if coordinator.controller?.isEngineActive == false {
+                    coordinator.controller?.activateEngine()
+                }
+            }
+
+            if coordinator.isMapReady {
+                coordinator.applyOverlays()
+            }
+        } else {
+            coordinator.controller?.pauseEngine()
+            coordinator.controller?.resetEngine()
         }
     }
 
@@ -47,6 +66,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
         weak var container: KMViewContainer?
         var controller: KMController?
         var isMapReady = false
+        var isEnginePrepared = false
 
         var pendingRoutes: [MapRoute]
         var pendingPins: [MapPin]
@@ -76,12 +96,12 @@ struct KakaoMapRepresentable: UIViewRepresentable {
         func createController(container: KMViewContainer) {
             controller = KMController(viewContainer: container)
             controller?.delegate = self
-            controller?.prepareEngine()
         }
 
         // MARK: - MapControllerDelegate
 
         func addViews() {
+            print("[KakaoMap] addViews called - container frame: \(container?.frame ?? .zero)")
             let defaultPosition = MapPoint(
                 longitude: initialCenter.longitude,
                 latitude: initialCenter.latitude
@@ -98,7 +118,9 @@ struct KakaoMapRepresentable: UIViewRepresentable {
         }
 
         func addViewSucceeded(_ viewName: String, viewInfoName: String) {
+            print("[KakaoMap] addViewSucceeded - viewName: \(viewName), container frame: \(container?.frame ?? .zero)")
             guard let mapView = controller?.getView(viewName) as? KakaoMapsSDK.KakaoMap else {
+                print("[KakaoMap] getView failed - could not cast to KakaoMap")
                 return
             }
             mapView.eventDelegate = self
@@ -108,12 +130,17 @@ struct KakaoMapRepresentable: UIViewRepresentable {
         }
 
         func addViewFailed(_ viewName: String, viewInfoName: String) {
+            print("[KakaoMap] addView failed - viewName: \(viewName), viewInfoName: \(viewInfoName)")
             isMapReady = false
         }
 
-        func authenticationSucceeded() {}
+        func authenticationSucceeded() {
+            print("[KakaoMap] Authentication succeeded")
+        }
 
-        func authenticationFailed(_ errorCode: Int, desc: String) {}
+        func authenticationFailed(_ errorCode: Int, desc: String) {
+            print("[KakaoMap] Authentication failed - code: \(errorCode), desc: \(desc)")
+        }
 
         // MARK: - KakaoMapEventDelegate
 
