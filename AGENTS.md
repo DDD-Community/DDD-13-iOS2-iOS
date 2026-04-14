@@ -1,6 +1,6 @@
 # Bangawo
 
-- **스택**: Swift 6, SwiftUI, TCA 1.18, Tuist 4
+- **스택**: Swift 6, SwiftUI, TCA 1.25, Tuist 4
 - **아키텍처**: TCA + Clean Architecture 멀티모듈
 - **배포 타겟**: iOS 26.0, iPhone 전용
 
@@ -73,7 +73,7 @@ Projects/
 ## Git Rules
 
 ### Branch
-- `main`: 배포 / `develop`: 통합 / `feature/{issue-number}`: 작업
+- `main`: 배포 / `develop`: 통합 / `feature/#{issue-number}`: 작업
 - PR → develop 머지
 
 ### Commit
