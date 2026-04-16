@@ -1,0 +1,101 @@
+name: Gemini Code Review
+on:
+  pull_request:
+    branches:
+      - develop
+    types: [opened, synchronize]
+
+jobs:
+  code-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install GoogleGenerativeAI
+        run: npm install @google/generative-ai
+
+      - name: Get PR Context and Filtered Git Diff
+        id: get_diff
+        run: |
+          git fetch origin "${{ github.event.pull_request.base.ref }}"
+          git fetch origin "${{ github.event.pull_request.head.ref }}"
+
+          git diff "origin/${{ github.event.pull_request.base.ref }}"..."origin/${{ github.event.pull_request.head.ref }}" -- "*.swift" > diff.txt
+
+          if [ ! -s diff.txt ]; then
+            echo "skip_review=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip_review=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Gemini Review
+        if: steps.get_diff.outputs.skip_review == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const diff_output = fs.readFileSync("diff.txt", "utf8");
+
+            const pr_title = context.payload.pull_request.title;
+            const pr_body = context.payload.pull_request.body || "내용 없음";
+
+            const { GoogleGenerativeAI } = require("@google/generative-ai");
+            const genAI = new GoogleGenerativeAI("${{ secrets.GEMINI_API_KEY }}");
+            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+            const prompt = `You are a senior iOS software engineer performing a code review on a Swift project that uses TCA (The Composable Architecture) 1.25 + Clean Architecture multi-module structure.
+
+            [PR Context]
+            Title: ${pr_title}
+            Description: ${pr_body}
+
+            [Project Architecture]
+            - Stack: Swift 6, SwiftUI, TCA 1.25, Tuist 4 (multi-module)
+            - Architecture: TCA + Clean Architecture
+            - Module dependency: Presentation → Domain ← Data, Network is only referenced by Data
+            - Deployment target: iOS 26.0
+
+            [Review Criteria]
+            1. TCA Pattern: Verify @Reducer macro usage, @ObservableState, event-based Action naming (e.g., xxxButtonTapped, xxxResponse), proper Effect usage (.none for no side effects, .run for async), and no shared logic between actions.
+            2. Architecture: Check layer separation (Presentation/Domain/Data), dependency direction compliance, protocol-based abstractions at module boundaries.
+            3. SwiftUI: SubView should be separate structs (not @ViewBuilder functions), no View suffix in naming, use .frame(maxWidth/maxHeight: .infinity) instead of Spacer.
+            4. Code Quality: guard early return, final class by default, private access first, no force unwrap, line limit 120 chars.
+            5. Actionable Feedback: If improvements are needed, provide specific Swift code snippets using GitHub's \`\`\`suggestion syntax.
+
+            Ignore comments and formatting changes. Write in Korean using Markdown without intro/outro.
+
+            <git diff>
+            ${diff_output}
+            </git diff>`;
+
+            const result = await model.generateContent(prompt);
+            const text = result.response.text();
+            fs.writeFileSync("review_result.txt", text);
+
+      - name: Comment on Pull Request
+        if: steps.get_diff.outputs.skip_review == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            if (fs.existsSync("review_result.txt")) {
+              const body = fs.readFileSync("review_result.txt", "utf8");
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: body
+              });
+            }
