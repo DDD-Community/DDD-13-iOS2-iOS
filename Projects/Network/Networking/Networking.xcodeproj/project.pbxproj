@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -44,6 +44,10 @@
 		95586702619AFCD66C00D94E /* Networking-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Networking-Info.plist"; sourceTree = "<group>"; };
 		D20792EA2F8E5A0F0034C380 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		D20792EE2F9115BA0034C380 /* Error */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Error; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		EDC35DF7348B62B9866B925F /* Frameworks */ = {
@@ -109,6 +113,7 @@
 		D742642C51EB4E585D4226C6 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				D20792EE2F9115BA0034C380 /* Error */,
 				D20792EA2F8E5A0F0034C380 /* NetworkManager.swift */,
 				9D14E7A747B12AB9A274617A /* Exorted */,
 				3F6EC385D19578D3F2602FF4 /* Interceptor.swift */,
@@ -132,6 +137,9 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				D20792EE2F9115BA0034C380 /* Error */,
 			);
 			name = Networking;
 			packageProductDependencies = (

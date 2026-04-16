@@ -14,25 +14,31 @@ public final class NetworkManager: Sendable {
     
     private init() {}
     
-    public func request<T: Decodable>(_ endPoint: EndPoint) async -> T? {
+    public func request<T: Decodable>(_ endPoint: EndPoint) async throws(NetworkError) -> T {
         let request = makeDataRequest(endPoint)
         let result = await request.serializingData().result
         
         let data: Foundation.Data
         
-        do {
-            data = try result.get()
-        } catch {
-            print("data fetch error: \(error.localizedDescription)")
-            return nil
+        switch result {
+        case .success(let responseData):
+            data = responseData
+        case .failure(let afError):
+            // Alamofire는 에러를 AFError로 래핑하여 반환함
+            // Interceptor에서 completion(.failure(NetworkError.noToken))을 호출하면
+            // Alamofire가 이를 AFError.underlyingError에 감싸서 전달하므로
+            // 여기서 다시 꺼내서 원래의 NetworkError로 변환
+            if let underlyingError = afError.underlyingError as? NetworkError {
+                throw underlyingError
+            }
+            // Interceptor가 아닌 일반 네트워크 실패 (타임아웃, DNS 오류 등)
+            throw .connectionFailed
         }
         
         do {
-            let decodedData = try JSONDecoder().decode(T.self, from: data)
-            return decodedData
+            return try JSONDecoder().decode(T.self, from: data)
         } catch {
-            print("data decode error - origin data: \(String(data: data, encoding: .utf8) ?? "")")
-            return nil
+            throw .decodingFailed
         }
     }
     

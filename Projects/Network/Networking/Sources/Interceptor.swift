@@ -11,13 +11,13 @@ import Utill
 
 class Interceptor: RequestInterceptor, @unchecked Sendable {
     func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping @Sendable (Result<URLRequest, Error>) -> Void) { // swift6 concurrency data race 문제 때문에 @Sendable 처리
-        guard let accessToken = KeyChainManager.readItem(key: "accessToken") else {
+        guard let accessToken = KeyChainManager.readItem(key: KeyChainKey.accessToken) else {
             // ex)토큰이 없는경우 로그인 화면으로 이동
             DispatchQueue.main.async {
-                UserDefaults.standard.set(false, forKey: "isLogin") // @AppStorage를 통해서 관리
+                UserDefaults.standard.set(false, forKey: UserDefaultsKey.isLogin) // @AppStorage를 통해서 관리
             }
             
-            //completion(.failure(AuthError.noToken)) // AuthError 미구현
+            completion(.failure(NetworkError.noToken))
             return
         }
         
@@ -38,13 +38,13 @@ class Interceptor: RequestInterceptor, @unchecked Sendable {
             Task {
                 let refreshCompleted = await refreshAccessToken()
                 
-                if refreshCompleted, let _ = KeyChainManager.readItem(key: "accessToken") {
+                if refreshCompleted, let _ = KeyChainManager.readItem(key: KeyChainKey.accessToken) {
                     completion(.retry)
                 } else {
                     print("refresh Token 만료")
                     // TODO: 로그인창으로 보내기
                     await MainActor.run {
-                        UserDefaults.standard.set(false, forKey: "isLogin")
+                        UserDefaults.standard.set(false, forKey: UserDefaultsKey.isLogin)
                     }
                     completion(.doNotRetry)
                 }
@@ -65,9 +65,9 @@ class Interceptor: RequestInterceptor, @unchecked Sendable {
             // TODO: 갱신된 토큰 저장
 //            if let newAccessToken = refreshTokenResponse.data?.accessToken,
 //               let newRefreshToken = refreshTokenResponse.data?.refreshToken {
-//                KeyChainManager.updateItem(key: "accessToken", value: newAccessToken)
-//                KeyChainManager.updateItem(key: "refreshToken", value: newRefreshToken)
-//                UserDefaults.standard.set(Date(), forKey: "tokenIssueDate") // 새 발급 시간 저장
+//                KeyChainManager.updateItem(key: KeyChainKey.accessToken, value: newAccessToken)
+//                KeyChainManager.updateItem(key: KeyChainKey.refreshToken, value: newRefreshToken)
+//                UserDefaults.standard.set(Date(), forKey: UserDefaultsKey.tokenIssueDate)
 //                return true
 //            } else {
 //                return false
