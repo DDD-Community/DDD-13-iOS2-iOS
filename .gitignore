@@ -65,3 +65,6 @@ fastlane/test_output
 
 # Compiled binaries
 tuisttool
+
+# Claude Code
+CLAUDE.md

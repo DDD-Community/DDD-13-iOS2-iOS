@@ -3,11 +3,13 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 55;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		933E9F97F8675217757FFA51 /* Base.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64B0F7C37B5A0D5ED954E77D /* Base.swift */; };
+		AB19D0946E1589CE0397ED61 /* KeyChainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89E7D1A9BDD74C2701BD38EC /* KeyChainManager.swift */; };
+		D20792F52F911B0D0034C380 /* StorageKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = D20792F42F911B0D0034C380 /* StorageKey.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -27,6 +29,8 @@
 		136D114982ED83CB9F5177A1 /* Utill.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Utill.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		64B0F7C37B5A0D5ED954E77D /* Base.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Base.swift; sourceTree = "<group>"; };
 		7B9A8A431FB3EEAE4AE3FB1D /* Utill-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Utill-Info.plist"; sourceTree = "<group>"; };
+		89E7D1A9BDD74C2701BD38EC /* KeyChainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyChainManager.swift; sourceTree = "<group>"; };
+		D20792F42F911B0D0034C380 /* StorageKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageKey.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,6 +89,8 @@
 			isa = PBXGroup;
 			children = (
 				64B0F7C37B5A0D5ED954E77D /* Base.swift */,
+				89E7D1A9BDD74C2701BD38EC /* KeyChainManager.swift */,
+				D20792F42F911B0D0034C380 /* StorageKey.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -119,8 +125,6 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				TargetAttributes = {
-				};
 			};
 			buildConfigurationList = 817DAE8E8FEF1C2850504165 /* Build configuration list for PBXProject "Utill" */;
 			compatibilityVersion = "Xcode 14.0";
@@ -156,6 +160,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				933E9F97F8675217757FFA51 /* Base.swift in Sources */,
+				D20792F52F911B0D0034C380 /* StorageKey.swift in Sources */,
+				AB19D0946E1589CE0397ED61 /* KeyChainManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -280,10 +286,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
-					"$(inherited)",
-					DEBUG,
-				);
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0.0;

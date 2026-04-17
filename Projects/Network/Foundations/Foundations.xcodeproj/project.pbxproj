@@ -7,10 +7,23 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		96A1792CE0FD4063EEFC06AE /* APITask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A4F3FDFFD9506B95BF067B /* APITask.swift */; };
+		BF944AC34FBF9D483366128F /* EndPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C4CEFE0CA706EF31382B66 /* EndPoint.swift */; };
+		D8246DA3CC6AAA7F387A69A3 /* AsyncMoya.framework in Dependencies */ = {isa = PBXBuildFile; fileRef = 1C792CC956FA539853A801FA /* AsyncMoya.framework */; };
 		E4A51A528FD9229FE20844A4 /* Base.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1EDE0D6962DC9EE00EC71C7 /* Base.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		6DC4BB38EF366837F61807E9 /* Dependencies */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 8;
+			dstSubfolderSpec = 16;
+			files = (
+				D8246DA3CC6AAA7F387A69A3 /* AsyncMoya.framework in Dependencies */,
+			);
+			name = Dependencies;
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 		825B4768E9037432C9031ECC /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -25,7 +38,10 @@
 
 /* Begin PBXFileReference section */
 		021CD7FF40B20F0F8FAE456B /* Foundations.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Foundations.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		13A4F3FDFFD9506B95BF067B /* APITask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APITask.swift; sourceTree = "<group>"; };
+		1C792CC956FA539853A801FA /* AsyncMoya.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AsyncMoya.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		648B5FA2F05EDB9FF9E152BF /* Foundations-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Foundations-Info.plist"; sourceTree = "<group>"; };
+		A1C4CEFE0CA706EF31382B66 /* EndPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndPoint.swift; sourceTree = "<group>"; };
 		A1EDE0D6962DC9EE00EC71C7 /* Base.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Base.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -68,6 +84,7 @@
 		76D3FE9FF954FD9A0EE696B8 /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				1C792CC956FA539853A801FA /* AsyncMoya.framework */,
 				021CD7FF40B20F0F8FAE456B /* Foundations.framework */,
 			);
 			name = Products;
@@ -84,7 +101,9 @@
 		B8F8EEEAD586953FD1EBF096 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				13A4F3FDFFD9506B95BF067B /* APITask.swift */,
 				A1EDE0D6962DC9EE00EC71C7 /* Base.swift */,
+				A1C4CEFE0CA706EF31382B66 /* EndPoint.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -100,6 +119,7 @@
 				1DB396F46BC79FF1A3BDDE8E /* Resources */,
 				7248FF24D317F39847EA5458 /* Frameworks */,
 				825B4768E9037432C9031ECC /* Embed Frameworks */,
+				6DC4BB38EF366837F61807E9 /* Dependencies */,
 			);
 			buildRules = (
 			);
@@ -155,7 +175,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				96A1792CE0FD4063EEFC06AE /* APITask.swift in Sources */,
 				E4A51A528FD9229FE20844A4 /* Base.swift in Sources */,
+				BF944AC34FBF9D483366128F /* EndPoint.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -171,6 +193,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
+				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Foundations-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -180,6 +206,17 @@
 					"@loader_path/Frameworks",
 				);
 				MACH_O_TYPE = staticlib;
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-fmodule-map-file=$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
+				);
+				OTHER_SWIFT_FLAGS = (
+					"$(inherited)",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo.Foundations";
 				PRODUCT_NAME = Foundations;
 				SDKROOT = iphoneos;
@@ -205,6 +242,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
+				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Foundations-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -214,6 +255,17 @@
 					"@loader_path/Frameworks",
 				);
 				MACH_O_TYPE = staticlib;
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-fmodule-map-file=$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
+				);
+				OTHER_SWIFT_FLAGS = (
+					"$(inherited)",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo.Foundations";
 				PRODUCT_NAME = Foundations;
 				SDKROOT = iphoneos;

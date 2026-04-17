@@ -9,14 +9,25 @@
 /* Begin PBXBuildFile section */
 		065CDD9E3F159CCEC6E1A6C0 /* Repository.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03D39D8FFA6B36EC82B3C778 /* Repository.framework */; };
 		0665E18AA1924964380A891C /* Test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 249237573713EC791ECD9BCA /* Test.swift */; };
+		08A491E1067C93EFC4474817 /* Moya.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1CC14A70BD175D51D4A7EEB /* Moya.framework */; };
 		1188C881A64450A8DE7F1643 /* Base.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8577FA41D47DE037F2387BE /* Base.swift */; };
+		29734DE54DCB5E7218BF8203 /* RxSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AFD6BEF4EEDC73B527495BB6 /* RxSwift.framework */; };
 		3839AEFACE76CF764C5A966D /* Entity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 920317889251737DB7FA2F33 /* Entity.framework */; };
+		5FF9785CD2D8ABD53E784222 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AA1CFA625141FD7F9B1DB22 /* Alamofire.framework */; };
+		7355412663C7423424F3A245 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F43CDC33501823FDC6E616D3 /* CFNetwork.framework */; };
+		7BA89C01047091FDCCB28455 /* Alamofire_Alamofire.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 6C8A7366562A815FBE2C7810 /* Alamofire_Alamofire.bundle */; };
 		8A4EA2436DC81B20486209C6 /* DataInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0C051AEF60DC4BF2E9179E04 /* DataInterface.framework */; };
 		8D3EE4A12A835297EA66F043 /* Model.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B001E4EB12F1B31552843EC8 /* Model.framework */; };
+		A2333F1CDF2EE173146917D2 /* Alamofire_Alamofire.bundle in Dependencies */ = {isa = PBXBuildFile; fileRef = 6C8A7366562A815FBE2C7810 /* Alamofire_Alamofire.bundle */; };
+		BC3E81878EF9E2A2651B2F87 /* LogMacro.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B6CD10CD4A587CB9F328BD12 /* LogMacro.framework */; };
+		C1669AB5BB04B11E566D8683 /* AsyncMoya.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 19A290AEAD111F015CBFDADB /* AsyncMoya.framework */; };
+		DA272BEA4FC48206CDC3E121 /* RxMoya.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C30B633FFEC1DE967352E8 /* RxMoya.framework */; };
 		DEEC771D534965D1D392318A /* Foundations.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B285930F3594266FEB0BC20 /* Foundations.framework */; };
 		EAA7EA5BDD8E847A1A0A5854 /* Networking.framework in Dependencies */ = {isa = PBXBuildFile; fileRef = E9256A28824CD986ECC1EF08 /* Networking.framework */; };
 		ED7ABEC4AB9FBA1707BB2752 /* DataInterface.framework in Dependencies */ = {isa = PBXBuildFile; fileRef = 0C051AEF60DC4BF2E9179E04 /* DataInterface.framework */; };
+		FD0FCD7CCB8F7E01AA5683F1 /* OSLog.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2B6D597B16E9CDDB21DA680 /* OSLog.framework */; };
 		FEFB0DA0A60E3FBF3A1B1416 /* Networking.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9256A28824CD986ECC1EF08 /* Networking.framework */; };
+		FFDACF7E5B91FBAE76D131B1 /* CombineMoya.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A402D4C6F1E028A1FF6A15B9 /* CombineMoya.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,6 +50,16 @@
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6262AF5C39AFA9F1F33CBA3C /* Dependencies */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 8;
+			dstSubfolderSpec = 16;
+			files = (
+				A2333F1CDF2EE173146917D2 /* Alamofire_Alamofire.bundle in Dependencies */,
+			);
+			name = Dependencies;
+			runOnlyForDeploymentPostprocessing = 1;
 		};
 		91EE5845A923942DC21F97E3 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -67,14 +88,24 @@
 		03D39D8FFA6B36EC82B3C778 /* Repository.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Repository.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		0C051AEF60DC4BF2E9179E04 /* DataInterface.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DataInterface.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		18618E5B5CE8E0BEE5F43988 /* RepositoryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RepositoryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		19A290AEAD111F015CBFDADB /* AsyncMoya.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AsyncMoya.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1B285930F3594266FEB0BC20 /* Foundations.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Foundations.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		249237573713EC791ECD9BCA /* Test.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Test.swift; sourceTree = "<group>"; };
+		4AA1CFA625141FD7F9B1DB22 /* Alamofire.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Alamofire.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6C8A7366562A815FBE2C7810 /* Alamofire_Alamofire.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Alamofire_Alamofire.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		7DB3288BD804BE671D5A9E6C /* RepositoryTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "RepositoryTests-Info.plist"; sourceTree = "<group>"; };
 		8434724C7BDFEA2B4A08E1DC /* Repository-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Repository-Info.plist"; sourceTree = "<group>"; };
 		920317889251737DB7FA2F33 /* Entity.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Entity.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A402D4C6F1E028A1FF6A15B9 /* CombineMoya.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CombineMoya.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		AFD6BEF4EEDC73B527495BB6 /* RxSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = RxSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B001E4EB12F1B31552843EC8 /* Model.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Model.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B6CD10CD4A587CB9F328BD12 /* LogMacro.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = LogMacro.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B8577FA41D47DE037F2387BE /* Base.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Base.swift; sourceTree = "<group>"; };
+		C1CC14A70BD175D51D4A7EEB /* Moya.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Moya.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C2B6D597B16E9CDDB21DA680 /* OSLog.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSLog.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/OSLog.framework; sourceTree = DEVELOPER_DIR; };
 		E9256A28824CD986ECC1EF08 /* Networking.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Networking.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F43CDC33501823FDC6E616D3 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/CFNetwork.framework; sourceTree = DEVELOPER_DIR; };
+		F9C30B633FFEC1DE967352E8 /* RxMoya.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = RxMoya.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,12 +120,21 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7355412663C7423424F3A245 /* CFNetwork.framework in Frameworks */,
+				FD0FCD7CCB8F7E01AA5683F1 /* OSLog.framework in Frameworks */,
+				5FF9785CD2D8ABD53E784222 /* Alamofire.framework in Frameworks */,
+				C1669AB5BB04B11E566D8683 /* AsyncMoya.framework in Frameworks */,
+				FFDACF7E5B91FBAE76D131B1 /* CombineMoya.framework in Frameworks */,
 				8A4EA2436DC81B20486209C6 /* DataInterface.framework in Frameworks */,
 				3839AEFACE76CF764C5A966D /* Entity.framework in Frameworks */,
 				DEEC771D534965D1D392318A /* Foundations.framework in Frameworks */,
+				BC3E81878EF9E2A2651B2F87 /* LogMacro.framework in Frameworks */,
 				8D3EE4A12A835297EA66F043 /* Model.framework in Frameworks */,
+				08A491E1067C93EFC4474817 /* Moya.framework in Frameworks */,
 				FEFB0DA0A60E3FBF3A1B1416 /* Networking.framework in Frameworks */,
 				065CDD9E3F159CCEC6E1A6C0 /* Repository.framework in Frameworks */,
+				DA272BEA4FC48206CDC3E121 /* RxMoya.framework in Frameworks */,
+				29734DE54DCB5E7218BF8203 /* RxSwift.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -140,19 +180,37 @@
 			children = (
 				B9E40665B322982A6453CC4E /* Products */,
 				4CBA9A858B0C70334F132096 /* Project */,
+				AAE649489D78DD6539EEB5FF /* Frameworks */,
 			);
+			sourceTree = "<group>";
+		};
+		AAE649489D78DD6539EEB5FF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F43CDC33501823FDC6E616D3 /* CFNetwork.framework */,
+				C2B6D597B16E9CDDB21DA680 /* OSLog.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		B9E40665B322982A6453CC4E /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				6C8A7366562A815FBE2C7810 /* Alamofire_Alamofire.bundle */,
+				4AA1CFA625141FD7F9B1DB22 /* Alamofire.framework */,
+				19A290AEAD111F015CBFDADB /* AsyncMoya.framework */,
+				A402D4C6F1E028A1FF6A15B9 /* CombineMoya.framework */,
 				0C051AEF60DC4BF2E9179E04 /* DataInterface.framework */,
 				920317889251737DB7FA2F33 /* Entity.framework */,
 				1B285930F3594266FEB0BC20 /* Foundations.framework */,
+				B6CD10CD4A587CB9F328BD12 /* LogMacro.framework */,
 				B001E4EB12F1B31552843EC8 /* Model.framework */,
+				C1CC14A70BD175D51D4A7EEB /* Moya.framework */,
 				E9256A28824CD986ECC1EF08 /* Networking.framework */,
 				03D39D8FFA6B36EC82B3C778 /* Repository.framework */,
 				18618E5B5CE8E0BEE5F43988 /* RepositoryTests.xctest */,
+				F9C30B633FFEC1DE967352E8 /* RxMoya.framework */,
+				AFD6BEF4EEDC73B527495BB6 /* RxSwift.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -206,6 +264,7 @@
 				6D03AC647552D7EADB48606C /* Resources */,
 				38FFD09AE8882DA767050547 /* Frameworks */,
 				91EE5845A923942DC21F97E3 /* Embed Frameworks */,
+				6262AF5C39AFA9F1F33CBA3C /* Dependencies */,
 			);
 			buildRules = (
 			);
@@ -253,6 +312,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7BA89C01047091FDCCB28455 /* Alamofire_Alamofire.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -298,6 +358,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
+				);
 				INFOPLIST_FILE = "Derived/InfoPlists/RepositoryTests-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -305,9 +369,20 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-fmodule-map-file=$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-L$(DT_TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)",
+				);
+				OTHER_SWIFT_FLAGS = (
+					"$(inherited)",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo.Repository.RepositoryTests";
 				PRODUCT_NAME = RepositoryTests;
@@ -326,6 +401,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
+				);
 				INFOPLIST_FILE = "Derived/InfoPlists/RepositoryTests-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -333,9 +412,20 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-fmodule-map-file=$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-L$(DT_TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)",
+				);
+				OTHER_SWIFT_FLAGS = (
+					"$(inherited)",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo.Repository.RepositoryTests";
 				PRODUCT_NAME = RepositoryTests;
@@ -363,6 +453,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
+				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Repository-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -372,6 +466,17 @@
 					"@loader_path/Frameworks",
 				);
 				MACH_O_TYPE = staticlib;
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-fmodule-map-file=$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
+				);
+				OTHER_SWIFT_FLAGS = (
+					"$(inherited)",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo.Repository";
 				PRODUCT_NAME = Repository;
 				SDKROOT = iphoneos;
@@ -509,6 +614,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
+				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Repository-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -518,6 +627,17 @@
 					"@loader_path/Frameworks",
 				);
 				MACH_O_TYPE = staticlib;
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-fmodule-map-file=$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
+				);
+				OTHER_SWIFT_FLAGS = (
+					"$(inherited)",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../../../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/LogMacroMacro#LogMacroMacro",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ddd-ios2.Bangawo.Repository";
 				PRODUCT_NAME = Repository;
 				SDKROOT = iphoneos;
