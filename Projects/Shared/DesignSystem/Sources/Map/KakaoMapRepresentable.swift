@@ -13,9 +13,19 @@ struct KakaoMapRepresentable: UIViewRepresentable {
         let container = KMViewContainer()
         context.coordinator.container = container
         context.coordinator.createController(container: container)
+        // 다음 run loop에서 엔진을 준비한다.
+        // 현재 run loop에서는 Auto Layout이 완료되지 않아 bounds가 .zero일 수 있으므로,
+        // 레이아웃 커밋 이후 시점으로 미뤄 SDK가 정상적인 렌더 서피스를 생성하도록 한다.
+        DispatchQueue.main.async {
+            context.coordinator.controller?.prepareEngine()
+        }
         return container
     }
 
+    // SDK 엔진 라이프사이클: prepareEngine → 인증 → activateEngine → addViews → 맵 렌더링
+    // prepareEngine은 makeUIView에서 1회 호출하고,
+    // activateEngine은 authenticationSucceeded 델리게이트에서 호출한다.
+    // updateUIView는 화면 재진입(isVisible 토글) 시 엔진을 활성화/비활성화하는 역할만 담당한다.
     func updateUIView(_ uiView: KMViewContainer, context: Context) {
         let coordinator = context.coordinator
         coordinator.pendingRoutes = routes
@@ -23,24 +33,12 @@ struct KakaoMapRepresentable: UIViewRepresentable {
         coordinator.onPinTapped = onPinTapped
 
         if isVisible {
-            // KakaoMapSDK는 KMViewContainer의 bounds 기반으로 렌더 서피스를 생성한다.
-            // onAppear 시점에도 Auto Layout + CALayer 커밋이 완료되지 않을 수 있어
-            // 0.5초 지연 후 SDK 자체 상태를 확인하여 엔진을 초기화한다.
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                if coordinator.controller?.isEnginePrepared == false {
-                    coordinator.controller?.prepareEngine()
-                }
-
-                if coordinator.controller?.isEngineActive == false {
-                    coordinator.controller?.activateEngine()
-                }
-            }
+            coordinator.controller?.activateEngine()
 
             if coordinator.isMapReady {
                 coordinator.applyOverlays()
             }
         } else {
-            coordinator.controller?.pauseEngine()
             coordinator.controller?.resetEngine()
         }
     }
@@ -125,7 +123,6 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             }
             mapView.eventDelegate = self
             isMapReady = true
-            controller?.activateEngine()
             applyOverlays()
         }
 
@@ -134,8 +131,14 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             isMapReady = false
         }
 
+        // 인증 성공 후 엔진을 활성화한다.
+        // SDK 라이프사이클상 activateEngine()의 최초 호출 지점이다.
+        // 이후 addViews → addViewSucceeded 순서로 맵 렌더링이 진행된다.
         func authenticationSucceeded() {
             print("[KakaoMap] Authentication succeeded")
+            if controller?.isEngineActive == false {
+                controller?.activateEngine()
+            }
         }
 
         func authenticationFailed(_ errorCode: Int, desc: String) {
