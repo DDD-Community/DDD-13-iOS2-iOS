@@ -38,6 +38,7 @@ public extension InfoPlist {
           ]
         ]
       ])
+      .setKakaoAppKey("$(KAKAO_APP_KEY)")
   )
 
   static let moduleInfoPlist: Self = .extendingDefault(
