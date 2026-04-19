@@ -2,6 +2,8 @@
 import SwiftUI
 
 struct KakaoMapRepresentable: UIViewRepresentable {
+    /// 화면 이탈/재진입 시 엔진을 토글하기 위한 상태값.
+    /// onAppear(true) → activateEngine, onDisappear(false) → resetEngine
     @Binding var isVisible: Bool
     let routes: [MapRoute]
     let pins: [MapPin]
@@ -99,15 +101,14 @@ struct KakaoMapRepresentable: UIViewRepresentable {
         // MARK: - MapControllerDelegate
 
         func addViews() {
-            print("[KakaoMap] addViews called - container frame: \(container?.frame ?? .zero)")
             let defaultPosition = MapPoint(
                 longitude: initialCenter.longitude,
                 latitude: initialCenter.latitude
             )
             let mapviewInfo = MapviewInfo(
-                viewName: "bangawo_map",
-                appName: "openmap",
-                viewInfoName: "map",
+                viewName: MapIdentifier.viewName,
+                appName: MapIdentifier.appName,
+                viewInfoName: MapIdentifier.viewInfoName,
                 defaultPosition: defaultPosition,
                 defaultLevel: initialZoomLevel,
                 enabled: true
@@ -116,8 +117,8 @@ struct KakaoMapRepresentable: UIViewRepresentable {
         }
 
         func addViewSucceeded(_ viewName: String, viewInfoName: String) {
-            print("[KakaoMap] addViewSucceeded - viewName: \(viewName), container frame: \(container?.frame ?? .zero)")
             guard let mapView = controller?.getView(viewName) as? KakaoMapsSDK.KakaoMap else {
+                // TODO: Logger로 대체
                 print("[KakaoMap] getView failed - could not cast to KakaoMap")
                 return
             }
@@ -127,6 +128,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
         }
 
         func addViewFailed(_ viewName: String, viewInfoName: String) {
+            // TODO: Logger로 대체
             print("[KakaoMap] addView failed - viewName: \(viewName), viewInfoName: \(viewInfoName)")
             isMapReady = false
         }
@@ -135,13 +137,13 @@ struct KakaoMapRepresentable: UIViewRepresentable {
         // SDK 라이프사이클상 activateEngine()의 최초 호출 지점이다.
         // 이후 addViews → addViewSucceeded 순서로 맵 렌더링이 진행된다.
         func authenticationSucceeded() {
-            print("[KakaoMap] Authentication succeeded")
             if controller?.isEngineActive == false {
                 controller?.activateEngine()
             }
         }
 
         func authenticationFailed(_ errorCode: Int, desc: String) {
+            // TODO: Logger로 대체
             print("[KakaoMap] Authentication failed - code: \(errorCode), desc: \(desc)")
         }
 
@@ -156,7 +158,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
 
         func applyOverlays() {
             guard isMapReady,
-                  let mapView = controller?.getView("bangawo_map") as? KakaoMapsSDK.KakaoMap
+                  let mapView = controller?.getView(MapIdentifier.viewName) as? KakaoMapsSDK.KakaoMap
             else { return }
 
             if pendingRoutes != currentRoutes {
@@ -172,11 +174,11 @@ struct KakaoMapRepresentable: UIViewRepresentable {
 
         private func applyRoutes(_ routes: [MapRoute], on mapView: KakaoMapsSDK.KakaoMap) {
             let shapeManager = mapView.getShapeManager()
-            shapeManager.removeShapeLayer(layerID: "bangawo_polyline_layer")
+            shapeManager.removeShapeLayer(layerID: MapIdentifier.polylineLayer)
 
             guard !routes.isEmpty else { return }
 
-            let styleSetID = "bangawo_polyline_styles"
+            let styleSetID = MapIdentifier.polylineStyleSet
 
             var polylineStyles: [PolylineStyle] = []
             for route in routes {
@@ -194,7 +196,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             shapeManager.addPolylineStyleSet(styleSet)
 
             guard let layer = shapeManager.addShapeLayer(
-                layerID: "bangawo_polyline_layer",
+                layerID: MapIdentifier.polylineLayer,
                 zOrder: 1,
                 passType: .route
             ) else { return }
@@ -208,7 +210,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             }
 
             let shapeOptions = MapPolylineShapeOptions(
-                shapeID: "bangawo_polylines",
+                shapeID: MapIdentifier.polylineShape,
                 styleID: styleSetID,
                 zOrder: 0
             )
@@ -221,13 +223,13 @@ struct KakaoMapRepresentable: UIViewRepresentable {
 
         private func applyPins(_ pins: [MapPin], on mapView: KakaoMapsSDK.KakaoMap) {
             let labelManager = mapView.getLabelManager()
-            labelManager.removeLabelLayer(layerID: "bangawo_pin_layer")
+            labelManager.removeLabelLayer(layerID: MapIdentifier.pinLayer)
             pinMap.removeAll()
 
             guard !pins.isEmpty else { return }
 
             for (index, pin) in pins.enumerated() {
-                let styleID = "bangawo_pin_style_\(index)"
+                let styleID = MapIdentifier.pinStyle(index: index)
                 let iconStyle: PoiIconStyle
                 if let image = pin.iconImage {
                     iconStyle = PoiIconStyle(symbol: image, anchorPoint: CGPoint(x: 0.5, y: 1.0))
@@ -240,7 +242,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             }
 
             let layerOptions = LabelLayerOptions(
-                layerID: "bangawo_pin_layer",
+                layerID: MapIdentifier.pinLayer,
                 competitionType: .none,
                 competitionUnit: .poi,
                 orderType: .rank,
@@ -250,7 +252,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             layer.setClickable(true)
 
             for (index, pin) in pins.enumerated() {
-                let styleID = "bangawo_pin_style_\(index)"
+                let styleID = MapIdentifier.pinStyle(index: index)
                 let options = PoiOptions(styleID: styleID, poiID: pin.id)
                 options.rank = index
                 options.clickable = true
@@ -282,5 +284,21 @@ struct KakaoMapRepresentable: UIViewRepresentable {
                 ctx.fillEllipse(in: innerCircle)
             }
         }
+    }
+}
+
+// MARK: - Constants
+
+private enum MapIdentifier {
+    static let viewName = "bangawo_map"
+    static let appName = "openmap"
+    static let viewInfoName = "map"
+    static let polylineLayer = "bangawo_polyline_layer"
+    static let polylineStyleSet = "bangawo_polyline_styles"
+    static let polylineShape = "bangawo_polylines"
+    static let pinLayer = "bangawo_pin_layer"
+
+    static func pinStyle(index: Int) -> String {
+        "bangawo_pin_style_\(index)"
     }
 }

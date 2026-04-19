@@ -7,6 +7,8 @@ public struct KakaoMap: View {
     private let initialZoomLevel: Int
     private var onPinTapped: ((MapPin) -> Void)?
     
+    /// 화면 이탈/재진입 시 엔진을 토글하기 위한 상태값.
+    /// onAppear(true) → activateEngine, onDisappear(false) → resetEngine
     @State private var isVisible: Bool = false
 
     public init(
