@@ -23,7 +23,7 @@ class Interceptor: RequestInterceptor, @unchecked Sendable {
         
         var urlRequest = urlRequest
         urlRequest.headers.add(.authorization("Bearer \(accessToken)"))
-        print("JWT: \(accessToken)")
+        Log.debug("JWT: \(accessToken)")
         
         completion(.success(urlRequest))
     }
@@ -41,7 +41,7 @@ class Interceptor: RequestInterceptor, @unchecked Sendable {
                 if refreshCompleted, let _ = KeyChainManager.readItem(key: KeyChainKey.accessToken) {
                     completion(.retry)
                 } else {
-                    print("refresh Token 만료")
+                    Log.debug("refresh Token 만료")
                     // TODO: 로그인창으로 보내기
                     await MainActor.run {
                         UserDefaults.standard.set(false, forKey: UserDefaultsKey.isLogin)
@@ -56,7 +56,7 @@ class Interceptor: RequestInterceptor, @unchecked Sendable {
     
         // 토큰 리프레시 함수
         private func refreshAccessToken() async -> Bool {
-            print("토큰 리프레시 함수 실행")
+            Log.debug("토큰 리프레시 함수 실행")
             // TODO: 리프레시 함수 구현
 //            guard let refreshTokenResponse = await AuthService.refreshingToken() else {
 //                return false
