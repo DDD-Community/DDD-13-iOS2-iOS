@@ -23,9 +23,9 @@ regenerate:
 	tuist install
 	tuist generate
 
-# Privates 파일 다운로드
+# Privates 파일 다운로드/업로드
 
-.PHONY: download-privates _download-privates
+.PHONY: download-privates upload-privates _download-privates _ensure-token
 
 BASE_URL=https://raw.githubusercontent.com/khyeji98/DDD-iOS2-iOS-private/main
 
@@ -36,20 +36,23 @@ XCCONFIG_FILES = \
 	Release.xcconfig \
 	Secrets.xcconfig
 
-download-privates:
+_ensure-token:
 	@if [ ! -f .env ]; then \
 		printf "Enter your GitHub access token: "; \
 		read token; \
 		echo "GITHUB_ACCESS_TOKEN=$$token" > .env; \
 	fi
-	@$(MAKE) --no-print-directory _download-privates
-
-_download-privates:
 	@set -a; . ./.env; set +a; \
 	if [ -z "$$GITHUB_ACCESS_TOKEN" ]; then \
 		echo "ERROR: GITHUB_ACCESS_TOKEN is empty in .env"; \
 		exit 1; \
-	fi; \
+	fi
+
+download-privates: _ensure-token
+	@$(MAKE) --no-print-directory _download-privates
+
+_download-privates:
+	@set -a; . ./.env; set +a; \
 	mkdir -p Config; \
 	for FILE in $(XCCONFIG_FILES); do \
 		echo "Downloading $$FILE..."; \
@@ -66,3 +69,7 @@ _download-privates:
 		fi; \
 	done; \
 	echo "All xcconfig files downloaded to Config/"
+
+upload-privates: _ensure-token
+	@set -a; . ./.env; set +a; \
+	python3 Scripts/upload_privates.py

@@ -20,5 +20,11 @@ ln -s AGENTS.md CLAUDE.md
    make download-privates   # 첫 실행 시 PAT 입력, 이후 .env에 캐시
    make generate
    ```
+4. xcconfig 수정분을 private repo에 올릴 때는 업로드 명령을 사용합니다.
+   ```bash
+   make upload-privates     # 변경된 파일만 1커밋으로 업로드
+   ```
+   - 커밋 메시지는 `[CHORE]: {파일명} 업데이트` 포맷으로 자동 생성됩니다.
+   - 변경 없는 파일은 자동 skip. 원격이 앞서 있으면 `make download-privates` 후 재시도하세요.
 
 자세한 절차/트러블슈팅은 private repo의 README를 참조하세요.
