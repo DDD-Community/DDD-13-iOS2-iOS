@@ -13,7 +13,6 @@ let project = Project.makeModule(
     .Data(implements: .Repository),
     .Domain(implements: .DomainInterface),
     .SPM.composableArchitecture,
-    .SPM.weaveDI,
   ],
   sources: ["Sources/**"],
   hasTests: true
