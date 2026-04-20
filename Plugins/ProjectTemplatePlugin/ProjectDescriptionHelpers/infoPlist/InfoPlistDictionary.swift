@@ -185,4 +185,8 @@ extension InfoPlistDictionary {
   func setBaseURL(_ value: String) -> InfoPlistDictionary {
     return self.merging(["BASE_URL": .string(value)]) { (_, new) in new }
   }
+
+  func setKakaoAppKey(_ value: String) -> InfoPlistDictionary {
+    return self.merging(["KAKAO_APP_KEY": .string(value)]) { (_, new) in new }
+  }
 }

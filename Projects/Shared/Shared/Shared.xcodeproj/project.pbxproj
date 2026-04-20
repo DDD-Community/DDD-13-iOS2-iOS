@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		0F7C51CBACDF5C4DA176E637 /* DesignSystem_DesignSystem.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 0202CA9E6AAAC0787B68E995 /* DesignSystem_DesignSystem.bundle */; };
 		79D754C55D2E38EF431F6C6E /* Utill.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C94F2606E7E958A55416DF32 /* Utill.framework */; };
+		8249191F76A1AF5E9D2FBFAC /* KakaoMapsSDK_SPM.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63AC6E2683A30FF89D4075ED /* KakaoMapsSDK_SPM.framework */; };
+		AF12B8F816308E58FC0A6267 /* KakaoMapsSDK.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A9C6E400A1D0C985EBAFF00 /* KakaoMapsSDK.xcframework */; };
 		BD78CC586EFA1C7CBC6F8B73 /* Base.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CE59A41CA35A26F7854C331 /* Base.swift */; };
 		C0E9ABCA7163C2A40175E0F9 /* DesignSystem.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AE87645A97032776452E22F /* DesignSystem.framework */; };
 		F137F005EB97558E94BABB39 /* DesignSystem_DesignSystem.bundle in Dependencies */ = {isa = PBXBuildFile; fileRef = 0202CA9E6AAAC0787B68E995 /* DesignSystem_DesignSystem.bundle */; };
@@ -41,7 +43,9 @@
 		0202CA9E6AAAC0787B68E995 /* DesignSystem_DesignSystem.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DesignSystem_DesignSystem.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		080C58231FCEDC083F899294 /* Shared.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Shared.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		0CE59A41CA35A26F7854C331 /* Base.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Base.swift; sourceTree = "<group>"; };
+		1A9C6E400A1D0C985EBAFF00 /* KakaoMapsSDK.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = KakaoMapsSDK.xcframework; path = "/Users/hyeji/Bangawo/Tuist/.build/checkouts/KakaoMapsSDK-SPM/BinaryFramework/KakaoMapsSDK.xcframework"; sourceTree = "<absolute>"; };
 		4AE87645A97032776452E22F /* DesignSystem.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DesignSystem.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		63AC6E2683A30FF89D4075ED /* KakaoMapsSDK_SPM.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = KakaoMapsSDK_SPM.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C94F2606E7E958A55416DF32 /* Utill.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Utill.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D72BA6AE8B9AF02B56D8FC04 /* Shared-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Shared-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -52,7 +56,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				C0E9ABCA7163C2A40175E0F9 /* DesignSystem.framework in Frameworks */,
+				8249191F76A1AF5E9D2FBFAC /* KakaoMapsSDK_SPM.framework in Frameworks */,
 				79D754C55D2E38EF431F6C6E /* Utill.framework in Frameworks */,
+				AF12B8F816308E58FC0A6267 /* KakaoMapsSDK.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -81,6 +87,7 @@
 			children = (
 				0202CA9E6AAAC0787B68E995 /* DesignSystem_DesignSystem.bundle */,
 				4AE87645A97032776452E22F /* DesignSystem.framework */,
+				63AC6E2683A30FF89D4075ED /* KakaoMapsSDK_SPM.framework */,
 				080C58231FCEDC083F899294 /* Shared.framework */,
 				C94F2606E7E958A55416DF32 /* Utill.framework */,
 			);
@@ -108,7 +115,16 @@
 			children = (
 				72723117B1BFA01E33CBB7A6 /* Products */,
 				6EC0B98B4A7FF03886AD270E /* Project */,
+				E7E2DC04443691192563DF03 /* Frameworks */,
 			);
+			sourceTree = "<group>";
+		};
+		E7E2DC04443691192563DF03 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1A9C6E400A1D0C985EBAFF00 /* KakaoMapsSDK.xcframework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -195,6 +211,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../../../Tuist/.build/checkouts/KakaoMapsSDK-SPM/BinaryFramework",
+				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Shared-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
@@ -232,6 +252,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../../../Tuist/.build/checkouts/KakaoMapsSDK-SPM/BinaryFramework",
+				);
 				INFOPLIST_FILE = "Derived/InfoPlists/Shared-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
