@@ -71,6 +71,9 @@ tuisttool
 Config/
 *.xcconfig
 
+# Secrets
+.env
+
 # Claude Code
 CLAUDE.md
 .claude/
