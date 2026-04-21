@@ -14,5 +14,23 @@ let project = Project.makeModule(
   ],
   sources: ["Sources/**"],
   resources: ["Resources/**", "FontAsset/**"],
-  hasTests: false
+  hasTests: false,
+  resourceSynthesizers: [
+    .custom(
+      name: "Colors",
+      parser: .assets,
+      extensions: ["xcassets"]
+    ),
+    .custom(
+      name: "Images",
+      parser: .assets,
+      extensions: ["xcassets"]
+    ),
+    .fonts(),
+    .custom(
+      name: "Localizable",
+      parser: .strings,
+      extensions: ["strings", "stringsdict"]
+    ),
+  ]
 )

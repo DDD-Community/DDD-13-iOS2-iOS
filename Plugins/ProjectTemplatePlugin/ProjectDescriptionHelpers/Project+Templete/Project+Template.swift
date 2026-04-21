@@ -23,7 +23,8 @@ public extension Project {
     resources: ProjectDescription.ResourceFileElements? = nil,
     infoPlist: ProjectDescription.InfoPlist = .default,
     entitlements: ProjectDescription.Entitlements? = nil,
-    schemes: [ProjectDescription.Scheme] = []
+    schemes: [ProjectDescription.Scheme] = [],
+    resourceSynthesizers: [ProjectDescription.ResourceSynthesizer]? = nil
   ) -> Project {
 
     let appTarget: Target = .target(
@@ -106,7 +107,8 @@ public extension Project {
       packages: packages,
       settings: settings,
       targets: targets,
-      schemes: schemes
+      schemes: schemes,
+      resourceSynthesizers: resourceSynthesizers ?? .default
     )
   }
 
@@ -126,7 +128,8 @@ public extension Project {
     infoPlist: ProjectDescription.InfoPlist = .default,
     entitlements: ProjectDescription.Entitlements? = nil,
     schemes: [ProjectDescription.Scheme] = [],
-    hasTests: Bool = false
+    hasTests: Bool = false,
+    resourceSynthesizers: [ProjectDescription.ResourceSynthesizer]? = nil
   ) -> Project {
     
     let appTarget: Target = .target(
@@ -164,7 +167,8 @@ public extension Project {
       packages: packages,
       settings: settings,
       targets: targets,
-      schemes: schemes
+      schemes: schemes,
+      resourceSynthesizers: resourceSynthesizers ?? .default
     )
   }
 }
