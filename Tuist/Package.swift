@@ -15,6 +15,16 @@ let packageSettings = PackageSettings(
     "ConcurrencyExtras": .staticFramework,
     "Sharing": .staticFramework,
     "KakaoMapsSDK-SPM": .staticFramework
+  ],
+  targetSettings: [
+    "WeaveDICore": ["SWIFT_STRICT_CONCURRENCY": "minimal"],
+    "WeaveDI": ["SWIFT_STRICT_CONCURRENCY": "minimal"],
+    "ComposableArchitecture": ["SWIFT_STRICT_CONCURRENCY": "minimal"],
+    "TCACoordinators": ["SWIFT_STRICT_CONCURRENCY": "minimal"],
+    "AsyncMoya": ["SWIFT_STRICT_CONCURRENCY": "minimal"],
+    "Moya": ["SWIFT_STRICT_CONCURRENCY": "minimal"],
+    "CombineMoya": ["SWIFT_STRICT_CONCURRENCY": "minimal"],
+    "RxMoya": ["SWIFT_STRICT_CONCURRENCY": "minimal"],
   ]
 )
 #endif

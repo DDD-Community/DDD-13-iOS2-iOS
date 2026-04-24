@@ -24,7 +24,7 @@ extension Settings {
       .setSkipInstall(setSkipInstall)
       .setCFBundleDevelopmentRegion("ko")
   }
-  
+
   private static func commonBaseSettings(
     appName: String
   ) -> SettingsDictionary {
@@ -33,7 +33,7 @@ extension Settings {
       .setOtherLdFlags("-ObjC -all_load")
       .setStripStyle()
   }
-  
+
   public static let appMainSetting: Settings = .settings(
     base: SettingsDictionary()
       .setProductName(Project.Environment.appName)
@@ -99,7 +99,7 @@ extension Settings {
 
     ], defaultSettings: .recommended
   )
-  
+
   public static func appBaseSetting(appName: String) -> Settings {
     let appBaseSetting: Settings = .settings(
       base: SettingsDictionary()
@@ -129,8 +129,8 @@ extension Settings {
           xcconfig: .relativeToRoot("./Config/Release.xcconfig")
         )
       ], defaultSettings: .recommended)
-    
+
     return appBaseSetting
-    
+
   }
 }
