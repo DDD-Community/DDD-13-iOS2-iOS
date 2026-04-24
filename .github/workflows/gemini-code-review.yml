@@ -1,0 +1,320 @@
+name: Gemini Code Review
+on:
+  pull_request:
+    branches:
+      - develop
+    types: [opened, synchronize]
+
+jobs:
+  code-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install GoogleGenerativeAI
+        run: npm install @google/generative-ai
+
+      - name: Get PR Context and Filtered Git Diff
+        id: get_diff
+        run: |
+          git fetch origin "${{ github.event.pull_request.base.ref }}"
+          git fetch origin "${{ github.event.pull_request.head.ref }}"
+
+          git diff "origin/${{ github.event.pull_request.base.ref }}"..."origin/${{ github.event.pull_request.head.ref }}" -- "*.swift" > diff.txt
+
+          if [ ! -s diff.txt ]; then
+            echo "skip_review=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip_review=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Parse Diff for Valid Lines and Annotate
+        if: steps.get_diff.outputs.skip_review == 'false'
+        uses: actions/github-script@v7
+        id: parse_diff
+        with:
+          script: |
+            const fs = require("fs");
+            const diff = fs.readFileSync("diff.txt", "utf8");
+
+            const validLines = {};
+            const lineContentMap = {};
+            const annotatedLines = [];
+
+            let currentFile = null;
+            let lineNum = 0;
+
+            for (const line of diff.split("\n")) {
+              if (line.startsWith("diff --git")) {
+                const match = line.match(/b\/(.+)$/);
+                if (match) currentFile = match[1];
+                annotatedLines.push(line);
+                continue;
+              }
+
+              if (line.startsWith("+++") || line.startsWith("---") || line.startsWith("index ")) {
+                annotatedLines.push(line);
+                continue;
+              }
+
+              if (line.startsWith("@@") && currentFile) {
+                const match = line.match(/@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@/);
+                if (match) lineNum = parseInt(match[1]);
+                annotatedLines.push(line);
+                continue;
+              }
+
+              if (!currentFile) {
+                annotatedLines.push(line);
+                continue;
+              }
+
+              if (line.startsWith("+") && !line.startsWith("+++")) {
+                // Added line: valid comment target
+                if (!validLines[currentFile]) validLines[currentFile] = new Set();
+                validLines[currentFile].add(lineNum);
+
+                if (!lineContentMap[currentFile]) lineContentMap[currentFile] = {};
+                lineContentMap[currentFile][lineNum] = line.substring(1).trim();
+
+                annotatedLines.push(`[LINE ${lineNum}] ${line}`);
+                lineNum++;
+              } else if (line.startsWith("-") && !line.startsWith("---")) {
+                // Deleted line: no line number increment
+                annotatedLines.push(`[DEL] ${line}`);
+              } else {
+                // Context line: increment but not valid
+                annotatedLines.push(`[CTX ${lineNum}] ${line}`);
+                lineNum++;
+              }
+            }
+
+            // Serialize validLines (Set -> Array)
+            const serializable = {};
+            for (const [file, lines] of Object.entries(validLines)) {
+              serializable[file] = [...lines].sort((a, b) => a - b);
+            }
+
+            fs.writeFileSync("valid_lines.json", JSON.stringify(serializable));
+            fs.writeFileSync("line_content_map.json", JSON.stringify(lineContentMap));
+            fs.writeFileSync("annotated_diff.txt", annotatedLines.join("\n"));
+
+      - name: Run Gemini Review
+        if: steps.get_diff.outputs.skip_review == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const annotated_diff = fs.readFileSync("annotated_diff.txt", "utf8");
+
+            const pr_title = context.payload.pull_request.title;
+            const pr_body = context.payload.pull_request.body || "내용 없음";
+
+            const { GoogleGenerativeAI } = require("@google/generative-ai");
+            const genAI = new GoogleGenerativeAI("${{ secrets.GEMINI_API_KEY }}");
+            const model = genAI.getGenerativeModel({
+              model: "gemini-2.5-flash",
+              generationConfig: {
+                responseMimeType: "application/json",
+              },
+            });
+
+            const prompt = `You are a senior iOS engineer performing a code review on a Swift 6 / SwiftUI / TCA 1.25 multi-module Clean Architecture project built with Tuist 4.
+
+            [Tone and Style Guidelines]
+            - Do NOT include unnecessary praise, greetings, or overly verbose explanations.
+            - Do NOT provide unsolicited CS insights (컴퓨터 과학적 통찰) or related interview questions.
+            - Provide concise, objective, and well-organized feedback suitable for immediate practical use.
+
+            CRITICAL LINE NUMBER RULES (MUST FOLLOW):
+            - Each diff line is annotated with [LINE N] for added lines or [CTX N] for context lines.
+            - You MUST only comment on [LINE N] lines (added/modified code). NEVER comment on [CTX] or [DEL] lines.
+            - Use the EXACT number N shown in the [LINE N] annotation. Do NOT compute line numbers yourself.
+            - The "code_snippet" field must contain the actual code from that [LINE N] line.
+
+            [PR Context]
+            Title: ${pr_title}
+            Description: ${pr_body}
+
+            [Project Architecture]
+            - Stack: Swift 6, SwiftUI, TCA 1.25, Tuist 4 (multi-module)
+            - Layer dependency: Presentation → Domain ← Data, Network is only referenced by Data
+            - Deployment target: iOS 26.0 (iPhone only)
+            - Source roots: Projects/App, Projects/Presentation, Projects/Domain/{Entity,UseCase,DomainInterface,DataInterface}, Projects/Data/{Model,Repository,API,Service}, Projects/Network/*, Projects/Shared/*
+
+            [Review Criteria]
+            1. TCA Convention: Verify @Reducer + @ObservableState usage; Action naming describes events that occurred (e.g., xxxButtonTapped, xxxResponse), NOT intended effects (e.g., performLogin, loadData); Effect is .none when no side effect and .run for async work; shared logic lives in private methods, NOT shared Actions; Effect.run must NOT capture entire @ObservableState (extract needed values first); Reducer must NOT perform CPU-intensive work (offload to Effect); Store.scope must use stored property paths only (no computed transforms); Navigation uses @Reducer enum; transient UI state (hover, focus, animation) stays in SwiftUI @State, not TCA State.
+            2. Module Architecture: Respect Presentation → Domain ← Data dependency direction; Network is only imported by Data; module boundaries expose protocols (DomainInterface / DataInterface); DTO-to-Entity mapping stays in Data layer.
+            3. SwiftUI Convention: SubViews are structs (NOT @ViewBuilder functions); use @Binding when a SubView mutates parent @State; no "View" suffix in View names (unless clarity requires it); use .frame(maxWidth/maxHeight: .infinity) instead of Spacer() for simple expansion; required props via init, optional props via ViewModifier-style functions.
+            4. Swift Code Quality: guard early return with shorthand optional binding (guard let value else { ... }) followed by a blank line; final class by default; private first (avoid fileprivate unless required); never force unwrap; operator line break puts operator at the start of the next line; function params line-break with closing paren on its own line; ternary for simple return/assignment only, split on '?'; [weak self] + guard let self else { return } in closures; constant groups as private enum (Metric/Font/Constant), NOT struct; empty collection literals ([] / [:]); indent 4 spaces; 120-char line limit.
+            5. Actionable Feedback: When improvement is needed you MUST provide a concrete Swift fix using GitHub's \`\`\`suggestion block.
+
+            [Severity Prefix]
+            Each comment body MUST start with a severity tag on its own line, then a blank line, then the actual comment:
+            - 🔴 [P1] Critical: force-unwrap crash risk, retain cycles / memory leaks, heavy or blocking work inside a Reducer, main-thread blocking
+            - 🟠 [P2] Major: module dependency-direction violations (e.g., Domain importing Data), Effect.run capturing entire @ObservableState, sharing logic through Actions, Store.scope with computed property, serious concurrency or error-mapping issues
+            - 🟡 [P3] Minor: Action naming that describes intent/effect (performLogin, loadData, setRecords), SubView written as @ViewBuilder function, Swift API Design Guideline violations on public APIs, inefficient Effect composition
+            - 🔵 [P4] Readability: View-suffix naming, Spacer() misuse, missing final / private, guard / ternary / line-break style violations, constant groups declared as struct instead of enum
+            - ⚪ [P5] Nitpick: typos, whitespace, formatting
+
+            Format: "🔴 **[P1] Critical**\\n\\nActual comment content here..."
+
+            Ignore comments and formatting-only changes. Write all review comments in Korean using Markdown, without greetings or closings.
+
+            [Example]
+            Given this annotated diff:
+            \`\`\`
+            diff --git a/Projects/Presentation/Sources/Login/LoginFeature.swift b/Projects/Presentation/Sources/Login/LoginFeature.swift
+            @@ -20,4 +20,6 @@
+            [CTX 20]    enum Action {
+            [LINE 21] +      case performLogin
+            [LINE 22] +      case setRecords([Diary])
+            \`\`\`
+
+            Correct response:
+            {
+              "summary": "TCA Action 네이밍이 의도/효과 기반이라 발생한 사건으로 바꾸는 것이 좋습니다.",
+              "comments": [
+                {
+                  "path": "Projects/Presentation/Sources/Login/LoginFeature.swift",
+                  "line": 21,
+                  "code_snippet": "case performLogin",
+                  "body": "🟡 **[P3] Minor**\\n\\nTCA Action은 '발생한 사건'을 서술해야 합니다. 'performLogin'은 의도된 효과 표현이므로 버튼 탭 이벤트로 고쳐주세요.\\n\\n\\\`\\\`\\\`suggestion\\n      case loginButtonTapped\\n\\\`\\\`\\\`"
+                }
+              ]
+            }
+
+            Respond ONLY with a JSON object in this exact format:
+            {
+              "summary": "전체 리뷰 요약 (한국어, 마크다운)",
+              "comments": [
+                {
+                  "path": "file path relative to repo root (from the b/ prefix in diff)",
+                  "line": <exact N from [LINE N] annotation>,
+                  "code_snippet": "the actual code content from that line",
+                  "body": "🔴/🟠/🟡/🔵/⚪ **[P1~P5] Label**\\n\\n리뷰 코멘트 (한국어, 마크다운. 개선이 필요하면 \`\`\`suggestion 블록 포함)"
+                }
+              ]
+            }
+
+            If no issues are found, return {"summary": "...", "comments": []}.
+
+            <annotated_diff>
+            ${annotated_diff}
+            </annotated_diff>`;
+
+            const result = await model.generateContent(prompt);
+            const text = result.response.text();
+            fs.writeFileSync("review_result.json", text);
+
+      - name: Post Inline Review Comments
+        if: steps.get_diff.outputs.skip_review == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const raw = fs.readFileSync("review_result.json", "utf8");
+            const validLinesMap = JSON.parse(fs.readFileSync("valid_lines.json", "utf8"));
+            const lineContentMap = JSON.parse(fs.readFileSync("line_content_map.json", "utf8"));
+
+            let review;
+            try {
+              review = JSON.parse(raw);
+            } catch (e) {
+              console.log("JSON parse failed, falling back to single comment");
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: raw,
+              });
+              return;
+            }
+
+            // Snap to nearest valid line with content matching
+            function snapToValidLine(comment) {
+              const fileLines = validLinesMap[comment.path];
+              if (!fileLines || fileLines.length === 0) {
+                console.log(`Dropping comment: file not in diff - ${comment.path}`);
+                return null;
+              }
+
+              // 1. Exact match
+              if (fileLines.includes(comment.line)) return comment.line;
+
+              // 2. Content-based matching using code_snippet
+              const fileContent = lineContentMap[comment.path] || {};
+              if (comment.code_snippet) {
+                const snippet = comment.code_snippet.trim();
+                for (const validLine of fileLines) {
+                  const content = fileContent[validLine] || "";
+                  if (content.includes(snippet) || snippet.includes(content)) {
+                    console.log(`Content-matched comment from line ${comment.line} to ${validLine} for ${comment.path}`);
+                    return validLine;
+                  }
+                }
+              }
+
+              // 3. Nearest valid line within ±5 lines
+              const THRESHOLD = 5;
+              let bestLine = null;
+              let bestDist = THRESHOLD + 1;
+              for (const validLine of fileLines) {
+                const dist = Math.abs(validLine - comment.line);
+                if (dist < bestDist) {
+                  bestDist = dist;
+                  bestLine = validLine;
+                }
+              }
+
+              if (bestLine !== null) {
+                console.log(`Snapped comment from line ${comment.line} to ${bestLine} (dist=${bestDist}) for ${comment.path}`);
+                return bestLine;
+              }
+
+              console.log(`Dropping comment: no valid line within ±${THRESHOLD} of line ${comment.line} for ${comment.path}`);
+              return null;
+            }
+
+            const reviewComments = (review.comments || [])
+              .map((c) => {
+                const snappedLine = snapToValidLine(c);
+                if (snappedLine === null) return null;
+                return {
+                  path: c.path,
+                  line: snappedLine,
+                  side: "RIGHT",
+                  body: c.body,
+                };
+              })
+              .filter(Boolean);
+
+            if (reviewComments.length > 0) {
+              await github.rest.pulls.createReview({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+                event: "COMMENT",
+                body: review.summary || "",
+                comments: reviewComments,
+              });
+            } else if (review.summary) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: review.summary,
+              });
+            }

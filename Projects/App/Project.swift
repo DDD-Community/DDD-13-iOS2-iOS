@@ -10,7 +10,8 @@ let project = Project.makeAppModule(
   settings: .appMainSetting,
   scripts: [],
   dependencies: [
-    .Presentation(implements: .Presentation)
+    .Presentation(implements: .Presentation),
+    .SPM.kakaoMapsSDK
   ],
   sources: ["Sources/**"],
   resources: ["Resources/**"],
