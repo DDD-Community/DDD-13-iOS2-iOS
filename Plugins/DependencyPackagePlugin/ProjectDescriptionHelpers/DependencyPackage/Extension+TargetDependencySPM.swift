@@ -12,4 +12,5 @@ public extension TargetDependency.SPM {
   static let composableArchitecture = TargetDependency.external(name: "ComposableArchitecture", condition: .none)
   static let sharing = TargetDependency.external(name: "Sharing", condition: .none)
   static let kakaoMapsSDK = TargetDependency.external(name: "KakaoMapsSDK-SPM", condition: .none)
+  static let kakaoSDK = TargetDependency.external(name: "KakaoSDK", condition: .none)
 }

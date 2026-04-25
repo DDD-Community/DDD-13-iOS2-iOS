@@ -23,7 +23,8 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>${REVERSED_CLIENT_ID}</string>
+				<string>$(REVERSED_CLIENT_ID)</string>
+				<string>kakao$(KAKAO_APP_KEY)</string>
 			</array>
 		</dict>
 	</array>
@@ -33,6 +34,11 @@
 	<false/>
 	<key>KAKAO_APP_KEY</key>
 	<string>$(KAKAO_APP_KEY)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>kakaokompassauth</string>
+		<string>kakaolink</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
