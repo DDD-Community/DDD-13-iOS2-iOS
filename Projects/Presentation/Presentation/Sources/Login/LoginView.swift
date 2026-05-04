@@ -30,9 +30,15 @@ public struct LoginView: View {
 
             // MARK: - 소셜 로그인 버튼
             VStack(spacing: 12) {
-                kakaoLoginButton
-                naverLoginButton
-                googleLoginButton
+                KakaoLoginButton {
+                    store.send(.kakaoLoginTapped)
+                }
+                NaverLoginButton {
+                    store.send(.naverLoginTapped)
+                }
+                AppleLoginButton {
+                    store.send(.appleLoginTapped)
+                }
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 48)
@@ -46,14 +52,11 @@ public struct LoginView: View {
     }
 }
 
-// MARK: - 소셜 로그인 버튼 컴포넌트
+private struct KakaoLoginButton: View {
+    let onTap: () -> Void
 
-private extension LoginView {
-
-    var kakaoLoginButton: some View {
-        Button {
-            store.send(.kakaoLoginTapped)
-        } label: {
+    var body: some View {
+        Button(action: onTap) {
             HStack(spacing: 8) {
                 Image(systemName: "message.fill")
                 Text("카카오로 3초 만에 로그인")
@@ -66,14 +69,16 @@ private extension LoginView {
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
     }
+}
 
-    var googleLoginButton: some View {
-        Button {
-            store.send(.appleLoginTapped)
-        } label: {
+private struct AppleLoginButton: View {
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
             HStack(spacing: 8) {
                 Image(systemName: "g.circle.fill")
-                Text("Google로 로그인")
+                Text("Apple로 로그인")
                     .pretendardCustomFont(textStyle: .bodyBold)
             }
             .frame(maxWidth: .infinity)
@@ -83,11 +88,13 @@ private extension LoginView {
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
     }
+}
 
-    var naverLoginButton: some View {
-        Button {
-            store.send(.naverLoginTapped)
-        } label: {
+private struct NaverLoginButton: View {
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
             HStack(spacing: 8) {
                 Text("N")
                     .pretendardCustomFont(textStyle: .titleBold)
