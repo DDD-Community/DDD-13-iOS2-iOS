@@ -7,6 +7,7 @@
 //
 
 import ComposableArchitecture
+import CoreDependencies
 import DomainInterface
 import Entity
 import Utill
@@ -29,7 +30,7 @@ public struct LoginFeature {
         case kakaoLoginTapped // 카카오 로그인
         case appleLoginTapped // 애플 로그인
         case naverLoginTapped // 네이버 로그인
-        case socialLoginResponse(Result<SocialAuthToken, SocialAuthClientError>)
+        case loginResponse(Result<AuthToken, SocialAuthClientError>)
 
         // MARK: - 부모 Coordinator 전달용
         case delegate(Delegate)
@@ -50,32 +51,35 @@ public struct LoginFeature {
                 state.selectedProvider = .kakao
                 state.error = nil
                 Log.debug("카카오 로그인 클릭")
-                return login(provider: .kakao)
+                return signIn(provider: .kakao)
 
             case .appleLoginTapped:
                 state.isLoading = true
                 state.selectedProvider = .apple
                 state.error = nil
                 Log.debug("애플 로그인 클릭")
-                return login(provider: .apple)
+                return signIn(provider: .apple)
 
             case .naverLoginTapped:
                 state.isLoading = true
                 state.selectedProvider = .naver
                 state.error = nil
                 Log.debug("네이버 로그인 클릭")
-                return login(provider: .naver)
+                return signIn(provider: .naver)
 
-            case let .socialLoginResponse(.success(token)): // 각 sns 로그인 성공 후 통합 로직
+            case let .loginResponse(.success(authToken)):
                 state.isLoading = false
-                Log.debug("소셜 로그인 성공: \(token.accessToken)")
-                // TODO: AuthUseCase 연결 후 서버 로그인/회원가입 분기 처리
-                return .none
+                Log.debug("로그인 성공 - isNewMember: \(authToken.isNewMember), registrationCompleted: \(authToken.registrationCompleted)")
+                if !authToken.registrationCompleted {
+                    return .send(.delegate(.needsSignUp(tempToken: authToken.accessToken))) // 회원 가입이 안된 상태
+                } else {
+                    return .send(.delegate(.didLoginSuccess)) // 회원가입 이미 한 상태
+                }
 
-            case let .socialLoginResponse(.failure(error)): // 각 sns 로그인 실패 후 통합 로직
+            case let .loginResponse(.failure(error)):
                 state.isLoading = false
                 state.error = error.localizedDescription
-                Log.debug("소셜 로그인 실패: \(error.localizedDescription)")
+                Log.debug("로그인 실패: \(error.localizedDescription)")
                 return .none
 
             case .delegate:
@@ -86,17 +90,17 @@ public struct LoginFeature {
 }
 
 private extension LoginFeature {
-    func login(provider: SocialAuthProvider) -> Effect<Action> {
-        let socialAuthClient = socialAuthClient
+    func signIn(provider: SocialAuthProvider) -> Effect<Action> {
+        let client = socialAuthClient
 
         return .run { send in
             do {
-                let token = try await socialAuthClient.login(provider)
-                await send(.socialLoginResponse(.success(token)))
-            } catch let error as SocialAuthClientError { // TODO: 애플, 네이버 연동 필요
-                await send(.socialLoginResponse(.failure(error)))
+                let authToken = try await client.signIn(provider)
+                await send(.loginResponse(.success(authToken)))
+            } catch let error as SocialAuthClientError {
+                await send(.loginResponse(.failure(error)))
             } catch {
-                await send(.socialLoginResponse(.failure(.underlying(error.localizedDescription))))
+                await send(.loginResponse(.failure(.underlying(error.localizedDescription))))
             }
         }
     }

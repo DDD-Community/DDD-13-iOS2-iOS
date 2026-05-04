@@ -5,14 +5,16 @@ import ProjectTemplatePlugin
 import DependencyPackagePlugin
 
 let project = Project.makeModule(
-  name: "Repository",
-  bundleId: .appBundleID(name: ".Repository"),
+  name: "DataUseCase",
+  bundleId: .appBundleID(name: ".DataUseCase"),
   product: .staticFramework,
-  settings:  .settings(),
+  settings: .settings(),
   dependencies: [
-    .Network(implements: .Networking),
+    .Domain(implements: .Entity),
+    .Domain(implements: .UseCase),
+    .Domain(implements: .DomainInterface),
     .Domain(implements: .DataInterface),
-    .Data(implements: .API),
+    .Data(implements: .Service),
     .Shared(implements: .Utill)
   ],
   sources: ["Sources/**"],

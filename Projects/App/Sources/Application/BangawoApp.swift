@@ -27,8 +27,6 @@ struct BangawoApp: App {
             LoginView( // 앱 시작점 임의로 로그인 뷰
                 store: Store(initialState: LoginFeature.State()) { // store 주입
                     LoginFeature()
-                } withDependencies: { // 로그인 뷰에 의존성 주입
-                    $0.socialAuthClient = .live
                 }
             ).onOpenURL(perform: { url in
                 if (AuthApi.isKakaoTalkLoginUrl(url)) { // 카카오 로그인 처리를 정상적으로 완료

@@ -15,7 +15,6 @@ public enum SocialAuthProvider: Equatable, Sendable {
 
 public extension SocialAuthProvider {
     /// 사용자에게 보여줄 에러 메시지를 만들 때 사용하는 provider 이름입니다.
-
     var displayName: String {
         switch self {
         case .kakao:
@@ -24,6 +23,18 @@ public extension SocialAuthProvider {
             return "애플"
         case .naver:
             return "네이버"
+        }
+    }
+
+    /// 서버 API 요청 시 사용하는 provider 식별 문자열입니다.
+    var serverValue: String {
+        switch self {
+        case .kakao:
+            return "KAKAO"
+        case .apple:
+            return "APPLE"
+        case .naver:
+            return "NAVER"
         }
     }
 }

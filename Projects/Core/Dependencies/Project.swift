@@ -5,16 +5,18 @@ import ProjectTemplatePlugin
 import DependencyPackagePlugin
 
 let project = Project.makeModule(
-  name: "Service",
-  bundleId: .appBundleID(name: ".Service"),
+  name: "CoreDependencies",
+  bundleId: .appBundleID(name: ".Dependencies"),
   product: .staticFramework,
-  settings:  .settings(),
+  settings: .settings(),
   dependencies: [
     .Domain(implements: .Entity),
     .Domain(implements: .DomainInterface),
-    .Shared(implements: .Utill),
-    .SPM.kakaoSDKAuth,
-    .SPM.kakaoSDKUser
+    .Domain(implements: .UseCase),
+    .project(target: "DataUseCase", path: .relativeToRoot("Projects/Data/UseCase")),
+    .Data(implements: .Repository),
+    .Data(implements: .Service),
+    .SPM.composableArchitecture
   ],
   sources: ["Sources/**"],
   hasTests: false

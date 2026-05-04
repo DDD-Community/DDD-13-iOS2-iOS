@@ -12,9 +12,9 @@ let project = Project.makeAppModule(
   dependencies: [
     .Presentation(implements: .Presentation),
     .SPM.kakaoMapsSDK,
-    .external(name: "KakaoSDKCommon"),
-    .external(name: "KakaoSDKAuth"),
-    .external(name: "KakaoSDKUser")
+    .SPM.kakaoSDKCommon,
+    .SPM.kakaoSDKAuth,
+    .SPM.kakaoSDKUser
   ],
   sources: ["Sources/**"],
   resources: ["Resources/**"],
