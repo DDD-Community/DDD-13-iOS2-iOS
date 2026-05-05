@@ -151,6 +151,10 @@ extension InfoPlistDictionary {
   func setNSCameraUsageDescription(_ value: String) -> InfoPlistDictionary {
     return self.merging(["NSCameraUsageDescription": .string(value)]) { (_, new) in new }
   }
+
+  func setNSPhotoLibraryUsageDescription(_ value: String) -> InfoPlistDictionary {
+    return self.merging(["NSPhotoLibraryUsageDescription": .string(value)]) { (_, new) in new }
+  }
   
   func setUILaunchScreens() -> InfoPlistDictionary {
     let dict: InfoPlistDictionary = [
@@ -188,5 +192,9 @@ extension InfoPlistDictionary {
 
   func setKakaoAppKey(_ value: String) -> InfoPlistDictionary {
     return self.merging(["KAKAO_APP_KEY": .string(value)]) { (_, new) in new }
+  }
+
+  func setKakaoRestAPIKey(_ value: String) -> InfoPlistDictionary {
+    return self.merging(["KAKAO_REST_API_KEY": .string(value)]) { (_, new) in new }
   }
 }
