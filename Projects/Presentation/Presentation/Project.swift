@@ -8,10 +8,10 @@ let project = Project.makeModule(
   name: "Presentation",
   bundleId: .appBundleID(name: ".Presentation"),
   product: .staticFramework,
-  settings:  .settings(),
+  settings: .settings(),
   dependencies: [
-    .Shared(implements: .Shared),
-    .Domain(implements: .UseCase)
+    .Presentation(implements: .AuthFlowFeature),
+    .Presentation(implements: .HomeFeature),
   ],
   sources: ["Sources/**"]
 )
