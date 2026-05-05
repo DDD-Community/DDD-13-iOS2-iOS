@@ -23,6 +23,7 @@ public extension ModulePath {
     case Presentation
     case AuthFlowFeature
     case HomeFeature
+    case RootFeature
 
 
     public static let name: String = "Presentation"

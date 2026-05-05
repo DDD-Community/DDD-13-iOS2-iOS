@@ -1,6 +1,6 @@
 //
 //  RootView.swift
-//  App
+//  RootFeature
 //
 
 import AuthFlowFeature
@@ -8,14 +8,14 @@ import ComposableArchitecture
 import HomeFeature
 import SwiftUI
 
-struct RootView: View {
+public struct RootView: View {
     @Bindable private var store: StoreOf<RootFeature>
 
-    init(store: StoreOf<RootFeature>) {
+    public init(store: StoreOf<RootFeature>) {
         self.store = store
     }
 
-    var body: some View {
+    public var body: some View {
         Group {
             switch store.mode {
             case .auth:

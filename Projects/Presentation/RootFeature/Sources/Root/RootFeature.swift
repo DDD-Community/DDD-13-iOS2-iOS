@@ -1,6 +1,6 @@
 //
 //  RootFeature.swift
-//  App
+//  RootFeature
 //
 //  로그인 토큰 존재 여부에 따라 Auth 플로우와 Home 메인 플로우를 분기하는 진입점
 //
@@ -12,28 +12,30 @@ import HomeFeature
 import Utill
 
 @Reducer
-struct RootFeature {
-    enum Mode: Equatable {
+public struct RootFeature {
+    public enum Mode: Equatable {
         case auth
         case main
     }
 
     @ObservableState
-    struct State: Equatable {
-        var mode: Mode = .auth
-        var auth: AuthFlowFeature.State = AuthFlowFeature.State()
-        var home: HomeFeature.State = HomeFeature.State()
+    public struct State: Equatable {
+        public var mode: Mode = .auth
+        public var auth: AuthFlowFeature.State = AuthFlowFeature.State()
+        public var home: HomeFeature.State = HomeFeature.State()
+
+        public init() {}
     }
 
-    enum Action {
+    public enum Action {
         case onAppear
         case auth(AuthFlowFeature.Action)
         case home(HomeFeature.Action)
     }
 
-    init() {}
+    public init() {}
 
-    var body: some ReducerOf<Self> {
+    public var body: some ReducerOf<Self> {
         Scope(state: \.auth, action: \.auth) {
             AuthFlowFeature()
         }

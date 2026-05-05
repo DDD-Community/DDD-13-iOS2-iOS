@@ -5,14 +5,15 @@ import ProjectTemplatePlugin
 import DependencyPackagePlugin
 
 let project = Project.makeModule(
-  name: "Presentation",
-  bundleId: .appBundleID(name: ".Presentation"),
+  name: "RootFeature",
+  bundleId: .appBundleID(name: ".RootFeature"),
   product: .staticFramework,
-  settings: .settings(),
+  settings:  .settings(),
   dependencies: [
     .Presentation(implements: .AuthFlowFeature),
     .Presentation(implements: .HomeFeature),
-    .Presentation(implements: .RootFeature),
+    .Shared(implements: .Utill),
+    .SPM.composableArchitecture,
   ],
   sources: ["Sources/**"]
 )
