@@ -44,9 +44,11 @@ struct SearchSheetHeader: View {
                 Image(systemName: "xmark")
                     .font(.system(size: 18, weight: .bold))
                     .foregroundStyle(.black)
+                    .padding(.vertical, 8)
             }
             .buttonStyle(.plain)
         }
+        .fixedSize(horizontal: false, vertical: true)
     }
 }
 
