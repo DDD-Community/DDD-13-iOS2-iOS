@@ -27,20 +27,20 @@ public final class SignInWithSocialUseCaseImpl: SignInWithSocialUseCase {
     public func execute(provider: SocialAuthProvider) async throws -> AuthToken {
         switch provider {
         case .kakao:
-            let socialToken = try await kakaoLoginService.login()
-            return try await signInWithServer(
+            let socialToken = try await kakaoLoginService.login() // 소셜인증 후
+            return try await signInWithServer( // 서버 로그인 요청
                 provider: provider,
                 providerToken: socialToken.accessToken
             )
 
-        case .apple, .naver:
+        case .apple, .naver: // TODO: 구현 필요
             throw SocialAuthClientError.notImplemented(provider)
         }
     }
 }
 
 private extension SignInWithSocialUseCaseImpl {
-    func signInWithServer(provider: SocialAuthProvider, providerToken: String) async throws -> AuthToken {
+    func signInWithServer(provider: SocialAuthProvider, providerToken: String) async throws -> AuthToken { // 서버 로그인 요청
         let response = try await repository.login(
             provider: provider.serverValue,
             providerToken: providerToken

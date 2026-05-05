@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Entity
 
 /// 서버 로그인 API 요청 바디
 public struct LoginRequestDTO: Encodable, Sendable {
@@ -26,4 +27,15 @@ public struct LoginResponseDTO: Codable, Sendable {
     public let isNewMember: Bool // 최초 생성한 회원 여부
     public let registrationCompleted: Bool // 회원가입 완료 여부 -> 닉네임 설정 완료까지 하면 true
     /// registrationCompleted가 true인 회원만 메인화면으로 아니면 회원가입 화면
+}
+
+public extension LoginResponseDTO {
+    func toEntity() -> AuthToken {
+        AuthToken(
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            isNewMember: isNewMember,
+            registrationCompleted: registrationCompleted,
+        )
+    }
 }

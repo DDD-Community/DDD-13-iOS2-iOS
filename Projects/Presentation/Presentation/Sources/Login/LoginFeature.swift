@@ -19,7 +19,6 @@ public struct LoginFeature {
     @ObservableState
     public struct State: Equatable {
         public var isLoading: Bool = false
-        public var selectedProvider: SocialAuthProvider? = nil
         public var error: String? = nil
 
         public init() {}
@@ -48,21 +47,18 @@ public struct LoginFeature {
             switch action {
             case .kakaoLoginTapped:
                 state.isLoading = true
-                state.selectedProvider = .kakao
                 state.error = nil
                 Log.debug("카카오 로그인 클릭")
                 return signIn(provider: .kakao)
 
             case .appleLoginTapped:
                 state.isLoading = true
-                state.selectedProvider = .apple
                 state.error = nil
                 Log.debug("애플 로그인 클릭")
                 return signIn(provider: .apple)
 
             case .naverLoginTapped:
                 state.isLoading = true
-                state.selectedProvider = .naver
                 state.error = nil
                 Log.debug("네이버 로그인 클릭")
                 return signIn(provider: .naver)
