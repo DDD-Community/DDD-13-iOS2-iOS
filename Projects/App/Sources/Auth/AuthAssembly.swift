@@ -1,15 +1,16 @@
 //
 //  AuthAssembly.swift
-//  CoreDependencies
+//  Bangawo
 //
-//  Created by DDD-iOS2 on 5/4/26.
+//  Created by DDD-iOS2 on 5/5/26.
 //
 
+import CoreDependencies
 import DataUseCase
 import Repository
 import Service
 
-enum AuthAssembly { // 단순 조립 함수
+enum AuthAssembly {
     static func makeSocialAuthClient() -> SocialAuthClient {
         let repository = AuthRepository()
         let useCase = SignInWithSocialUseCaseImpl(

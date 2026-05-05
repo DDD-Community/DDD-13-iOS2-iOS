@@ -30,7 +30,9 @@ public extension SocialAuthClient {
 
 extension SocialAuthClient: DependencyKey {
     public static var liveValue: SocialAuthClient {
-        AuthAssembly.makeSocialAuthClient()
+        SocialAuthClient { provider in
+            throw SocialAuthClientError.notImplemented(provider)
+        }
     }
 
     public static var testValue: SocialAuthClient {
