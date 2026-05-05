@@ -11,7 +11,13 @@ let project = Project.makeAppModule(
   scripts: [],
   dependencies: [
     .Presentation(implements: .Presentation),
-    .SPM.kakaoMapsSDK
+    .Domain(implements: .UseCase),
+    .Data(implements: .Repository),
+    .Data(implements: .DataUseCase),
+    .Core(implements: .CoreDependencies),
+    .Shared(implements: .Utill),
+    .SPM.kakaoMapsSDK,
+    .SPM.composableArchitecture
   ],
   sources: ["Sources/**"],
   resources: ["Resources/**"],

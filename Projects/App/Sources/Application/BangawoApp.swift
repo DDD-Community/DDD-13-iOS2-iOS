@@ -1,17 +1,25 @@
 import SwiftUI
+import ComposableArchitecture
+import CoreDependencies
+import Utill
 @preconcurrency import KakaoMapsSDK
 
 @main
 struct BangawoApp: App {
+    private let store = Store(initialState: RootFeature.State()) {
+        RootFeature()
+    }
+
     init() {
-        if let appKey = Bundle.main.infoDictionary?["KAKAO_APP_KEY"] as? String, !appKey.isEmpty {
-            SDKInitializer.InitSDK(appKey: appKey, phase: .real)
+        SDKInitializer.InitSDK(appKey: AppEnvironment.kakaoAppKey, phase: .real)
+        prepareDependencies {
+            $0.searchStationsClient = SearchStationsFactory.makeClient()
         }
     }
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView(store: store)
         }
     }
 }
