@@ -29,7 +29,7 @@ public extension SocialAuthClient {
 }
 
 extension SocialAuthClient: DependencyKey {
-    public static var liveValue: SocialAuthClient {
+    public static var liveValue: SocialAuthClient { // tca dependencies 추가
         SocialAuthClient { provider in
             throw SocialAuthClientError.notImplemented(provider)
         }

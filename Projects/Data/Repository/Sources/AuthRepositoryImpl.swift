@@ -1,5 +1,5 @@
 //
-//  AuthRepository.swift
+//  AuthRepositoryImpl.swift
 //  Repository
 //
 //  Created by DDD-iOS2 on 4/28/26.
@@ -14,7 +14,7 @@ import API
 import Entity
 
 /// 인증 관련 Repository 구현체
-public struct AuthRepository: AuthRepositoryProtocol {
+public struct AuthRepositoryImpl: AuthRepositoryProtocol {
     public init() {}
     // provider와 providerToken을 받아와서 requestDTO를 구성하고 서버 로그인 요청
     public func login(provider: String, providerToken: String) async throws -> AuthToken {

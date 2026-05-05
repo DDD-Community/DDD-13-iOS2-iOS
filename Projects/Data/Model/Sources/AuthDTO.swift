@@ -29,7 +29,7 @@ public struct LoginResponseDTO: Codable, Sendable {
     /// registrationCompleted가 true인 회원만 메인화면으로 아니면 회원가입 화면
 }
 
-public extension LoginResponseDTO {
+public extension LoginResponseDTO { // 엔티티 변환 함수 추가
     func toEntity() -> AuthToken {
         AuthToken(
             accessToken: accessToken,

@@ -12,7 +12,7 @@ import Service
 
 enum AuthAssembly {
     static func makeSocialAuthClient() -> SocialAuthClient {
-        let repository = AuthRepository()
+        let repository = AuthRepositoryImpl()
         let useCase = SignInWithSocialUseCaseImpl(
             repository: repository,
             kakaoLoginService: KakaoLoginService()
