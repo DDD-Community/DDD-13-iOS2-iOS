@@ -15,7 +15,7 @@ import Entity
 import Utill
 
 /// 인증 관련 Repository 구현체
-public struct AuthRepositoryImpl: AuthRepositoryProtocol {
+public final class AuthRepositoryImpl: AuthRepositoryProtocol {
     public init() {}
     // provider와 providerToken을 받아와서 requestDTO를 구성하고 서버 로그인 요청
     public func login(provider: String, providerToken: String) async throws -> LoginResult {
