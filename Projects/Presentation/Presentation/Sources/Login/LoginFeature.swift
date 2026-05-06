@@ -29,7 +29,7 @@ public struct LoginFeature {
         case kakaoLoginTapped // 카카오 로그인
         case appleLoginTapped // 애플 로그인
         case naverLoginTapped // 네이버 로그인
-        case loginResponse(Result<AuthToken, SocialAuthClientError>)
+        case loginResponse(Result<LoginResult, SocialAuthClientError>)
 
         // MARK: - 부모 Coordinator 전달용
         case delegate(Delegate)
@@ -63,11 +63,11 @@ public struct LoginFeature {
                 Log.debug("네이버 로그인 클릭")
                 return signIn(provider: .naver)
 
-            case let .loginResponse(.success(authToken)):
+            case let .loginResponse(.success(loginResult)):
                 state.isLoading = false
-                Log.debug("로그인 성공 - isNewMember: \(authToken.isNewMember), registrationCompleted: \(authToken.registrationCompleted)")
-                if !authToken.registrationCompleted {
-                    return .send(.delegate(.needsSignUp(tempToken: authToken.accessToken))) // 회원 가입이 안된 상태
+                Log.debug("로그인 성공 - isNewMember: \(loginResult.isNewMember), registrationCompleted: \(loginResult.registrationCompleted)")
+                if !loginResult.registrationCompleted {
+                    return .send(.delegate(.needsSignUp(tempToken: loginResult.tokens.accessToken))) // 회원 가입이 안된 상태
                 } else {
                     return .send(.delegate(.didLoginSuccess)) // 회원가입 이미 한 상태
                 }
@@ -91,8 +91,8 @@ private extension LoginFeature {
 
         return .run { send in
             do {
-                let authToken = try await client.signIn(provider)
-                await send(.loginResponse(.success(authToken)))
+                let loginResult = try await client.signIn(provider)
+                await send(.loginResponse(.success(loginResult)))
             } catch let error as SocialAuthClientError {
                 await send(.loginResponse(.failure(error)))
             } catch {

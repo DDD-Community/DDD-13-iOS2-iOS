@@ -29,7 +29,7 @@ struct BangawoApp: App {
                 store: Store(initialState: LoginFeature.State()) { // store 주입
                     LoginFeature()
                 } withDependencies: {
-                    $0.socialAuthClient = AuthAssembly.makeSocialAuthClient()
+                    $0.socialAuthClient = AuthFactory.makeSocialAuthClient()
                 }
             ).onOpenURL(perform: { url in
                 if (AuthApi.isKakaoTalkLoginUrl(url)) { // 카카오 로그인 처리를 정상적으로 완료

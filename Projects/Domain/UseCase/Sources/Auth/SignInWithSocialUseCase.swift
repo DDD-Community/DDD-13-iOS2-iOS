@@ -8,5 +8,5 @@
 import Entity
 
 public protocol SignInWithSocialUseCase: Sendable {
-    func execute(provider: SocialAuthProvider) async throws -> AuthToken
+    func execute(provider: SocialAuthProvider) async throws -> LoginResult
 }

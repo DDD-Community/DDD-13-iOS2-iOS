@@ -9,7 +9,6 @@ import DataInterface
 import DomainInterface
 import Entity
 import Service
-import Utill
 import UseCase
 
 public final class SignInWithSocialUseCaseImpl: SignInWithSocialUseCase {
@@ -24,7 +23,7 @@ public final class SignInWithSocialUseCaseImpl: SignInWithSocialUseCase {
         self.kakaoLoginService = kakaoLoginService
     }
 
-    public func execute(provider: SocialAuthProvider) async throws -> AuthToken {
+    public func execute(provider: SocialAuthProvider) async throws -> LoginResult {
         switch provider {
         case .kakao:
             let socialToken = try await kakaoLoginService.login() // 소셜인증 후
@@ -40,20 +39,14 @@ public final class SignInWithSocialUseCaseImpl: SignInWithSocialUseCase {
 }
 
 private extension SignInWithSocialUseCaseImpl {
-    func signInWithServer(provider: SocialAuthProvider, providerToken: String) async throws -> AuthToken { // 서버 로그인 요청
-        let response = try await repository.login(
+    func signInWithServer(provider: SocialAuthProvider, providerToken: String) async throws -> LoginResult { // 서버 로그인 요청
+        let loginResult = try await repository.login(
             provider: provider.serverValue,
             providerToken: providerToken
         )
 
-        KeyChainManager.addItem(key: KeyChainKey.accessToken, value: response.accessToken)
-        KeyChainManager.addItem(key: KeyChainKey.refreshToken, value: response.refreshToken)
+        repository.saveAuthTokens(loginResult.tokens)
 
-        return AuthToken(
-            accessToken: response.accessToken,
-            refreshToken: response.refreshToken,
-            isNewMember: response.isNewMember,
-            registrationCompleted: response.registrationCompleted
-        )
+        return loginResult
     }
 }

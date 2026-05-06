@@ -30,12 +30,14 @@ public struct LoginResponseDTO: Codable, Sendable {
 }
 
 public extension LoginResponseDTO { // 엔티티 변환 함수 추가
-    func toEntity() -> AuthToken {
-        AuthToken(
-            accessToken: accessToken,
-            refreshToken: refreshToken,
+    func toEntity() -> LoginResult {
+        LoginResult(
+            tokens: AuthTokens(
+                accessToken: accessToken,
+                refreshToken: refreshToken
+            ),
             isNewMember: isNewMember,
-            registrationCompleted: registrationCompleted,
+            registrationCompleted: registrationCompleted
         )
     }
 }

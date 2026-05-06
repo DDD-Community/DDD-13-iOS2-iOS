@@ -11,10 +11,10 @@ import Entity
 import UseCase
 
 public struct SocialAuthClient: Sendable {
-    public var signIn: @Sendable (SocialAuthProvider) async throws -> AuthToken
+    public var signIn: @Sendable (SocialAuthProvider) async throws -> LoginResult
 
     public init(
-        signIn: @escaping @Sendable (SocialAuthProvider) async throws -> AuthToken
+        signIn: @escaping @Sendable (SocialAuthProvider) async throws -> LoginResult
     ) {
         self.signIn = signIn
     }

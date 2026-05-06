@@ -14,8 +14,7 @@ let project = Project.makeModule(
     .Domain(implements: .UseCase),
     .Domain(implements: .DomainInterface),
     .Domain(implements: .DataInterface),
-    .Data(implements: .Service),
-    .Shared(implements: .Utill)
+    .Data(implements: .Service)
   ],
   sources: ["Sources/**"],
   hasTests: true

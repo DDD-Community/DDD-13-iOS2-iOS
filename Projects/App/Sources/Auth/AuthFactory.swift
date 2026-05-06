@@ -1,5 +1,5 @@
 //
-//  AuthAssembly.swift
+//  AuthFactory.swift
 //  Bangawo
 //
 //  Created by DDD-iOS2 on 5/5/26.
@@ -10,7 +10,7 @@ import DataUseCase
 import Repository
 import Service
 
-enum AuthAssembly {
+enum AuthFactory {
     static func makeSocialAuthClient() -> SocialAuthClient {
         let repository = AuthRepositoryImpl()
         let useCase = SignInWithSocialUseCaseImpl(
