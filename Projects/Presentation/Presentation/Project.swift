@@ -10,8 +10,10 @@ let project = Project.makeModule(
   product: .staticFramework,
   settings:  .settings(),
   dependencies: [
+    .project(target: "CoreDependencies", path: .relativeToRoot("Projects/Core/Dependencies")),
     .Shared(implements: .Shared),
-    .Domain(implements: .UseCase)
+    .Domain(implements: .Entity),
+    .Domain(implements: .DomainInterface)
   ],
   sources: ["Sources/**"]
 )

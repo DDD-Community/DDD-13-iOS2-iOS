@@ -10,9 +10,9 @@ let project = Project.makeModule(
   product: .staticFramework,
   settings:  .settings(),
   dependencies: [
-    .Data(implements: .Repository),
+    .Domain(implements: .Entity),
     .Domain(implements: .DomainInterface),
-    .SPM.composableArchitecture,
+    .Shared(implements: .Utill)
   ],
   sources: ["Sources/**"],
   hasTests: true

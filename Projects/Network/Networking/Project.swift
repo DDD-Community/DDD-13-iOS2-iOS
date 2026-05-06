@@ -10,7 +10,8 @@ let project = Project.makeModule(
   product: .staticFramework,
   settings:  .settings(),
   dependencies: [
-    .Network(implements: .Foundations)
+    .Network(implements: .Foundations),
+    .Shared(implements: .Utill)
   ],
   sources: ["Sources/**"],
   hasTests: false
