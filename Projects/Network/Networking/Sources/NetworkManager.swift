@@ -8,6 +8,7 @@
 import Foundation
 import Alamofire
 import Foundations
+import Utill
 
 public final class NetworkManager: Sendable {
     public static let shared = NetworkManager()
@@ -16,14 +17,16 @@ public final class NetworkManager: Sendable {
     
     public func request<T: Decodable>(_ endPoint: EndPoint) async throws(NetworkError) -> T {
         let request = makeDataRequest(endPoint)
-        let result = await request.serializingData().result
+        Log.debug("🌐 [Request] \(endPoint.method.rawValue) \(endPoint.baseURL)\(endPoint.path)")
+        let response = await request.serializingData().response
         
         let data: Foundation.Data
-        
-        switch result {
+        switch response.result {
         case .success(let responseData):
+            Log.debug("✅ [Response] \(responseData.count) bytes")
             data = responseData
         case .failure(let afError):
+            Log.debug("❌ [Response Failed] \(afError.localizedDescription)")
             // Alamofire는 에러를 AFError로 래핑하여 반환함
             // Interceptor에서 completion(.failure(NetworkError.noToken))을 호출하면
             // Alamofire가 이를 AFError.underlyingError에 감싸서 전달하므로
@@ -31,15 +34,27 @@ public final class NetworkManager: Sendable {
             if let underlyingError = afError.underlyingError as? NetworkError {
                 throw underlyingError
             }
+            if let statusCode = response.response?.statusCode {
+                let message = response.data.flatMap { String(data: $0, encoding: .utf8) }
+                Log.debug("❌ [HTTP \(statusCode)] \(message ?? "No response body")")
+                throw .serverError(statusCode: statusCode, message: message)
+            }
             // Interceptor가 아닌 일반 네트워크 실패 (타임아웃, DNS 오류 등)
             throw .connectionFailed
         }
         
         do {
-            return try JSONDecoder().decode(T.self, from: data)
+            let decodedData = try JSONDecoder().decode(T.self, from: data)
+            Log.debug("✅ [Decode Success] \(T.self)")
+            return decodedData
         } catch {
+            if let raw = String(data: data, encoding: .utf8) {
+                Log.debug("📦 [Decode Failed Raw Response] \(raw)")
+            }
+            Log.debug("❌ [Decode Error] \(error.localizedDescription)")
             throw .decodingFailed
         }
+
     }
     
     private func makeDataRequest(_ endPoint: EndPoint) -> DataRequest {

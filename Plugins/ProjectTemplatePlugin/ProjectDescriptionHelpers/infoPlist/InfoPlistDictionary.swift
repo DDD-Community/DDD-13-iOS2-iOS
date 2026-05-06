@@ -100,16 +100,26 @@ extension InfoPlistDictionary {
     return self.merging(dict) { (_, new) in new }
   }
 
-  // 매개변수 없는 URL 타입 (예: 카카오)
+  // 매개변수 없는 URL 타입
   func setCFBundleURLTypes() -> InfoPlistDictionary {
     let dict: [String: Plist.Value] = [
       "CFBundleURLTypes": .array([
         .dictionary([
           "CFBundleURLSchemes": .array([
-            .string("${REVERSED_CLIENT_ID}")
-//            .string("com.googleusercontent.apps.882277748169-glpolfiecue4lqqps6hmgj9t8lm1g5qp")
+            .string("$(REVERSED_CLIENT_ID)"),
+            .string("kakao$(KAKAO_APP_KEY)")
           ])
         ])
+      ])
+    ]
+    return self.merging(dict) { (_, new) in new }
+  }
+
+  func setLSApplicationQueriesSchemes() -> InfoPlistDictionary {
+    let dict: [String: Plist.Value] = [
+      "LSApplicationQueriesSchemes": .array([
+        .string("kakaokompassauth"),
+        .string("kakaolink")
       ])
     ]
     return self.merging(dict) { (_, new) in new }

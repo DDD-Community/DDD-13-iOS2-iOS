@@ -3,6 +3,8 @@ import ComposableArchitecture
 import CoreDependencies
 import RootFeature
 import Utill
+import KakaoSDKCommon
+import KakaoSDKAuth
 @preconcurrency import KakaoMapsSDK
 
 @main
@@ -12,15 +14,24 @@ struct BangawoApp: App {
     }
 
     init() {
-        SDKInitializer.InitSDK(appKey: AppEnvironment.kakaoAppKey, phase: .real)
+        let appKey = AppEnvironment.kakaoAppKey
+        SDKInitializer.InitSDK(appKey: appKey, phase: .real)
+        KakaoSDK.initSDK(appKey: appKey)
+
         prepareDependencies {
             $0.searchStationsClient = SearchStationsFactory.makeClient()
+            $0.socialAuthClient = AuthFactory.makeSocialAuthClient()
         }
     }
 
     var body: some Scene {
         WindowGroup {
             RootView(store: store)
+                .onOpenURL { url in
+                    if AuthApi.isKakaoTalkLoginUrl(url) {
+                        AuthController.handleOpenUrl(url: url)
+                    }
+                }
         }
     }
 }

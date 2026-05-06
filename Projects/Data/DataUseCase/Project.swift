@@ -12,7 +12,9 @@ let project = Project.makeModule(
   dependencies: [
     .Domain(implements: .Entity),
     .Domain(implements: .UseCase),
+    .Domain(implements: .DomainInterface),
     .Domain(implements: .DataInterface),
+    .Data(implements: .Service)
   ],
   sources: ["Sources/**"],
   hasTests: true

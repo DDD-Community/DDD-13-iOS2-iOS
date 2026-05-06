@@ -15,6 +15,7 @@ let project = Project.makeModule(
     .Domain(implements: .Entity),
     .Data(implements: .Model),
     .Data(implements: .API),
+    .Shared(implements: .Utill)
   ],
   sources: ["Sources/**"],
   hasTests: true

@@ -13,10 +13,14 @@ let project = Project.makeAppModule(
     .Presentation(implements: .Presentation),
     .Domain(implements: .UseCase),
     .Data(implements: .Repository),
+    .Data(implements: .Service),
     .Data(implements: .DataUseCase),
     .Core(implements: .CoreDependencies),
     .Shared(implements: .Utill),
     .SPM.kakaoMapsSDK,
+    .SPM.kakaoSDKCommon,
+    .SPM.kakaoSDKAuth,
+    .SPM.kakaoSDKUser,
     .SPM.composableArchitecture
   ],
   sources: ["Sources/**"],
@@ -28,4 +32,3 @@ let project = Project.makeAppModule(
 
   ]
 )
-

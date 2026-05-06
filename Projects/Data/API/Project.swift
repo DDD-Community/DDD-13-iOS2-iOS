@@ -12,6 +12,7 @@ let project = Project.makeModule(
   dependencies: [
     .Network(implements: .Foundations),
     .Shared(implements: .Utill),
+    .Data(implements: .Model)
   ],
   sources: ["Sources/**"],
   hasTests: false

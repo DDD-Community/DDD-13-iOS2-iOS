@@ -13,6 +13,10 @@ let project = Project.makeModule(
     .Presentation(implements: .AuthFlowFeature),
     .Presentation(implements: .HomeFeature),
     .Presentation(implements: .RootFeature),
+    .Core(implements: .CoreDependencies),
+    .Shared(implements: .Shared),
+    .Domain(implements: .Entity),
+    .Domain(implements: .DomainInterface)
   ],
   sources: ["Sources/**"]
 )

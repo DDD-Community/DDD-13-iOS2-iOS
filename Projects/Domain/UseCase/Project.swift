@@ -11,6 +11,8 @@ let project = Project.makeModule(
   settings:  .settings(),
   dependencies: [
     .Domain(implements: .Entity),
+    .Domain(implements: .DomainInterface),
+    .Shared(implements: .Utill)
   ],
   sources: ["Sources/**"],
   hasTests: true
