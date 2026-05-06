@@ -77,7 +77,7 @@ private struct AppleLoginButton: View {
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 8) {
-                Image(systemName: "g.circle.fill")
+                Image(systemName: "apple.logo")
                 Text("Apple로 로그인")
                     .pretendardCustomFont(textStyle: .bodyBold)
             }
