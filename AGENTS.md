@@ -70,6 +70,14 @@ Projects/
 - CPU 작업은 Effect 내에서 처리
 - 테스트: TestStore 패턴 사용
 
+#### TCA Dependency Client
+- TCA Client(`@DependencyClient` + `DependencyKey` + `DependencyValues`)는 `CoreDependencies` 한 파일에 둔다
+- `liveValue` / `testValue`는 빈 `Self()`, `static func live(useCase:)` 팩토리는 Domain UseCase protocol만 받는다
+- 실제 live 조립은 `App/Sources/Factory/*Factory.makeClient()`에서, 주입은 `BangawoApp.init()`의 `prepareDependencies`에서 한 번만
+- Feature는 `@Dependency`만 사용, `Data` 계열(Repository/DataUseCase/Model/API/Service) import 금지
+- 네이밍: Entity는 도메인명 그대로(`AuthToken`), DTO는 `*RequestDTO`/`*ResponseDTO`, Repository는 `*RepositoryProtocol`/`*RepositoryImpl`, UseCase는 `*UseCase`/`*UseCaseImpl`, TCA Client는 `*Client`, Composition Root 헬퍼는 `*Factory`
+- 상세 예시·의존성 표·금지 사항은 [`docs/conventions/tca-dependency-convention.md`](docs/conventions/tca-dependency-convention.md) 참고
+
 ## Git Rules
 
 ### Branch
