@@ -18,7 +18,8 @@ let project = Project.makeAppModule(
     .SPM.kakaoMapsSDK,
     .SPM.kakaoSDKCommon,
     .SPM.kakaoSDKAuth,
-    .SPM.kakaoSDKUser
+    .SPM.kakaoSDKUser,
+    .SPM.nidThirdPartyLogin
   ],
   sources: ["Sources/**"],
   resources: ["Resources/**"],

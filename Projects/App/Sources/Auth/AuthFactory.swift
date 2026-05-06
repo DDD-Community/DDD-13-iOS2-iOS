@@ -15,7 +15,8 @@ enum AuthFactory {
         let repository = AuthRepositoryImpl()
         let useCase = SignInWithSocialUseCaseImpl(
             repository: repository,
-            kakaoLoginService: KakaoLoginService()
+            kakaoLoginService: KakaoLoginService(),
+            naverLoginService: NaverLoginService()
         )
 
         return .live(useCase: useCase)

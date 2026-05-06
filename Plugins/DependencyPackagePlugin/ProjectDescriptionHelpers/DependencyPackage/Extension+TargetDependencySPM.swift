@@ -15,4 +15,5 @@ public extension TargetDependency.SPM {
   static let kakaoSDKCommon = TargetDependency.external(name: "KakaoSDKCommon", condition: .none)
   static let kakaoSDKAuth = TargetDependency.external(name: "KakaoSDKAuth", condition: .none)
   static let kakaoSDKUser = TargetDependency.external(name: "KakaoSDKUser", condition: .none)
+  static let nidThirdPartyLogin = TargetDependency.external(name: "NidThirdPartyLogin", condition: .none)
 }

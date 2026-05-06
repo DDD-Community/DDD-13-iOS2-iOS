@@ -14,7 +14,8 @@ let project = Project.makeModule(
     .Domain(implements: .DomainInterface),
     .Shared(implements: .Utill),
     .SPM.kakaoSDKAuth,
-    .SPM.kakaoSDKUser
+    .SPM.kakaoSDKUser,
+    .SPM.nidThirdPartyLogin
   ],
   sources: ["Sources/**"],
   hasTests: false

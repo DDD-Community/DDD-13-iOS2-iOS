@@ -26,7 +26,7 @@ public final class AuthRepositoryImpl: AuthRepositoryProtocol {
 
         return response.toEntity()
     }
-
+    // 로그인과 토큰 저장 로직 분리
     public func saveAuthTokens(_ tokens: AuthTokens) {
         KeyChainManager.addItem(key: KeyChainKey.accessToken, value: tokens.accessToken)
         KeyChainManager.addItem(key: KeyChainKey.refreshToken, value: tokens.refreshToken)

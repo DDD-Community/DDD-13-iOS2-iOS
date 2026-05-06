@@ -78,6 +78,9 @@ Config/
 # Secrets
 .env
 
+# Docs
+README.md
+
 # Claude Code
 CLAUDE.md
 .claude/

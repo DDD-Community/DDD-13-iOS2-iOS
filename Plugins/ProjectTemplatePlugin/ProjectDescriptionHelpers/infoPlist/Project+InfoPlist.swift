@@ -40,6 +40,9 @@ public extension InfoPlist {
         ]
       ])
       .setKakaoAppKey("$(KAKAO_APP_KEY)")
+      .setNaverClientID("$(NAVER_CLIENT_ID)")
+      .setNaverClientSecret("$(NAVER_CLIENT_SECRET)")
+      .setNaverURLScheme("$(NAVER_URL_SCHEME)")
   )
 
   static let moduleInfoPlist: Self = .extendingDefault(
