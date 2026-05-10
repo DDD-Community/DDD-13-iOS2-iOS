@@ -1,7 +1,7 @@
 import SwiftUI
 import ComposableArchitecture
 import CoreDependencies
-import RootFeature
+import Presentation
 import Utill
 import KakaoSDKCommon
 import KakaoSDKAuth
