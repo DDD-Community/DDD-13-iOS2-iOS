@@ -1,44 +1,11 @@
 //
-//  TempLoginView.swift
-//  Presentation
+//  PrimaryButtons.swift
+//  AuthFlowFeature
+//
+//  AuthFlow 화면 공용 버튼 컴포넌트
 //
 
 import SwiftUI
-import ComposableArchitecture
-
-public struct TempLoginView: View {
-    @Bindable private var store: StoreOf<TempLoginFeature>
-
-    public init(store: StoreOf<TempLoginFeature>) {
-        self.store = store
-    }
-
-    public var body: some View {
-        VStack(spacing: 16) {
-            Color.clear.frame(maxHeight: .infinity)
-
-            VStack(spacing: 8) {
-                Text("Bangawo")
-                    .font(.largeTitle.bold())
-                Text("임시 로그인 화면")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-
-            Color.clear.frame(maxHeight: .infinity)
-
-            PrimaryFilledButton(title: "회원가입 플로우 진입") {
-                store.send(.signUpButtonTapped)
-            }
-
-            PrimaryOutlinedButton(title: "메인 진입") {
-                store.send(.enterMainButtonTapped)
-            }
-        }
-        .padding(.horizontal, 24)
-        .padding(.bottom, 24)
-    }
-}
 
 struct PrimaryFilledButton: View {
     private let title: String

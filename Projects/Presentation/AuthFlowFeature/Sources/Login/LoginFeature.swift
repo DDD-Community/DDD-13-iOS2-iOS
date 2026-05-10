@@ -1,9 +1,8 @@
 //
 //  LoginFeature.swift
-//  Presentation
+//  AuthFlowFeature
 //
-//  Created by DDD-iOS2 on 4/25/26.
-//  Copyright (c) 2025 DDD, Ltd., All rights reserved.
+//  소셜 로그인 진입 화면 Reducer
 //
 
 import ComposableArchitecture

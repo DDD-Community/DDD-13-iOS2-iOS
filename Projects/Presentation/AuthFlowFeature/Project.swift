@@ -14,6 +14,7 @@ let project = Project.makeModule(
     .Shared(implements: .Utill),
     .Shared(implements: .DesignSystem),
     .Domain(implements: .Entity),
+    .Domain(implements: .DomainInterface),
     .Core(implements: .CoreDependencies),
   ],
   sources: ["Sources/**"]

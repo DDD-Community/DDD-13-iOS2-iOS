@@ -2,7 +2,7 @@
 //  AuthFlowFeature.swift
 //  Presentation
 //
-//  TempLogin → Terms → ProfileInput → DepartureSearch의 회원가입 네비게이션 스택
+//  Login → Terms → ProfileInput → DepartureSearch의 회원가입 네비게이션 스택
 //  인증 완료 시 부모(RootFeature)에 delegate를 발행해 메인 플로우로 위임한다
 //
 
@@ -20,20 +20,20 @@ public struct AuthFlowFeature {
 
     @ObservableState
     public struct State: Equatable {
-        public var temp: TempLoginFeature.State
+        public var login: LoginFeature.State
         public var path: StackState<Path.State>
 
         public init(
-            temp: TempLoginFeature.State = TempLoginFeature.State(),
+            login: LoginFeature.State = LoginFeature.State(),
             path: StackState<Path.State> = StackState<Path.State>()
         ) {
-            self.temp = temp
+            self.login = login
             self.path = path
         }
     }
 
     public enum Action {
-        case temp(TempLoginFeature.Action)
+        case login(LoginFeature.Action)
         case path(StackActionOf<Path>)
         case delegate(Delegate)
 
@@ -45,20 +45,20 @@ public struct AuthFlowFeature {
     public init() {}
 
     public var body: some ReducerOf<Self> {
-        Scope(state: \.temp, action: \.temp) {
-            TempLoginFeature()
+        Scope(state: \.login, action: \.login) {
+            LoginFeature()
         }
 
         Reduce { state, action in
             switch action {
-            case .temp(.delegate(.startSignUp)):
+            case .login(.delegate(.needsSignUp)):
                 state.path.append(.terms(TermsAgreementFeature.State()))
                 return .none
 
-            case .temp(.delegate(.enterMain)):
+            case .login(.delegate(.didLoginSuccess)):
                 return .send(.delegate(.authDidComplete))
 
-            case .temp:
+            case .login:
                 return .none
 
             case let .path(.element(id: _, action: .terms(.delegate(.completeAgreement)))):

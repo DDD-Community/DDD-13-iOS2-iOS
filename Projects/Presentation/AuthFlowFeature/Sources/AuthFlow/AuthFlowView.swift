@@ -15,7 +15,7 @@ public struct AuthFlowView: View {
 
     public var body: some View {
         NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
-            TempLoginView(store: store.scope(state: \.temp, action: \.temp))
+            LoginView(store: store.scope(state: \.login, action: \.login))
         } destination: { pathStore in
             switch pathStore.case {
             case let .terms(termsStore):
