@@ -49,16 +49,16 @@ struct BangawoApp: App {
         let naverClientSecret = Bundle.main.infoDictionary?["NAVER_CLIENT_SECRET"] as? String ?? ""
         let naverURLScheme = Bundle.main.infoDictionary?["NAVER_URL_SCHEME"] as? String ?? ""
 
-        if !appName.isEmpty, !naverClientID.isEmpty, !naverClientSecret.isEmpty, !naverURLScheme.isEmpty {
-            NidOAuth.shared.initialize(
-                appName: appName,
-                clientId: naverClientID,
-                clientSecret: naverClientSecret,
-                urlScheme: naverURLScheme
-            )
-            Log.debug("👤 [Naver] Login SDK 초기화 완료")
-        } else {
-            Log.debug("⚠️ [Naver] Error: Info.plist에서 네이버 로그인 설정값을 찾을 수 없습니다.")
+        guard !appName.isEmpty, !naverClientID.isEmpty, !naverClientSecret.isEmpty, !naverURLScheme.isEmpty else {
+                    Log.debug("⚠️ [Naver] Error: Info.plist에서 네이버 로그인 설정값을 찾을 수 없습니다.")
+                    return
+                }
+                NidOAuth.shared.initialize(
+                    appName: appName,
+                    clientId: naverClientID,
+                    clientSecret: naverClientSecret,
+                    urlScheme: naverURLScheme
+                )
+                Log.debug("👤 [Naver] Login SDK 초기화 완료")
         }
-    }
 }
