@@ -11,6 +11,7 @@ let project = Project.makeModule(
   settings:  .settings(),
   dependencies: [
     .Network(implements: .Foundations),
+    .Shared(implements: .Utill),
     .Data(implements: .Model)
   ],
   sources: ["Sources/**"],

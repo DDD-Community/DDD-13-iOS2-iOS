@@ -14,12 +14,16 @@ public enum ModulePath {
   case Domain(Domains)
   case Data(Datas)
   case Shared(Shareds)
+  case Core(Cores)
 }
 
 // MARK: FeatureModule
 public extension ModulePath {
   enum Presentations: String, CaseIterable {
     case Presentation
+    case AuthFlowFeature
+    case HomeFeature
+    case RootFeature
 
 
     public static let name: String = "Presentation"
@@ -46,6 +50,7 @@ public extension ModulePath {
     case Repository
     case API
     case Service
+    case DataUseCase
 
     public static let name: String = "Data"
   }
@@ -72,8 +77,18 @@ public extension ModulePath {
     case Shared
     case DesignSystem
     case Utill
-    
+
     public static let name: String = "Shared"
+  }
+}
+
+
+//MARK: -  CoreModule
+public extension ModulePath {
+  enum Cores: String, CaseIterable {
+    case CoreDependencies
+
+    public static let name: String = "Core"
   }
 }
 

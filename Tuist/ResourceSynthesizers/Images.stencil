@@ -1,0 +1,23 @@
+// swiftlint:disable all
+// Generated using Tuist (SwiftGen) — https://github.com/tuist/tuist
+
+{% if catalogs %}
+#if canImport(SwiftUI)
+import SwiftUI
+
+public extension Image {
+  enum Asset {
+    {% for catalog in catalogs %}
+    {% for asset in catalog.assets %}
+    {% if asset.type == "image" %}
+    public static let {{asset.name|swiftIdentifier:"pretty"|lowerFirstWord|escapeReservedKeywords}}: Image = Image("{{asset.name}}", bundle: Bundle.module)
+    {% endif %}
+    {% endfor %}
+    {% endfor %}
+  }
+}
+#endif
+{% else %}
+// No image assets found.
+{% endif %}
+// swiftlint:enable all

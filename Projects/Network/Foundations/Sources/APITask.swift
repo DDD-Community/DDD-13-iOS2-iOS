@@ -19,4 +19,6 @@ public enum APITask {
     case requestParameters(parameters: Parameters)
     /// 인터셉터 없는 요청
     case requestWithoutInterceptor(body: (Encodable & Sendable)? = nil)
+    /// 인터셉터 없는 쿼리 파라미터 요청 (외부 API용)
+    case requestParametersWithoutInterceptor(parameters: Parameters)
 }

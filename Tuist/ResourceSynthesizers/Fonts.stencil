@@ -1,0 +1,65 @@
+// swiftlint:disable all
+// Generated using Tuist (SwiftGen) — https://github.com/tuist/tuist
+
+#if canImport(UIKit)
+import UIKit
+#endif
+#if canImport(SwiftUI)
+import SwiftUI
+#endif
+import CoreText
+
+{% if families %}
+public enum DesignSystemFontFamily {
+  {% for family in families %}
+  public enum {{family.name|swiftIdentifier:"pretty"|escapeReservedKeywords}} {
+    {% for font in family.fonts %}
+    public static let {{font.style|swiftIdentifier:"pretty"|lowerFirstWord|escapeReservedKeywords}}: String = "{{font.name}}"
+    {% endfor %}
+    public static let all: [String] = [
+      {% for font in family.fonts %}
+      "{{font.name}}"{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ]
+  }
+  {% endfor %}
+
+  public static func registerAllCustomFonts() {
+    let paths: Set<String> = [
+      {% for family in families %}
+      {% for font in family.fonts %}
+      "{{font.path}}",
+      {% endfor %}
+      {% endfor %}
+    ]
+    paths.forEach { registerFont(path: $0) }
+  }
+
+  private static func registerFont(path: String) {
+    let filename = (path as NSString).lastPathComponent
+    let resourceName = (filename as NSString).deletingPathExtension
+    let resourceExt = (filename as NSString).pathExtension
+    guard let url = Bundle.module.url(forResource: resourceName, withExtension: resourceExt) else { return }
+    CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+  }
+}
+
+#if canImport(SwiftUI)
+public extension Font {
+  static func designSystem(_ name: String, size: CGFloat) -> Font {
+    return Font.custom(name, size: size)
+  }
+}
+#endif
+
+#if canImport(UIKit)
+public extension UIFont {
+  static func designSystem(_ name: String, size: CGFloat) -> UIFont {
+    return UIFont(name: name, size: size) ?? UIFont.systemFont(ofSize: size)
+  }
+}
+#endif
+{% else %}
+// No custom fonts found.
+{% endif %}
+// swiftlint:enable all

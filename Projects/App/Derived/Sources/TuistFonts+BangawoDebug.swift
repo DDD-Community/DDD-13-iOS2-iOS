@@ -1,104 +1,66 @@
-// swiftlint:disable:this file_name
 // swiftlint:disable all
-// swift-format-ignore-file
-// swiftformat:disable all
-// Generated using tuist — https://github.com/tuist/tuist
+// Generated using Tuist (SwiftGen) — https://github.com/tuist/tuist
 
-#if os(macOS)
-  import AppKit.NSFont
-#elseif os(iOS) || os(tvOS) || os(watchOS) || os(visionOS)
-  import UIKit.UIFont
+#if canImport(UIKit)
+import UIKit
 #endif
 #if canImport(SwiftUI)
-  import SwiftUI
+import SwiftUI
 #endif
+import CoreText
 
-// swiftlint:disable superfluous_disable_command
-// swiftlint:disable file_length
-
-// MARK: - Fonts
-
-// swiftlint:disable identifier_name line_length type_body_length
-public enum BangawoDebugFontFamily: Sendable {
-  public enum PretendardVariable: Sendable {
-    public static let black = BangawoDebugFontConvertible(name: "PretendardVariable-Black", family: "Pretendard Variable", path: "PretendardVariable.ttf")
-    public static let bold = BangawoDebugFontConvertible(name: "PretendardVariable-Bold", family: "Pretendard Variable", path: "PretendardVariable.ttf")
-    public static let extraBold = BangawoDebugFontConvertible(name: "PretendardVariable-ExtraBold", family: "Pretendard Variable", path: "PretendardVariable.ttf")
-    public static let extraLight = BangawoDebugFontConvertible(name: "PretendardVariable-ExtraLight", family: "Pretendard Variable", path: "PretendardVariable.ttf")
-    public static let light = BangawoDebugFontConvertible(name: "PretendardVariable-Light", family: "Pretendard Variable", path: "PretendardVariable.ttf")
-    public static let medium = BangawoDebugFontConvertible(name: "PretendardVariable-Medium", family: "Pretendard Variable", path: "PretendardVariable.ttf")
-    public static let regular = BangawoDebugFontConvertible(name: "PretendardVariable-Regular", family: "Pretendard Variable", path: "PretendardVariable.ttf")
-    public static let semiBold = BangawoDebugFontConvertible(name: "PretendardVariable-SemiBold", family: "Pretendard Variable", path: "PretendardVariable.ttf")
-    public static let thin = BangawoDebugFontConvertible(name: "PretendardVariable-Thin", family: "Pretendard Variable", path: "PretendardVariable.ttf")
-    public static let all: [BangawoDebugFontConvertible] = [black, bold, extraBold, extraLight, light, medium, regular, semiBold, thin]
+public enum DesignSystemFontFamily {
+  public enum PretendardVariable {
+    public static let black: String = "PretendardVariable-Black"
+    public static let bold: String = "PretendardVariable-Bold"
+    public static let extraBold: String = "PretendardVariable-ExtraBold"
+    public static let extraLight: String = "PretendardVariable-ExtraLight"
+    public static let light: String = "PretendardVariable-Light"
+    public static let medium: String = "PretendardVariable-Medium"
+    public static let regular: String = "PretendardVariable-Regular"
+    public static let semiBold: String = "PretendardVariable-SemiBold"
+    public static let thin: String = "PretendardVariable-Thin"
+    public static let all: [String] = [
+      "PretendardVariable-Black",      "PretendardVariable-Bold",      "PretendardVariable-ExtraBold",      "PretendardVariable-ExtraLight",      "PretendardVariable-Light",      "PretendardVariable-Medium",      "PretendardVariable-Regular",      "PretendardVariable-SemiBold",      "PretendardVariable-Thin"    ]
   }
-  public static let allCustomFonts: [BangawoDebugFontConvertible] = [PretendardVariable.all].flatMap { $0 }
+
   public static func registerAllCustomFonts() {
-    allCustomFonts.forEach { $0.register() }
-  }
-}
-// swiftlint:enable identifier_name line_length type_body_length
-
-// MARK: - Implementation Details
-
-public struct BangawoDebugFontConvertible: Sendable {
-  public let name: String
-  public let family: String
-  public let path: String
-
-  #if os(macOS)
-  public typealias Font = NSFont
-  #elseif os(iOS) || os(tvOS) || os(watchOS) || os(visionOS)
-  public typealias Font = UIFont
-  #endif
-
-  public func font(size: CGFloat) -> Font {
-    guard let font = Font(font: self, size: size) else {
-      fatalError("Unable to initialize font '\(name)' (\(family))")
-    }
-    return font
+    let paths: Set<String> = [
+      "Projects/App/Resources/FontAsset/PretendardVariable.ttf",
+      "Projects/App/Resources/FontAsset/PretendardVariable.ttf",
+      "Projects/App/Resources/FontAsset/PretendardVariable.ttf",
+      "Projects/App/Resources/FontAsset/PretendardVariable.ttf",
+      "Projects/App/Resources/FontAsset/PretendardVariable.ttf",
+      "Projects/App/Resources/FontAsset/PretendardVariable.ttf",
+      "Projects/App/Resources/FontAsset/PretendardVariable.ttf",
+      "Projects/App/Resources/FontAsset/PretendardVariable.ttf",
+      "Projects/App/Resources/FontAsset/PretendardVariable.ttf",
+    ]
+    paths.forEach { registerFont(path: $0) }
   }
 
-  #if canImport(SwiftUI)
-  @available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, *)
-  public func swiftUIFont(size: CGFloat) -> SwiftUI.Font {
-    guard let font = Font(font: self, size: size) else {
-      fatalError("Unable to initialize font '\(name)' (\(family))")
-    }
-    #if os(macOS)
-    return SwiftUI.Font.custom(font.fontName, size: font.pointSize)
-    #elseif os(iOS) || os(tvOS) || os(watchOS) || os(visionOS)
-    return SwiftUI.Font(font)
-    #endif
-  }
-  #endif
-
-  public func register() {
-    // swiftlint:disable:next conditional_returns_on_newline
-    guard let url = url else { return }
+  private static func registerFont(path: String) {
+    let filename = (path as NSString).lastPathComponent
+    let resourceName = (filename as NSString).deletingPathExtension
+    let resourceExt = (filename as NSString).pathExtension
+    guard let url = Bundle.module.url(forResource: resourceName, withExtension: resourceExt) else { return }
     CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
   }
-
-  fileprivate var url: URL? {
-    // swiftlint:disable:next implicit_return
-    return Bundle.module.url(forResource: path, withExtension: nil)
-  }
 }
 
-public extension BangawoDebugFontConvertible.Font {
-  convenience init?(font: BangawoDebugFontConvertible, size: CGFloat) {
-    #if os(iOS) || os(tvOS) || os(watchOS) || os(visionOS)
-    if !UIFont.fontNames(forFamilyName: font.family).contains(font.name) {
-      font.register()
-    }
-    #elseif os(macOS)
-    if let url = font.url, CTFontManagerGetScopeForURL(url as CFURL) == .none {
-      font.register()
-    }
-    #endif
-
-    self.init(name: font.name, size: size)
+#if canImport(SwiftUI)
+public extension Font {
+  static func designSystem(_ name: String, size: CGFloat) -> Font {
+    return Font.custom(name, size: size)
   }
 }
-// swiftformat:enable all
+#endif
+
+#if canImport(UIKit)
+public extension UIFont {
+  static func designSystem(_ name: String, size: CGFloat) -> UIFont {
+    return UIFont(name: name, size: size) ?? UIFont.systemFont(ofSize: size)
+  }
+}
+#endif
 // swiftlint:enable all

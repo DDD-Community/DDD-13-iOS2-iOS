@@ -8,12 +8,11 @@ let project = Project.makeModule(
   name: "Presentation",
   bundleId: .appBundleID(name: ".Presentation"),
   product: .staticFramework,
-  settings:  .settings(),
+  settings: .settings(),
   dependencies: [
-    .project(target: "CoreDependencies", path: .relativeToRoot("Projects/Core/Dependencies")),
-    .Shared(implements: .Shared),
-    .Domain(implements: .Entity),
-    .Domain(implements: .DomainInterface)
+    .Presentation(implements: .AuthFlowFeature),
+    .Presentation(implements: .HomeFeature),
+    .Presentation(implements: .RootFeature),
   ],
   sources: ["Sources/**"]
 )
