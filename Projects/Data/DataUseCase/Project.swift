@@ -8,7 +8,7 @@ let project = Project.makeModule(
   name: "DataUseCase",
   bundleId: .appBundleID(name: ".DataUseCase"),
   product: .staticFramework,
-  settings:  .settings(),
+  settings: .settings(),
   dependencies: [
     .Domain(implements: .Entity),
     .Domain(implements: .UseCase),

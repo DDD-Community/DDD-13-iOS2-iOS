@@ -8,7 +8,7 @@ let project = Project.makeModule(
   name: "AuthFlowFeature",
   bundleId: .appBundleID(name: ".AuthFlowFeature"),
   product: .staticFramework,
-  settings:  .settings(),
+  settings: .settings(),
   dependencies: [
     .Shared(implements: .Shared),
     .Shared(implements: .Utill),

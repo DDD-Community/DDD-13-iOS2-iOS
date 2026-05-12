@@ -8,7 +8,7 @@ let project = Project.makeModule(
   name: "RootFeature",
   bundleId: .appBundleID(name: ".RootFeature"),
   product: .staticFramework,
-  settings:  .settings(),
+  settings: .settings(),
   dependencies: [
     .Presentation(implements: .AuthFlowFeature),
     .Presentation(implements: .HomeFeature),

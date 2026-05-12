@@ -8,7 +8,7 @@ let project = Project.makeModule(
   name: "CoreDependencies",
   bundleId: .appBundleID(name: ".CoreDependencies"),
   product: .staticFramework,
-  settings:  .settings(),
+  settings: .settings(),
   dependencies: [
     .Domain(implements: .Entity),
     .Domain(implements: .DomainInterface),

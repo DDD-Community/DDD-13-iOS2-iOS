@@ -8,7 +8,7 @@ let project = Project.makeModule(
   name: "HomeFeature",
   bundleId: .appBundleID(name: ".HomeFeature"),
   product: .staticFramework,
-  settings:  .settings(),
+  settings: .settings(),
   dependencies: [
     .Shared(implements: .Shared),
     .Shared(implements: .Utill),
