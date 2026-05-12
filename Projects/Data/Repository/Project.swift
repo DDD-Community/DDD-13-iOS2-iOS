@@ -12,6 +12,8 @@ let project = Project.makeModule(
   dependencies: [
     .Network(implements: .Networking),
     .Domain(implements: .DataInterface),
+    .Domain(implements: .Entity),
+    .Data(implements: .Model),
     .Data(implements: .API),
     .Shared(implements: .Utill)
   ],

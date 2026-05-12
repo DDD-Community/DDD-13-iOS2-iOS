@@ -5,16 +5,17 @@ import ProjectTemplatePlugin
 import DependencyPackagePlugin
 
 let project = Project.makeModule(
-  name: "CoreDependencies",
-  bundleId: .appBundleID(name: ".Dependencies"),
+  name: "HomeFeature",
+  bundleId: .appBundleID(name: ".HomeFeature"),
   product: .staticFramework,
   settings: .settings(),
   dependencies: [
-    .Domain(implements: .Entity),
-    .Domain(implements: .DomainInterface),
+    .Shared(implements: .Shared),
+    .Shared(implements: .Utill),
+    .Shared(implements: .DesignSystem),
     .Domain(implements: .UseCase),
-    .SPM.composableArchitecture
+    .Domain(implements: .Entity),
+    .SPM.composableArchitecture,
   ],
-  sources: ["Sources/**"],
-  hasTests: false
+  sources: ["Sources/**"]
 )

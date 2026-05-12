@@ -100,6 +100,14 @@ public final class NetworkManager: Sendable {
                     headers: endPoint.headers
                 ).validate()
             }
+        case let .requestParametersWithoutInterceptor(parameters):
+            return AF.request(
+                "\(endPoint.baseURL)\(endPoint.path)",
+                method: endPoint.method,
+                parameters: parameters,
+                encoding: URLEncoding.default,
+                headers: endPoint.headers
+            ).validate()
         }
     }
 }

@@ -7,10 +7,10 @@ import DependencyPackagePlugin
 let project = Project.makeModule(
   name: "DomainInterface",
   bundleId: .appBundleID(name: ".DomainInterface"),
-  product: .framework,
+  product: .staticFramework,
   settings:  .settings(),
   dependencies: [
-    .Domain(implements: .Entity)
+    .Domain(implements: .Entity),
   ],
   sources: ["Sources/**"],
   hasTests: false
