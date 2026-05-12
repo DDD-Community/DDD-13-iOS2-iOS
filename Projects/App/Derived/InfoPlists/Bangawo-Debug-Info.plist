@@ -25,6 +25,7 @@
 			<array>
 				<string>$(REVERSED_CLIENT_ID)</string>
 				<string>kakao$(KAKAO_APP_KEY)</string>
+				<string>$(NAVER_URL_SCHEME)</string>
 			</array>
 		</dict>
 	</array>
@@ -38,9 +39,17 @@
 	<array>
 		<string>kakaokompassauth</string>
 		<string>kakaolink</string>
+		<string>naversearchapp</string>
+		<string>naversearchthirdlogin</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NAVER_CLIENT_ID</key>
+	<string>$(NAVER_CLIENT_ID)</string>
+	<key>NAVER_CLIENT_SECRET</key>
+	<string>$(NAVER_CLIENT_SECRET)</string>
+	<key>NAVER_URL_SCHEME</key>
+	<string>$(NAVER_URL_SCHEME)</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
