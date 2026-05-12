@@ -14,7 +14,8 @@ let packageSettings = PackageSettings(
     "Clocks": .staticFramework,
     "ConcurrencyExtras": .staticFramework,
     "Sharing": .staticFramework,
-    "KakaoMapsSDK-SPM": .staticFramework
+    "KakaoMapsSDK-SPM": .staticFramework,
+    "NidThirdPartyLogin": .staticFramework
   ],
   targetSettings: [
     "WeaveDICore": ["SWIFT_STRICT_CONCURRENCY": "minimal"],
@@ -36,6 +37,7 @@ let package = Package(
     .package(url: "https://github.com/Roy-wonji/AsyncMoya", from: "1.1.8"),
     .package(url: "https://github.com/pointfreeco/swift-sharing", from: "1.0.0"),
     .package(url: "https://github.com/kakao-mapsSDK/KakaoMapsSDK-SPM", from: "2.12.0"),
-    .package(url: "https://github.com/kakao/kakao-ios-sdk", from: "2.27.3")
+    .package(url: "https://github.com/kakao/kakao-ios-sdk", from: "2.27.3"),
+    .package(url: "https://github.com/naver/naveridlogin-sdk-ios-swift", from: "5.1.0")
   ]
 )

@@ -107,7 +107,8 @@ extension InfoPlistDictionary {
         .dictionary([
           "CFBundleURLSchemes": .array([
             .string("$(REVERSED_CLIENT_ID)"),
-            .string("kakao$(KAKAO_APP_KEY)")
+            .string("kakao$(KAKAO_APP_KEY)"),
+            .string("$(NAVER_URL_SCHEME)")
           ])
         ])
       ])
@@ -119,7 +120,9 @@ extension InfoPlistDictionary {
     let dict: [String: Plist.Value] = [
       "LSApplicationQueriesSchemes": .array([
         .string("kakaokompassauth"),
-        .string("kakaolink")
+        .string("kakaolink"),
+        .string("naversearchapp"),
+        .string("naversearchthirdlogin")
       ])
     ]
     return self.merging(dict) { (_, new) in new }
@@ -202,6 +205,18 @@ extension InfoPlistDictionary {
 
   func setKakaoAppKey(_ value: String) -> InfoPlistDictionary {
     return self.merging(["KAKAO_APP_KEY": .string(value)]) { (_, new) in new }
+  }
+
+  func setNaverClientID(_ value: String) -> InfoPlistDictionary {
+    return self.merging(["NAVER_CLIENT_ID": .string(value)]) { (_, new) in new }
+  }
+
+  func setNaverClientSecret(_ value: String) -> InfoPlistDictionary {
+    return self.merging(["NAVER_CLIENT_SECRET": .string(value)]) { (_, new) in new }
+  }
+
+  func setNaverURLScheme(_ value: String) -> InfoPlistDictionary {
+    return self.merging(["NAVER_URL_SCHEME": .string(value)]) { (_, new) in new }
   }
 
   func setKakaoRestAPIKey(_ value: String) -> InfoPlistDictionary {

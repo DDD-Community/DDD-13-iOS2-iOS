@@ -21,6 +21,7 @@ let project = Project.makeAppModule(
     .SPM.kakaoSDKCommon,
     .SPM.kakaoSDKAuth,
     .SPM.kakaoSDKUser,
+    .SPM.nidThirdPartyLogin,
     .SPM.composableArchitecture
   ],
   sources: ["Sources/**"],
