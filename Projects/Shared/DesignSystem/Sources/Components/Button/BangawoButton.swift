@@ -37,6 +37,8 @@ public struct BangawoButton: View {
     private var customBackgroundColor: Color? = nil
     private let action: () -> Void
 
+    @GestureState private var isPressed = false
+
     // MARK: - Init
 
     public init(
@@ -54,54 +56,58 @@ public struct BangawoButton: View {
     // MARK: - Body
 
     public var body: some View {
-        Button(action: {
-            guard !isDisabled, !isLoading else { return }
-            action()
-        }) {
-            ButtonContent(
-                title: title,
-                isLoading: isLoading,
-                indicatorTintColor: indicatorTintColor,
-                indicatorSize: indicatorSize,
-                effectiveFont: effectiveFont,
-                foregroundColor: foregroundColor,
-                widthType: widthType
-            )
-        }
-        .buttonStyle(
-            BangawoButtonStyle(
-                variant: variant,
-                size: size,
-                widthType: widthType,
-                isDisabled: isDisabled,
-                isLoading: isLoading,
-                isKeyboardAttached: isKeyboardAttached,
-                customBackgroundColor: customBackgroundColor
-            )
+        ButtonContent(
+            title: title,
+            isLoading: isLoading,
+            indicatorTintColor: indicatorTintColor,
+            indicatorSize: indicatorSize,
+            effectiveFont: effectiveFont,
+            foregroundColor: foregroundColor,
+            widthType: widthType
+        )
+        .padding(.vertical, effectiveVerticalPadding)
+        .padding(.horizontal, effectiveHorizontalPadding)
+        .frame(maxWidth: effectiveMaxWidth, minHeight: effectiveMinHeight)
+        .background(currentBackground)
+        .clipShape(RoundedRectangle(cornerRadius: effectiveCornerRadius))
+        .animation(.easeInOut(duration: 0.1), value: isPressed)
+        .gesture(
+            DragGesture(minimumDistance: 0)
+                .updating($isPressed) { _, state, _ in
+                    guard !isDisabled, !isLoading else { return }
+                    state = true
+                }
+                .onEnded { _ in
+                    guard !isDisabled, !isLoading else { return }
+                    action()
+                }
         )
     }
 
     // MARK: - Modifiers
 
+    /// 로딩 상태
     public func loading(_ isLoading: Bool) -> Self {
         var copy = self
         copy.isLoading = isLoading
         return copy
     }
 
+    /// 비활성 상태
     public func disabled(_ isDisabled: Bool) -> Self {
         var copy = self
         copy.isDisabled = isDisabled
         return copy
     }
 
+    /// 버튼 가로 너비 타입
     public func buttonWidth(_ type: WidthType) -> Self {
         var copy = self
         copy.widthType = type
         return copy
     }
 
-    /// 키보드가 올라왔을 때 적용. 디바이스 full width + radius 0 + 고유 size 스펙으로 전환.
+    /// 키보드 올라왔을 때 레이아웃 — full width + radius 0 + body/large 타이포
     public func keyboardAttached() -> Self {
         var copy = self
         copy.isKeyboardAttached = true
@@ -109,31 +115,75 @@ public struct BangawoButton: View {
         return copy
     }
 
+    /// 배경색 커스텀 지정
     public func buttonBackgroundColor(_ color: Color) -> Self {
         var copy = self
         copy.customBackgroundColor = color
         return copy
     }
 
-    // MARK: - Private
+    // MARK: - Label
 
+    // 라벨 텍스트 색상
     private var foregroundColor: Color {
-        let base: Color = (isKeyboardAttached || variant == .solid) ? Colors.gray00 : Colors.gray800
-        return isDisabled ? base.opacity(Opacity.opacity500) : base
+        if isDisabled { return Colors.gray500 }
+        return variant == .solid ? Colors.gray00 : Colors.gray800
     }
 
+    // 로딩 인디케이터 색상
     private var indicatorTintColor: Color {
-        isKeyboardAttached ? Colors.gray00 : variant.indicatorColor
+        variant.indicatorColor
     }
 
+    // 라벨 타이포
     private var effectiveFont: CustomSizeFont {
-        isKeyboardAttached ? .titleMediumEmphasized : size.font
+        isKeyboardAttached ? .bodyLarge : size.font
     }
 
+    // 로딩 인디케이터 크기
     private var indicatorSize: CGFloat {
         isKeyboardAttached
             ? Spacing.spacing800 - 2 * Spacing.spacing300
             : size.minHeight - 2 * size.verticalPadding
+    }
+
+    // MARK: - Layout
+
+    // 배경색
+    private var currentBackground: Color {
+        if let custom = customBackgroundColor { return custom }
+        if isDisabled { return variant.disabledBackground }
+        if isLoading { return variant.enabledBackground }
+        return isPressed ? variant.pressedBackground : variant.enabledBackground
+    }
+
+    // 수직 내부 패딩
+    private var effectiveVerticalPadding: CGFloat {
+        isKeyboardAttached ? Spacing.spacing300 : size.verticalPadding
+    }
+
+    // 수평 내부 패딩
+    private var effectiveHorizontalPadding: CGFloat {
+        isKeyboardAttached ? Spacing.spacing400 : size.horizontalPadding
+    }
+
+    // 최소 높이
+    private var effectiveMinHeight: CGFloat {
+        isKeyboardAttached ? Spacing.spacing800 : size.minHeight
+    }
+
+    // 모서리 반경
+    private var effectiveCornerRadius: CGFloat {
+        isKeyboardAttached ? 0 : size.cornerRadius
+    }
+
+    // 최대 너비
+    private var effectiveMaxWidth: CGFloat? {
+        if isKeyboardAttached { return UIScreen.screenWidth }
+        switch widthType {
+        case .default: return nil
+        case .maxWidth: return .infinity
+        }
     }
 }
 

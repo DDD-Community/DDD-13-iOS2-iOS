@@ -23,10 +23,7 @@ extension BangawoButton.Variant {
     }
 
     var disabledBackground: Color {
-        switch self {
-        case .weak: return Colors.grayAlpha100
-        case .solid: return Colors.grayAlpha400
-        }
+        Colors.gray200
     }
 
     // TODO: 디자인 명세 확정 시 컬러 교체 필요
@@ -45,8 +42,8 @@ extension BangawoButton.Size {
         switch self {
         case .xsmall: return .labelXSmall
         case .small: return .labelSmall
-        case .medium: return .titleMediumEmphasized
-        case .large: return .titleLarge
+        case .medium: return .labelMedium
+        case .large: return .labelLarge
         }
     }
 
