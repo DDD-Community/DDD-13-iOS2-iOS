@@ -22,7 +22,10 @@ public extension View {
   }
   
   func pretendardCustomFont(textStyle: CustomSizeFont) -> some View {
-    return self.modifier(PretendardFont(family: textStyle.fontFamily, size: textStyle.size))
+    self
+      .modifier(PretendardFont(family: textStyle.fontFamily, size: textStyle.size))
+      .kerning(textStyle.letterSpacing * textStyle.size)
+      .lineSpacing(textStyle.lineHeight - textStyle.size)
   }
 }
 
