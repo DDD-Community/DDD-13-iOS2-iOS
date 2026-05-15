@@ -17,11 +17,6 @@ let project = Project.makeModule(
   hasTests: false,
   resourceSynthesizers: [
     .custom(
-      name: "Colors",
-      parser: .assets,
-      extensions: ["xcassets"]
-    ),
-    .custom(
       name: "Images",
       parser: .assets,
       extensions: ["xcassets"]
