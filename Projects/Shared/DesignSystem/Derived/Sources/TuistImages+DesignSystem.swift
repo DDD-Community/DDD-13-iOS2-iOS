@@ -6,6 +6,7 @@ import SwiftUI
 
 public extension Image {
   enum Asset {
+    public static let icArrowBigLeft24: Image = Image("ic_arrow_big_left_24", bundle: Bundle.module)
     public static let icArrowSmallDown24: Image = Image("ic_arrow_small_down_24", bundle: Bundle.module)
     public static let icArrowSmallRight24: Image = Image("ic_arrow_small_right_24", bundle: Bundle.module)
     public static let icArrowSmallUp24: Image = Image("ic_arrow_small_up_24", bundle: Bundle.module)
