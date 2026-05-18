@@ -39,8 +39,7 @@ public struct TextButton: View {
             title: title,
             type: type,
             size: size,
-            foregroundColor: foregroundColor,
-            isDisabled: isDisabled
+            foregroundColor: foregroundColor
         )
         .padding(Spacing.spacing50)
         .background(
@@ -64,7 +63,7 @@ public struct TextButton: View {
     // MARK: - Computed
 
     private var foregroundColor: Color {
-        isDisabled ? Colors.gray500 : Colors.gray700
+        isDisabled ? Colors.gray500 : Colors.gray600
     }
 }
 
@@ -76,7 +75,6 @@ private extension TextButton {
         let type: ButtonType
         let size: Size
         let foregroundColor: Color
-        let isDisabled: Bool
 
         var body: some View {
             HStack(spacing: 0) {
@@ -85,7 +83,7 @@ private extension TextButton {
                     .padding(.vertical, Spacing.spacing50)
 
                 if type == .textWithArrow {
-                    ArrowIcon(size: size, isDisabled: isDisabled)
+                    ArrowIcon(size: size, foregroundColor: foregroundColor)
                 }
             }
         }
@@ -93,12 +91,13 @@ private extension TextButton {
 
     struct ArrowIcon: View {
         let size: Size
-        let isDisabled: Bool
+        let foregroundColor: Color
 
         var body: some View {
-            (isDisabled ? Image.Asset.icArrowRightDisabled24 : Image.Asset.icArrowRight24)
+            Image.Asset.icArrowSmallRight24
                 .resizable()
                 .frame(width: size.iconSize, height: size.iconSize)
+                .foregroundStyle(foregroundColor)
         }
     }
 }

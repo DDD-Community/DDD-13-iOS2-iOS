@@ -101,9 +101,9 @@ private extension CheckboxRow {
 
         private var arrowImage: Image {
             switch direction {
-            case .right: Image.Asset.icArrowRight24
-            case .down: Image.Asset.icArrowDown24
-            case .up: Image.Asset.icArrowUp24
+            case .right: Image.Asset.icArrowSmallRight24
+            case .down: Image.Asset.icArrowSmallDown24
+            case .up: Image.Asset.icArrowSmallUp24
             }
         }
     }

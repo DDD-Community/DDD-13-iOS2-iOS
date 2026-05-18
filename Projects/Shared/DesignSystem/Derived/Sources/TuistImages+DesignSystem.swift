@@ -6,10 +6,9 @@ import SwiftUI
 
 public extension Image {
   enum Asset {
-    public static let icArrowDown24: Image = Image("ic_arrow_down_24", bundle: Bundle.module)
-    public static let icArrowRight24: Image = Image("ic_arrow_right_24", bundle: Bundle.module)
-    public static let icArrowRightDisabled24: Image = Image("ic_arrow_right_disabled_24", bundle: Bundle.module)
-    public static let icArrowUp24: Image = Image("ic_arrow_up_24", bundle: Bundle.module)
+    public static let icArrowSmallDown24: Image = Image("ic_arrow_small_down_24", bundle: Bundle.module)
+    public static let icArrowSmallRight24: Image = Image("ic_arrow_small_right_24", bundle: Bundle.module)
+    public static let icArrowSmallUp24: Image = Image("ic_arrow_small_up_24", bundle: Bundle.module)
     public static let icCheckboxCircleDisabledMd: Image = Image("ic_checkbox_circle_disabled_md", bundle: Bundle.module)
     public static let icCheckboxCircleDisabledSm: Image = Image("ic_checkbox_circle_disabled_sm", bundle: Bundle.module)
     public static let icCheckboxCircleEnabledMd: Image = Image("ic_checkbox_circle_enabled_md", bundle: Bundle.module)
