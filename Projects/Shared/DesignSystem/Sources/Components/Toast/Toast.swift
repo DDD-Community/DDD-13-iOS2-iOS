@@ -19,8 +19,7 @@ public struct Toast: View {
     // MARK: - Body
 
     public var body: some View {
-        Text(message)
-            .pretendardCustomFont(textStyle: .bodyMediumEmphasized)
+        BangawoText(message, textStyle: .bodyMediumEmphasized)
             .foregroundStyle(Colors.gray800)
             .padding(.vertical, Spacing.spacing50)
             .padding(.vertical, Spacing.spacing250)

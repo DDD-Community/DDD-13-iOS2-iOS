@@ -70,14 +70,12 @@ private extension CheckboxRow {
 
         var body: some View {
             VStack(alignment: .leading, spacing: Spacing.spacing50) {
-                Text(title)
-                    .pretendardCustomFont(textStyle: size.titleFont)
+                BangawoText(title, textStyle: size.titleFont)
                     .foregroundStyle(Colors.gray800)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 if let description {
-                    Text(description)
-                        .pretendardCustomFont(textStyle: size.descriptionFont)
+                    BangawoText(description, textStyle: size.descriptionFont)
                         .foregroundStyle(Colors.gray700)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }

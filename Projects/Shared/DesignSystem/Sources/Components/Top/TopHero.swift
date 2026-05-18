@@ -71,12 +71,10 @@ private extension TopHero {
 
         var body: some View {
             VStack(alignment: .leading, spacing: Spacing.spacing100) {
-                Text(title)
-                    .pretendardCustomFont(textStyle: .headingMedium)
+                BangawoText(title, textStyle: .headingMedium)
                     .foregroundStyle(Colors.gray900)
 
-                Text(description)
-                    .pretendardCustomFont(textStyle: .bodyMedium)
+                BangawoText(description, textStyle: .bodyMedium)
                     .foregroundStyle(Colors.gray700)
             }
             .frame(maxWidth: .infinity, alignment: .leading)

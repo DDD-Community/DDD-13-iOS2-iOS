@@ -32,8 +32,7 @@ public struct SnackBar: View {
                 .renderingMode(.template)
                 .foregroundStyle(Colors.orange500)
 
-            Text(message)
-                .pretendardCustomFont(textStyle: .bodyMediumEmphasized)
+            BangawoText(message, textStyle: .bodyMediumEmphasized)
                 .foregroundStyle(Colors.gray800)
                 .padding(.vertical, Spacing.spacing50)
                 .frame(maxWidth: .infinity, alignment: .leading)

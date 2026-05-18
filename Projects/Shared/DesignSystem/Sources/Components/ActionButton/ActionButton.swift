@@ -58,8 +58,7 @@ private extension ActionButton {
                     Toast(message)
 
                 case let .description(text):
-                    Text(text)
-                        .pretendardCustomFont(textStyle: .bodyLarge)
+                    BangawoText(text, textStyle: .bodyLarge)
                         .foregroundStyle(Colors.gray700)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)

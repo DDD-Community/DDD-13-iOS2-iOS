@@ -146,9 +146,8 @@ private extension BangawoButton {
 
         var body: some View {
             ZStack {
-                Text(title)
+                BangawoText(title, textStyle: effectiveFont)
                     .multilineTextAlignment(.center)
-                    .pretendardCustomFont(textStyle: effectiveFont)
                     .foregroundStyle(foregroundColor)
                     .frame(maxWidth: widthType == .default ? nil : .infinity)
                     .opacity(isLoading ? 0 : 1)
@@ -167,8 +166,7 @@ private extension BangawoButton {
     ScrollView {
         VStack(alignment: .leading, spacing: 24) {
             Group {
-                Text("Solid / Sizes")
-                    .font(.headline)
+                BangawoText("Solid / Sizes", textStyle: .titleLarge)
 
                 BangawoButton("XSmall", size: .xsmall) {}
                 BangawoButton("Small", size: .small) {}
@@ -179,8 +177,7 @@ private extension BangawoButton {
             Divider()
 
             Group {
-                Text("Weak / Sizes")
-                    .font(.headline)
+                BangawoText("Weak / Sizes", textStyle: .titleLarge)
 
                 BangawoButton("XSmall", variant: .weak, size: .xsmall) {}
                 BangawoButton("Small", variant: .weak, size: .small) {}
@@ -191,8 +188,7 @@ private extension BangawoButton {
             Divider()
 
             Group {
-                Text("States")
-                    .font(.headline)
+                BangawoText("States", textStyle: .titleLarge)
 
                 BangawoButton("Loading", size: .medium, isLoading: true) {}
                 BangawoButton("Disabled Solid", size: .medium, isDisabled: true) {}
@@ -202,8 +198,7 @@ private extension BangawoButton {
             Divider()
 
             Group {
-                Text("Width Types")
-                    .font(.headline)
+                BangawoText("Width Types", textStyle: .titleLarge)
 
                 BangawoButton("MaxWidth", size: .medium, widthType: .maxWidth) {}
                 BangawoButton("Keyboard Attached", size: .medium, isKeyboardAttached: true) {}

@@ -80,8 +80,7 @@ private extension TextButton {
 
         var body: some View {
             HStack(spacing: 0) {
-                Text(title)
-                    .pretendardCustomFont(textStyle: size.font)
+                BangawoText(title, textStyle: size.font)
                     .foregroundStyle(foregroundColor)
                     .padding(.vertical, Spacing.spacing50)
 
@@ -108,8 +107,7 @@ private extension TextButton {
     ScrollView {
         VStack(alignment: .leading, spacing: 24) {
             Group {
-                Text("TextOnly / Sizes")
-                    .font(.headline)
+                BangawoText("TextOnly / Sizes", textStyle: .titleLarge)
 
                 TextButton("Large Text", size: .large) {}
                 TextButton("Medium Text", size: .medium) {}
@@ -119,8 +117,7 @@ private extension TextButton {
             Divider()
 
             Group {
-                Text("TextWithArrow / Sizes")
-                    .font(.headline)
+                BangawoText("TextWithArrow / Sizes", textStyle: .titleLarge)
 
                 TextButton("Large Arrow", type: .textWithArrow, size: .large) {}
                 TextButton("Medium Arrow", type: .textWithArrow, size: .medium) {}
@@ -130,8 +127,7 @@ private extension TextButton {
             Divider()
 
             Group {
-                Text("Disabled")
-                    .font(.headline)
+                BangawoText("Disabled", textStyle: .titleLarge)
 
                 TextButton("Disabled TextOnly", size: .medium, isDisabled: true) {}
                 TextButton("Disabled TextWithArrow", type: .textWithArrow, size: .medium, isDisabled: true) {}
