@@ -10,14 +10,17 @@ public struct Menu: View {
 
     private let groupTitle: String?
     private let items: [Item]
+    @Binding private var selectedIndex: Int?
 
     // MARK: - Init
 
     public init(
         groupTitle: String? = nil,
+        selectedIndex: Binding<Int?> = .constant(nil),
         items: [Item]
     ) {
         self.groupTitle = groupTitle
+        self._selectedIndex = selectedIndex
         self.items = Array(items.prefix(5))
     }
 
@@ -29,7 +32,9 @@ public struct Menu: View {
                 GroupTitleLabel(title: groupTitle)
             }
             ForEach(items.indices, id: \.self) { index in
-                ItemRow(item: items[index])
+                MenuItem(item: items[index], isSelected: selectedIndex == index) {
+                    selectedIndex = index
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -58,8 +63,7 @@ private extension Menu {
         let title: String
 
         var body: some View {
-            Text(title)
-                .pretendardCustomFont(textStyle: .labelXSmall)
+            BangawoText(title, textStyle: .labelXSmall)
                 .foregroundStyle(Colors.gray600)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.top, Spacing.spacing200)
@@ -69,28 +73,40 @@ private extension Menu {
     }
 }
 
-// MARK: - ItemRow
+// MARK: - MenuItem
 
 private extension Menu {
-    struct ItemRow: View {
+    struct MenuItem: View {
         let item: Item
+        let isSelected: Bool
+        let onTap: () -> Void
 
         var body: some View {
-            Button(action: item.action) {
+            Button(action: {
+                item.action()
+                onTap()
+            }) {
                 HStack(spacing: Spacing.spacing200) {
-                    if let icon = item.leadingIcon {
+                    if let icon = item.icon {
                         icon
                             .resizable()
                             .renderingMode(.template)
                             .frame(width: Sizing.sizing150, height: Sizing.sizing150)
                             .foregroundStyle(Colors.gray600)
                     }
-                    Text(item.label)
-                        .pretendardCustomFont(textStyle: .labelMedium)
+                    BangawoText(item.label, textStyle: .labelMedium)
                         .foregroundStyle(Colors.gray800)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .padding(Spacing.spacing250)
+                .background(
+                    Group {
+                        if isSelected {
+                            RoundedRectangle(cornerRadius: BorderRadius.borderRadius250)
+                                .fill(Colors.grayAlpha200)
+                        }
+                    }
+                )
             }
             .buttonStyle(.plain)
         }
@@ -98,24 +114,29 @@ private extension Menu {
 }
 
 #Preview {
-    ScrollView {
+    @State var selectedIndex: Int? = 0
+    @State var selectedIndex2: Int? = nil
+
+    return ScrollView {
         VStack(spacing: 24) {
             Menu(
                 groupTitle: "그룹 타이틀",
+                selectedIndex: $selectedIndex,
                 items: [
-                    .init(leadingIcon: Image.Asset.icStar24, label: "메뉴 항목 1") {},
-                    .init(leadingIcon: Image.Asset.icStar24, label: "메뉴 항목 2") {},
-                    .init(label: "아이콘 없는 항목") {},
+                    .init(label: "메뉴 항목 1", icon: .Asset.icStar24) {},
+                    .init(label: "메뉴 항목 2", icon: .Asset.icStar24) {},
+                    .init(label: "메뉴 항목 3", icon: .Asset.icStar24) {},
                 ]
             )
 
-            Menu(items: [
-                .init(label: "타이틀 없는 메뉴 1") {},
-                .init(label: "타이틀 없는 메뉴 2") {},
-                .init(leadingIcon: Image.Asset.icStar24, label: "타이틀 없는 메뉴 3") {},
-                .init(leadingIcon: Image.Asset.icStar24, label: "타이틀 없는 메뉴 4") {},
-                .init(leadingIcon: Image.Asset.icStar24, label: "타이틀 없는 메뉴 5") {},
-            ])
+            Menu(
+                selectedIndex: $selectedIndex2,
+                items: [
+                    .init(label: "타이틀 없는 메뉴 1") {},
+                    .init(label: "타이틀 없는 메뉴 2") {},
+                    .init(label: "타이틀 없는 메뉴 3") {},
+                ]
+            )
         }
         .padding(24)
     }
