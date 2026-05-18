@@ -13,7 +13,7 @@ public struct BangawoButton: View {
         case solid
     }
 
-    public enum Size {
+    public enum Size: Sendable {
         case xsmall
         case small
         case medium
