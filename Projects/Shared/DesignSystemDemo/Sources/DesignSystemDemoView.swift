@@ -1,12 +1,19 @@
 import SwiftUI
 
-enum ComponentDemo: String, CaseIterable, Identifiable {
+private enum ComponentDemo: String, CaseIterable, Identifiable {
     case button = "Button"
+    case actionButton = "ActionButton"
+    case asset = "Asset"
+    case checkbox = "Checkbox"
+    case snackBar = "SnackBar"
+    case toast = "Toast"
+    case top = "Top"
+    case text = "Text"
 
     var id: String { rawValue }
 }
 
-enum MapDemo: String, CaseIterable, Identifiable {
+private enum MapDemo: String, CaseIterable, Identifiable {
     case kakaoMap = "KakaoMap"
 
     var id: String { rawValue }
@@ -30,6 +37,13 @@ struct DesignSystemDemoView: View {
         .navigationDestination(for: ComponentDemo.self) { component in
             switch component {
             case .button: BangawoButtonDemoView()
+            case .actionButton: ActionButtonDemoView()
+            case .asset: AssetDemoView()
+            case .checkbox: CheckboxDemoView()
+            case .snackBar: SnackBarDemoView()
+            case .toast: ToastDemoView()
+            case .top: TopHeroDemoView()
+            case .text: TextDemoView()
             }
         }
         .navigationDestination(for: MapDemo.self) { component in
