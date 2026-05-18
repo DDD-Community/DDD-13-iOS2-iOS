@@ -6,23 +6,6 @@
 import SwiftUI
 
 public struct Checkbox: View {
-    // MARK: - Enums
-
-    public enum Variant {
-        case circle
-        case ghost
-    }
-
-    public enum State {
-        case enabled
-        case disabled
-    }
-
-    public enum Size {
-        case small
-        case medium
-    }
-
     // MARK: - Properties
 
     private let variant: Variant

@@ -6,19 +6,6 @@
 import SwiftUI
 
 public struct TextButton: View {
-    // MARK: - Enums
-
-    public enum ButtonType {
-        case textOnly
-        case textWithArrow
-    }
-
-    public enum Size {
-        case large
-        case medium
-        case small
-    }
-
     // MARK: - Properties
 
     private let title: String

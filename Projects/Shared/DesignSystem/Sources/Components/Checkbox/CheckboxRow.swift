@@ -6,19 +6,6 @@
 import SwiftUI
 
 public struct CheckboxRow: View {
-    // MARK: - Enums
-
-    public enum Size {
-        case small
-        case medium
-    }
-
-    public enum ArrowDirection {
-        case right
-        case down
-        case up
-    }
-
     // MARK: - Properties
 
     private let title: String

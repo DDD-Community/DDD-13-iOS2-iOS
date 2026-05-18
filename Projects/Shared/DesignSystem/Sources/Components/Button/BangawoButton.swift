@@ -6,25 +6,6 @@
 import SwiftUI
 
 public struct BangawoButton: View {
-    // MARK: - Enums
-
-    public enum Variant {
-        case weak
-        case solid
-    }
-
-    public enum Size: Sendable {
-        case xsmall
-        case small
-        case medium
-        case large
-    }
-
-    public enum WidthType {
-        case `default`
-        case maxWidth
-    }
-
     // MARK: - Properties
 
     private let title: String
