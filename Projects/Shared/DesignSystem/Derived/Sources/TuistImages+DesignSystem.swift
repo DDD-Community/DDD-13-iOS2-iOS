@@ -19,6 +19,7 @@ public extension Image {
     public static let icCheckboxGhostEnabledMd: Image = Image("ic_checkbox_ghost_enabled_md", bundle: Bundle.module)
     public static let icCheckboxGhostEnabledSm: Image = Image("ic_checkbox_ghost_enabled_sm", bundle: Bundle.module)
     public static let icCircleQuestionFilled24: Image = Image("ic_circle_question_filled_24", bundle: Bundle.module)
+    public static let icStar24: Image = Image("ic_star_24", bundle: Bundle.module)
     public static let symApple: Image = Image("sym_apple", bundle: Bundle.module)
     public static let symKakao: Image = Image("sym_kakao", bundle: Bundle.module)
     public static let symNaver: Image = Image("sym_naver", bundle: Bundle.module)
