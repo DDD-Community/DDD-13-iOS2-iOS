@@ -24,7 +24,7 @@ public struct TextButton: View {
     private let title: String
     private let type: ButtonType
     private let size: Size
-    private var isDisabled: Bool = false
+    private let isDisabled: Bool
     private let action: () -> Void
 
     @GestureState private var isPressed = false
@@ -35,11 +35,13 @@ public struct TextButton: View {
         _ title: String,
         type: ButtonType = .textOnly,
         size: Size = .medium,
+        isDisabled: Bool = false,
         action: @escaping () -> Void
     ) {
         self.title = title
         self.type = type
         self.size = size
+        self.isDisabled = isDisabled
         self.action = action
     }
 
@@ -70,15 +72,6 @@ public struct TextButton: View {
                     action()
                 }
         )
-    }
-
-    // MARK: - Modifiers
-
-    /// 비활성 상태
-    public func disabled(_ isDisabled: Bool) -> Self {
-        var copy = self
-        copy.isDisabled = isDisabled
-        return copy
     }
 
     // MARK: - Computed
@@ -153,11 +146,8 @@ private extension TextButton {
                 Text("Disabled")
                     .font(.headline)
 
-                TextButton("Disabled TextOnly", size: .medium) {}
-                    .disabled(true)
-
-                TextButton("Disabled TextWithArrow", type: .textWithArrow, size: .medium) {}
-                    .disabled(true)
+                TextButton("Disabled TextOnly", size: .medium, isDisabled: true) {}
+                TextButton("Disabled TextWithArrow", type: .textWithArrow, size: .medium, isDisabled: true) {}
             }
         }
         .padding(24)

@@ -6,17 +6,26 @@ struct BangawoButtonDemoView: View {
     @State private var isDisabled = false
     @State private var widthType: BangawoButton.WidthType = .default
 
-    private let sizeLabels = ["xsmall", "small", "medium", "large"]
-    private let sizes: [BangawoButton.Size] = [.xsmall, .small, .medium, .large]
-
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
-                controlSection
-                variantSection("weak", variant: .weak)
-                variantSection("solid", variant: .solid)
-                keyboardSection
-                customBackgroundSection
+                ControlSection(isLoading: $isLoading, isDisabled: $isDisabled, widthType: $widthType)
+                VariantSection(
+                    "weak", variant: .weak,
+                    isLoading: isLoading, isDisabled: isDisabled,
+                    widthType: widthType
+                )
+                VariantSection(
+                    "solid", variant: .solid,
+                    isLoading: isLoading, isDisabled: isDisabled,
+                    widthType: widthType
+                )
+                KeyboardSection(isLoading: isLoading, isDisabled: isDisabled)
+                CustomBackgroundSection(
+                    isLoading: isLoading,
+                    isDisabled: isDisabled,
+                    widthType: widthType
+                )
             }
             .padding(.top, 16)
             .padding(.bottom, 40)
@@ -25,25 +34,41 @@ struct BangawoButtonDemoView: View {
         .navigationTitle("Button")
         .navigationBarTitleDisplayMode(.inline)
     }
+}
 
-    // MARK: - Controls
+// MARK: - ControlSection
 
-    private var controlSection: some View {
+private struct ControlSection: View {
+    @Binding var isLoading: Bool
+    @Binding var isDisabled: Bool
+    @Binding var widthType: BangawoButton.WidthType
+
+    init(
+        isLoading: Binding<Bool>,
+        isDisabled: Binding<Bool>,
+        widthType: Binding<BangawoButton.WidthType>
+    ) {
+        self._isLoading = isLoading
+        self._isDisabled = isDisabled
+        self._widthType = widthType
+    }
+
+    var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            sectionHeader("Controls")
+            SectionHeader("Controls")
 
             VStack(spacing: 0) {
                 Toggle("Loading", isOn: $isLoading)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
 
-                rowDivider()
+                RowDivider()
 
                 Toggle("Disabled", isOn: $isDisabled)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
 
-                rowDivider()
+                RowDivider()
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Width")
@@ -61,53 +86,117 @@ struct BangawoButtonDemoView: View {
         }
         .padding(.horizontal, 20)
     }
+}
 
-    // MARK: - Variant Section
+// MARK: - VariantSection
 
-    private func variantSection(_ title: String, variant: BangawoButton.Variant) -> some View {
+private struct VariantSection: View {
+    private enum Sizes {
+        static let all: [BangawoButton.Size] = [.xsmall, .small, .medium, .large]
+        static let labels = ["xsmall", "small", "medium", "large"]
+    }
+
+    let title: String
+    let variant: BangawoButton.Variant
+    let isLoading: Bool
+    let isDisabled: Bool
+    let widthType: BangawoButton.WidthType
+
+    init(
+        _ title: String,
+        variant: BangawoButton.Variant,
+        isLoading: Bool,
+        isDisabled: Bool,
+        widthType: BangawoButton.WidthType
+    ) {
+        self.title = title
+        self.variant = variant
+        self.isLoading = isLoading
+        self.isDisabled = isDisabled
+        self.widthType = widthType
+    }
+
+    var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            sectionHeader(title)
+            SectionHeader(title)
 
             VStack(spacing: 0) {
-                ForEach(0..<sizes.count, id: \.self) { i in
+                ForEach(0..<Sizes.all.count, id: \.self) { i in
                     HStack(alignment: .center, spacing: 12) {
-                        Text(sizeLabels[i])
+                        Text(Sizes.labels[i])
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .frame(width: 52, alignment: .leading)
 
-                        buttonView("Label", variant: variant, size: sizes[i])
+                        ButtonItem(
+                            "Label",
+                            variant: variant,
+                            size: Sizes.all[i],
+                            isLoading: isLoading,
+                            isDisabled: isDisabled,
+                            widthType: widthType
+                        )
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
 
-                    if i < sizes.count - 1 { rowDivider() }
+                    if i < Sizes.all.count - 1 { RowDivider() }
                 }
             }
             .card()
         }
         .padding(.horizontal, 20)
     }
+}
 
-    // MARK: - Keyboard Attached
+// MARK: - KeyboardSection
 
-    private var keyboardSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            sectionHeader("keyboard attached")
-                .padding(.horizontal, 20)
+private struct KeyboardSection: View {
+    let isLoading: Bool
+    let isDisabled: Bool
 
-            BangawoButton("Label", variant: .solid, size: .medium) {}
-                .loading(isLoading)
-                .disabled(isDisabled)
-                .keyboardAttached()
-        }
+    init(isLoading: Bool, isDisabled: Bool) {
+        self.isLoading = isLoading
+        self.isDisabled = isDisabled
     }
 
-    // MARK: - Custom Background
-
-    private var customBackgroundSection: some View {
+    var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            sectionHeader("custom background")
+            SectionHeader("keyboard attached")
+                .padding(.horizontal, 20)
+
+            BangawoButton(
+                "Label",
+                variant: .solid,
+                size: .medium,
+                isLoading: isLoading,
+                isDisabled: isDisabled,
+                isKeyboardAttached: true
+            ) {}
+        }
+    }
+}
+
+// MARK: - CustomBackgroundSection
+
+private struct CustomBackgroundSection: View {
+    let isLoading: Bool
+    let isDisabled: Bool
+    let widthType: BangawoButton.WidthType
+
+    init(
+        isLoading: Bool,
+        isDisabled: Bool,
+        widthType: BangawoButton.WidthType
+    ) {
+        self.isLoading = isLoading
+        self.isDisabled = isDisabled
+        self.widthType = widthType
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SectionHeader("custom background")
 
             VStack(spacing: 0) {
                 HStack(alignment: .center, spacing: 12) {
@@ -116,12 +205,20 @@ struct BangawoButtonDemoView: View {
                         .foregroundStyle(.secondary)
                         .frame(width: 52, alignment: .leading)
 
-                    buttonView("Label", variant: .weak, size: .small, customBackground: .blue)
+                    ButtonItem(
+                        "Label",
+                        variant: .weak,
+                        size: .small,
+                        customBackground: .blue,
+                        isLoading: isLoading,
+                        isDisabled: isDisabled,
+                        widthType: widthType
+                    )
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
 
-                rowDivider()
+                RowDivider()
 
                 HStack(alignment: .center, spacing: 12) {
                     Text("red")
@@ -129,7 +226,15 @@ struct BangawoButtonDemoView: View {
                         .foregroundStyle(.secondary)
                         .frame(width: 52, alignment: .leading)
 
-                    buttonView("Label", variant: .solid, size: .small, customBackground: .red)
+                    ButtonItem(
+                        "Label",
+                        variant: .solid,
+                        size: .small,
+                        customBackground: .red,
+                        isLoading: isLoading,
+                        isDisabled: isDisabled,
+                        widthType: widthType
+                    )
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
@@ -138,35 +243,71 @@ struct BangawoButtonDemoView: View {
         }
         .padding(.horizontal, 20)
     }
+}
 
-    // MARK: - Helpers
+// MARK: - ButtonItem
 
-    private func buttonView(
+private struct ButtonItem: View {
+    let title: String
+    let variant: BangawoButton.Variant
+    let size: BangawoButton.Size
+    let customBackground: Color?
+    let isLoading: Bool
+    let isDisabled: Bool
+    let widthType: BangawoButton.WidthType
+
+    init(
         _ title: String,
         variant: BangawoButton.Variant,
         size: BangawoButton.Size,
-        customBackground: Color? = nil
-    ) -> some View {
-        let base = BangawoButton(title, variant: variant, size: size) {}
-            .loading(isLoading)
-            .disabled(isDisabled)
-            .buttonWidth(widthType)
-
-        if let bg = customBackground {
-            return base.buttonBackgroundColor(bg)
-        } else {
-            return base
-        }
+        customBackground: Color? = nil,
+        isLoading: Bool,
+        isDisabled: Bool,
+        widthType: BangawoButton.WidthType
+    ) {
+        self.title = title
+        self.variant = variant
+        self.size = size
+        self.customBackground = customBackground
+        self.isLoading = isLoading
+        self.isDisabled = isDisabled
+        self.widthType = widthType
     }
 
-    private func sectionHeader(_ text: String) -> some View {
+    var body: some View {
+        BangawoButton(
+            title,
+            variant: variant,
+            size: size,
+            widthType: widthType,
+            isLoading: isLoading,
+            isDisabled: isDisabled,
+            customBackgroundColor: customBackground
+        ) {}
+    }
+}
+
+// MARK: - SectionHeader
+
+private struct SectionHeader: View {
+    let text: String
+
+    init(_ text: String) {
+        self.text = text
+    }
+
+    var body: some View {
         Text(text.uppercased())
             .font(.footnote)
             .foregroundStyle(.secondary)
             .padding(.leading, 4)
     }
+}
 
-    private func rowDivider() -> some View {
+// MARK: - RowDivider
+
+private struct RowDivider: View {
+    var body: some View {
         Divider().padding(.leading, 16)
     }
 }
