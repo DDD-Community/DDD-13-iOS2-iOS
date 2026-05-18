@@ -215,8 +215,6 @@ func generateProjectWithSettings(name: String, bundleIdPrefix: String, teamId: S
         //  \(name)Tests.swift
         //  \(name)Tests
         //
-        //  Created by TuistTool.
-        //
 
         import XCTest
 
@@ -1012,8 +1010,6 @@ let project = Project.makeAppModule(
           //
           //  Base.swift
           //  Domain.\(moduleName).Interface
-          //
-          //  Created by \(author) on \(currentDate).
           //
           
           import Foundation

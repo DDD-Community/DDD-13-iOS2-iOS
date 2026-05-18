@@ -2,8 +2,6 @@
 //  SignInWithSocialUseCaseImpl.swift
 //  DataUseCase
 //
-//  Created by DDD-iOS2 on 5/4/26.
-//
 
 import DataInterface
 import DomainInterface
@@ -16,15 +14,18 @@ public final class SignInWithSocialUseCaseImpl: SignInWithSocialUseCase {
     private let repository: AuthRepositoryProtocol
     private let kakaoLoginService: KakaoLoginServiceInterface
     private let naverLoginService: NaverLoginServiceInterface
+    private let appleLoginService: AppleLoginServiceInterface
 
     public init(
         repository: AuthRepositoryProtocol,
         kakaoLoginService: KakaoLoginServiceInterface,
-        naverLoginService: NaverLoginServiceInterface
+        naverLoginService: NaverLoginServiceInterface,
+        appleLoginService: AppleLoginServiceInterface,
     ) {
         self.repository = repository
         self.kakaoLoginService = kakaoLoginService
         self.naverLoginService = naverLoginService
+        self.appleLoginService = appleLoginService
     }
 
     public func execute(provider: SocialAuthProvider) async throws -> LoginResult {
@@ -45,8 +46,11 @@ public final class SignInWithSocialUseCaseImpl: SignInWithSocialUseCase {
                 providerToken: socialToken.accessToken
             )
 
-        case .apple: // TODO: 구현 필요
-            throw SocialAuthClientError.notImplemented(provider)
+        case .apple:
+            let socialToken = try await appleLoginService.login()
+            Log.debug("🔑 appleSocialToken: \(socialToken)")
+            return try await signInWithServer(provider: provider, providerToken: socialToken.accessToken
+            )
         }
     }
 }

@@ -2,8 +2,6 @@
 //  LoginResult.swift
 //  Entity
 //
-//  Created by DDD-iOS2 on 5/6/26.
-//
 
 /// 서버 로그인 API 응답으로 받은 로그인 결과 도메인 모델입니다.
 public struct LoginResult: Equatable, Sendable {
