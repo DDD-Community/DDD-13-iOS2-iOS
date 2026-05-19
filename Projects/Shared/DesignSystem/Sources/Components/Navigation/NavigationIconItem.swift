@@ -19,7 +19,7 @@ public enum NavigationIcon {
         case .user24: return Image.Asset.icUser24
         case .ball24: return Image.Asset.icBall24
         case .verticalMenu24: return Image.Asset.icVerticalMenu24
-        case .arrowBigRight24: return Image.Asset.icArrowBigRight16
+        case .arrowBigRight24: return Image.Asset.icArrowBigRight24
         case .close24: return Image.Asset.icClose24
         }
     }

@@ -12,6 +12,7 @@ public extension Image {
     public static let icArrowBigLeft16: Image = Image("ic_arrow_big_left_16", bundle: Bundle.module)
     public static let icArrowBigLeft24: Image = Image("ic_arrow_big_left_24", bundle: Bundle.module)
     public static let icArrowBigRight16: Image = Image("ic_arrow_big_right_16", bundle: Bundle.module)
+    public static let icArrowBigRight24: Image = Image("ic_arrow_big_right_24", bundle: Bundle.module)
     public static let icArrowSmallDown16: Image = Image("ic_arrow_small_down_16", bundle: Bundle.module)
     public static let icArrowSmallDown24: Image = Image("ic_arrow_small_down_24", bundle: Bundle.module)
     public static let icArrowSmallLeft16: Image = Image("ic_arrow_small_left_16", bundle: Bundle.module)
