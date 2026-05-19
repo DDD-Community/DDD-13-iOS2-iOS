@@ -65,8 +65,8 @@ public struct AuthFlowFeature {
                 state.path.append(.profile(ProfileInputFeature.State()))
                 return .none
 
-            case let .path(.element(id: _, action: .profile(.delegate(.proceedToDepartureSearch(nickname))))):
-                state.path.append(.departure(DepartureSearchFeature.State(nickname: nickname)))
+            case let .path(.element(id: _, action: .profile(.delegate(.proceedToDepartureSearch(name))))):
+                state.path.append(.departure(DepartureSearchFeature.State(nickname: name)))
                 return .none
 
             case .path(.element(id: _, action: .departure(.delegate(.proceedToHome)))):

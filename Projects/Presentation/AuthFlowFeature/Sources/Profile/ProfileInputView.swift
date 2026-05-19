@@ -5,109 +5,133 @@
 
 import SwiftUI
 import ComposableArchitecture
+import DesignSystem
 
 public struct ProfileInputView: View {
     @Bindable private var store: StoreOf<ProfileInputFeature>
+    @State private var isShowingMenu = false
 
     public init(store: StoreOf<ProfileInputFeature>) {
         self.store = store
     }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            Text("반가워요 \(store.greetingName)님")
-                .font(.title2.bold())
-                .padding(.top, 16)
-
-            ProfileImageThumbnail(image: store.profileImage) {
-                store.send(.profileImageTapped)
-            }
-            .frame(maxWidth: .infinity, alignment: .center)
-
-            NicknameField(
-                nickname: $store.nickname,
-                onClear: { store.send(.clearNicknameButtonTapped) }
+        VStack(spacing: 0) {
+            NavigationPage(
+                background: .clear,
+                leadingAction: { store.send(.backButtonTapped) },
+                title: "프로필 설정"
             )
 
-            Color.clear.frame(maxHeight: .infinity)
+            VStack(spacing: 0) {
+                ProfileImageContainer(
+                    profileImage: store.profileImage,
+                    isShowingMenu: $isShowingMenu,
+                    onMenuAlbumTapped: { store.send(.avatarMenuAlbumTapped) },
+                    onMenuProfileSetupTapped: { store.send(.avatarMenuProfileSetupTapped) }
+                )
 
-            PrimaryFilledButton(
-                title: "다음",
-                isEnabled: store.isNextEnabled
+                TextInput(
+                    title: "이름",
+                    isRequired: true,
+                    placeholder: "이름을 입력해주세요",
+                    helperText: "이름 그대로 작성해주세요",
+                    maxCount: 10,
+                    state: store.isNameReadOnly ? .readOnly : .default,
+                    text: $store.name
+                )
+                .padding(.top, Spacing.spacing350)
+                .padding(.horizontal, Spacing.spacing400)
+
+                Color.clear.frame(maxHeight: .infinity)
+            }
+
+            BangawoButton(
+                "다음",
+                variant: .solid,
+                size: .large,
+                widthType: .maxWidth,
+                isDisabled: !store.isNextEnabled
             ) {
                 store.send(.nextButtonTapped)
             }
+            .padding(.horizontal, Spacing.spacing450)
+            .padding(.bottom, Spacing.spacing400)
         }
-        .padding(.horizontal, 24)
-        .padding(.bottom, 24)
+        .navigationBarBackButtonHidden(true)
         .sheet(
             item: $store.scope(state: \.imagePicker, action: \.imagePicker)
         ) { pickerStore in
             ProfileImagePickerSheet(store: pickerStore)
                 .presentationDetents([.medium])
         }
+        .onTapGesture {
+            if isShowingMenu { isShowingMenu = false }
+        }
     }
 }
 
-struct ProfileImageThumbnail: View {
-    private let image: ProfileImage
-    private let action: () -> Void
+// MARK: - ProfileImageContainer
 
-    init(image: ProfileImage, action: @escaping () -> Void) {
-        self.image = image
-        self.action = action
-    }
+private struct ProfileImageContainer: View {
+    let profileImage: ProfileImage
+    @Binding var isShowingMenu: Bool
+    let onMenuAlbumTapped: () -> Void
+    let onMenuProfileSetupTapped: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            ZStack(alignment: .bottomTrailing) {
-                ProfileImageDisplay(image: image, size: 120)
-                CameraOverlayBadge()
+        Avatar(
+            avatarType: avatarType(for: profileImage),
+            size: .s124,
+            iconType: .edit { isShowingMenu.toggle() }
+        )
+        .overlay(alignment: .topTrailing) {
+            if isShowingMenu {
+                DesignSystem.Menu(items: [
+                    .init(
+                        label: "프로필 설정하기",
+                        icon: .Asset.icStar24,
+                        iconColor: Colors.gray600
+                    ) {
+                        onMenuProfileSetupTapped()
+                        isShowingMenu = false
+                    },
+                    .init(
+                        label: "앨범에서 선택하기",
+                        icon: .Asset.icAlbum24,
+                        iconColor: Colors.gray500
+                    ) {
+                        onMenuAlbumTapped()
+                        isShowingMenu = false
+                    }
+                ])
+                .frame(width: 200)
+                .offset(y: 132)
             }
         }
-        .buttonStyle(.plain)
-    }
-}
-
-struct CameraOverlayBadge: View {
-    var body: some View {
-        Circle()
-            .fill(Color.white)
-            .frame(width: 36, height: 36)
-            .overlay(
-                Image(systemName: "camera.fill")
-                    .font(.system(size: 16))
-                    .foregroundStyle(.black)
-            )
-            .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
-    }
-}
-
-struct NicknameField: View {
-    @Binding private var nickname: String
-    private let onClear: () -> Void
-
-    init(nickname: Binding<String>, onClear: @escaping () -> Void) {
-        self._nickname = nickname
-        self.onClear = onClear
+        .padding(.top, Spacing.spacing400)
+        .padding(.bottom, Spacing.spacing300)
     }
 
-    var body: some View {
-        HStack(spacing: 8) {
-            TextField("닉네임을 입력해주세요", text: $nickname)
-                .textFieldStyle(.plain)
-                .submitLabel(.done)
-
-            if !nickname.isEmpty {
-                Button(action: onClear) {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(Color(.systemGray3))
-                }
-                .buttonStyle(.plain)
-            }
+    private func avatarType(for profileImage: ProfileImage) -> Avatar.AvatarType {
+        switch profileImage {
+        case .none:
+            return .placeholder
+        case .data(let data):
+            guard let uiImage = UIImage(data: data) else { return .placeholder }
+            return .localImage(Image(uiImage: uiImage))
+        case .preset:
+            return .d3
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 14)
-        .background(Color(.systemGray6), in: RoundedRectangle(cornerRadius: 10))
+    }
+}
+
+#Preview {
+    BangawoPreview {
+        ProfileInputView(
+            store: Store(initialState: ProfileInputFeature.State()) {
+                ProfileInputFeature()
+            }
+        )
     }
 }
