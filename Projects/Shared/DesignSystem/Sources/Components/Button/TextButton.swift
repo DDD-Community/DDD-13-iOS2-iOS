@@ -41,7 +41,6 @@ public struct TextButton: View {
             size: size,
             foregroundColor: foregroundColor
         )
-        .padding(Spacing.spacing50)
         .background(
             RoundedRectangle(cornerRadius: BorderRadius.borderRadius200)
                 .fill(isPressed ? Colors.grayAlpha200 : .clear)
