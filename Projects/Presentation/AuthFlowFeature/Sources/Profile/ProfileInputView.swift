@@ -26,9 +26,7 @@ public struct ProfileInputView: View {
             VStack(spacing: 0) {
                 ProfileImageContainer(
                     profileImage: store.profileImage,
-                    isShowingMenu: $isShowingMenu,
-                    onMenuAlbumTapped: { store.send(.avatarMenuAlbumTapped) },
-                    onMenuProfileSetupTapped: { store.send(.avatarMenuProfileSetupTapped) }
+                    isShowingMenu: $isShowingMenu
                 )
 
                 TextInput(
@@ -45,6 +43,35 @@ public struct ProfileInputView: View {
 
                 Color.clear.frame(maxHeight: .infinity)
             }
+            .overlay {
+                if isShowingMenu {
+                    GeometryReader { geo in
+                        DesignSystem.Menu(items: [
+                            .init(
+                                label: "프로필 설정하기",
+                                icon: .Asset.icStar24,
+                                iconColor: Colors.gray600
+                            ) {
+                                store.send(.avatarMenuProfileSetupTapped)
+                                isShowingMenu = false
+                            },
+                            .init(
+                                label: "앨범에서 선택하기",
+                                icon: .Asset.icAlbum24,
+                                iconColor: Colors.gray600
+                            ) {
+                                store.send(.avatarMenuAlbumTapped)
+                                isShowingMenu = false
+                            }
+                        ])
+                        .frame(width: Metric.menuWidth)
+                        .offset(
+                            x: (geo.size.width + Metric.avatarSize) / 2 - Metric.menuWidth,
+                            y: Spacing.spacing400 + Metric.avatarSize + Spacing.spacing200
+                        )
+                    }
+                }
+            }
 
             BangawoButton(
                 "다음",
@@ -58,7 +85,6 @@ public struct ProfileInputView: View {
             .padding(.horizontal, Spacing.spacing450)
             .padding(.bottom, Spacing.spacing400)
         }
-        .navigationBarBackButtonHidden(true)
         .sheet(
             item: $store.scope(state: \.imagePicker, action: \.imagePicker)
         ) { pickerStore in
@@ -71,13 +97,18 @@ public struct ProfileInputView: View {
     }
 }
 
+// MARK: - Metric
+
+private enum Metric {
+    static let menuWidth: CGFloat = 200
+    static let avatarSize: CGFloat = 124
+}
+
 // MARK: - ProfileImageContainer
 
 private struct ProfileImageContainer: View {
     let profileImage: ProfileImage
     @Binding var isShowingMenu: Bool
-    let onMenuAlbumTapped: () -> Void
-    let onMenuProfileSetupTapped: () -> Void
 
     var body: some View {
         Avatar(
@@ -85,30 +116,6 @@ private struct ProfileImageContainer: View {
             size: .s124,
             iconType: .edit { isShowingMenu.toggle() }
         )
-        .overlay(alignment: .topTrailing) {
-            if isShowingMenu {
-                DesignSystem.Menu(items: [
-                    .init(
-                        label: "프로필 설정하기",
-                        icon: .Asset.icStar24,
-                        iconColor: Colors.gray600
-                    ) {
-                        onMenuProfileSetupTapped()
-                        isShowingMenu = false
-                    },
-                    .init(
-                        label: "앨범에서 선택하기",
-                        icon: .Asset.icAlbum24,
-                        iconColor: Colors.gray500
-                    ) {
-                        onMenuAlbumTapped()
-                        isShowingMenu = false
-                    }
-                ])
-                .frame(width: 200)
-                .offset(y: 132)
-            }
-        }
         .padding(.top, Spacing.spacing400)
         .padding(.bottom, Spacing.spacing300)
     }
