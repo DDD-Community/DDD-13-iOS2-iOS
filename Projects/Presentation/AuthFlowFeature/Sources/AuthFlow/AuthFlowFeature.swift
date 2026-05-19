@@ -76,6 +76,14 @@ public struct AuthFlowFeature {
                 state.path.removeLast()
                 return .none
 
+            case .path(.element(id: _, action: .terms(.delegate(.navigateBack)))):
+                state.path.removeLast()
+                return .none
+
+            case .path(.element(id: _, action: .profile(.delegate(.navigateBack)))):
+                state.path.removeLast()
+                return .none
+
             case .path:
                 return .none
 
