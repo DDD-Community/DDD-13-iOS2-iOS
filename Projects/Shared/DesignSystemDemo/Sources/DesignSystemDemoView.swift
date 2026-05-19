@@ -2,9 +2,13 @@ import SwiftUI
 
 private enum ComponentDemo: String, CaseIterable, Identifiable {
     case button = "Button"
+    case textButton = "TextButton"
     case actionButton = "ActionButton"
     case asset = "Asset"
+    case avatar = "Avatar"
     case checkbox = "Checkbox"
+    case menu = "Menu"
+    case navigation = "Navigation"
     case snackBar = "SnackBar"
     case toast = "Toast"
     case top = "Top"
@@ -37,9 +41,13 @@ struct DesignSystemDemoView: View {
         .navigationDestination(for: ComponentDemo.self) { component in
             switch component {
             case .button: BangawoButtonDemoView()
+            case .textButton: TextButtonDemoView()
             case .actionButton: ActionButtonDemoView()
             case .asset: AssetDemoView()
+            case .avatar: AvatarDemoView()
             case .checkbox: CheckboxDemoView()
+            case .menu: MenuDemoView()
+            case .navigation: NavigationDemoView()
             case .snackBar: SnackBarDemoView()
             case .toast: ToastDemoView()
             case .top: TopHeroDemoView()
