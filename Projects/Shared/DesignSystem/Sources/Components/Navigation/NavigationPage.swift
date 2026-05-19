@@ -31,13 +31,7 @@ public struct NavigationPage: View {
     public var body: some View {
         HStack(spacing: 0) {
             if let leadingAction {
-                Button {
-                    leadingAction()
-                } label: {
-                    Image.Asset.icArrowBigLeft24
-                        .frame(width: Sizing.sizing200, height: Sizing.sizing200)
-                }
-                .frame(width: Sizing.sizing450, height: Sizing.sizing450)
+                LeadingArea(action: leadingAction)
             }
 
             if let title {
@@ -78,6 +72,22 @@ public struct NavigationPage: View {
                 )
                 .ignoresSafeArea(edges: .top)
             }
+        }
+    }
+
+    private struct LeadingArea: View {
+        let action: () -> Void
+
+        var body: some View {
+            Button {
+                action()
+            } label: {
+                Image.Asset.icArrowBigLeft24
+                    .frame(width: Sizing.sizing200, height: Sizing.sizing200)
+            }
+            .frame(width: Sizing.sizing450, height: Sizing.sizing450)
+            .padding(.leading, Spacing.spacing225) // 10pt
+            .padding(.trailing, Spacing.spacing150) // 6pt
         }
     }
 }
