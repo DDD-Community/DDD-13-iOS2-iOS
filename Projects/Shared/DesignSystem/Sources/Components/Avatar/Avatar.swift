@@ -70,6 +70,13 @@ public struct Avatar: View {
                     .resizable()
                     .scaledToFit()
             }
+
+        case .localImage(let image):
+            image
+                .resizable()
+                .scaledToFill()
+                .frame(width: size.length, height: size.length)
+                .clipShape(Circle())
         }
     }
 }
@@ -103,6 +110,15 @@ private struct IconArea: View {
     let size: Avatar.Size
 
     var body: some View {
+        if case .edit(let action) = iconType {
+            Button(action: action) { iconCircle }
+                .buttonStyle(.plain)
+        } else {
+            iconCircle
+        }
+    }
+
+    private var iconCircle: some View {
         ZStack {
             Circle()
                 .fill(Colors.gray00)
@@ -149,7 +165,7 @@ private struct IconArea: View {
             HStack(spacing: 16) {
                 Avatar(avatarType: .placeholder, size: .s56, iconType: .host)
                 Avatar(avatarType: .placeholder, size: .s56, iconType: .pin)
-                Avatar(avatarType: .placeholder, size: .s56, iconType: .edit)
+                Avatar(avatarType: .placeholder, size: .s56, iconType: .edit(action: {}))
                 Avatar(avatarType: .placeholder, size: .s56, iconType: .star)
             }
 

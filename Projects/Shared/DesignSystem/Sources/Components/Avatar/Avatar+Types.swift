@@ -10,12 +10,13 @@ extension Avatar {
         case d3
         case image(URL)
         case placeholder
+        case localImage(Image)
     }
 
     public enum IconType {
         case host
         case pin
-        case edit
+        case edit(action: () -> Void)
         case star
     }
 
