@@ -20,8 +20,9 @@ public struct LoginView: View {
         VStack(spacing: 0) {
             Spacer()
 
-            Color.clear
-                .frame(maxWidth: .infinity)
+            Image.Asset.imgLogin3d
+                .resizable()
+                .scaledToFit()
                 .frame(height: 240)
 
             Spacer()
