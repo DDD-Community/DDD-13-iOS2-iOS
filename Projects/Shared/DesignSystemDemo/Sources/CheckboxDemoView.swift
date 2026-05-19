@@ -54,19 +54,39 @@ private struct CheckboxRowSection: View {
         VStack(alignment: .leading, spacing: 8) {
             SectionHeader("CheckboxRow")
             VStack(spacing: 0) {
-                CheckboxRow("제목만 있는 항목")
-                    .arrow(.right)
+                CheckboxRow(
+                    "제목만 있는 항목",
+                    checkboxVariant: .circle,
+                    checkboxState: .enabled,
+                    size: .medium,
+                    arrowDirection: .right
+                )
                 RowDivider()
-                CheckboxRow("설명이 있는 항목")
-                    .description("부가 설명이 표시됩니다")
-                    .arrow(.right)
+                CheckboxRow(
+                    "설명이 있는 항목",
+                    checkboxVariant: .circle,
+                    checkboxState: .enabled,
+                    size: .medium,
+                    description: "부가 설명이 표시됩니다",
+                    arrowDirection: .right
+                )
                 RowDivider()
-                CheckboxRow("ghost variant", checkboxVariant: .ghost)
-                    .description("ghost 스타일 체크박스")
-                    .arrow(.down)
+                CheckboxRow(
+                    "ghost variant",
+                    checkboxVariant: .ghost,
+                    checkboxState: .enabled,
+                    size: .medium,
+                    description: "ghost 스타일 체크박스",
+                    arrowDirection: .down
+                )
                 RowDivider()
-                CheckboxRow("disabled", checkboxState: .disabled)
-                    .description("비활성화된 항목입니다")
+                CheckboxRow(
+                    "disabled",
+                    checkboxVariant: .circle,
+                    checkboxState: .disabled,
+                    size: .medium,
+                    description: "비활성화된 항목입니다"
+                )
             }
             .card()
         }

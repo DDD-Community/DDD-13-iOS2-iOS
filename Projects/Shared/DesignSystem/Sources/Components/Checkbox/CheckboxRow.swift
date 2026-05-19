@@ -12,21 +12,28 @@ public struct CheckboxRow: View {
     private let checkboxVariant: Checkbox.Variant
     private let checkboxState: Checkbox.State
     private let size: Size
-    private var description: String?
-    private var arrowDirection: ArrowDirection?
+    private let description: String?
+    private let arrowDirection: ArrowDirection?
+    private let titleColor: Color
 
     // MARK: - Init
 
     public init(
         _ title: String,
-        checkboxVariant: Checkbox.Variant = .circle,
-        checkboxState: Checkbox.State = .enabled,
-        size: Size = .medium
+        checkboxVariant: Checkbox.Variant,
+        checkboxState: Checkbox.State,
+        size: Size,
+        description: String? = nil,
+        arrowDirection: ArrowDirection? = nil,
+        titleColor: Color = Colors.gray800
     ) {
         self.title = title
         self.checkboxVariant = checkboxVariant
         self.checkboxState = checkboxState
         self.size = size
+        self.description = description
+        self.arrowDirection = arrowDirection
+        self.titleColor = titleColor
     }
 
     // MARK: - Body
@@ -35,7 +42,7 @@ public struct CheckboxRow: View {
         HStack(spacing: Spacing.spacing200) {
             Checkbox(variant: checkboxVariant, state: checkboxState, size: size.checkboxSize)
 
-            LabelArea(title: title, description: description, size: size)
+            LabelArea(title: title, description: description, size: size, titleColor: titleColor)
 
             if let direction = arrowDirection {
                 ArrowIcon(direction: direction)
@@ -45,19 +52,6 @@ public struct CheckboxRow: View {
         .padding(.horizontal, Spacing.spacing200)
     }
 
-    // MARK: - Modifiers
-
-    public func description(_ text: String) -> Self {
-        var copy = self
-        copy.description = text
-        return copy
-    }
-
-    public func arrow(_ direction: ArrowDirection) -> Self {
-        var copy = self
-        copy.arrowDirection = direction
-        return copy
-    }
 }
 
 // MARK: - LabelArea
@@ -67,11 +61,12 @@ private extension CheckboxRow {
         let title: String
         let description: String?
         let size: Size
+        let titleColor: Color
 
         var body: some View {
             VStack(alignment: .leading, spacing: Spacing.spacing50) {
                 BangawoText(title, textStyle: size.titleFont)
-                    .foregroundStyle(Colors.gray800)
+                    .foregroundStyle(titleColor)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 if let description {
@@ -111,31 +106,56 @@ private extension CheckboxRow {
 
 #Preview {
     VStack(spacing: 0) {
-        CheckboxRow("제목만 있는 항목", size: .medium)
-            .arrow(.right)
+        CheckboxRow(
+            "제목만 있는 항목",
+            checkboxVariant: .circle,
+            checkboxState: .enabled,
+            size: .medium,
+            arrowDirection: .right
+        )
 
         Divider()
 
-        CheckboxRow("설명이 있는 항목 (medium)", size: .medium)
-            .description("부가 설명이 여기에 표시됩니다")
-            .arrow(.right)
+        CheckboxRow(
+            "설명이 있는 항목 (medium)",
+            checkboxVariant: .circle,
+            checkboxState: .enabled,
+            size: .medium,
+            description: "부가 설명이 여기에 표시됩니다",
+            arrowDirection: .right
+        )
 
         Divider()
 
-        CheckboxRow("설명이 있는 항목 (small)", size: .small)
-            .description("부가 설명이 여기에 표시됩니다")
-            .arrow(.down)
+        CheckboxRow(
+            "설명이 있는 항목 (small)",
+            checkboxVariant: .circle,
+            checkboxState: .enabled,
+            size: .small,
+            description: "부가 설명이 여기에 표시됩니다",
+            arrowDirection: .down
+        )
 
         Divider()
 
-        CheckboxRow("ghost variant", checkboxVariant: .ghost, size: .medium)
-            .description("ghost 스타일 체크박스")
-            .arrow(.up)
+        CheckboxRow(
+            "ghost variant",
+            checkboxVariant: .ghost,
+            checkboxState: .enabled,
+            size: .medium,
+            description: "ghost 스타일 체크박스",
+            arrowDirection: .up
+        )
 
         Divider()
 
-        CheckboxRow("disabled 상태", checkboxState: .disabled, size: .medium)
-            .description("비활성화된 항목입니다")
+        CheckboxRow(
+            "disabled 상태",
+            checkboxVariant: .circle,
+            checkboxState: .disabled,
+            size: .medium,
+            description: "비활성화된 항목입니다"
+        )
     }
     .padding(.horizontal, 16)
 }
