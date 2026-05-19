@@ -128,7 +128,7 @@ private extension ActionButton {
         let content: LowerContent
 
         var body: some View {
-            TextButton(content.title, type: content.type, action: content.action)
+            TextButton(content.title, type: content.type, size: .large, action: content.action)
                 .padding(.top, Spacing.spacing300)
                 .padding(.bottom, Spacing.spacing200)
                 .padding(.horizontal, Spacing.spacing450)
