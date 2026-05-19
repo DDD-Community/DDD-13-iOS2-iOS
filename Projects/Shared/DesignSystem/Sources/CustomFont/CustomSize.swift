@@ -23,6 +23,7 @@ public enum CustomSizeFont {
     case titleMedium
     case titleMediumEmphasized
     case titleSmall
+    case titleSmallEmphasized
 
     // MARK: - Body
     case bodyLarge
@@ -51,6 +52,7 @@ public enum CustomSizeFont {
         case .titleMedium: return Typography.typographySize300
         case .titleMediumEmphasized: return Typography.typographySize300
         case .titleSmall: return Typography.typographySize200
+        case .titleSmallEmphasized: return Typography.typographySize200
         case .bodyLarge: return Typography.typographySize300
         case .bodyLargeEmphasized: return Typography.typographySize300
         case .bodyMedium: return Typography.typographySize200
@@ -77,6 +79,7 @@ public enum CustomSizeFont {
         case .titleMedium: return .Medium
         case .titleMediumEmphasized: return .SemiBold
         case .titleSmall: return .Medium
+        case .titleSmallEmphasized: return .SemiBold
         case .bodyLarge: return .Regular
         case .bodyLargeEmphasized: return .Medium
         case .bodyMedium: return .Medium
@@ -103,6 +106,7 @@ public enum CustomSizeFont {
         case .titleMedium: return Typography.typographyLineHeight300
         case .titleMediumEmphasized: return Typography.typographyLineHeight300
         case .titleSmall: return Typography.typographyLineHeight200
+        case .titleSmallEmphasized: return Typography.typographyLineHeight200
         case .bodyLarge: return Typography.typographyLineHeight300
         case .bodyLargeEmphasized: return Typography.typographyLineHeight300
         case .bodyMedium: return Typography.typographyLineHeight200
@@ -127,7 +131,7 @@ public enum CustomSizeFont {
             return Typography.typographyLetterSpacing100
         case .titleLarge:
             return Typography.typographyLetterSpacing200
-        case .titleMedium, .titleMediumEmphasized, .titleSmall:
+        case .titleMedium, .titleMediumEmphasized, .titleSmall, .titleSmallEmphasized:
             return Typography.typographyLetterSpacing100
         case .bodyLarge, .bodyLargeEmphasized,
              .bodyMedium, .bodyMediumEmphasized,

@@ -17,7 +17,7 @@ extension TopHero {
 extension TopHero.AssetSize {
     var length: CGFloat {
         switch self {
-        case .large: return 80 // sizing750 (token pending generation)
+        case .large: return 82 // sizing750 (token pending generation)
         case .small: return Sizing.sizing700
         }
     }

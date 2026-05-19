@@ -102,20 +102,17 @@ private struct TextInputTitleArea: View {
     var body: some View {
         HStack(spacing: 0) {
             if let title {
-                Text(title)
-                    .pretendardFont(family: .SemiBold, size: Typography.typographySize200)
+                BangawoText(title, textStyle: .titleSmallEmphasized)
                     .foregroundStyle(Colors.gray900)
                     .padding(.vertical, Spacing.spacing50)
             }
             if isRequired {
-                Text("*")
-                    .pretendardFont(family: .SemiBold, size: Typography.typographySize200)
+                BangawoText("*", textStyle: .titleSmallEmphasized)
                     .foregroundStyle(Colors.red500)
                     .padding(.vertical, Spacing.spacing50)
             }
             if isOptional {
-                Text("(optional)")
-                    .pretendardFont(family: .Medium, size: Typography.typographySize200)
+                BangawoText("(optional)", textStyle: .bodyMedium)
                     .foregroundStyle(Colors.gray600)
                     .padding(.vertical, Spacing.spacing50)
                     .padding(.leading, Spacing.spacing100)
@@ -150,7 +147,9 @@ private struct TextInputFieldArea: View {
             HStack(spacing: 0) {
                 TextField(
                     text: $text,
-                    prompt: Text(placeholder).foregroundStyle(Colors.gray500)
+                    prompt: Text(placeholder)
+                        .font(.pretendardFontFamily(family: .Regular, size: Typography.typographySize300))
+                        .foregroundStyle(Colors.gray500)
                 ) {
                     EmptyView()
                 }
@@ -237,15 +236,13 @@ private struct TextInputHelperArea: View {
                         Image.Asset.icCircleExclamation
                             .renderingMode(.template)
                             .foregroundStyle(Colors.red600)
-                        Text(helperText)
-                            .pretendardFont(family: .Regular, size: Typography.typographySize100)
+                        BangawoText(helperText, textStyle: .bodySmall)
                             .foregroundStyle(Colors.red600)
                             .multilineTextAlignment(.leading)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 } else {
-                    Text(helperText)
-                        .pretendardFont(family: .Regular, size: Typography.typographySize100)
+                    BangawoText(helperText, textStyle: .bodySmall)
                         .foregroundStyle(Colors.gray600)
                         .multilineTextAlignment(.leading)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -256,8 +253,7 @@ private struct TextInputHelperArea: View {
             }
 
             if let maxCount {
-                Text("\(currentCount)/\(maxCount)")
-                    .pretendardFont(family: .Regular, size: Typography.typographySize100)
+                BangawoText("\(currentCount)/\(maxCount)", textStyle: .bodySmall)
                     .foregroundStyle(isError ? Colors.red600 : Colors.gray600)
                     .lineLimit(1)
                     .fixedSize()
@@ -269,85 +265,51 @@ private struct TextInputHelperArea: View {
 // MARK: - Preview
 
 #Preview("TextInput States") {
+    @Previewable @State var defaultText = ""
+    @Previewable @State var readOnlyText = "읽기 전용 텍스트"
+    @Previewable @State var disabledText = ""
+    @Previewable @State var errorText = "잘못된 입력"
+    @Previewable @State var optionalText = ""
+
     ScrollView {
         VStack(spacing: Spacing.spacing400) {
-            PreviewDefaultState()
-            PreviewReadOnlyState()
-            PreviewDisabledState()
-            PreviewErrorState()
-            PreviewOptionalFields()
+            TextInput(
+                title: "모임 이름",
+                isRequired: true,
+                placeholder: "모임 이름을 입력하세요",
+                helperText: "20자 이내로 입력해주세요",
+                maxCount: 20,
+                text: $defaultText
+            )
+            TextInput(
+                title: "읽기 전용",
+                placeholder: "",
+                state: .readOnly,
+                text: $readOnlyText
+            )
+            TextInput(
+                title: "비활성화",
+                placeholder: "비활성화된 필드",
+                state: .disabled,
+                text: $disabledText
+            )
+            TextInput(
+                title: "에러 상태",
+                isRequired: true,
+                placeholder: "입력하세요",
+                helperText: "올바른 형식으로 입력해주세요",
+                maxCount: 20,
+                state: .error,
+                text: $errorText
+            )
+            TextInput(
+                title: "선택 항목",
+                isOptional: true,
+                placeholder: "입력하지 않아도 됩니다",
+                helperText: "선택적으로 입력할 수 있습니다",
+                text: $optionalText
+            )
         }
         .padding(Spacing.spacing300)
-    }
-}
-
-private struct PreviewDefaultState: View {
-    @State private var text = ""
-
-    var body: some View {
-        TextInput(
-            title: "모임 이름",
-            isRequired: true,
-            placeholder: "모임 이름을 입력하세요",
-            helperText: "20자 이내로 입력해주세요",
-            maxCount: 20,
-            text: $text
-        )
-    }
-}
-
-private struct PreviewReadOnlyState: View {
-    @State private var text = "읽기 전용 텍스트"
-
-    var body: some View {
-        TextInput(
-            title: "읽기 전용",
-            placeholder: "",
-            state: .readOnly,
-            text: $text
-        )
-    }
-}
-
-private struct PreviewDisabledState: View {
-    @State private var text = ""
-
-    var body: some View {
-        TextInput(
-            title: "비활성화",
-            placeholder: "비활성화된 필드",
-            state: .disabled,
-            text: $text
-        )
-    }
-}
-
-private struct PreviewErrorState: View {
-    @State private var text = "잘못된 입력"
-
-    var body: some View {
-        TextInput(
-            title: "에러 상태",
-            isRequired: true,
-            placeholder: "입력하세요",
-            helperText: "올바른 형식으로 입력해주세요",
-            maxCount: 20,
-            state: .error,
-            text: $text
-        )
-    }
-}
-
-private struct PreviewOptionalFields: View {
-    @State private var text = ""
-
-    var body: some View {
-        TextInput(
-            title: "선택 항목",
-            isOptional: true,
-            placeholder: "입력하지 않아도 됩니다",
-            helperText: "선택적으로 입력할 수 있습니다",
-            text: $text
-        )
     }
 }

@@ -33,8 +33,8 @@ private struct MainSection: View {
                         background: .clear,
                         title: "반가워",
                         trailingIcons: [
-                            NavigationIconItem(image: Image(systemName: "bell")) {},
-                            NavigationIconItem(image: Image(systemName: "person")) {}
+                            NavigationIconItem(icon: .user24) {},
+                            NavigationIconItem(icon: .verticalMenu24) {}
                         ]
                     )
                 }
@@ -43,7 +43,7 @@ private struct MainSection: View {
                     NavigationMain(
                         background: .clear,
                         trailingIcons: [
-                            NavigationIconItem(image: Image(systemName: "bell")) {}
+                            NavigationIconItem(icon: .ball24) {}
                         ]
                     )
                 }
@@ -71,7 +71,7 @@ private struct PageSection: View {
                         leadingAction: {},
                         title: "상세 페이지",
                         trailingIcons: [
-                            NavigationIconItem(image: Image(systemName: "ellipsis")) {}
+                            NavigationIconItem(icon: .verticalMenu24) {}
                         ]
                     )
                 }

@@ -38,13 +38,7 @@ public struct NavigationPage: View {
                 if !trailingIcons.isEmpty {
                     HStack(spacing: 0) {
                         ForEach(trailingIcons) { item in
-                            Button {
-                                item.action()
-                            } label: {
-                                item.image
-                                    .frame(width: Sizing.sizing200, height: Sizing.sizing200)
-                            }
-                            .padding(Spacing.spacing225)
+                            NavigationIconButton(image: item.icon.image, action: item.action)
                         }
                     }
                     .padding(.trailing, Spacing.spacing300)
@@ -77,15 +71,9 @@ public struct NavigationPage: View {
         let action: () -> Void
 
         var body: some View {
-            Button {
-                action()
-            } label: {
-                Image.Asset.icArrowBigLeft24
-                    .frame(width: Sizing.sizing200, height: Sizing.sizing200)
-            }
-            .frame(width: Sizing.sizing450, height: Sizing.sizing450)
-            .padding(.leading, Spacing.spacing225) // 10pt
-            .padding(.trailing, Spacing.spacing150) // 6pt
+            NavigationIconButton(image: Image.Asset.icArrowBigLeft24, action: action)
+                .padding(.leading, Spacing.spacing225)
+                .padding(.trailing, Spacing.spacing150)
         }
     }
 }
@@ -96,7 +84,7 @@ public struct NavigationPage: View {
         leadingAction: {},
         title: "상세 페이지",
         trailingIcons: [
-            NavigationIconItem(image: Image(systemName: "ellipsis")) {}
+            NavigationIconItem(icon: .verticalMenu24) {}
         ]
     )
 }

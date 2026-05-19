@@ -26,6 +26,7 @@ public struct DepartureSearchFeature {
     }
 
     public enum Action {
+        case backButtonTapped
         case searchTriggerTapped
         case searchSheet(PresentationAction<StationSearchSheetFeature.Action>)
         case nextButtonTapped
@@ -33,6 +34,7 @@ public struct DepartureSearchFeature {
 
         public enum Delegate: Equatable {
             case proceedToHome
+            case dismiss
         }
     }
 
@@ -41,6 +43,9 @@ public struct DepartureSearchFeature {
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
+            case .backButtonTapped:
+                return .send(.delegate(.dismiss))
+
             case .searchTriggerTapped:
                 state.searchSheet = StationSearchSheetFeature.State()
                 return .none

@@ -41,13 +41,7 @@ public struct NavigationMain: View {
             if !trailingIcons.isEmpty {
                 HStack(spacing: 0) {
                     ForEach(trailingIcons) { item in
-                        Button {
-                            item.action()
-                        } label: {
-                            item.image
-                                .frame(width: Sizing.sizing200, height: Sizing.sizing200)
-                        }
-                        .padding(Spacing.spacing225)
+                        NavigationIconButton(image: item.icon.image, action: item.action)
                     }
                 }
                 .padding(.trailing, Spacing.spacing300)
@@ -73,8 +67,8 @@ public struct NavigationMain: View {
         background: .gradient,
         title: "반가워",
         trailingIcons: [
-            NavigationIconItem(image: Image(systemName: "bell")) {},
-            NavigationIconItem(image: Image(systemName: "person")) {}
+            NavigationIconItem(icon: .user24) {},
+            NavigationIconItem(icon: .verticalMenu24) {}
         ]
     )
 }

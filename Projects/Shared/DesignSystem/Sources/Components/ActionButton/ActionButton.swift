@@ -10,6 +10,7 @@ public struct ActionButton: View {
 
     private let buttonLayout: ButtonLayout
     private let upperContent: UpperContent?
+    private let isUpperContentVisible: Binding<Bool>?
     private let lowerContent: LowerContent?
 
     // MARK: - Init
@@ -17,10 +18,12 @@ public struct ActionButton: View {
     public init(
         buttonLayout: ButtonLayout,
         upperContent: UpperContent? = nil,
+        isUpperContentVisible: Binding<Bool>? = nil,
         lowerContent: LowerContent? = nil
     ) {
         self.buttonLayout = buttonLayout
         self.upperContent = upperContent
+        self.isUpperContentVisible = isUpperContentVisible
         self.lowerContent = lowerContent
     }
 
@@ -29,7 +32,7 @@ public struct ActionButton: View {
     public var body: some View {
         VStack(spacing: 0) {
             if let upper = upperContent {
-                UpperArea(content: upper)
+                UpperArea(content: upper, isVisible: isUpperContentVisible)
             }
 
             ButtonArea(layout: buttonLayout)
@@ -47,25 +50,72 @@ public struct ActionButton: View {
 private extension ActionButton {
     struct UpperArea: View {
         let content: UpperContent
+        let isVisible: Binding<Bool>?
+
+        @State private var isShowing = false
+        @State private var dismissTask: Task<Void, Never>?
 
         var body: some View {
             Group {
                 switch content {
-                case let .snackBar(message, buttonTitle, action):
-                    SnackBar(message, buttonTitle: buttonTitle, action: action)
-
-                case let .toast(message):
-                    Toast(message)
-
                 case let .description(text):
                     BangawoText(text, textStyle: .bodyLarge)
                         .foregroundStyle(Colors.gray700)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)
+                        .padding(.bottom, Spacing.spacing400)
+                        .padding(.horizontal, Spacing.spacing450)
+
+                case let .snackBar(message, buttonTitle, action):
+                    if isShowing {
+                        SnackBar(message, buttonTitle: buttonTitle, action: action)
+                            .padding(.bottom, Spacing.spacing400)
+                            .padding(.horizontal, Spacing.spacing450)
+                            .transition(.offset(y: 64).combined(with: .opacity))
+                    }
+
+                case let .toast(message):
+                    if isShowing {
+                        Toast(message)
+                            .padding(.bottom, Spacing.spacing400)
+                            .padding(.horizontal, Spacing.spacing450)
+                            .transition(.offset(y: 64).combined(with: .opacity))
+                    }
                 }
             }
-            .padding(.bottom, Spacing.spacing400)
-            .padding(.horizontal, Spacing.spacing450)
+            .onChange(of: isVisible?.wrappedValue) { _, newValue in
+                switch content {
+                case .toast, .snackBar:
+                    if newValue == true { show() } else { hide() }
+                case .description:
+                    break
+                }
+            }
+            .onDisappear {
+                dismissTask?.cancel()
+            }
+        }
+
+        private func show() {
+            dismissTask?.cancel()
+            withAnimation(.spring(duration: 0.4, bounce: 0.1)) {
+                isShowing = true
+            }
+            dismissTask = Task { @MainActor in
+                do { try await Task.sleep(for: .seconds(3)) } catch { return }
+                withAnimation(.easeIn(duration: 0.25)) {
+                    isShowing = false
+                }
+                do { try await Task.sleep(for: .seconds(0.25)) } catch { return }
+                isVisible?.wrappedValue = false
+            }
+        }
+
+        private func hide() {
+            dismissTask?.cancel()
+            withAnimation(.easeIn(duration: 0.25)) {
+                isShowing = false
+            }
         }
     }
 }
@@ -136,75 +186,109 @@ private extension ActionButton {
     }
 }
 
-#Preview {
-    ScrollView {
-        VStack(spacing: 40) {
-            Group {
-                Text("Single Button")
-                    .font(.headline)
+#Preview("Toast") {
+    @Previewable @State var showToast = false
 
-                ActionButton(buttonLayout: .single(title: "확인", action: {}))
-            }
+    VStack(spacing: 0) {
+        ZStack {
+            Color(uiColor: .systemGroupedBackground).ignoresSafeArea()
 
-            Divider()
+            VStack(spacing: 16) {
+                Text("이벤트 발생 버튼을 눌러\nToast 애니메이션을 확인하세요")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
 
-            Group {
-                Text("Single + Description")
-                    .font(.headline)
-
-                ActionButton(
-                    buttonLayout: .single(title: "확인", action: {}),
-                    upperContent: .description("안내 문구가 여기에 표시됩니다")
-                )
-            }
-
-            Divider()
-
-            Group {
-                Text("Single + SnackBar + LowerArea")
-                    .font(.headline)
-
-                ActionButton(
-                    buttonLayout: .single(title: "확인", action: {}),
-                    upperContent: .snackBar(message: "안내 메시지입니다", buttonTitle: "닫기", action: {}),
-                    lowerContent: .init("더 알아보기", type: .textWithArrow, action: {})
-                )
-            }
-
-            Divider()
-
-            Group {
-                Text("Dual Vertical")
-                    .font(.headline)
-
-                ActionButton(
-                    buttonLayout: .dual(
-                        primaryTitle: "확인",
-                        primaryAction: {},
-                        secondaryTitle: "취소",
-                        secondaryAction: {},
-                        arrangement: .vertical
-                    ),
-                    upperContent: .toast(message: "토스트 메시지입니다"),
-                    lowerContent: .init("건너뛰기", action: {})
-                )
-            }
-
-            Divider()
-
-            Group {
-                Text("Dual Horizontal")
-                    .font(.headline)
-
-                ActionButton(buttonLayout: .dual(
-                    primaryTitle: "확인",
-                    primaryAction: {},
-                    secondaryTitle: "취소",
-                    secondaryAction: {},
-                    arrangement: .horizontal
-                ))
+                Button("이벤트 발생") { showToast = true }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(showToast)
             }
         }
-        .padding(.vertical, 24)
+
+        ActionButton(
+            buttonLayout: .single(title: "확인", action: {}),
+            upperContent: .toast(message: "토스트 메시지입니다"),
+            isUpperContentVisible: $showToast
+        )
+        .padding(.bottom, 16)
+        .background(Color(uiColor: .systemBackground))
+    }
+}
+
+#Preview("SnackBar") {
+    @Previewable @State var showSnackBar = false
+
+    VStack(spacing: 0) {
+        ZStack {
+            Color(uiColor: .systemGroupedBackground).ignoresSafeArea()
+
+            VStack(spacing: 16) {
+                Text("이벤트 발생 버튼을 눌러\nSnackBar 애니메이션을 확인하세요")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+
+                Button("이벤트 발생") { showSnackBar = true }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(showSnackBar)
+            }
+        }
+
+        ActionButton(
+            buttonLayout: .single(title: "확인", action: {}),
+            upperContent: .snackBar(message: "안내 메시지입니다", buttonTitle: "닫기", action: { showSnackBar = false }),
+            isUpperContentVisible: $showSnackBar,
+            lowerContent: .init("더 알아보기", type: .textWithArrow, action: {})
+        )
+        .padding(.bottom, 16)
+        .background(Color(uiColor: .systemBackground))
+    }
+}
+
+#Preview("Description (Static)") {
+    VStack(spacing: 0) {
+        Spacer()
+
+        ActionButton(
+            buttonLayout: .single(title: "확인", action: {}),
+            upperContent: .description("안내 문구가 여기에 표시됩니다")
+        )
+        .padding(.bottom, 16)
+        .background(Color(uiColor: .systemBackground))
+    }
+}
+
+#Preview("Dual Vertical") {
+    VStack(spacing: 0) {
+        Spacer()
+
+        ActionButton(
+            buttonLayout: .dual(
+                primaryTitle: "확인",
+                primaryAction: {},
+                secondaryTitle: "취소",
+                secondaryAction: {},
+                arrangement: .vertical
+            ),
+            lowerContent: .init("건너뛰기", action: {})
+        )
+        .padding(.bottom, 16)
+        .background(Color(uiColor: .systemBackground))
+    }
+}
+
+#Preview("Dual Horizontal") {
+    VStack(spacing: 0) {
+        Spacer()
+
+        ActionButton(buttonLayout: .dual(
+            primaryTitle: "확인",
+            primaryAction: {},
+            secondaryTitle: "취소",
+            secondaryAction: {},
+            arrangement: .horizontal
+        ))
+        .padding(.bottom, 16)
+        .background(Color(uiColor: .systemBackground))
     }
 }

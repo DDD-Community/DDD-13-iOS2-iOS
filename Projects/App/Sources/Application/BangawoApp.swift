@@ -30,6 +30,7 @@ struct BangawoApp: App {
     var body: some Scene {
         WindowGroup {
             RootView(store: store)
+                .dismissKeyboardOnTap()
                 .onOpenURL { url in
                     if AuthApi.isKakaoTalkLoginUrl(url) {
                         AuthController.handleOpenUrl(url: url)
@@ -61,4 +62,19 @@ struct BangawoApp: App {
                 )
                 Log.debug("👤 [Naver] Login SDK 초기화 완료")
         }
+}
+
+private extension View {
+    func dismissKeyboardOnTap() -> some View {
+        simultaneousGesture(
+            TapGesture().onEnded {
+                UIApplication.shared.sendAction(
+                    #selector(UIResponder.resignFirstResponder),
+                    to: nil,
+                    from: nil,
+                    for: nil
+                )
+            }
+        )
+    }
 }

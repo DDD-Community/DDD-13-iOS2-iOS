@@ -72,6 +72,10 @@ public struct AuthFlowFeature {
             case .path(.element(id: _, action: .departure(.delegate(.proceedToHome)))):
                 return .send(.delegate(.authDidComplete))
 
+            case .path(.element(id: _, action: .departure(.delegate(.dismiss)))):
+                state.path.removeLast()
+                return .none
+
             case .path:
                 return .none
 
