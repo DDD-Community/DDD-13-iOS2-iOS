@@ -6,6 +6,7 @@ import SwiftUI
 
 public extension Image {
   enum Asset {
+    public static let icAlbum24: Image = Image("ic_album_24", bundle: Bundle.module)
     public static let icAnnouncement16: Image = Image("ic_announcement_16", bundle: Bundle.module)
     public static let icAnnouncement24: Image = Image("ic_announcement_24", bundle: Bundle.module)
     public static let icArrowBigLeft16: Image = Image("ic_arrow_big_left_16", bundle: Bundle.module)
@@ -45,6 +46,7 @@ public extension Image {
     public static let icCircleCheck16: Image = Image("ic_circle_check_16", bundle: Bundle.module)
     public static let icCircleClose16: Image = Image("ic_circle_close_16", bundle: Bundle.module)
     public static let icCircleClose24: Image = Image("ic_circle_close_24", bundle: Bundle.module)
+    public static let icCircleExclamation: Image = Image("ic_circle_exclamation", bundle: Bundle.module)
     public static let icCircleInfo16: Image = Image("ic_circle_info_16", bundle: Bundle.module)
     public static let icCircleInfo24: Image = Image("ic_circle_info_24", bundle: Bundle.module)
     public static let icCircleInfoFill16: Image = Image("ic_circle_info_fill_16", bundle: Bundle.module)
