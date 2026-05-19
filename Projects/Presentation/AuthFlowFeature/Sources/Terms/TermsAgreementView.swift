@@ -5,6 +5,7 @@
 
 import SwiftUI
 import ComposableArchitecture
+import DesignSystem
 
 public struct TermsAgreementView: View {
     @Bindable private var store: StoreOf<TermsAgreementFeature>
@@ -14,39 +15,59 @@ public struct TermsAgreementView: View {
     }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            Text("Bangawo에 참여하려면\n약관 동의가 필요해요")
-                .font(.title2.bold())
-                .padding(.top, 24)
+        VStack(spacing: 0) {
+            NavigationPage(
+                background: .clear,
+                leadingAction: { store.send(.backButtonTapped) }
+            )
 
-            AgreeAllRow(isOn: store.isAllAgreed) {
-                store.send(.agreeAllToggleTapped)
+            TopHero(
+                asset: Image.Asset.imgAgreement3d,
+                title: "편리한 이용을 위해\n약관동의가 필요해요",
+                assetSize: .large
+            )
+
+            Button { store.send(.agreeAllToggleTapped) } label: {
+                CheckboxRow(
+                    "전체 동의하기",
+                    checkboxVariant: .circle,
+                    checkboxState: store.isAllAgreed ? .enabled : .disabled,
+                    size: .medium,
+                    arrowDirection: .right
+                )
+                .padding(.vertical, Spacing.spacing50)
+                .background(Colors.gray50)
+                .clipShape(RoundedRectangle(cornerRadius: BorderRadius.borderRadius250))
             }
+            .buttonStyle(.plain)
+            .padding(.horizontal, Spacing.spacing450)
 
-            Divider()
+            Spacer().frame(height: Spacing.spacing300)
 
-            VStack(spacing: 16) {
+            VStack(spacing: Spacing.spacing100) {
                 ForEach(store.clauses) { clause in
-                    ClauseRow(
-                        clause: clause,
-                        isOn: store.agreedIDs.contains(clause.id),
-                        onToggle: { store.send(.clauseToggleTapped(id: clause.id)) },
-                        onPDF: { store.send(.clausePDFTapped(id: clause.id)) }
-                    )
+                    Button { store.send(.clauseToggleTapped(id: clause.id)) } label: {
+                        CheckboxRow(
+                            clause.title,
+                            checkboxVariant: .circle,
+                            checkboxState: store.agreedIDs.contains(clause.id) ? .enabled : .disabled,
+                            size: .small,
+                            arrowDirection: .right,
+                            titleColor: Colors.gray700
+                        )
+                    }
+                    .buttonStyle(.plain)
                 }
             }
+            .padding(.horizontal, Spacing.spacing450)
 
             Color.clear.frame(maxHeight: .infinity)
 
-            PrimaryFilledButton(
-                title: "시작하기",
-                isEnabled: store.isStartEnabled
-            ) {
-                store.send(.startButtonTapped)
-            }
+            ActionButton(
+                buttonLayout: .single(title: "다음", action: { store.send(.startButtonTapped) }),
+                lowerContent: .init("로그인 아이디 변경", type: .textWithArrow, action: { store.send(.changeLoginIDTapped) })
+            )
         }
-        .padding(.horizontal, 24)
-        .padding(.bottom, 24)
         .sheet(
             isPresented: Binding(
                 get: { store.pdfClause != nil },
@@ -71,78 +92,12 @@ public struct TermsAgreementView: View {
     }
 }
 
-struct AgreeAllRow: View {
-    private let isOn: Bool
-    private let action: () -> Void
-
-    init(isOn: Bool, action: @escaping () -> Void) {
-        self.isOn = isOn
-        self.action = action
-    }
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 12) {
-                CheckmarkIcon(isOn: isOn)
-                Text("전체 동의하기")
-                    .font(.body.bold())
-                    .foregroundStyle(.black)
+#Preview {
+    BangawoPreview {
+        TermsAgreementView(
+            store: Store(initialState: TermsAgreementFeature.State()) {
+                TermsAgreementFeature()
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .buttonStyle(.plain)
-    }
-}
-
-struct ClauseRow: View {
-    private let clause: TermClause
-    private let isOn: Bool
-    private let onToggle: () -> Void
-    private let onPDF: () -> Void
-
-    init(
-        clause: TermClause,
-        isOn: Bool,
-        onToggle: @escaping () -> Void,
-        onPDF: @escaping () -> Void
-    ) {
-        self.clause = clause
-        self.isOn = isOn
-        self.onToggle = onToggle
-        self.onPDF = onPDF
-    }
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Button(action: onToggle) {
-                CheckmarkIcon(isOn: isOn)
-            }
-            .buttonStyle(.plain)
-
-            Text(clause.title)
-                .font(.body)
-                .foregroundStyle(.black)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            Button(action: onPDF) {
-                Image(systemName: "chevron.right")
-                    .foregroundStyle(Color(.systemGray2))
-            }
-            .buttonStyle(.plain)
-        }
-    }
-}
-
-struct CheckmarkIcon: View {
-    private let isOn: Bool
-
-    init(isOn: Bool) {
-        self.isOn = isOn
-    }
-
-    var body: some View {
-        Image(systemName: "checkmark")
-            .font(.system(size: 16, weight: .bold))
-            .foregroundStyle(isOn ? Color.black : Color(.systemGray3))
+        )
     }
 }

@@ -39,10 +39,14 @@ public struct TermsAgreementFeature {
         case clausePDFTapped(id: String)
         case pdfDismissed
         case startButtonTapped
+        case backButtonTapped
+        case changeLoginIDTapped
         case delegate(Delegate)
 
         public enum Delegate: Equatable {
             case completeAgreement
+            case navigateBack
+            case changeLoginID
         }
     }
 
@@ -79,6 +83,12 @@ public struct TermsAgreementFeature {
                 guard state.isStartEnabled else { return .none }
 
                 return .send(.delegate(.completeAgreement))
+
+            case .backButtonTapped:
+                return .send(.delegate(.navigateBack))
+
+            case .changeLoginIDTapped:
+                return .send(.delegate(.changeLoginID))
 
             case .delegate:
                 return .none
