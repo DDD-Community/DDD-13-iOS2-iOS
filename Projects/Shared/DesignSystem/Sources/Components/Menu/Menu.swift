@@ -92,7 +92,7 @@ private extension Menu {
                             .resizable()
                             .renderingMode(.template)
                             .frame(width: Sizing.sizing150, height: Sizing.sizing150)
-                            .foregroundStyle(Colors.gray600)
+                            .foregroundStyle(item.iconColor ?? Colors.gray600)
                     }
                     BangawoText(item.label, textStyle: .labelMedium)
                         .foregroundStyle(Colors.gray800)
