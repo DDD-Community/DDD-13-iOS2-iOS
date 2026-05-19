@@ -29,11 +29,27 @@ public struct NavigationPage: View {
     }
 
     public var body: some View {
-        HStack(spacing: 0) {
-            if let leadingAction {
-                LeadingArea(action: leadingAction)
+        ZStack {
+            HStack(spacing: 0) {
+                if let leadingAction {
+                    LeadingArea(action: leadingAction)
+                }
+                Color.clear.frame(maxWidth: .infinity)
+                if !trailingIcons.isEmpty {
+                    HStack(spacing: 0) {
+                        ForEach(trailingIcons) { item in
+                            Button {
+                                item.action()
+                            } label: {
+                                item.image
+                                    .frame(width: Sizing.sizing200, height: Sizing.sizing200)
+                            }
+                            .padding(Spacing.spacing225)
+                        }
+                    }
+                    .padding(.trailing, Spacing.spacing300)
+                }
             }
-
             if let title {
                 Text(title)
                     .pretendardFont(family: .Medium, size: Typography.typographySize400)
@@ -41,24 +57,6 @@ public struct NavigationPage: View {
                     .lineLimit(1)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.horizontal, Spacing.spacing300)
-            } else {
-                Color.clear
-                    .frame(maxWidth: .infinity)
-            }
-
-            if !trailingIcons.isEmpty {
-                HStack(spacing: 0) {
-                    ForEach(trailingIcons) { item in
-                        Button {
-                            item.action()
-                        } label: {
-                            item.image
-                                .frame(width: Sizing.sizing200, height: Sizing.sizing200)
-                        }
-                        .padding(Spacing.spacing225)
-                    }
-                }
-                .padding(.trailing, Spacing.spacing300)
             }
         }
         .frame(height: Sizing.sizing450)
