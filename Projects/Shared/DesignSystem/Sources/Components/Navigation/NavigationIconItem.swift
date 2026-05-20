@@ -8,7 +8,7 @@ import SwiftUI
 public enum NavigationIcon {
     case userPlus24
     case user24
-    case ball24
+    case bell24
     case verticalMenu24
     case arrowBigRight24
     case close24
@@ -17,7 +17,7 @@ public enum NavigationIcon {
         switch self {
         case .userPlus24: return Image.Asset.icUserPlus24
         case .user24: return Image.Asset.icUser24
-        case .ball24: return Image.Asset.icBall24
+        case .bell24: return Image.Asset.icBell24
         case .verticalMenu24: return Image.Asset.icVerticalMenu24
         case .arrowBigRight24: return Image.Asset.icArrowBigRight24
         case .close24: return Image.Asset.icClose24

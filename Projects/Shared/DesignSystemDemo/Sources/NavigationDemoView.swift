@@ -43,7 +43,7 @@ private struct MainSection: View {
                     NavigationMain(
                         background: .clear,
                         trailingIcons: [
-                            NavigationIconItem(icon: .ball24) {}
+                            NavigationIconItem(icon: .bell24) {}
                         ]
                     )
                 }
