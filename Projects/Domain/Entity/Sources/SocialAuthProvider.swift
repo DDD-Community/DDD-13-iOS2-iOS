@@ -2,8 +2,6 @@
 //  SocialAuthProvider.swift
 //  Entity
 //
-//  Created by yeosong on 4/25/26.
-//
 
 /// `LoginFeature`는 이 enum 값만 보고 어떤 소셜 로그인을 요청할지 결정합니다.
 /// 각 제공자의 실제 SDK 타입이나 구현 방식은 `Presentation` 모듈 밖에서 처리합니다.

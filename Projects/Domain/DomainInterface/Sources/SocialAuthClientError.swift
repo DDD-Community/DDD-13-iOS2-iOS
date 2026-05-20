@@ -2,8 +2,6 @@
 //  SocialAuthClientError.swift
 //  DomainInterface
 //
-//  Created by yeosong on 4/25/26.
-//
 
 import Entity
 import Foundation

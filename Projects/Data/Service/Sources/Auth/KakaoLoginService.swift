@@ -2,8 +2,6 @@
 //  KakaoLoginService.swift
 //  Service
 //
-//  Created by DDD-iOS2 on 5/4/26.
-//
 
 import DomainInterface
 import Entity

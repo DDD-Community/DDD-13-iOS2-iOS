@@ -2,9 +2,6 @@
 //  Log.swift
 //  Utill
 //
-//  Created by DDD-iOS2 on 4/20/26.
-//  Copyright (c) 2025 DDD, Ltd., All rights reserved.
-//
 
 import os
 import Foundation

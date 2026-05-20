@@ -2,8 +2,6 @@
 //  ConfigurationEnvironment.swift
 //  DependencyPackagePlugin
 //
-//  Created by DDD-iOS2 on 4/7/26.
-//
 
 import Foundation
 import ProjectDescription

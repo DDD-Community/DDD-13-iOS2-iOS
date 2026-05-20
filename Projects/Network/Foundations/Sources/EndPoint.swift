@@ -2,7 +2,6 @@
 //  EndPoint.swift
 //  Foundations
 //
-//  Created by DDD-iOS2 on 4/13/26.
 //  Copyright © 2025 DDD, Ltd., All rights reserved.
 //
 

@@ -2,8 +2,6 @@
 //  SocialAuthClient.swift
 //  CoreDependencies
 //
-//  Created by DDD-iOS2 on 5/4/26.
-//
 
 import ComposableArchitecture
 import DomainInterface

@@ -2,8 +2,6 @@
 //  NaverLoginService.swift
 //  Service
 //
-//  Created by DDD-iOS2 on 5/6/26.
-//
 
 import DomainInterface
 import Entity

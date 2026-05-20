@@ -2,8 +2,6 @@
 //  SocialAuthToken.swift
 //  Entity
 //
-//  Created by yeosong on 4/25/26.
-//
 
 /// 소셜 로그인 SDK에서 발급받은 인증 토큰을 앱 공통 형태로 표현한 모델입니다.
 ///
