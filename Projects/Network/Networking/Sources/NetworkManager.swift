@@ -2,8 +2,6 @@
 //  NetworkManager.swift
 //  Networking
 //
-//  Created by yeosong on 4/14/26.
-//
 
 import Foundation
 import Alamofire

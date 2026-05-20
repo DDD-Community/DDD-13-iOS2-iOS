@@ -2,9 +2,6 @@
 //  AuthRepositoryProtocol.swift
 //  DataInterface
 //
-//  Created by DDD-iOS2 on 4/28/26.
-//  Copyright (c) 2025 DDD, Ltd., All rights reserved.
-//
 
 import Entity
 
