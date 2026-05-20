@@ -13,12 +13,12 @@ import Foundation
 public struct DepartureSearchFeature {
     @ObservableState
     public struct State: Equatable {
-        public var nickname: String
+        public var name: String
         public var selectedStation: Station?
         @Presents public var searchSheet: StationSearchSheetFeature.State?
 
-        public init(nickname: String = "", selectedStation: Station? = nil) {
-            self.nickname = nickname
+        public init(name: String = "", selectedStation: Station? = nil) {
+            self.name = name
             self.selectedStation = selectedStation
         }
 
