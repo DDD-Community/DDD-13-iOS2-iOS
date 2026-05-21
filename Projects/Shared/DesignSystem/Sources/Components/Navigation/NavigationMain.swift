@@ -15,6 +15,7 @@ public struct NavigationMain: View {
     private let title: String?
     private let trailingIcons: [NavigationIconItem]
 
+    /// - Parameter trailingIcons: 우측에 표시할 아이콘 목록. 디자인 명세상 최대 3개까지만 표시됩니다.
     public init(
         background: Background,
         title: String? = nil,

@@ -22,6 +22,7 @@ public struct BangawoButton: View {
 
     // MARK: - Init
 
+    /// - Parameter isKeyboardAttached: true이면 cornerRadius 0 + 전체 너비로 전환 — 키보드 위 플로팅 CTA 버튼 패턴
     public init(
         _ title: String,
         variant: Variant = .solid,
@@ -62,6 +63,8 @@ public struct BangawoButton: View {
         .background(currentBackground)
         .clipShape(RoundedRectangle(cornerRadius: effectiveCornerRadius))
         .animation(.easeInOut(duration: 0.1), value: isPressed)
+        // Button 기본 제스처는 눌림 상태를 @GestureState로 추적할 수 없어
+        // DragGesture(minimumDistance: 0)으로 isPressed를 직접 관리
         .gesture(
             DragGesture(minimumDistance: 0)
                 .updating($isPressed) { _, state, _ in
@@ -145,6 +148,7 @@ private extension BangawoButton {
         let widthType: WidthType
 
         var body: some View {
+            // 로딩 중에도 버튼 크기 유지 — 텍스트와 ProgressView를 겹쳐 opacity로만 전환
             ZStack {
                 BangawoText(title, textStyle: effectiveFont)
                     .multilineTextAlignment(.center)

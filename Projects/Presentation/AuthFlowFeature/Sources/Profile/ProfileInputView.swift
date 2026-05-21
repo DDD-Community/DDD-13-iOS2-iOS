@@ -66,6 +66,7 @@ public struct ProfileInputView: View {
                         ])
                         .frame(width: Metric.menuWidth)
                         .offset(
+                            // 아바타 오른쪽 끝 기준 정렬: (전체 너비 + 아바타 크기) / 2 - 메뉴 너비
                             x: (geo.size.width + Metric.avatarSize) / 2 - Metric.menuWidth,
                             y: Spacing.spacing400 + Metric.avatarSize + Spacing.spacing200
                         )

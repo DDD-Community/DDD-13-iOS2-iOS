@@ -19,6 +19,8 @@ public struct SearchField: View {
 
     public var body: some View {
         ZStack(alignment: .trailing) {
+            // 항상 레이아웃에 존재시켜 onAppear에서 너비를 한 번만 측정
+            // InputContainer의 trailing 패딩에 사용 — opacity로만 숨겨 레이아웃 유지
             CancelButton {
                 text = ""
                 isFocused = false

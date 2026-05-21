@@ -83,6 +83,7 @@ public struct Avatar: View {
 
 // MARK: - CircleBackground
 
+// .d3 · .placeholder 전용 — 네트워크/로컬 이미지는 직접 Circle clip을 사용하므로 불필요
 private struct CircleBackground<Content: View>: View {
     let size: Avatar.Size
     let content: () -> Content
@@ -110,6 +111,7 @@ private struct IconArea: View {
     let size: Avatar.Size
 
     var body: some View {
+        // .edit 타입만 인터랙티브 — 나머지(host, pin, star)는 비인터랙티브 뱃지
         if case .edit(let action) = iconType {
             Button(action: action) { iconCircle }
                 .buttonStyle(.plain)

@@ -14,6 +14,7 @@ public struct Menu: View {
 
     // MARK: - Init
 
+    /// - Parameter items: 표시할 메뉴 항목 목록. 디자인 명세상 최대 5개까지만 표시됩니다.
     public init(
         groupTitle: String? = nil,
         selectedIndex: Binding<Int?> = .constant(nil),

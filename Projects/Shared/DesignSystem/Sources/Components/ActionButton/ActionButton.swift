@@ -91,6 +91,7 @@ private extension ActionButton {
                     break
                 }
             }
+            // 뷰가 사라질 때 자동 닫기 Task를 취소해 좀비 콜백 방지
             .onDisappear {
                 dismissTask?.cancel()
             }
