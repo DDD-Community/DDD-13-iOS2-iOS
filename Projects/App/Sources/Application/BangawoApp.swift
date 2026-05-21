@@ -24,6 +24,7 @@ struct BangawoApp: App {
         prepareDependencies {
             $0.searchStationsClient = SearchStationsFactory.makeClient()
             $0.socialAuthClient = AuthFactory.makeClient()
+            $0.signupTermsClient = SignupTermsFactory.makeClient()
         }
 
         initializeNaverLoginSDK()
