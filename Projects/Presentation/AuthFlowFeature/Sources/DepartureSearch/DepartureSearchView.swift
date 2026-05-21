@@ -55,11 +55,7 @@ public struct DepartureSearchView: View {
             isToastVisible = false
             Task { @MainActor in isToastVisible = true }
         }
-        .fullScreenCover(
-            item: $store.scope(state: \.searchSheet, action: \.searchSheet)
-        ) { sheetStore in
-            StationSearchSheet(store: sheetStore)
-        }
+        .stationSearchSheet(item: $store.scope(state: \.searchSheet, action: \.searchSheet))
     }
 }
 
