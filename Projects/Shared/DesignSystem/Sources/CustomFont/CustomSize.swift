@@ -3,7 +3,7 @@
 //  DesignSystem
 //
 
-import CoreGraphics
+import Foundation
 
 public enum CustomSizeFont {
     // MARK: - Display
