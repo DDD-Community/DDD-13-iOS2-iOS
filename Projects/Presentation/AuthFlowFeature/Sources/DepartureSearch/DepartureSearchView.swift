@@ -49,8 +49,11 @@ public struct DepartureSearchView: View {
                 )
             }
         }
-        .onChange(of: store.selectedStation) { old, new in
-            if old == nil, new != nil { isToastVisible = true }
+        .onChange(of: store.selectedStation) { _, new in
+            guard new != nil else { return }
+            // 이미 토스트가 노출 중일 때도 재선택 시 다시 보여주기 위해 리셋 후 재발화
+            isToastVisible = false
+            Task { @MainActor in isToastVisible = true }
         }
         .fullScreenCover(
             item: $store.scope(state: \.searchSheet, action: \.searchSheet)
