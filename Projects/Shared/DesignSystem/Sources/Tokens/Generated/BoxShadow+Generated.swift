@@ -27,20 +27,20 @@ public enum BoxShadow {
         offsetY: 4,
         blur: 10,
         spread: 0,
-        color: Color(red: 0, green: 0, blue: 0, opacity: 0.161)
+        color: Color(red: 0, green: 0, blue: 0, opacity: 0.122)
     )
     public static let boxShadow300 = DesignTokenShadow(
         offsetX: 0,
-        offsetY: 2,
+        offsetY: 4,
         blur: 20,
         spread: 0,
-        color: Color(red: 0, green: 0, blue: 0, opacity: 0.2)
+        color: Color(red: 0.169, green: 0.169, blue: 0.169, opacity: 0.122)
     )
     public static let boxShadow400 = DesignTokenShadow(
         offsetX: 0,
-        offsetY: 16,
-        blur: 40,
+        offsetY: 4,
+        blur: 24,
         spread: 0,
-        color: Color(red: 0, green: 0, blue: 0, opacity: 0.2)
+        color: Color(red: 0.169, green: 0.169, blue: 0.169, opacity: 0.122)
     )
 }
