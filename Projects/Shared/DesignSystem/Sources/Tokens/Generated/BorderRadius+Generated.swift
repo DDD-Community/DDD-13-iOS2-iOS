@@ -13,6 +13,7 @@ public enum BorderRadius {
     public static let borderRadius225: CGFloat = 10
     public static let borderRadius250: CGFloat = 12
     public static let borderRadius300: CGFloat = 16
+    public static let borderRadius350: CGFloat = 20
     public static let borderRadius400: CGFloat = 24
     public static let borderRadius50: CGFloat = 2
     public static let borderRadius500: CGFloat = 32
