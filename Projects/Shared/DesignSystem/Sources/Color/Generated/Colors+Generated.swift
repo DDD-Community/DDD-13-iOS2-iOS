@@ -6,7 +6,8 @@
 
 import SwiftUI
 
-private let designSystemBundle = Bundle.module
+private final class DesignSystemBundleToken {}
+private let designSystemBundle = Bundle(for: DesignSystemBundleToken.self)
 
 public enum Colors {
     // MARK: - Orange
