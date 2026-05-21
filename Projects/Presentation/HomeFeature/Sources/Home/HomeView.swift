@@ -9,6 +9,7 @@ import DesignSystem
 
 public struct HomeView: View {
     @Bindable private var store: StoreOf<HomeFeature>
+    @State private var sheetDetents: Set<PresentationDetent> = [.fraction(0.5)]
 
     public init(store: StoreOf<HomeFeature>) {
         self.store = store
@@ -28,19 +29,37 @@ public struct HomeView: View {
                     .padding(.top, Spacing.spacing250)
                 }
 
-                MeetingListContent(meetings: store.filteredMeetings)
+                MeetingListContent(
+                    meetings: store.filteredMeetings,
+                    onCreateTapped: { store.send(.createMeetingRowTapped) }
+                )
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .background(.gray200)
 
             HomeFAB(
                 isExpanded: store.isFABExpanded,
-                onTap: { store.send(.fabTapped) }
+                onTap: { store.send(.fabTapped) },
+                onCreateMeeting: { store.send(.fabCreateMeetingTapped) },
+                onJoinMeeting: { store.send(.fabJoinMeetingTapped) }
             )
             .padding(.trailing, Spacing.spacing300)
             .padding(.bottom, Spacing.spacing400)
         }
         .onAppear { store.send(.onAppear) }
+        .sheet(item: $store.scope(state: \.creationSheet, action: \.creationSheet)) { sheetStore in
+            MeetingCreationSheet(store: sheetStore)
+                .presentationDetents(sheetDetents)
+                .presentationDragIndicator(sheetStore.step == .purpose ? .visible : .hidden)
+                .onAppear { sheetDetents = [.fraction(0.5)] }
+                .onChange(of: sheetStore.step) { _, step in
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        sheetDetents = step == .purpose
+                            ? [.fraction(0.5), .fraction(0.9)]
+                            : [.fraction(0.5)]
+                    }
+                }
+        }
     }
 }
 
@@ -116,11 +135,14 @@ private struct FilterChip: View {
 
 private struct MeetingListContent: View {
     let meetings: [Meeting]
+    let onCreateTapped: () -> Void
 
     var body: some View {
         if meetings.isEmpty {
-            MeetingEmptyState()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            CreateMeetingRow(onTap: onCreateTapped)
+                .padding(.horizontal, Spacing.spacing300)
+                .padding(.top, Spacing.spacing250)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         } else {
             ScrollView {
                 LazyVStack(spacing: Spacing.spacing250) {
@@ -136,17 +158,39 @@ private struct MeetingListContent: View {
     }
 }
 
-private struct MeetingEmptyState: View {
-    var body: some View {
-        VStack(spacing: Spacing.spacing250) {
-            Text("아직 모임이 없어요")
-                .pretendardCustomFont(textStyle: .bodyBold)
-                .foregroundStyle(.gray700)
+private struct CreateMeetingRow: View {
+    let onTap: () -> Void
 
-            Text("+ 버튼을 눌러 새 모임을 만들어보세요")
-                .pretendardCustomFont(textStyle: .body2Regular)
-                .foregroundStyle(.gray500)
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: Spacing.spacing300) {
+                RoundedRectangle(cornerRadius: BorderRadius.borderRadius200)
+                    .fill(.gray300)
+                    .frame(width: Sizing.sizing550, height: Sizing.sizing550)
+                    .overlay(
+                        Text("+")
+                            .pretendardCustomFont(textStyle: .heading1)
+                            .foregroundStyle(.gray600)
+                    )
+
+                VStack(alignment: .leading, spacing: Spacing.spacing100) {
+                    Text("모임 생성하기")
+                        .pretendardCustomFont(textStyle: .bodyBold)
+                        .foregroundStyle(.gray900)
+
+                    Text("새로운 모임을 만들어보세요")
+                        .pretendardCustomFont(textStyle: .body2Regular)
+                        .foregroundStyle(.gray600)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(Spacing.spacing300)
+            .background(
+                RoundedRectangle(cornerRadius: BorderRadius.borderRadius250)
+                    .fill(Color(hex: "FFFFFF"))
+            )
         }
+        .buttonStyle(.plain)
     }
 }
 
@@ -259,26 +303,21 @@ private struct OverlappingCircles: View {
 private struct HomeFAB: View {
     let isExpanded: Bool
     let onTap: () -> Void
+    let onCreateMeeting: () -> Void
+    let onJoinMeeting: () -> Void
 
     private enum Metric {
         static let fabSize: CGFloat = Sizing.sizing600
-        static let menuWidth: CGFloat = 160
-        static let menuHeight: CGFloat = 120
         static let menuSpacing: CGFloat = 7
     }
 
     var body: some View {
         VStack(alignment: .trailing, spacing: Metric.menuSpacing) {
             if isExpanded {
-                RoundedRectangle(cornerRadius: BorderRadius.borderRadius250)
-                    .fill(Color(hex: "FFFFFF"))
-                    .frame(width: Metric.menuWidth, height: Metric.menuHeight)
-                    .shadow(
-                        color: Color(hex: "D4D4D4").opacity(0.4),
-                        radius: 8,
-                        x: 0,
-                        y: 4
-                    )
+                FABMenu(
+                    onCreateMeeting: onCreateMeeting,
+                    onJoinMeeting: onJoinMeeting
+                )
             }
 
             Button(action: onTap) {
@@ -299,6 +338,47 @@ private struct HomeFAB: View {
             }
             .buttonStyle(.plain)
         }
+    }
+}
+
+private struct FABMenu: View {
+    let onCreateMeeting: () -> Void
+    let onJoinMeeting: () -> Void
+
+    private enum Metric {
+        static let width: CGFloat = 160
+        static let height: CGFloat = 120
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Button(action: onCreateMeeting) {
+                Text("모임 만들기")
+                    .pretendardCustomFont(textStyle: .body2Medium)
+                    .foregroundStyle(.gray900)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            .buttonStyle(.plain)
+
+            Divider()
+
+            Button(action: onJoinMeeting) {
+                Text("모임 참여하기")
+                    .pretendardCustomFont(textStyle: .body2Medium)
+                    .foregroundStyle(.gray900)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            .buttonStyle(.plain)
+        }
+        .frame(width: Metric.width, height: Metric.height)
+        .background(Color(hex: "FFFFFF"))
+        .clipShape(RoundedRectangle(cornerRadius: BorderRadius.borderRadius250))
+        .shadow(
+            color: Color(hex: "D4D4D4").opacity(0.4),
+            radius: 8,
+            x: 0,
+            y: 4
+        )
     }
 }
 

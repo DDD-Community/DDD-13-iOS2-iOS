@@ -36,6 +36,7 @@ public struct HomeFeature {
         public var meetings: [Meeting] = []
         public var selectedFilter: MeetingFilter = .all
         public var isFABExpanded: Bool = false
+        @Presents public var creationSheet: MeetingCreationSheetFeature.State?
 
         public var filteredMeetings: [Meeting] {
             selectedFilter == .all ? meetings : meetings.filter { $0.status == selectedFilter }
@@ -48,6 +49,10 @@ public struct HomeFeature {
         case onAppear
         case filterTapped(MeetingFilter)
         case fabTapped
+        case createMeetingRowTapped
+        case fabCreateMeetingTapped
+        case fabJoinMeetingTapped
+        case creationSheet(PresentationAction<MeetingCreationSheetFeature.Action>)
     }
 
     public init() {}
@@ -64,7 +69,35 @@ public struct HomeFeature {
             case .fabTapped:
                 state.isFABExpanded.toggle()
                 return .none
+
+            case .createMeetingRowTapped:
+                state.creationSheet = MeetingCreationSheetFeature.State()
+                return .none
+
+            case .fabCreateMeetingTapped:
+                state.isFABExpanded = false
+                state.creationSheet = MeetingCreationSheetFeature.State()
+                return .none
+
+            case .fabJoinMeetingTapped:
+                state.isFABExpanded = false
+                return .none
+
+            case let .creationSheet(.presented(.delegate(.meetingCreated(meeting)))):
+                state.meetings.append(meeting)
+                state.creationSheet = nil
+                return .none
+
+            case .creationSheet(.presented(.delegate(.dismissed))):
+                state.creationSheet = nil
+                return .none
+
+            case .creationSheet:
+                return .none
             }
+        }
+        .ifLet(\.$creationSheet, action: \.creationSheet) {
+            MeetingCreationSheetFeature()
         }
     }
 }
