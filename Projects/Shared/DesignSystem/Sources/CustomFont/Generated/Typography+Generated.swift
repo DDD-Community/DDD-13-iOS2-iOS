@@ -17,7 +17,6 @@ public enum Typography {
     public static let typographyWeight700: UIFont.Weight = .bold
 
     // MARK: - Font Size
-    public static let typographySize50: CGFloat = 11
     public static let typographySize100: CGFloat = 11
     public static let typographySize200: CGFloat = 13
     public static let typographySize300: CGFloat = 15
@@ -27,10 +26,8 @@ public enum Typography {
     public static let typographySize700: CGFloat = 25
     public static let typographySize800: CGFloat = 29
     public static let typographySize900: CGFloat = 31
-    public static let typographySize1000: CGFloat = 86
 
     // MARK: - Line Height
-    public static let typographyLineHeight50: CGFloat = 15
     public static let typographyLineHeight100: CGFloat = 15
     public static let typographyLineHeight200: CGFloat = 18
     public static let typographyLineHeight300: CGFloat = 22
@@ -40,7 +37,6 @@ public enum Typography {
     public static let typographyLineHeight700: CGFloat = 34
     public static let typographyLineHeight800: CGFloat = 40
     public static let typographyLineHeight900: CGFloat = 44
-    public static let typographyLineHeight1000: CGFloat = 114
 
     // MARK: - Letter Spacing (em fraction)
     public static let typographyLetterSpacing000: CGFloat = 0
