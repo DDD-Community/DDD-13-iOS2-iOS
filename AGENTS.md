@@ -55,20 +55,16 @@ Projects/
 - final class 기본, private 우선
 - Never force unwrap
 
-### SwiftUI
-- SubView는 struct로 분리 (@ViewBuilder 함수 대신 Binding 사용)
-- View 네이밍에 View suffix 안 붙임
-- Spacer 대신 `.frame(maxWidth/maxHeight: .infinity)` 사용
-- 필수 속성은 init, 선택적 속성은 modifier 함수로 관리
+### SwiftUI / Swift
+상세 컨벤션: `docs/code-convention.md`
 
 ### TCA
-- `@Reducer` 매크로 + `@ObservableState` 사용
-- Action은 이벤트 기반 네이밍 (`incrementButtonTapped`, `numberFactResponse`)
-- Effect: 부작용 없으면 `.none`, 비동기 작업은 `.run`
-- Store: `StoreOf<Feature>`로 선언
-- 액션 간 로직 공유 지양 (헬퍼 메서드 사용)
-- CPU 작업은 Effect 내에서 처리
-- 테스트: TestStore 패턴 사용
+상세 컨벤션: `docs/tca-convention.md`
+
+## Resource Naming
+상세 규칙: `docs/resource-naming.md`
+
+---
 
 #### TCA Dependency Client
 - TCA Client(`@DependencyClient` + `DependencyKey` + `DependencyValues`)는 `CoreDependencies` 한 파일에 둔다
@@ -85,8 +81,6 @@ Projects/
 - PR → develop 머지
 
 ### Commit
-- 형식: `[{Header}]: {Message}`
-- Header: FEAT / REFACTOR / ADD / FIX / HOTFIX / DOCS / TEST / CHORE
-- Message: 한국어, 한 줄, 최대 50자, 마침표 및 특수기호 미사용
-- Body: 필요시 작성, 무엇을 왜 변경했는지 기술
-- 예시: `[FEAT]: 로그인 화면 UI 구현`
+상세 컨벤션: `docs/commit-convention.md`
+
+형식: `[{Header}]: {Message}` — 예시: `[FEAT]: 로그인 화면 UI 구현`

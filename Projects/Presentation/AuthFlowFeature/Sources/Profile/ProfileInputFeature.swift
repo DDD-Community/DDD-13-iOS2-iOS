@@ -2,7 +2,7 @@
 //  ProfileInputFeature.swift
 //  Presentation
 //
-//  닉네임 입력 + 프로필 이미지 선택 진입 화면
+//  이름 입력 + 프로필 이미지 선택 화면
 //
 
 import ComposableArchitecture
@@ -12,36 +12,39 @@ import Foundation
 public struct ProfileInputFeature {
     @ObservableState
     public struct State: Equatable {
-        public var greetingName: String
-        public var nickname: String
+        public var name: String
+        public var isNameReadOnly: Bool
         public var profileImage: ProfileImage
         @Presents public var imagePicker: ProfileImagePickerFeature.State?
 
         public init(
-            greetingName: String = "김반가워",
-            nickname: String = "",
+            name: String = "",
             profileImage: ProfileImage = .none
         ) {
-            self.greetingName = greetingName
-            self.nickname = nickname
+            self.name = name
+            self.isNameReadOnly = !name.isEmpty
             self.profileImage = profileImage
+            self.imagePicker = nil
         }
 
         public var isNextEnabled: Bool {
-            !nickname.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                && profileImage.isPresent
         }
     }
 
     public enum Action: BindableAction {
         case binding(BindingAction<State>)
-        case profileImageTapped
-        case clearNicknameButtonTapped
+        case backButtonTapped
+        case avatarMenuAlbumTapped
+        case avatarMenuProfileSetupTapped
         case nextButtonTapped
         case imagePicker(PresentationAction<ProfileImagePickerFeature.Action>)
         case delegate(Delegate)
 
         public enum Delegate: Equatable {
-            case proceedToDepartureSearch(nickname: String)
+            case proceedToDepartureSearch(name: String)
+            case navigateBack
         }
     }
 
@@ -55,19 +58,22 @@ public struct ProfileInputFeature {
             case .binding:
                 return .none
 
-            case .profileImageTapped:
+            case .backButtonTapped:
+                return .send(.delegate(.navigateBack))
+
+            case .avatarMenuAlbumTapped:
                 state.imagePicker = ProfileImagePickerFeature.State(initialImage: state.profileImage)
                 return .none
 
-            case .clearNicknameButtonTapped:
-                state.nickname = ""
+            case .avatarMenuProfileSetupTapped:
+                // TODO: 프로필 설정하기 플로우 미명세 - 추후 별도 명세 후 연결
                 return .none
 
             case .nextButtonTapped:
                 guard state.isNextEnabled else { return .none }
 
-                let nickname = state.nickname.trimmingCharacters(in: .whitespacesAndNewlines)
-                return .send(.delegate(.proceedToDepartureSearch(nickname: nickname)))
+                let name = state.name.trimmingCharacters(in: .whitespacesAndNewlines)
+                return .send(.delegate(.proceedToDepartureSearch(name: name)))
 
             case let .imagePicker(.presented(.delegate(.dismissWithSave(image)))):
                 state.profileImage = image

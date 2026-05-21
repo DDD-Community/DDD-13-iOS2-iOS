@@ -61,16 +61,28 @@ public struct AuthFlowFeature {
             case .login:
                 return .none
 
-            case let .path(.element(id: _, action: .terms(.delegate(.completeAgreement)))):
+            case .path(.element(id: _, action: .terms(.delegate(.completeAgreement)))):
                 state.path.append(.profile(ProfileInputFeature.State()))
                 return .none
 
-            case let .path(.element(id: _, action: .profile(.delegate(.proceedToDepartureSearch(nickname))))):
-                state.path.append(.departure(DepartureSearchFeature.State(nickname: nickname)))
+            case let .path(.element(id: _, action: .profile(.delegate(.proceedToDepartureSearch(name))))):
+                state.path.append(.departure(DepartureSearchFeature.State(name: name)))
                 return .none
 
             case .path(.element(id: _, action: .departure(.delegate(.proceedToHome)))):
                 return .send(.delegate(.authDidComplete))
+
+            case .path(.element(id: _, action: .departure(.delegate(.dismiss)))):
+                state.path.removeLast()
+                return .none
+
+            case .path(.element(id: _, action: .terms(.delegate(.navigateBack)))):
+                state.path.removeLast()
+                return .none
+
+            case .path(.element(id: _, action: .profile(.delegate(.navigateBack)))):
+                state.path.removeLast()
+                return .none
 
             case .path:
                 return .none

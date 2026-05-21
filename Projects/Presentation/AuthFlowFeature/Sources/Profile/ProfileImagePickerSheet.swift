@@ -58,7 +58,7 @@ struct ProfileImagePickerSheet: View {
                 let data = try? await newItem.loadTransferable(type: Data.self)
                 await MainActor.run {
                     store.send(.galleryImagePicked(data))
-                    photoItem = nil
+                    photoItem = nil  // 동일한 사진을 다시 선택할 수 있도록 리셋 (nil이 되지 않으면 onChange 재발화 안 됨)
                 }
             }
         }
@@ -79,6 +79,8 @@ struct ProfileImagePickerSheet: View {
         }
     }
 
+    // SwiftUI의 fullScreenCover/photosPicker는 권한을 자동 처리하지 않으므로
+    // AVFoundation/Photos로 직접 상태 확인 후 조건부로 UI를 노출
     private func requestCameraPermission() {
         let status = AVCaptureDevice.authorizationStatus(for: .video)
         switch status {

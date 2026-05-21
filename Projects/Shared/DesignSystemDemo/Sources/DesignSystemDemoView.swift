@@ -1,6 +1,23 @@
 import SwiftUI
 
-enum DemoComponent: String, CaseIterable, Identifiable {
+private enum ComponentDemo: String, CaseIterable, Identifiable {
+    case button = "Button"
+    case textButton = "TextButton"
+    case actionButton = "ActionButton"
+    case asset = "Asset"
+    case avatar = "Avatar"
+    case checkbox = "Checkbox"
+    case menu = "Menu"
+    case navigation = "Navigation"
+    case snackBar = "SnackBar"
+    case toast = "Toast"
+    case top = "Top"
+    case text = "Text"
+
+    var id: String { rawValue }
+}
+
+private enum MapDemo: String, CaseIterable, Identifiable {
     case kakaoMap = "KakaoMap"
 
     var id: String { rawValue }
@@ -8,14 +25,38 @@ enum DemoComponent: String, CaseIterable, Identifiable {
 
 struct DesignSystemDemoView: View {
     var body: some View {
-        List(DemoComponent.allCases) { component in
-            NavigationLink(component.rawValue, value: component)
+        List {
+            Section("Components") {
+                ForEach(ComponentDemo.allCases) { component in
+                    NavigationLink(component.rawValue, value: component)
+                }
+            }
+            Section("Map") {
+                ForEach(MapDemo.allCases) { component in
+                    NavigationLink(component.rawValue, value: component)
+                }
+            }
         }
         .navigationTitle("DesignSystem")
-        .navigationDestination(for: DemoComponent.self) { component in
+        .navigationDestination(for: ComponentDemo.self) { component in
             switch component {
-            case .kakaoMap:
-                KakaoMapDemoView()
+            case .button: BangawoButtonDemoView()
+            case .textButton: TextButtonDemoView()
+            case .actionButton: ActionButtonDemoView()
+            case .asset: AssetDemoView()
+            case .avatar: AvatarDemoView()
+            case .checkbox: CheckboxDemoView()
+            case .menu: MenuDemoView()
+            case .navigation: NavigationDemoView()
+            case .snackBar: SnackBarDemoView()
+            case .toast: ToastDemoView()
+            case .top: TopHeroDemoView()
+            case .text: TextDemoView()
+            }
+        }
+        .navigationDestination(for: MapDemo.self) { component in
+            switch component {
+            case .kakaoMap: KakaoMapDemoView()
             }
         }
     }

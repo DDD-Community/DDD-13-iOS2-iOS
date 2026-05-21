@@ -13,12 +13,12 @@ import Foundation
 public struct DepartureSearchFeature {
     @ObservableState
     public struct State: Equatable {
-        public var nickname: String
+        public var name: String
         public var selectedStation: Station?
         @Presents public var searchSheet: StationSearchSheetFeature.State?
 
-        public init(nickname: String = "", selectedStation: Station? = nil) {
-            self.nickname = nickname
+        public init(name: String = "", selectedStation: Station? = nil) {
+            self.name = name
             self.selectedStation = selectedStation
         }
 
@@ -26,6 +26,7 @@ public struct DepartureSearchFeature {
     }
 
     public enum Action {
+        case backButtonTapped
         case searchTriggerTapped
         case searchSheet(PresentationAction<StationSearchSheetFeature.Action>)
         case nextButtonTapped
@@ -33,6 +34,7 @@ public struct DepartureSearchFeature {
 
         public enum Delegate: Equatable {
             case proceedToHome
+            case dismiss
         }
     }
 
@@ -41,6 +43,9 @@ public struct DepartureSearchFeature {
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
+            case .backButtonTapped:
+                return .send(.delegate(.dismiss))
+
             case .searchTriggerTapped:
                 state.searchSheet = StationSearchSheetFeature.State()
                 return .none

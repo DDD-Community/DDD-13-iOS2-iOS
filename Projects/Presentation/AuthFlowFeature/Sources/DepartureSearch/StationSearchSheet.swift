@@ -5,18 +5,30 @@
 
 import SwiftUI
 import ComposableArchitecture
+import DesignSystem
 import Entity
 
 struct StationSearchSheet: View {
     @Bindable var store: StoreOf<StationSearchSheetFeature>
 
     var body: some View {
-        VStack(spacing: 16) {
-            SearchSheetHeader {
-                store.send(.closeButtonTapped)
-            }
+        VStack(spacing: 0) {
+            NavigationPage(
+                background: .clear,
+                trailingIcons: [
+                    NavigationIconItem(icon: .close24) {
+                        store.send(.closeButtonTapped)
+                    }
+                ]
+            )
 
-            SearchKeywordField(keyword: $store.keyword)
+            SearchField(
+                placeholder: "지역, 지하철역 명으로 찾기",
+                text: $store.keyword
+            )
+            .padding(.horizontal, Spacing.spacing450)
+            .frame(maxWidth: .infinity)
+            .background(Colors.gray00)
 
             StationResultList(
                 isLoading: store.isLoading,
@@ -24,52 +36,7 @@ struct StationSearchSheet: View {
                 onSelect: { station in store.send(.stationTapped(station)) }
             )
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 16)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-    }
-}
-
-struct SearchSheetHeader: View {
-    private let onClose: () -> Void
-
-    init(onClose: @escaping () -> Void) {
-        self.onClose = onClose
-    }
-
-    var body: some View {
-        HStack {
-            Color.clear.frame(maxWidth: .infinity)
-            Button(action: onClose) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundStyle(.black)
-                    .padding(.vertical, 8)
-            }
-            .buttonStyle(.plain)
-        }
-        .fixedSize(horizontal: false, vertical: true)
-    }
-}
-
-struct SearchKeywordField: View {
-    @Binding private var keyword: String
-
-    init(keyword: Binding<String>) {
-        self._keyword = keyword
-    }
-
-    var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "magnifyingglass")
-                .foregroundStyle(Color(.systemGray2))
-            TextField("지역, 지하철역 명으로 찾기", text: $keyword)
-                .textFieldStyle(.plain)
-                .submitLabel(.search)
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 12)
-        .background(Color(.systemGray6), in: RoundedRectangle(cornerRadius: 10))
     }
 }
 
@@ -101,14 +68,87 @@ struct StationResultList: View {
             ScrollView {
                 LazyVStack(spacing: 0) {
                     ForEach(stations) { station in
+                        // TODO: 추후 listRow 컴포넌트 추가 예정 - 디자인 명세 필요
                         StationRow(station: station) { onSelect(station) }
                         Divider()
                     }
                 }
+                .padding(.top, 16)
+                .padding(.horizontal, Spacing.spacing450)
             }
+            .ignoresSafeArea(edges: .bottom)
         }
     }
 }
+
+// MARK: - Preview
+
+#Preview("기본 (빈 상태)") {
+    BangawoPreview {
+        StationSearchSheet(
+            store: Store(initialState: StationSearchSheetFeature.State()) {
+                StationSearchSheetFeature()
+            }
+        )
+    }
+}
+
+#Preview("검색 결과 있음") {
+    BangawoPreview {
+        StationSearchSheet(
+            store: Store(
+                initialState: StationSearchSheetFeature.State(
+                    keyword: "강남",
+                    stations: [
+                        Station(
+                            id: "1",
+                            name: "강남역",
+                            addressName: "서울 강남구 역삼동",
+                            roadAddressName: "서울 강남구 강남대로 396",
+                            x: 127.0276368,
+                            y: 37.4979502
+                        ),
+                        Station(
+                            id: "2",
+                            name: "강남구청역",
+                            addressName: "서울 강남구 삼성동",
+                            roadAddressName: "서울 강남구 봉은사로 425",
+                            x: 127.0448716,
+                            y: 37.5172485
+                        ),
+                        Station(
+                            id: "3",
+                            name: "강남터미널",
+                            addressName: "서울 서초구 반포동",
+                            roadAddressName: "서울 서초구 신반포로 194",
+                            x: 127.0047041,
+                            y: 37.5049791
+                        )
+                    ]
+                )
+            ) {
+                StationSearchSheetFeature()
+            }
+        )
+    }
+}
+
+#Preview("로딩 중") {
+    BangawoPreview {
+        StationSearchSheet(
+            store: Store(
+                initialState: StationSearchSheetFeature.State(
+                    keyword: "강남",
+                    isLoading: true
+                )
+            ) {
+                StationSearchSheetFeature()
+            }
+        )
+    }
+}
+
+// MARK: - StationRow
 
 struct StationRow: View {
     private let station: Station
@@ -125,7 +165,7 @@ struct StationRow: View {
                 Text(station.name)
                     .font(.body.bold())
                     .foregroundStyle(.black)
-                Text(districtLevelAddress)
+                Text(fullAddress)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -135,23 +175,8 @@ struct StationRow: View {
         .buttonStyle(.plain)
     }
 
-    private var districtLevelAddress: String {
-        let source = station.roadAddressName.isEmpty
+    private var fullAddress: String {
+        station.roadAddressName.isEmpty
             ? station.addressName : station.roadAddressName
-        return Self.truncateToDistrict(source)
-    }
-
-    private static let administrativeSuffixes: Set<Character> = ["시", "도", "군", "구"]
-
-    private static func truncateToDistrict(_ address: String) -> String {
-        let tokens = address.split(separator: " ")
-        let prefix = tokens.prefix { token in
-            guard let last = token.last else { return false }
-            return administrativeSuffixes.contains(last)
-        }
-
-        return prefix.isEmpty
-            ? address
-            : prefix.joined(separator: " ")
     }
 }
