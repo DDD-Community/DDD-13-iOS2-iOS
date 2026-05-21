@@ -57,9 +57,7 @@ private struct KakaoLoginButton: View {
         Button(action: onTap) {
             HStack(spacing: 0) {
                 Image.Asset.symKakao
-                Text("카카오로 3초 만에 로그인")
-                    .pretendardFont(family: .SemiBold, size: 16)
-                    .lineSpacing(6)
+                BangawoText("카카오로 3초 만에 로그인", textStyle: .labelLarge)
                     .foregroundStyle(Color(hex: "000000").opacity(0.8))
                     .frame(maxWidth: .infinity)
             }
@@ -79,9 +77,7 @@ private struct NaverLoginButton: View {
         Button(action: onTap) {
             HStack(spacing: 0) {
                 Image.Asset.symNaver
-                Text("네이버 로그인")
-                    .pretendardFont(family: .SemiBold, size: 16)
-                    .lineSpacing(6)
+                BangawoText("네이버 로그인", textStyle: .labelLarge)
                     .foregroundStyle(.gray100)
                     .frame(maxWidth: .infinity)
             }
@@ -101,10 +97,8 @@ private struct AppleLoginButton: View {
         Button(action: onTap) {
             HStack(spacing: 0) {
                 Image.Asset.symApple
-                Text("Apple로 로그인")
-                    .pretendardFont(family: .SemiBold, size: 16)
-                    .lineSpacing(6)
-                    .foregroundStyle(Color(hex: "17171C"))
+                BangawoText("Apple로 로그인", textStyle: .labelLarge)
+                    .foregroundStyle(Colors.gray900)
                     .frame(maxWidth: .infinity)
             }
             .padding(.horizontal, 20)
