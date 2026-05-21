@@ -32,10 +32,10 @@ public struct ProfileInputView: View {
                 TextInput(
                     title: "이름",
                     isRequired: true,
-                    placeholder: "이름을 입력해주세요",
-                    helperText: "이름 그대로 작성해주세요",
-                    maxCount: 10,
-                    state: store.isNameReadOnly ? .readOnly : .default,
+                    placeholder: "이름을 입력해 주세요.",
+                    helperText: store.nameHelperText,
+                    maxCount: 7,
+                    state: store.isNameReadOnly ? .readOnly : store.nameInputState,
                     text: $store.name
                 )
                 .padding(.top, Spacing.spacing350)
