@@ -28,8 +28,7 @@ public struct NavigationMain: View {
     public var body: some View {
         HStack(spacing: 0) {
             if let title {
-                Text(title)
-                    .pretendardFont(family: .Medium, size: Typography.typographySize500)
+                BangawoText(title, textStyle: .headingSmall)
                     .foregroundStyle(Colors.gray900)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, Spacing.spacing450)
