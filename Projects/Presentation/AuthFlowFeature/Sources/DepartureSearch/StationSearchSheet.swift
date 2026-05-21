@@ -165,7 +165,7 @@ struct StationRow: View {
                 Text(station.name)
                     .font(.body.bold())
                     .foregroundStyle(.black)
-                Text(districtLevelAddress)
+                Text(fullAddress)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -175,23 +175,8 @@ struct StationRow: View {
         .buttonStyle(.plain)
     }
 
-    private var districtLevelAddress: String {
-        let source = station.roadAddressName.isEmpty
+    private var fullAddress: String {
+        station.roadAddressName.isEmpty
             ? station.addressName : station.roadAddressName
-        return Self.truncateToDistrict(source)
-    }
-
-    private static let administrativeSuffixes: Set<Character> = ["시", "도", "군", "구"]
-
-    private static func truncateToDistrict(_ address: String) -> String {
-        let tokens = address.split(separator: " ")
-        let prefix = tokens.prefix { token in
-            guard let last = token.last else { return false }
-            return administrativeSuffixes.contains(last)
-        }
-
-        return prefix.isEmpty
-            ? address
-            : prefix.joined(separator: " ")
     }
 }
