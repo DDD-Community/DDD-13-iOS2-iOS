@@ -16,49 +16,57 @@ public struct HomeView: View {
     }
 
     public var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            VStack(spacing: 0) {
-                HomeNavigationBar()
-                    .padding(.horizontal, Spacing.spacing300)
+        NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
+            ZStack(alignment: .bottomTrailing) {
+                VStack(spacing: 0) {
+                    HomeNavigationBar()
+                        .padding(.horizontal, Spacing.spacing300)
 
-                if !store.meetings.isEmpty {
-                    MeetingFilterCarousel(
-                        selectedFilter: store.selectedFilter,
-                        onFilterTapped: { store.send(.filterTapped($0)) }
-                    )
-                    .padding(.top, Spacing.spacing250)
-                }
-
-                MeetingListContent(
-                    meetings: store.filteredMeetings,
-                    onCreateTapped: { store.send(.createMeetingRowTapped) }
-                )
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .background(.gray200)
-
-            HomeFAB(
-                isExpanded: store.isFABExpanded,
-                onTap: { store.send(.fabTapped) },
-                onCreateMeeting: { store.send(.fabCreateMeetingTapped) },
-                onJoinMeeting: { store.send(.fabJoinMeetingTapped) }
-            )
-            .padding(.trailing, Spacing.spacing300)
-            .padding(.bottom, Spacing.spacing400)
-        }
-        .onAppear { store.send(.onAppear) }
-        .sheet(item: $store.scope(state: \.creationSheet, action: \.creationSheet)) { sheetStore in
-            MeetingCreationSheet(store: sheetStore)
-                .presentationDetents(sheetDetents)
-                .presentationDragIndicator(sheetStore.step == .purpose ? .visible : .hidden)
-                .onAppear { sheetDetents = [.fraction(0.5)] }
-                .onChange(of: sheetStore.step) { _, step in
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        sheetDetents = step == .purpose
-                            ? [.fraction(0.5), .fraction(0.9)]
-                            : [.fraction(0.5)]
+                    if !store.meetings.isEmpty {
+                        MeetingFilterCarousel(
+                            selectedFilter: store.selectedFilter,
+                            onFilterTapped: { store.send(.filterTapped($0)) }
+                        )
+                        .padding(.top, Spacing.spacing250)
                     }
+
+                    MeetingListContent(
+                        meetings: store.filteredMeetings,
+                        onCreateTapped: { store.send(.createMeetingRowTapped) },
+                        onMeetingTapped: { store.send(.meetingCardTapped($0)) }
+                    )
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .background(.gray200)
+
+                HomeFAB(
+                    isExpanded: store.isFABExpanded,
+                    onTap: { store.send(.fabTapped) },
+                    onCreateMeeting: { store.send(.fabCreateMeetingTapped) },
+                    onJoinMeeting: { store.send(.fabJoinMeetingTapped) }
+                )
+                .padding(.trailing, Spacing.spacing300)
+                .padding(.bottom, Spacing.spacing400)
+            }
+            .onAppear { store.send(.onAppear) }
+            .sheet(item: $store.scope(state: \.creationSheet, action: \.creationSheet)) { sheetStore in
+                MeetingCreationSheet(store: sheetStore)
+                    .presentationDetents(sheetDetents)
+                    .presentationDragIndicator(sheetStore.step == .purpose ? .visible : .hidden)
+                    .onAppear { sheetDetents = [.fraction(0.5)] }
+                    .onChange(of: sheetStore.step) { _, step in
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            sheetDetents = step == .purpose
+                                ? [.fraction(0.5), .fraction(0.9)]
+                                : [.fraction(0.5)]
+                        }
+                    }
+            }
+        } destination: { pathStore in
+            switch pathStore.case {
+            case let .detail(detailStore):
+                MeetingDetailView(store: detailStore)
+            }
         }
     }
 }
@@ -136,6 +144,7 @@ private struct FilterChip: View {
 private struct MeetingListContent: View {
     let meetings: [Meeting]
     let onCreateTapped: () -> Void
+    let onMeetingTapped: (Meeting) -> Void
 
     var body: some View {
         if meetings.isEmpty {
@@ -147,7 +156,7 @@ private struct MeetingListContent: View {
             ScrollView {
                 LazyVStack(spacing: Spacing.spacing250) {
                     ForEach(meetings) { meeting in
-                        MeetingCard(meeting: meeting)
+                        MeetingCard(meeting: meeting, onTap: { onMeetingTapped(meeting) })
                     }
                 }
                 .padding(.horizontal, Spacing.spacing300)
@@ -198,17 +207,21 @@ private struct CreateMeetingRow: View {
 
 private struct MeetingCard: View {
     let meeting: Meeting
+    let onTap: () -> Void
 
     var body: some View {
-        VStack(spacing: Spacing.spacing250) {
-            MeetingCardTopArea(meeting: meeting)
-            MeetingCardBottomArea(participantCount: meeting.participantCount)
+        Button(action: onTap) {
+            VStack(spacing: Spacing.spacing250) {
+                MeetingCardTopArea(meeting: meeting)
+                MeetingCardBottomArea(participantCount: meeting.participantCount)
+            }
+            .padding(Spacing.spacing300)
+            .background(
+                RoundedRectangle(cornerRadius: BorderRadius.borderRadius250)
+                    .fill(Color(hex: "FFFFFF"))
+            )
         }
-        .padding(Spacing.spacing300)
-        .background(
-            RoundedRectangle(cornerRadius: BorderRadius.borderRadius250)
-                .fill(Color(hex: "FFFFFF"))
-        )
+        .buttonStyle(.plain)
     }
 }
 

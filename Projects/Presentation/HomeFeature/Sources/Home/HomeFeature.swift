@@ -31,12 +31,18 @@ public enum MeetingFilter: String, CaseIterable, Equatable {
 
 @Reducer
 public struct HomeFeature {
+    @Reducer(state: .equatable)
+    public enum Path {
+        case detail(MeetingDetailFeature)
+    }
+
     @ObservableState
     public struct State: Equatable {
         public var meetings: [Meeting] = []
         public var selectedFilter: MeetingFilter = .all
         public var isFABExpanded: Bool = false
         @Presents public var creationSheet: MeetingCreationSheetFeature.State?
+        public var path: StackState<Path.State> = StackState<Path.State>()
 
         public var filteredMeetings: [Meeting] {
             selectedFilter == .all ? meetings : meetings.filter { $0.status == selectedFilter }
@@ -52,7 +58,9 @@ public struct HomeFeature {
         case createMeetingRowTapped
         case fabCreateMeetingTapped
         case fabJoinMeetingTapped
+        case meetingCardTapped(Meeting)
         case creationSheet(PresentationAction<MeetingCreationSheetFeature.Action>)
+        case path(StackActionOf<Path>)
     }
 
     public init() {}
@@ -83,6 +91,10 @@ public struct HomeFeature {
                 state.isFABExpanded = false
                 return .none
 
+            case .meetingCardTapped(let meeting):
+                state.path.append(.detail(MeetingDetailFeature.State(meeting: meeting)))
+                return .none
+
             case let .creationSheet(.presented(.delegate(.meetingCreated(meeting)))):
                 state.meetings.append(meeting)
                 state.creationSheet = nil
@@ -94,10 +106,14 @@ public struct HomeFeature {
 
             case .creationSheet:
                 return .none
+
+            case .path:
+                return .none
             }
         }
         .ifLet(\.$creationSheet, action: \.creationSheet) {
             MeetingCreationSheetFeature()
         }
+        .forEach(\.path, action: \.path)
     }
 }
