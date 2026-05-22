@@ -4,7 +4,9 @@
 //
 
 import SwiftUI
+
 import ComposableArchitecture
+
 import DesignSystem
 
 public struct TermsAgreementView: View {

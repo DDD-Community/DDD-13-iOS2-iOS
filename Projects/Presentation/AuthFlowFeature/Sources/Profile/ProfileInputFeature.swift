@@ -5,9 +5,11 @@
 //  이름 입력 + 프로필 이미지 선택 화면
 //
 
-import ComposableArchitecture
-import DesignSystem
 import Foundation
+
+import ComposableArchitecture
+
+import DesignSystem
 
 private enum NameRule {
     static let minCount = 2

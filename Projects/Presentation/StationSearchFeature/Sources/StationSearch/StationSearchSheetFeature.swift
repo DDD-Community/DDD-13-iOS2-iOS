@@ -5,10 +5,12 @@
 //  Kakao Local 키워드 검색 바텀시트 Feature
 //
 
+import Foundation
+
 import ComposableArchitecture
+
 import CoreDependencies
 import Entity
-import Foundation
 import Utill
 
 @Reducer

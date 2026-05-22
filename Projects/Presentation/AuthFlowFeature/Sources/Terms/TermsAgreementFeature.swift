@@ -5,8 +5,9 @@
 //  필수 약관 동의 화면 Feature
 //
 
-import ComposableArchitecture
 import Foundation
+
+import ComposableArchitecture
 
 @Reducer
 public struct TermsAgreementFeature {

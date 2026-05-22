@@ -2,6 +2,28 @@
 
 ## Swift
 
+### Import 규칙
+- Apple 프레임워크 → 외부 라이브러리 → 내부 모듈 순으로 그룹을 구분하고, 빈 줄로 분리한다.
+- 각 그룹 내에서는 알파벳 오름차순으로 정렬한다.
+
+```swift
+// Preferred
+import Foundation
+import SwiftUI
+
+import Alamofire
+import ComposableArchitecture
+
+import DesignSystem
+import Entity
+
+// Not Preferred
+import ComposableArchitecture
+import DesignSystem
+import Foundation
+import SwiftUI
+```
+
 ### Guard 규칙
 - Optional Binding에 shorthand syntax를 사용한다: `guard let value else { return }`
 - `guard ~ else`가 한줄이면 한줄로 작성한다.

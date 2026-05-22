@@ -6,6 +6,7 @@
 //
 
 import Foundation
+
 import Alamofire
 
 /// API 요청 시 파라미터 전달 방식을 정의하는 열거형

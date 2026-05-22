@@ -5,9 +5,11 @@
 //  출발지 검색 화면 Feature. 검색 트리거 + 검색 바텀시트
 //
 
-import ComposableArchitecture
-import Entity
 import Foundation
+
+import ComposableArchitecture
+
+import Entity
 
 @Reducer
 public struct DepartureSearchFeature {

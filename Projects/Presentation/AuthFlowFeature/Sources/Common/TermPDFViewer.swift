@@ -6,8 +6,8 @@
 //  추후 서버/URL 교체 시 PDFDocument(url:) 기반으로 확장
 //
 
-import SwiftUI
 import PDFKit
+import SwiftUI
 import UIKit
 
 struct TermPDFViewer: View {

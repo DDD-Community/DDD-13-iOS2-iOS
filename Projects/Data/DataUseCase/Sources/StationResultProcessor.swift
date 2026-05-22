@@ -5,8 +5,9 @@
 //  Kakao Local 검색 결과 후처리: 서울 한정 필터, 역명 prefix 필터, anchor 거리 정렬
 //
 
-import Entity
 import Foundation
+
+import Entity
 
 enum StationResultProcessor {
     static func process(_ stations: [Station], keyword: String) -> [Station] {

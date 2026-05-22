@@ -5,8 +5,9 @@
 //  회원가입 완료 후 진입할 임시 메인 화면
 //
 
-import ComposableArchitecture
 import Foundation
+
+import ComposableArchitecture
 
 @Reducer
 public struct HomeFeature {
