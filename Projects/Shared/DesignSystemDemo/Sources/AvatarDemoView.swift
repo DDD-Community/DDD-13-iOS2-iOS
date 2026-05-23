@@ -59,7 +59,7 @@ private struct IconTypeSection: View {
                 RowDivider()
                 DemoRow("pin") { Avatar(avatarType: .placeholder, size: .s56, iconType: .pin) }
                 RowDivider()
-                DemoRow("edit") { Avatar(avatarType: .placeholder, size: .s56, iconType: .edit) }
+                DemoRow("edit") { Avatar(avatarType: .placeholder, size: .s56, iconType: .edit(action: {})) }
                 RowDivider()
                 DemoRow("star") { Avatar(avatarType: .placeholder, size: .s56, iconType: .star) }
             }

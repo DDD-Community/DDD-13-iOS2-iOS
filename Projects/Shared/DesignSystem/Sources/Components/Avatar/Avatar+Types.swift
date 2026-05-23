@@ -33,7 +33,7 @@ extension Avatar {
 // MARK: - Size Token Mapping
 
 extension Avatar.Size {
-    var length: CGFloat {
+    public var length: CGFloat {
         switch self {
         case .s24: return 24
         case .s32: return 32
