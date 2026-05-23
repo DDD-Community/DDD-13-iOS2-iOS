@@ -88,7 +88,7 @@ public struct ProfileInputFeature {
 
         Reduce { state, action in
             switch action {
-            case .binding(\.$name):
+            case .binding(\.name):
                 if state.name.count > NameRule.maxCount {
                     state.name = String(state.name.prefix(NameRule.maxCount))
                 }
