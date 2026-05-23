@@ -11,14 +11,14 @@ extension BangawoButton.Variant {
     var enabledBackground: Color {
         switch self {
         case .weak: return Colors.grayAlpha200
-        case .solid: return Colors.grayAlpha800
+        case .solid: return Colors.gray800
         }
     }
 
     var pressedBackground: Color {
         switch self {
         case .weak: return Colors.grayAlpha100
-        case .solid: return Colors.grayAlpha800
+        case .solid: return Colors.gray800
         }
     }
 
