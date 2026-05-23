@@ -145,29 +145,43 @@ private struct TextInputFieldArea: View {
     var body: some View {
         TextInputContainer(state: state) {
             HStack(spacing: 0) {
-                TextField(
-                    text: $text,
-                    prompt: Text(placeholder)
-                        .font(.pretendardFontFamily(family: .Regular, size: Typography.typographySize300))
-                        .foregroundStyle(Colors.gray500)
-                ) {
-                    EmptyView()
-                }
-                .pretendardFont(family: .Regular, size: Typography.typographySize300)
-                .foregroundStyle(textColor)
-                .padding(.vertical, Spacing.spacing50)
-                .focused($isFocused)
-                .disabled(!isInteractive)
-                .tint(Colors.blue500)
-
-                if !text.isEmpty && isInteractive {
-                    Button {
-                        text = ""
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(Colors.gray400)
+                if !isInteractive {
+                    Group {
+                        if text.isEmpty {
+                            Text(placeholder)
+                                .foregroundStyle(Colors.gray500)
+                        } else {
+                            Text(text)
+                                .foregroundStyle(textColor)
+                        }
                     }
-                    .padding(.leading, Spacing.spacing200)
+                    .pretendardFont(family: .Regular, size: Typography.typographySize300)
+                    .padding(.vertical, Spacing.spacing50)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    TextField(
+                        text: $text,
+                        prompt: Text(placeholder)
+                            .font(.pretendardFontFamily(family: .Regular, size: Typography.typographySize300))
+                            .foregroundStyle(Colors.gray500)
+                    ) {
+                        EmptyView()
+                    }
+                    .pretendardFont(family: .Regular, size: Typography.typographySize300)
+                    .foregroundStyle(textColor)
+                    .padding(.vertical, Spacing.spacing50)
+                    .focused($isFocused)
+                    .tint(Colors.blue500)
+
+                    if !text.isEmpty {
+                        Button {
+                            text = ""
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(Colors.gray400)
+                        }
+                        .padding(.leading, Spacing.spacing200)
+                    }
                 }
             }
         }
