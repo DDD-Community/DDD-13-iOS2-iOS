@@ -6,6 +6,7 @@ private enum ComponentDemo: String, CaseIterable, Identifiable {
     case actionButton = "ActionButton"
     case asset = "Asset"
     case avatar = "Avatar"
+    case bottomSheet = "BottomSheet"
     case checkbox = "Checkbox"
     case menu = "Menu"
     case navigation = "Navigation"
@@ -45,6 +46,7 @@ struct DesignSystemDemoView: View {
             case .actionButton: ActionButtonDemoView()
             case .asset: AssetDemoView()
             case .avatar: AvatarDemoView()
+            case .bottomSheet: BottomSheetDemoView()
             case .checkbox: CheckboxDemoView()
             case .menu: MenuDemoView()
             case .navigation: NavigationDemoView()
