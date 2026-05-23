@@ -57,7 +57,6 @@ public struct DepartureSearchView: View {
             isToastVisible = false
             Task { @MainActor in isToastVisible = true }
         }
-        .stationSearchSheet(item: $store.scope(state: \.searchSheet, action: \.searchSheet))
     }
 }
 

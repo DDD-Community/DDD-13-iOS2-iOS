@@ -7,6 +7,8 @@ import SwiftUI
 
 import ComposableArchitecture
 
+import StationSearchFeature
+
 public struct AuthFlowView: View {
     @Bindable private var store: StoreOf<AuthFlowFeature>
 
@@ -33,5 +35,6 @@ public struct AuthFlowView: View {
                     .toolbar(.hidden, for: .navigationBar)
             }
         }
+        .stationSearchSheet(item: $store.scope(state: \.stationSearch, action: \.stationSearch))
     }
 }

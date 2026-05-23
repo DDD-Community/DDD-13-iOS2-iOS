@@ -10,6 +10,9 @@ import Foundation
 
 import ComposableArchitecture
 
+import Entity
+import StationSearchFeature
+
 @Reducer
 public struct AuthFlowFeature {
     @Reducer(state: .equatable)
@@ -23,6 +26,7 @@ public struct AuthFlowFeature {
     public struct State: Equatable {
         public var login: LoginFeature.State
         public var path: StackState<Path.State>
+        @Presents public var stationSearch: StationSearchSheetFeature.State?
 
         public init(
             login: LoginFeature.State = LoginFeature.State(),
@@ -36,6 +40,7 @@ public struct AuthFlowFeature {
     public enum Action {
         case login(LoginFeature.Action)
         case path(StackActionOf<Path>)
+        case stationSearch(PresentationAction<StationSearchSheetFeature.Action>)
         case delegate(Delegate)
 
         public enum Delegate: Equatable {
@@ -77,12 +82,32 @@ public struct AuthFlowFeature {
                 state.path.removeLast()
                 return .none
 
+            case .path(.element(id: _, action: .departure(.delegate(.stationSearchRequested)))):
+                state.stationSearch = StationSearchSheetFeature.State()
+                return .none
+
             case .path(.element(id: _, action: .terms(.delegate(.navigateBack)))):
                 state.path.removeLast()
                 return .none
 
             case .path(.element(id: _, action: .profile(.delegate(.navigateBack)))):
                 state.path.removeLast()
+                return .none
+
+            case let .stationSearch(.presented(.delegate(.stationSelected(station)))):
+                state.stationSearch = nil
+                for id in state.path.ids {
+                    if case .departure = state.path[id: id] {
+                        return .send(.path(.element(id: id, action: .departure(.stationSelected(station)))))
+                    }
+                }
+                return .none
+
+            case .stationSearch(.presented(.delegate(.dismissed))):
+                state.stationSearch = nil
+                return .none
+
+            case .stationSearch:
                 return .none
 
             case .path:
@@ -93,5 +118,8 @@ public struct AuthFlowFeature {
             }
         }
         .forEach(\.path, action: \.path)
+        .ifLet(\.$stationSearch, action: \.stationSearch) {
+            StationSearchSheetFeature()
+        }
     }
 }
