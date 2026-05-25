@@ -70,27 +70,7 @@ public struct TermsAgreementView: View {
                 lowerContent: .init("로그인 아이디 변경", type: .textWithArrow, action: { store.send(.changeLoginIDTapped) })
             )
         }
-        .sheet(
-            isPresented: Binding(
-                get: { store.pdfClause != nil },
-                set: { isPresented in
-                    if !isPresented { store.send(.pdfDismissed) }
-                }
-            )
-        ) {
-            if let clause = store.pdfClause {
-                NavigationStack {
-                    TermPDFViewer(clause: clause)
-                        .navigationTitle(clause.title)
-                        .navigationBarTitleDisplayMode(.inline)
-                        .toolbar {
-                            ToolbarItem(placement: .topBarTrailing) {
-                                Button("닫기") { store.send(.pdfDismissed) }
-                            }
-                        }
-                }
-            }
-        }
+        // TODO: clausePDFTapped 시 약관 내용을 웹뷰로 present해야 합니다
     }
 }
 
