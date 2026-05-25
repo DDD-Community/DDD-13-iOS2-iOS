@@ -73,6 +73,10 @@ extension InfoPlistDictionary {
     return self.merging(dict) { (_, new) in new }
   }
   
+  func setCFBundleLocalizations(_ value: [String]) -> InfoPlistDictionary {
+    return self.merging(["CFBundleLocalizations": .array(value.map { .string($0) })]) { (_, new) in new }
+  }
+
   func setCFBundleVersion(_ value: String) -> InfoPlistDictionary {
     return self.merging(["CFBundleVersion": .string(value)]) { (_, new) in new }
   }
