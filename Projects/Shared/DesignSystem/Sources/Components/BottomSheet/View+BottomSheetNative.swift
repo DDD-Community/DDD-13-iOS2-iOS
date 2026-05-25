@@ -44,7 +44,7 @@ private struct NativeSheetContent<Content: View>: View {
 
     private var detents: Set<PresentationDetent> {
         contentNaturalHeight > scrollViewport
-            ? [.fraction(0.5), .fraction(0.9)]
+            ? [.(0.5), .fraction(0.9)]
             : [.fraction(0.5)]
     }
 

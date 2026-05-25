@@ -60,7 +60,19 @@ public struct BangawoButton: View {
         .padding(.vertical, effectiveVerticalPadding)
         .padding(.horizontal, effectiveHorizontalPadding)
         .frame(maxWidth: effectiveMaxWidth, minHeight: effectiveMinHeight)
-        .background(currentBackground)
+        .background {
+            ZStack {
+                currentBackground
+                if isLoading {
+                    InteractionLayer(variant.interactionStyle, .focused)
+                }
+            }
+        }
+        .overlay {
+            if isPressed {
+                InteractionLayer(variant.interactionStyle, .pressed)
+            }
+        }
         .clipShape(RoundedRectangle(cornerRadius: effectiveCornerRadius))
         .animation(.easeInOut(duration: 0.1), value: isPressed)
         // Button 기본 제스처는 눌림 상태를 @GestureState로 추적할 수 없어

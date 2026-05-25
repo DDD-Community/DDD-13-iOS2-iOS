@@ -69,8 +69,8 @@ public struct ProfileInputFeature {
     public enum Action: BindableAction {
         case binding(BindingAction<State>)
         case backButtonTapped
-        case avatarMenuAlbumTapped
         case avatarMenuProfileSetupTapped
+        case avatarMenuAlbumImagePicked(Data?)
         case nextButtonTapped
         case imagePicker(PresentationAction<ProfileImagePickerFeature.Action>)
         case delegate(Delegate)
@@ -100,12 +100,12 @@ public struct ProfileInputFeature {
             case .backButtonTapped:
                 return .send(.delegate(.navigateBack))
 
-            case .avatarMenuAlbumTapped:
+            case .avatarMenuProfileSetupTapped:
                 state.imagePicker = ProfileImagePickerFeature.State(initialImage: state.profileImage)
                 return .none
 
-            case .avatarMenuProfileSetupTapped:
-                // TODO: 프로필 설정하기 플로우 미명세 - 추후 별도 명세 후 연결
+            case let .avatarMenuAlbumImagePicked(data):
+                if let data { state.profileImage = .data(data) }
                 return .none
 
             case .nextButtonTapped:

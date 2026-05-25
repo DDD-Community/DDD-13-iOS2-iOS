@@ -26,6 +26,13 @@ extension BangawoButton.Variant {
         Colors.gray200
     }
 
+    var interactionStyle: InteractionLayer.Interaction {
+        switch self {
+        case .weak: return .normal
+        case .solid: return .strong
+        }
+    }
+
     // TODO: 디자인 명세 확정 시 컬러 교체 필요
     var indicatorColor: Color {
         switch self {

@@ -7,50 +7,29 @@
 
 import SwiftUI
 
+import DesignSystem
+
 struct ProfileImageDisplay: View {
     private let image: ProfileImage
-    private let size: CGFloat
 
-    init(image: ProfileImage, size: CGFloat) {
+    init(image: ProfileImage) {
         self.image = image
-        self.size = size
     }
 
     var body: some View {
-        Group {
-            switch image {
-            case .none:
-                Circle()
-                    .fill(Color(.systemGray5))
-                    .overlay(
-                        Image(systemName: "person.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .padding(size * 0.25)
-                            .foregroundStyle(Color(.systemGray2))
-                    )
+        switch image {
+        case .none:
+            Asset(assetType: .d3(Image.Asset.imgAvatarPlaceholder), size: .s104)
 
-            case let .data(data):
-                if let uiImage = UIImage(data: data) {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFill()
-                } else {
-                    Circle().fill(Color(.systemGray5))
-                }
-
-            case let .preset(index):
-                Circle()
-                    .fill(Color(.systemGray6))
-                    .overlay(
-                        Text("3D face\n\(index + 1)")
-                            .font(.system(size: size * 0.18, weight: .semibold))
-                            .multilineTextAlignment(.center)
-                            .foregroundStyle(Color(.systemGray))
-                    )
+        case let .data(data):
+            if let uiImage = UIImage(data: data) {
+                Asset(assetType: .image(Image(uiImage: uiImage)), size: .s104)
+            } else {
+                Asset(assetType: .d3(Image.Asset.imgAvatarPlaceholder), size: .s104)
             }
+
+        case .preset:
+            Asset(assetType: .d3(Image.Asset.imgAvatar3d), size: .s104)
         }
-        .frame(width: size, height: size)
-        .clipShape(Circle())
     }
 }

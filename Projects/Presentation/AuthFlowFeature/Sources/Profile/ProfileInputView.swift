@@ -3,6 +3,7 @@
 //  Presentation
 //
 
+import PhotosUI
 import SwiftUI
 
 import ComposableArchitecture
@@ -12,6 +13,8 @@ import DesignSystem
 public struct ProfileInputView: View {
     @Bindable private var store: StoreOf<ProfileInputFeature>
     @State private var isShowingMenu = false
+    @State private var isPhotosPickerPresented = false
+    @State private var photoItem: PhotosPickerItem?
 
     public init(store: StoreOf<ProfileInputFeature>) {
         self.store = store
@@ -62,7 +65,7 @@ public struct ProfileInputView: View {
                                 icon: .Asset.icAlbum24,
                                 iconColor: Colors.gray600
                             ) {
-                                store.send(.avatarMenuAlbumTapped)
+                                isPhotosPickerPresented = true
                                 isShowingMenu = false
                             }
                         ])
@@ -88,11 +91,44 @@ public struct ProfileInputView: View {
             .padding(.horizontal, Spacing.spacing450)
             .padding(.bottom, Spacing.spacing400)
         }
-        .sheet(
-            item: $store.scope(state: \.imagePicker, action: \.imagePicker)
-        ) { pickerStore in
-            ProfileImagePickerSheet(store: pickerStore)
-                .presentationDetents([.medium])
+        .bottomSheet(
+            isPresented: Binding(
+                get: { store.imagePicker != nil },
+                set: { if !$0 { store.send(.imagePicker(.dismiss)) } }
+            ),
+            header: .init(
+                title: "프로필 설정",
+                onClose: { store.send(.imagePicker(.dismiss)) }
+            ),
+            contentVerticalPadding: Spacing.spacing400,
+            buttons: [
+                .init(title: "삭제하기") {
+                    store.send(.imagePicker(.presented(.deleteButtonTapped)))
+                },
+                .init(title: "변경하기") {
+                    store.send(.imagePicker(.presented(.saveButtonTapped)))
+                }
+            ]
+        ) {
+            if let pickerStore = $store.scope(state: \.imagePicker, action: \.imagePicker).wrappedValue {
+                ProfileImagePickerSheet(store: pickerStore)
+            }
+        }
+        .photosPicker(
+            isPresented: $isPhotosPickerPresented,
+            selection: $photoItem,
+            matching: .images
+        )
+        .onChange(of: photoItem) { _, newItem in
+            guard let newItem else { return }
+
+            Task {
+                let data = try? await newItem.loadTransferable(type: Data.self)
+                await MainActor.run {
+                    store.send(.avatarMenuAlbumImagePicked(data))
+                    photoItem = nil
+                }
+            }
         }
         .onTapGesture {
             if isShowingMenu { isShowingMenu = false }
