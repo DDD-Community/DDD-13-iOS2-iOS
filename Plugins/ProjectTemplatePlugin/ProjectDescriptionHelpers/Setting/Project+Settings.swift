@@ -11,13 +11,15 @@ extension Settings {
     appName: String,
     displayName: String,
     provisioningProfile: String,
-    setSkipInstall: Bool
+    setSkipInstall: Bool,
+    codeSignStyle: String = "Manual"
   ) -> SettingsDictionary {
     return SettingsDictionary()
       .setProductName(appName)
       .setCFBundleDisplayName(displayName)
       .setOtherLdFlags("-ObjC -all_load")
       .setDebugInformationFormat("dwarf-with-dsym")
+      .setCodeSignStyle(codeSignStyle)
       .setProvisioningProfileSpecifier(provisioningProfile)
       .setSkipInstall(setSkipInstall)
       .setCFBundleDevelopmentRegion("ko")
