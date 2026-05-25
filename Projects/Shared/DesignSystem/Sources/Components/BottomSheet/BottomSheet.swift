@@ -7,8 +7,7 @@ import SwiftUI
 
 private enum Metric {
     static let contentSlotHeight: CGFloat = 230
-    static let handleAreaHeight: CGFloat = 20
-    static let handleBarWidth: CGFloat = 36
+    static let handleBarWidth: CGFloat = 48
     static let handleBarHeight: CGFloat = 4
     static let containerBottomPadding: CGFloat = 37
 }
@@ -20,8 +19,11 @@ public struct BottomSheet<Content: View>: View {
     private let content: () -> Content
     private let contentVerticalPadding: CGFloat
     private let buttons: [ButtonConfig]
+    private let canExpand: Binding<Bool>?
 
     @State private var isKeyboardVisible = false
+    @State private var contentNaturalHeight: CGFloat = 0
+    @State private var scrollViewport: CGFloat = 0
 
     // MARK: - Init
 
@@ -29,11 +31,13 @@ public struct BottomSheet<Content: View>: View {
         header: HeaderConfig? = nil,
         contentVerticalPadding: CGFloat = 0,
         buttons: [ButtonConfig] = [],
+        canExpand: Binding<Bool>? = nil,
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.header = header
         self.contentVerticalPadding = contentVerticalPadding
         self.buttons = Array(buttons.prefix(2))
+        self.canExpand = canExpand
         self.content = content
     }
 
@@ -45,7 +49,7 @@ public struct BottomSheet<Content: View>: View {
                 RoundedRectangle(cornerRadius: 2)
                     .fill(Colors.gray300)
                     .frame(width: Metric.handleBarWidth, height: Metric.handleBarHeight)
-                    .frame(height: Metric.handleAreaHeight)
+                    .padding(.top, Spacing.spacing300)
                 if let header {
                     HeaderView(config: header)
                 }
@@ -53,9 +57,28 @@ public struct BottomSheet<Content: View>: View {
                     content()
                         .padding(.horizontal, Spacing.spacing400)
                         .padding(.vertical, contentVerticalPadding)
+                        .background(
+                            GeometryReader { geo in
+                                Color.clear
+                                    .onChange(of: geo.size.height, initial: true) { _, h in
+                                        contentNaturalHeight = h
+                                        canExpand?.wrappedValue = h > scrollViewport
+                                    }
+                            }
+                        )
                 }
+                .background(
+                    GeometryReader { geo in
+                        Color.clear
+                            .onChange(of: geo.size.height, initial: true) { _, h in
+                                scrollViewport = h
+                                canExpand?.wrappedValue = contentNaturalHeight > h
+                            }
+                    }
+                )
                 .frame(minHeight: Metric.contentSlotHeight, maxHeight: .infinity)
                 .scrollBounceBehavior(.basedOnSize)
+
                 if !buttons.isEmpty {
                     LowerArea(buttons: buttons, isKeyboardVisible: isKeyboardVisible)
                 }
@@ -64,7 +87,9 @@ public struct BottomSheet<Content: View>: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .ignoresSafeArea(edges: .bottom)
         }
-        .padding(.bottom, Metric.containerBottomPadding)
+        .ignoresSafeArea(edges: .bottom)
+        .padding(.bottom, isKeyboardVisible ? 0 : Metric.containerBottomPadding)
+        .padding(.horizontal, isKeyboardVisible ? 0 : Spacing.spacing300)
         .presentationDragIndicator(.hidden)
         .onReceive(
             NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
@@ -83,7 +108,7 @@ private extension BottomSheet {
 
         var body: some View {
             ZStack(alignment: .top) {
-                RoundedRectangle(cornerRadius: BorderRadius.borderRadius450)
+                RoundedRectangle(cornerRadius: BorderRadius.borderRadius400)
                 .fill(Colors.gray00)
                 .shadow(
                     color: BoxShadow.boxShadow400.color,
@@ -196,89 +221,20 @@ private extension BottomSheet {
 
 // MARK: - Preview
 
-#Preview("헤더 + 버튼 1개") {
-    Color.gray.ignoresSafeArea()
-        .bangawoBottomSheet(
-            isPresented: .constant(true),
-            header: .init(
-                title: "제목입니다",
-                description: "설명 텍스트가 여기에 표시됩니다.",
-                onClose: {}
-            ),
-            contentVerticalPadding: Spacing.spacing400,
-            buttons: [.init(title: "확인") {}]
-        ) {
-            Text("컨텐츠 영역")
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-}
-
-#Preview("헤더 + 버튼 2개") {
-    Color.gray.ignoresSafeArea()
-        .bangawoBottomSheet(
-            isPresented: .constant(true),
-            header: .init(
-                title: "제목입니다",
-                description: "설명 텍스트가 여기에 표시됩니다.",
-                onClose: {}
-            ),
-            contentVerticalPadding: Spacing.spacing400,
-            buttons: [
-                .init(title: "취소") {},
-                .init(title: "확인") {}
-            ]
-        ) {
-            Text("컨텐츠 영역")
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-}
-
-#Preview("헤더 없음 + 버튼 없음") {
-    Color.gray.ignoresSafeArea()
-        .bangawoBottomSheet(
-            isPresented: .constant(true),
-            contentVerticalPadding: Spacing.spacing400
-        ) {
-            Text("컨텐츠만 있는 시트")
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-}
-
-#Preview("콘텐츠 오버플로우 (스크롤)") {
-    Color.gray.ignoresSafeArea()
-        .bangawoBottomSheet(
-            isPresented: .constant(true),
-            header: .init(title: "스크롤 테스트", onClose: {}),
-            contentVerticalPadding: Spacing.spacing400,
-            buttons: [.init(title: "확인") {}]
-        ) {
-            VStack(spacing: Spacing.spacing200) {
-                ForEach(0..<10, id: \.self) { i in
-                    Text("항목 \(i + 1)")
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-            }
-        }
-}
-
-#Preview("키보드 (TextField)") {
-    struct KeyboardPreview: View {
-        @State private var isPresented = true
-        @State private var text = ""
-
-        var body: some View {
-            Color.gray.ignoresSafeArea()
-                .bangawoBottomSheet(
-                    isPresented: $isPresented,
-                    header: .init(title: "키보드 테스트", onClose: {}),
-                    contentVerticalPadding: Spacing.spacing400,
-                    buttons: [.init(title: "확인") {}]
-                ) {
-                    TextField("입력하세요", text: $text)
-                        .textFieldStyle(.roundedBorder)
-                        .frame(maxWidth: .infinity)
-                }
-        }
+#Preview {
+    BottomSheet(
+        header: .init(
+            title: "제목입니다",
+            description: "설명 텍스트가 여기에 표시됩니다.",
+            onClose: {}
+        ),
+        contentVerticalPadding: Spacing.spacing400,
+        buttons: [
+            .init(title: "취소") {},
+            .init(title: "확인") {}
+        ]
+    ) {
+        Text("컨텐츠 영역")
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
-    return KeyboardPreview()
 }

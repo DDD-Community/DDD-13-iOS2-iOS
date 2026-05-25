@@ -1,9 +1,13 @@
 //
 //  Color+.swift
-//  DDDAttendance
+//  DesignSystem
 //
 
 import SwiftUI
+
+public extension Color {
+    var uiColor: UIColor { UIColor(self) }
+}
 
 public extension Color {
   init(hex: String) {
