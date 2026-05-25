@@ -110,6 +110,7 @@ private struct TextInputTitleArea: View {
                 BangawoText("*", textStyle: .titleSmallEmphasized)
                     .foregroundStyle(Colors.red500)
                     .padding(.vertical, Spacing.spacing50)
+                    .padding(.leading, Spacing.spacing50)
             }
             if isOptional {
                 BangawoText("(optional)", textStyle: .bodyMedium)
