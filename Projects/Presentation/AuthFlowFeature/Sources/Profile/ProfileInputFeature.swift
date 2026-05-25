@@ -49,12 +49,13 @@ public struct ProfileInputFeature {
             return .default
         }
 
-        public var nameHelperText: String {
-            if !name.isEmpty && NameRule.containsInvalidChars(name) {
-                return "숫자나 특수문자는 사용할 수 없습니다."
-            }
+        public var nameHelperText: String? {
+            guard !name.isEmpty else { return "이름 그대로 작성해주세요" }
 
-            return "이름 그대로 작성해주세요"
+            if NameRule.containsInvalidChars(name) { return "숫자나 특수문자는 사용할 수 없습니다." }
+            if name.count < NameRule.minCount { return "이름 그대로 작성해주세요" }
+
+            return nil
         }
 
         public var isNextEnabled: Bool {
