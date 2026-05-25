@@ -25,7 +25,6 @@ public extension View {
 }
 
 private enum Metric {
-    static let contentSlotHeight: CGFloat = 230
     static let handleBarWidth: CGFloat = 48
     static let handleBarHeight: CGFloat = 4
 }
@@ -44,8 +43,8 @@ private struct NativeSheetContent<Content: View>: View {
 
     private var detents: Set<PresentationDetent> {
         contentNaturalHeight > scrollViewport
-            ? [.(0.5), .fraction(0.9)]
-            : [.fraction(0.5)]
+            ? [.height(UIScreen.screenHeight * 0.5), .height(UIScreen.screenHeight * 0.9)]
+            : [.height(UIScreen.screenHeight * 0.5)]
     }
 
     var body: some View {
@@ -78,7 +77,6 @@ private struct NativeSheetContent<Content: View>: View {
                         }
                 }
             )
-            .frame(minHeight: Metric.contentSlotHeight, maxHeight: .infinity)
             .scrollBounceBehavior(.basedOnSize)
             if !buttons.isEmpty {
                 ButtonRow(buttons: Array(buttons.prefix(2)), isKeyboardVisible: isKeyboardVisible)
