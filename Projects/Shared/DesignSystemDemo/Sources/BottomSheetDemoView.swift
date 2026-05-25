@@ -11,6 +11,9 @@ struct BottomSheetDemoView: View {
                 SingleButtonSection()
                 DoubleButtonSection()
                 ScrollableSection()
+                KeyboardSection()
+                SectionDivider("Overlay 방식")
+                OverlayKeyboardSection()
             }
             .padding(.top, 16)
             .padding(.bottom, 40)
@@ -39,7 +42,7 @@ private struct ContentOnlySection: View {
             .card()
         }
         .padding(.horizontal, 20)
-        .bangawoBottomSheet(isPresented: $isPresented, contentVerticalPadding: Spacing.spacing400) {
+        .bottomSheet(isPresented: $isPresented, contentVerticalPadding: Spacing.spacing400) {
             Text("컨텐츠만 있는 시트입니다.")
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -64,7 +67,7 @@ private struct HeaderOnlySection: View {
             .card()
         }
         .padding(.horizontal, 20)
-        .bangawoBottomSheet(
+        .bottomSheet(
             isPresented: $isPresented,
             header: .init(
                 title: "제목입니다",
@@ -97,7 +100,7 @@ private struct SingleButtonSection: View {
             .card()
         }
         .padding(.horizontal, 20)
-        .bangawoBottomSheet(
+        .bottomSheet(
             isPresented: $isPresented,
             header: .init(
                 title: "제목입니다",
@@ -131,7 +134,7 @@ private struct DoubleButtonSection: View {
             .card()
         }
         .padding(.horizontal, 20)
-        .bangawoBottomSheet(
+        .bottomSheet(
             isPresented: $isPresented,
             header: .init(
                 title: "제목입니다",
@@ -168,7 +171,7 @@ private struct ScrollableSection: View {
             .card()
         }
         .padding(.horizontal, 20)
-        .bangawoBottomSheet(
+        .bottomSheet(
             isPresented: $isPresented,
             header: .init(title: "스크롤 테스트", onClose: { isPresented = false }),
             contentVerticalPadding: Spacing.spacing400,
@@ -180,6 +183,89 @@ private struct ScrollableSection: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
+        }
+    }
+}
+
+// MARK: - KeyboardSection
+
+private struct KeyboardSection: View {
+    @State private var isPresented = false
+    @State private var text = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SectionHeader("Keyboard")
+            VStack(spacing: 0) {
+                DemoRow("키보드 + TextField") {
+                    BangawoButton("열기", variant: .weak, size: .small) {
+                        isPresented = true
+                    }
+                }
+            }
+            .card()
+        }
+        .padding(.horizontal, 20)
+        .bottomSheet(
+            isPresented: $isPresented,
+            header: .init(title: "키보드 테스트", onClose: { isPresented = false }),
+            contentVerticalPadding: Spacing.spacing400,
+            buttons: [.init(title: "확인") { isPresented = false }]
+        ) {
+            TextField("입력하세요", text: $text)
+                .textFieldStyle(.roundedBorder)
+                .frame(maxWidth: .infinity)
+        }
+    }
+}
+
+// MARK: - SectionDivider
+
+private struct SectionDivider: View {
+    let title: String
+
+    init(_ title: String) {
+        self.title = title
+    }
+
+    var body: some View {
+        Text(title)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 20)
+            .padding(.top, 8)
+    }
+}
+
+// MARK: - OverlayKeyboardSection
+
+private struct OverlayKeyboardSection: View {
+    @State private var isPresented = false
+    @State private var text = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SectionHeader("Keyboard")
+            VStack(spacing: 0) {
+                DemoRow("키보드 + TextField") {
+                    BangawoButton("열기", variant: .weak, size: .small) {
+                        isPresented = true
+                    }
+                }
+            }
+            .card()
+        }
+        .padding(.horizontal, 20)
+        .customBottomSheet(
+            isPresented: $isPresented,
+            header: .init(title: "키보드 테스트 (Overlay)", onClose: { isPresented = false }),
+            contentVerticalPadding: Spacing.spacing400,
+            buttons: [.init(title: "확인") { isPresented = false }]
+        ) {
+            TextField("입력하세요", text: $text)
+                .textFieldStyle(.roundedBorder)
+                .frame(maxWidth: .infinity)
         }
     }
 }
