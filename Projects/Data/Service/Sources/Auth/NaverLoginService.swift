@@ -3,9 +3,10 @@
 //  Service
 //
 
+import NidThirdPartyLogin
+
 import DomainInterface
 import Entity
-import NidThirdPartyLogin
 import Utill
 
 public protocol NaverLoginServiceInterface: Sendable {

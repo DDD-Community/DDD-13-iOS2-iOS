@@ -7,14 +7,15 @@
 import CoreGraphics
 
 public enum BorderRadius {
+    public static let borderRadius50: CGFloat = 2
     public static let borderRadius100: CGFloat = 4
     public static let borderRadius150: CGFloat = 6
     public static let borderRadius200: CGFloat = 8
     public static let borderRadius225: CGFloat = 10
     public static let borderRadius250: CGFloat = 12
     public static let borderRadius300: CGFloat = 16
+    public static let borderRadius350: CGFloat = 20
     public static let borderRadius400: CGFloat = 24
-    public static let borderRadius50: CGFloat = 2
     public static let borderRadius500: CGFloat = 32
     public static let borderRadiusFull: CGFloat = 999
 }

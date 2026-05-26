@@ -7,12 +7,15 @@
 import CoreGraphics
 
 public enum Sizing {
+    public static let sizing50: CGFloat = 8
+    public static let sizing75: CGFloat = 12
     public static let sizing100: CGFloat = 16
     public static let sizing150: CGFloat = 20
     public static let sizing200: CGFloat = 24
     public static let sizing300: CGFloat = 32
     public static let sizing325: CGFloat = 34
     public static let sizing350: CGFloat = 36
+    public static let sizing375: CGFloat = 38
     public static let sizing400: CGFloat = 40
     public static let sizing425: CGFloat = 42
     public static let sizing450: CGFloat = 44
@@ -20,6 +23,8 @@ public enum Sizing {
     public static let sizing550: CGFloat = 52
     public static let sizing600: CGFloat = 56
     public static let sizing700: CGFloat = 64
+    public static let sizing750: CGFloat = 82
     public static let sizing800: CGFloat = 104
     public static let sizing900: CGFloat = 112
+    public static let sizing1000: CGFloat = 280
 }

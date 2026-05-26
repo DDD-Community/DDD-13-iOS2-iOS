@@ -13,6 +13,7 @@ public extension InfoPlist {
       .setUILaunchScreens()
       .setCFBundleDevelopmentRegion()
       .setCFBundleDevelopmentRegion("$(DEVELOPMENT_LANGUAGE)")
+      .setCFBundleLocalizations(["ko"])
       .setCFBundleExecutable("$(EXECUTABLE_NAME)")
       .setCFBundleIdentifier("$(PRODUCT_BUNDLE_IDENTIFIER)")
       .setCFBundleInfoDictionaryVersion("6.0")

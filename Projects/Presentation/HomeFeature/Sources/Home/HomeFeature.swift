@@ -3,8 +3,9 @@
 //  Presentation
 //
 
-import ComposableArchitecture
 import Foundation
+
+import ComposableArchitecture
 
 public struct Meeting: Identifiable, Equatable {
     public let id: UUID

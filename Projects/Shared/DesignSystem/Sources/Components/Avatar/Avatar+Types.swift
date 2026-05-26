@@ -18,6 +18,8 @@ extension Avatar {
         case pin
         case edit(action: () -> Void)
         case star
+        // TODO: check 케이스 디자인 명세(배경색, 아이콘 에셋) 확정 후 구현
+        case check
     }
 
     public enum Size: CaseIterable {
@@ -33,7 +35,7 @@ extension Avatar {
 // MARK: - Size Token Mapping
 
 extension Avatar.Size {
-    var length: CGFloat {
+    public var length: CGFloat {
         switch self {
         case .s24: return 24
         case .s32: return 32
@@ -93,6 +95,7 @@ extension Avatar.IconType {
         case .pin: return Colors.green500
         case .edit: return Colors.gray800
         case .star: return Colors.blue500
+        case .check: return .clear // TODO: 명세 확정 후 교체
         }
     }
 
@@ -102,6 +105,7 @@ extension Avatar.IconType {
         case .pin: return Image.Asset.icPin24
         case .edit: return Image.Asset.icEdit24
         case .star: return Image.Asset.icStar24
+        case .check: return Image.Asset.icCrown24 // TODO: check 아이콘 에셋 추가 후 교체
         }
     }
 }

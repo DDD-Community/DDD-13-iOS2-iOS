@@ -11,19 +11,26 @@ extension BangawoButton.Variant {
     var enabledBackground: Color {
         switch self {
         case .weak: return Colors.grayAlpha200
-        case .solid: return Colors.grayAlpha800
+        case .solid: return Colors.gray800
         }
     }
 
     var pressedBackground: Color {
         switch self {
         case .weak: return Colors.grayAlpha100
-        case .solid: return Colors.grayAlpha800
+        case .solid: return Colors.gray800
         }
     }
 
     var disabledBackground: Color {
         Colors.gray200
+    }
+
+    var interactionStyle: InteractionLayer.Interaction {
+        switch self {
+        case .weak: return .normal
+        case .solid: return .strong
+        }
     }
 
     // TODO: 디자인 명세 확정 시 컬러 교체 필요

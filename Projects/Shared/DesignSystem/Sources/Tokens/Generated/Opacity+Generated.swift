@@ -7,12 +7,12 @@
 import CoreGraphics
 
 public enum Opacity {
+    public static let opacity50: CGFloat = 0.05
     public static let opacity100: CGFloat = 0.08
     public static let opacity150: CGFloat = 0.12
     public static let opacity200: CGFloat = 0.16
     public static let opacity300: CGFloat = 0.24
     public static let opacity400: CGFloat = 0.32
-    public static let opacity50: CGFloat = 0.05
     public static let opacity500: CGFloat = 0.4
     public static let opacity600: CGFloat = 0.48
     public static let opacity700: CGFloat = 0.64

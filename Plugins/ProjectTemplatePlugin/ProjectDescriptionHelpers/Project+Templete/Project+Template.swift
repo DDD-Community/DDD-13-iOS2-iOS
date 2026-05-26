@@ -99,7 +99,7 @@ public extension Project {
     return Project(
       name: name,
       options: .options(
-        defaultKnownRegions: ["en", "ko"],
+        defaultKnownRegions: ["ko"],
         developmentRegion: "ko"
       ),
       packages: packages,

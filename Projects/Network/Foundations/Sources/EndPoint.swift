@@ -6,6 +6,7 @@
 //
 
 import Foundation
+
 import Alamofire
 
 /// API 엔드포인트를 정의하기 위한 프로토콜
