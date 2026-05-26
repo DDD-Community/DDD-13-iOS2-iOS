@@ -96,12 +96,14 @@ public struct AuthFlowFeature {
 
             case let .stationSearch(.presented(.delegate(.stationSelected(station)))):
                 state.stationSearch = nil
-                for id in state.path.ids {
-                    if case .departure = state.path[id: id] {
-                        return .send(.path(.element(id: id, action: .departure(.stationSelected(station)))))
-                    }
+                let departureID = state.path.ids.first { id in
+                    if case .departure = state.path[id: id] { return true }
+                    return false
                 }
-                return .none
+                return .run { send in
+                    guard let id = departureID else { return }
+                    await send(.path(.element(id: id, action: .departure(.stationSelected(station)))))
+                }
 
             case .stationSearch(.presented(.delegate(.dismissed))):
                 state.stationSearch = nil
