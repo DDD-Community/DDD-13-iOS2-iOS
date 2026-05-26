@@ -27,13 +27,17 @@ public struct AuthFlowFeature {
         public var login: LoginFeature.State
         public var path: StackState<Path.State>
         @Presents public var stationSearch: StationSearchSheetFeature.State?
+        public var suggestedProfileName: String?
 
         public init(
             login: LoginFeature.State = LoginFeature.State(),
-            path: StackState<Path.State> = StackState<Path.State>()
+            path: StackState<Path.State> = StackState<Path.State>(),
+            suggestedProfileName: String? = nil
         ) {
             self.login = login
             self.path = path
+            self.stationSearch = nil
+            self.suggestedProfileName = suggestedProfileName
         }
     }
 
@@ -57,7 +61,8 @@ public struct AuthFlowFeature {
 
         Reduce { state, action in
             switch action {
-            case .login(.delegate(.needsSignUp)):
+            case let .login(.delegate(.needsSignUp(_, suggestedName))):
+                state.suggestedProfileName = suggestedName
                 state.path.append(.terms(TermsAgreementFeature.State()))
                 return .none
 
@@ -68,7 +73,7 @@ public struct AuthFlowFeature {
                 return .none
 
             case .path(.element(id: _, action: .terms(.delegate(.completeAgreement)))):
-                state.path.append(.profile(ProfileInputFeature.State()))
+                state.path.append(.profile(ProfileInputFeature.State(name: state.suggestedProfileName ?? "")))
                 return .none
 
             case let .path(.element(id: _, action: .profile(.delegate(.proceedToDepartureSearch(name))))):

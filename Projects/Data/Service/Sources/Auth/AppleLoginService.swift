@@ -15,7 +15,7 @@ import Utill
 /// Apple 인증 요청, delegate callback 처리, token 추출을 Service 계층 안에 숨깁니다.
 public protocol AppleLoginServiceInterface: Sendable {
     @MainActor
-    func login() async throws -> SocialAuthToken
+    func login() async throws -> SocialAuthResult
 }
 
 /// `ASAuthorizationController`의 delegate 기반 API를 async/await 형태로 감싼 구현체입니다.
@@ -25,11 +25,11 @@ public protocol AppleLoginServiceInterface: Sendable {
 public final class AppleLoginService: NSObject, AppleLoginServiceInterface, @unchecked Sendable {
     /// Apple 로그인 결과를 `async` 호출 지점으로 돌려주기 위해 보관하는 continuation입니다.
     /// 성공/실패 callback을 받은 뒤 반드시 resume하고 nil로 정리해야 합니다.
-    private var continuation: CheckedContinuation<SocialAuthToken, Error>?
+    private var continuation: CheckedContinuation<SocialAuthResult, Error>?
 
     public override init() {}
     @MainActor
-    public func login() async throws -> SocialAuthToken {
+    public func login() async throws -> SocialAuthResult {
         // 사용자가 버튼을 빠르게 여러 번 누르더라도 Apple 인증 요청이 중복 실행되지 않도록 방어합니다.
         guard continuation == nil else {
             throw SocialAuthClientError.underlying("🍏 이미 Apple 로그인이 진행 중입니다.")
@@ -87,8 +87,19 @@ extension AppleLoginService: ASAuthorizationControllerDelegate {
             return
         }
 
+        let suggestedName = credential.fullName.flatMap { fullName in
+            let name = PersonNameComponentsFormatter().string(from: fullName)
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            return name.isEmpty ? nil : name
+        }
+
         // TODO: 서버 애플 로그인 방식 확정 후 providerToken으로 identityToken을 보낼지 authorizationCode를 보낼지 결정합니다.
-        resume(returning: SocialAuthToken(accessToken: identityToken, refreshToken: nil))
+        resume(
+            returning: SocialAuthResult(
+                token: SocialAuthToken(accessToken: identityToken, refreshToken: nil),
+                suggestedName: suggestedName
+            )
+        )
     }
 
     public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
@@ -104,8 +115,8 @@ extension AppleLoginService: ASAuthorizationControllerDelegate {
 
 private extension AppleLoginService {
     /// 성공 callback을 async 호출자에게 전달하고 continuation을 정리합니다.
-    func resume(returning token: SocialAuthToken) {
-        continuation?.resume(returning: token)
+    func resume(returning result: SocialAuthResult) {
+        continuation?.resume(returning: result)
         continuation = nil
     }
 

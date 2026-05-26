@@ -25,7 +25,7 @@ public struct SocialAuthToken: Equatable, Sendable {
     public init(
         accessToken: String,
         refreshToken: String? = nil,
-        idToken: String? = nil
+        idToken: String? = nil,
     ) {
         self.accessToken = accessToken
         self.refreshToken = refreshToken

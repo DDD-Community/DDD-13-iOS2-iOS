@@ -39,6 +39,7 @@ public extension InfoPlist {
         ]
       ])
       .setKakaoAppKey("$(KAKAO_APP_KEY)")
+      .setServerBaseURL("$(SERVER_BASE_URL)")
       .setNaverClientID("$(NAVER_CLIENT_ID)")
       .setNaverClientSecret("$(NAVER_CLIENT_SECRET)")
       .setNaverURLScheme("$(NAVER_URL_SCHEME)")

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Utill
 
 import ComposableArchitecture
 
@@ -26,7 +27,6 @@ public struct ProfileInputFeature {
     @ObservableState
     public struct State: Equatable {
         public var name: String
-        public var isNameReadOnly: Bool
         public var profileImage: ProfileImage
         @Presents public var imagePicker: ProfileImagePickerFeature.State?
 
@@ -35,7 +35,6 @@ public struct ProfileInputFeature {
             profileImage: ProfileImage = .none
         ) {
             self.name = name
-            self.isNameReadOnly = !name.isEmpty
             self.profileImage = profileImage
             self.imagePicker = nil
         }
@@ -44,6 +43,7 @@ public struct ProfileInputFeature {
             guard !name.isEmpty else { return .default }
 
             if NameRule.containsInvalidChars(name) { return .error }
+            if name.count > NameRule.maxCount { return .error }
             if name.count < NameRule.minCount { return .error }
 
             return .default
@@ -52,7 +52,9 @@ public struct ProfileInputFeature {
         public var nameHelperText: String? {
             guard !name.isEmpty else { return "이름 그대로 작성해주세요" }
 
-            if NameRule.containsInvalidChars(name) { return "숫자나 특수문자는 사용할 수 없습니다." }
+            if NameRule.containsInvalidChars(name) || name.count > NameRule.maxCount {
+                return "이름은 한글 7자 이내로 입력해주세요"
+            }
             if name.count < NameRule.minCount { return "이름 그대로 작성해주세요" }
 
             return nil
@@ -64,6 +66,10 @@ public struct ProfileInputFeature {
                 && (NameRule.minCount...NameRule.maxCount).contains(name.count)
 
             return isNameValid && profileImage.isPresent
+        }
+
+        public var isNameInvalid: Bool {
+            !name.isEmpty && nameInputState == .error
         }
     }
 
@@ -90,9 +96,6 @@ public struct ProfileInputFeature {
         Reduce { state, action in
             switch action {
             case .binding(\.name):
-                if state.name.count > NameRule.maxCount {
-                    state.name = String(state.name.prefix(NameRule.maxCount))
-                }
                 return .none
 
             case .binding:
@@ -113,6 +116,7 @@ public struct ProfileInputFeature {
                 guard state.isNextEnabled else { return .none }
 
                 let name = state.name.trimmingCharacters(in: .whitespacesAndNewlines)
+                Log.debug("입력된 이름:\(name)")
                 return .send(.delegate(.proceedToDepartureSearch(name: name)))
 
             case let .imagePicker(.presented(.delegate(.dismissWithSave(image)))):

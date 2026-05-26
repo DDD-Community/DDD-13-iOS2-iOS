@@ -128,6 +128,7 @@ private struct TextInputTitleArea: View {
 private struct TextInputFieldArea: View {
     let placeholder: String
     let state: TextInputState
+
     @Binding var text: String
     @FocusState.Binding var isFocused: Bool
 

@@ -129,8 +129,15 @@ private extension ActionButton {
 
         var body: some View {
             switch layout {
-            case let .single(title, action):
-                BangawoButton(title, variant: .solid, size: .large, widthType: .maxWidth, action: action)
+            case let .single(title, isDisabled, action):
+                BangawoButton(
+                    title,
+                    variant: .solid,
+                    size: .large,
+                    widthType: .maxWidth,
+                    isDisabled: isDisabled,
+                    action: action
+                )
                     .padding(.horizontal, Spacing.spacing450)
 
             case let .dual(primaryTitle, primaryAction, secondaryTitle, secondaryAction, arrangement):

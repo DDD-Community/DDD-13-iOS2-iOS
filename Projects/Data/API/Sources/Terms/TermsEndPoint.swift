@@ -5,20 +5,19 @@
 
 import Foundations
 import Alamofire
+import Utill
 
 public enum TermsEndPoint: EndPoint {
     case fetchSignupTerms // 회원 가입 이용약관 조회
     
     public var baseURL: String {
-        // TODO: baseURL secret파일에 추가하고 가져오기
-        let url = "https://port-0-bangawo-server-dev-mnaf2uuja2b612e3.sel3.cloudtype.app"
-        return url
+        AppEnvironment.serverBaseURL
     }
     
     public var path: String {
         switch self {
         case .fetchSignupTerms:
-            return "/v1/terms"
+            return "/api/v1/terms"
         }
     }
     

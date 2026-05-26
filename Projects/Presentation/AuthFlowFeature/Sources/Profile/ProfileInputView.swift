@@ -39,8 +39,8 @@ public struct ProfileInputView: View {
                     isRequired: true,
                     placeholder: "이름을 입력해 주세요.",
                     helperText: store.nameHelperText,
-                    maxCount: 7,
-                    state: store.isNameReadOnly ? .readOnly : store.nameInputState,
+                    maxCount: Metric.maxNameCount,
+                    state: store.nameInputState,
                     text: $store.name
                 )
                 .padding(.top, Spacing.spacing350)
@@ -137,6 +137,7 @@ public struct ProfileInputView: View {
 // MARK: - Metric
 
 private enum Metric {
+    static let maxNameCount = 7
     static let menuWidth: CGFloat = 200
     static let avatarSize: CGFloat = 124
 }

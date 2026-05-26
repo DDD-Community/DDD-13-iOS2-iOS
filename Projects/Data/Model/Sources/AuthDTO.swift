@@ -22,7 +22,7 @@ public struct LoginRequestDTO: Encodable, Sendable {
 public struct LoginResponseDTO: Codable, Sendable {
     public let accessToken: String // 액세스 토큰
     public let refreshToken: String // 리프레시 토큰
-    public let isNewMember: Bool // 최초 생성한 회원 여부
+    public let firstSocialLogin: Bool // 최초 생성한 회원 여부
     public let registrationCompleted: Bool // 회원가입 완료 여부 -> 닉네임 설정 완료까지 하면 true
     /// registrationCompleted가 true인 회원만 메인화면으로 아니면 회원가입 화면
 }
@@ -34,7 +34,7 @@ public extension LoginResponseDTO { // 엔티티 변환 함수 추가
                 accessToken: accessToken,
                 refreshToken: refreshToken
             ),
-            isNewMember: isNewMember,
+            firstSocialLogin: firstSocialLogin,
             registrationCompleted: registrationCompleted
         )
     }

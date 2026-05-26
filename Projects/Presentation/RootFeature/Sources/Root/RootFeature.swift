@@ -50,7 +50,8 @@ public struct RootFeature {
             switch action {
             case .onAppear:
                 let hasToken = KeyChainManager.itemExists(key: KeyChainKey.accessToken)
-                state.mode = hasToken ? .main : .auth
+                //state.mode = hasToken ? .main : .auth
+                state.mode = .auth // 테스트용
                 return .none
 
             case .auth(.delegate(.authDidComplete)):

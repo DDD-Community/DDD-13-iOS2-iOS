@@ -31,32 +31,41 @@ public final class SignInWithSocialUseCaseImpl: SignInWithSocialUseCase {
     public func execute(provider: SocialAuthProvider) async throws -> LoginResult {
         switch provider {
         case .kakao:
-            let socialToken = try await kakaoLoginService.login() // 소셜인증 후
-            Log.debug("🔑 kakaoSocialToken: \(socialToken)")
+            let socialAuthResult = try await kakaoLoginService.login() // 소셜인증 후
+            Log.debug("🔑 kakaoSocialToken: \(socialAuthResult.token)")
             return try await signInWithServer( // 서버 로그인 요청
                 provider: provider,
-                providerToken: socialToken.accessToken
+                providerToken: socialAuthResult.token.accessToken,
+                suggestedName: socialAuthResult.suggestedName
             )
 
         case .naver:
-            let socialToken = try await naverLoginService.login()
-            Log.debug("🔑 naverSocialToken: \(socialToken)")
+            let socialAuthResult = try await naverLoginService.login()
+            Log.debug("🔑 naverSocialToken: \(socialAuthResult.token)")
             return try await signInWithServer(
                 provider: provider,
-                providerToken: socialToken.accessToken
+                providerToken: socialAuthResult.token.accessToken,
+                suggestedName: socialAuthResult.suggestedName
             )
 
         case .apple:
-            let socialToken = try await appleLoginService.login()
-            Log.debug("🔑 appleSocialToken: \(socialToken)")
-            return try await signInWithServer(provider: provider, providerToken: socialToken.accessToken
+            let socialAuthResult = try await appleLoginService.login()
+            Log.debug("🔑 appleSocialToken: \(socialAuthResult.token)")
+            return try await signInWithServer(
+                provider: provider,
+                providerToken: socialAuthResult.token.accessToken,
+                suggestedName: socialAuthResult.suggestedName
             )
         }
     }
 }
 
 private extension SignInWithSocialUseCaseImpl {
-    func signInWithServer(provider: SocialAuthProvider, providerToken: String) async throws -> LoginResult { // 서버 로그인 요청
+    func signInWithServer(
+        provider: SocialAuthProvider,
+        providerToken: String,
+        suggestedName: String?
+    ) async throws -> LoginResult { // 서버 로그인 요청
         let loginResult = try await repository.login(
             provider: provider.serverValue,
             providerToken: providerToken
@@ -64,6 +73,11 @@ private extension SignInWithSocialUseCaseImpl {
         // 직접 키체인에 접근하는 것이 아닌 repository를 통해 접근하도록
         repository.saveAuthTokens(loginResult.tokens)
 
-        return loginResult
+        return LoginResult(
+            tokens: loginResult.tokens,
+            firstSocialLogin: loginResult.firstSocialLogin,
+            registrationCompleted: loginResult.registrationCompleted,
+            suggestedName: suggestedName
+        )
     }
 }

@@ -11,11 +11,18 @@ public struct TermClause: Equatable, Identifiable, Sendable {
     public let id: String
     public let title: String
     public let body: String
+    public let isRequired: Bool
 
-    public init(id: String, title: String, body: String) {
+    public init(id: String, title: String, body: String, isRequired: Bool = true) {
         self.id = id
         self.title = title
         self.body = body
+        self.isRequired = isRequired
+    }
+
+    public var displayTitle: String {
+        guard isRequired, !title.hasPrefix("(필수)") else { return "(선택) \(title)" } // 필수 약관인지 확인
+        return "(필수) \(title)"
     }
 }
 
