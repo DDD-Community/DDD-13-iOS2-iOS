@@ -47,7 +47,7 @@ private struct SheetHeader: View {
     var body: some View {
         HStack(spacing: 0) {
             Text("모임 만들기")
-                .pretendardCustomFont(textStyle: .bodyBold)
+                .pretendardCustomFont(textStyle: .bodyLargeEmphasized)
                 .foregroundStyle(.gray900)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -109,11 +109,11 @@ private struct PurposeSelectField: View {
         VStack(alignment: .leading, spacing: Spacing.spacing200) {
             HStack(spacing: 0) {
                 Text("모임 목적")
-                    .pretendardCustomFont(textStyle: .body2Medium)
+                    .pretendardCustomFont(textStyle: .bodyMedium)
                     .foregroundStyle(.gray900)
                     .padding(.vertical, Spacing.spacing50)
                 Text("*")
-                    .pretendardCustomFont(textStyle: .body2Medium)
+                    .pretendardCustomFont(textStyle: .bodyMedium)
                     .foregroundStyle(Colors.red500)
                     .padding(.vertical, Spacing.spacing50)
             }
@@ -121,7 +121,7 @@ private struct PurposeSelectField: View {
             Button(action: onTap) {
                 HStack(spacing: 0) {
                     Text(selectedPurpose?.rawValue ?? "목적을 선택해주세요")
-                        .pretendardCustomFont(textStyle: .bodyRegular)
+                        .pretendardCustomFont(textStyle: .bodyLarge)
                         .foregroundStyle(selectedPurpose == nil ? .gray500 : .gray900)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -148,7 +148,7 @@ private struct CreateButton: View {
     var body: some View {
         Button(action: onTap) {
             Text("만들기")
-                .pretendardCustomFont(textStyle: .bodyBold)
+                .pretendardCustomFont(textStyle: .bodyLargeEmphasized)
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: Sizing.sizing500)
@@ -199,7 +199,7 @@ private struct PurposeRow: View {
         Button(action: onTap) {
             HStack(spacing: 0) {
                 Text(purpose.rawValue)
-                    .pretendardCustomFont(textStyle: .bodyRegular)
+                    .pretendardCustomFont(textStyle: .bodyLarge)
                     .foregroundStyle(isSelected ? Color(hex: "FF3C27") : .gray900)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -223,7 +223,7 @@ private struct RegisterButton: View {
     var body: some View {
         Button(action: onTap) {
             Text("등록하기")
-                .pretendardCustomFont(textStyle: .bodyBold)
+                .pretendardCustomFont(textStyle: .bodyLargeEmphasized)
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: Sizing.sizing500)

@@ -17,11 +17,11 @@ public struct MeetingDetailView: View {
     public var body: some View {
         VStack(spacing: Spacing.spacing300) {
             Text(store.meeting.title)
-                .pretendardCustomFont(textStyle: .heading1)
+                .pretendardCustomFont(textStyle: .headingSmall)
                 .foregroundStyle(.gray900)
 
             Text("모임 상세 화면 (임시)")
-                .pretendardCustomFont(textStyle: .body2Regular)
+                .pretendardCustomFont(textStyle: .bodySmall)
                 .foregroundStyle(.gray600)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
