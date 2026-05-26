@@ -10,14 +10,16 @@ public extension View {
         isPresented: Binding<Bool>,
         header: BottomSheet<Content>.HeaderConfig? = nil,
         contentVerticalPadding: CGFloat = 0,
-        buttons: [BottomSheet<Content>.ButtonConfig] = [],
+        primaryButton: BottomSheet<Content>.ButtonConfig? = nil,
+        secondaryButton: BottomSheet<Content>.ButtonConfig? = nil,
         @ViewBuilder content: @escaping () -> Content
     ) -> some View {
         sheet(isPresented: isPresented) {
             NativeSheetContent(
                 header: header,
                 contentVerticalPadding: contentVerticalPadding,
-                buttons: buttons,
+                primaryButton: primaryButton,
+                secondaryButton: secondaryButton,
                 content: content
             )
         }
@@ -34,7 +36,8 @@ private enum Metric {
 private struct NativeSheetContent<Content: View>: View {
     let header: BottomSheet<Content>.HeaderConfig?
     let contentVerticalPadding: CGFloat
-    let buttons: [BottomSheet<Content>.ButtonConfig]
+    let primaryButton: BottomSheet<Content>.ButtonConfig?
+    let secondaryButton: BottomSheet<Content>.ButtonConfig?
     let content: () -> Content
 
     @State private var isKeyboardVisible = false
@@ -78,8 +81,12 @@ private struct NativeSheetContent<Content: View>: View {
                 }
             )
             .scrollBounceBehavior(.basedOnSize)
-            if !buttons.isEmpty {
-                ButtonRow(buttons: Array(buttons.prefix(2)), isKeyboardVisible: isKeyboardVisible)
+            if primaryButton != nil || secondaryButton != nil {
+                ButtonRow(
+                    primaryButton: primaryButton,
+                    secondaryButton: secondaryButton,
+                    isKeyboardVisible: isKeyboardVisible
+                )
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -138,12 +145,32 @@ private extension NativeSheetContent {
 
 private extension NativeSheetContent {
     struct ButtonRow: View {
-        let buttons: [BottomSheet<Content>.ButtonConfig]
+        let primaryButton: BottomSheet<Content>.ButtonConfig?
+        let secondaryButton: BottomSheet<Content>.ButtonConfig?
         let isKeyboardVisible: Bool
 
         var body: some View {
             HStack(spacing: isKeyboardVisible ? 0 : 8) {
-                buttonContent
+                if let secondary = secondaryButton {
+                    BangawoButton(
+                        secondary.title,
+                        variant: .weak,
+                        size: .large,
+                        widthType: .maxWidth,
+                        isKeyboardAttached: isKeyboardVisible,
+                        action: secondary.action
+                    )
+                }
+                if let primary = primaryButton {
+                    BangawoButton(
+                        primary.title,
+                        variant: .solid,
+                        size: .large,
+                        widthType: .maxWidth,
+                        isKeyboardAttached: isKeyboardVisible,
+                        action: primary.action
+                    )
+                }
             }
             .padding(
                 isKeyboardVisible
@@ -155,37 +182,6 @@ private extension NativeSheetContent {
                         trailing: Spacing.spacing400
                     )
             )
-        }
-
-        @ViewBuilder
-        private var buttonContent: some View {
-            if buttons.count >= 2 {
-                BangawoButton(
-                    buttons[0].title,
-                    variant: .weak,
-                    size: .large,
-                    widthType: .maxWidth,
-                    isKeyboardAttached: isKeyboardVisible,
-                    action: buttons[0].action
-                )
-                BangawoButton(
-                    buttons[1].title,
-                    variant: .solid,
-                    size: .large,
-                    widthType: .maxWidth,
-                    isKeyboardAttached: isKeyboardVisible,
-                    action: buttons[1].action
-                )
-            } else if let button = buttons.first {
-                BangawoButton(
-                    button.title,
-                    variant: .solid,
-                    size: .large,
-                    widthType: .maxWidth,
-                    isKeyboardAttached: isKeyboardVisible,
-                    action: button.action
-                )
-            }
         }
     }
 }
@@ -206,7 +202,7 @@ private extension NativeSheetContent {
                         onClose: { isPresented = false }
                     ),
                     contentVerticalPadding: Spacing.spacing400,
-                    buttons: [.init(title: "확인") { isPresented = false }]
+                    primaryButton: .init(title: "확인") { isPresented = false }
                 ) {
                     Text("컨텐츠 영역")
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -230,10 +226,8 @@ private extension NativeSheetContent {
                         onClose: { isPresented = false }
                     ),
                     contentVerticalPadding: Spacing.spacing400,
-                    buttons: [
-                        .init(title: "취소") { isPresented = false },
-                        .init(title: "확인") { isPresented = false }
-                    ]
+                    primaryButton: .init(title: "확인") { isPresented = false },
+                    secondaryButton: .init(title: "취소") { isPresented = false }
                 ) {
                     Text("컨텐츠 영역")
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -242,8 +236,6 @@ private extension NativeSheetContent {
     }
     return Preview()
 }
-
-
 
 #Preview("키보드 (TextField)") {
     struct Preview: View {
@@ -256,7 +248,7 @@ private extension NativeSheetContent {
                     isPresented: $isPresented,
                     header: .init(title: "키보드 테스트", onClose: { isPresented = false }),
                     contentVerticalPadding: Spacing.spacing400,
-                    buttons: [.init(title: "확인") { isPresented = false }]
+                    primaryButton: .init(title: "확인") { isPresented = false }
                 ) {
                     TextField("입력하세요", text: $text)
                         .textFieldStyle(.roundedBorder)

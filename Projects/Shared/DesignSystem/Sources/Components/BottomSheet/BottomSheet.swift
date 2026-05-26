@@ -18,7 +18,8 @@ public struct BottomSheet<Content: View>: View {
     private let header: HeaderConfig?
     private let content: () -> Content
     private let contentVerticalPadding: CGFloat
-    private let buttons: [ButtonConfig]
+    private let primaryButton: ButtonConfig?
+    private let secondaryButton: ButtonConfig?
     private let canExpand: Binding<Bool>?
 
     @State private var isKeyboardVisible = false
@@ -30,13 +31,15 @@ public struct BottomSheet<Content: View>: View {
     public init(
         header: HeaderConfig? = nil,
         contentVerticalPadding: CGFloat = 0,
-        buttons: [ButtonConfig] = [],
+        primaryButton: ButtonConfig? = nil,
+        secondaryButton: ButtonConfig? = nil,
         canExpand: Binding<Bool>? = nil,
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.header = header
         self.contentVerticalPadding = contentVerticalPadding
-        self.buttons = Array(buttons.prefix(2))
+        self.primaryButton = primaryButton
+        self.secondaryButton = secondaryButton
         self.canExpand = canExpand
         self.content = content
     }
@@ -79,8 +82,12 @@ public struct BottomSheet<Content: View>: View {
                 .frame(minHeight: Metric.contentSlotHeight, maxHeight: .infinity)
                 .scrollBounceBehavior(.basedOnSize)
 
-                if !buttons.isEmpty {
-                    LowerArea(buttons: buttons, isKeyboardVisible: isKeyboardVisible)
+                if primaryButton != nil || secondaryButton != nil {
+                    LowerArea(
+                        primaryButton: primaryButton,
+                        secondaryButton: secondaryButton,
+                        isKeyboardVisible: isKeyboardVisible
+                    )
                 }
             }
             .padding(.bottom, Spacing.spacing300)
@@ -167,12 +174,32 @@ private extension BottomSheet {
 
 private extension BottomSheet {
     struct LowerArea: View {
-        let buttons: [ButtonConfig]
+        let primaryButton: ButtonConfig?
+        let secondaryButton: ButtonConfig?
         let isKeyboardVisible: Bool
 
         var body: some View {
             HStack(spacing: isKeyboardVisible ? 0 : 8) {
-                buttonContent
+                if let secondary = secondaryButton {
+                    BangawoButton(
+                        secondary.title,
+                        variant: .weak,
+                        size: .large,
+                        widthType: .maxWidth,
+                        isKeyboardAttached: isKeyboardVisible,
+                        action: secondary.action
+                    )
+                }
+                if let primary = primaryButton {
+                    BangawoButton(
+                        primary.title,
+                        variant: .solid,
+                        size: .large,
+                        widthType: .maxWidth,
+                        isKeyboardAttached: isKeyboardVisible,
+                        action: primary.action
+                    )
+                }
             }
             .padding(
                 isKeyboardVisible
@@ -184,37 +211,6 @@ private extension BottomSheet {
                         trailing: Spacing.spacing400
                     )
             )
-        }
-
-        @ViewBuilder
-        private var buttonContent: some View {
-            if buttons.count >= 2 {
-                BangawoButton(
-                    buttons[0].title,
-                    variant: .weak,
-                    size: .large,
-                    widthType: .maxWidth,
-                    isKeyboardAttached: isKeyboardVisible,
-                    action: buttons[0].action
-                )
-                BangawoButton(
-                    buttons[1].title,
-                    variant: .solid,
-                    size: .large,
-                    widthType: .maxWidth,
-                    isKeyboardAttached: isKeyboardVisible,
-                    action: buttons[1].action
-                )
-            } else if let button = buttons.first {
-                BangawoButton(
-                    button.title,
-                    variant: .solid,
-                    size: .large,
-                    widthType: .maxWidth,
-                    isKeyboardAttached: isKeyboardVisible,
-                    action: button.action
-                )
-            }
         }
     }
 }
@@ -229,10 +225,8 @@ private extension BottomSheet {
             onClose: {}
         ),
         contentVerticalPadding: Spacing.spacing400,
-        buttons: [
-            .init(title: "취소") {},
-            .init(title: "확인") {}
-        ]
+        primaryButton: .init(title: "확인") {},
+        secondaryButton: .init(title: "취소") {}
     ) {
         Text("컨텐츠 영역")
             .frame(maxWidth: .infinity, alignment: .leading)

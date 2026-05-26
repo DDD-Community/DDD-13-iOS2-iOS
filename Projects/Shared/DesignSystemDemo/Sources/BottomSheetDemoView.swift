@@ -108,7 +108,7 @@ private struct SingleButtonSection: View {
                 onClose: { isPresented = false }
             ),
             contentVerticalPadding: Spacing.spacing400,
-            buttons: [.init(title: "확인") { isPresented = false }]
+            primaryButton: .init(title: "확인") { isPresented = false }
         ) {
             Text("버튼이 1개인 시트입니다.")
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -142,10 +142,8 @@ private struct DoubleButtonSection: View {
                 onClose: { isPresented = false }
             ),
             contentVerticalPadding: Spacing.spacing400,
-            buttons: [
-                .init(title: "취소") { isPresented = false },
-                .init(title: "확인") { isPresented = false }
-            ]
+            primaryButton: .init(title: "확인") { isPresented = false },
+            secondaryButton: .init(title: "취소") { isPresented = false }
         ) {
             Text("버튼이 2개인 시트입니다.")
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -175,7 +173,7 @@ private struct ScrollableSection: View {
             isPresented: $isPresented,
             header: .init(title: "스크롤 테스트", onClose: { isPresented = false }),
             contentVerticalPadding: Spacing.spacing400,
-            buttons: [.init(title: "확인") { isPresented = false }]
+            primaryButton: .init(title: "확인") { isPresented = false }
         ) {
             VStack(spacing: Spacing.spacing200) {
                 ForEach(0..<10, id: \.self) { i in
@@ -210,7 +208,7 @@ private struct KeyboardSection: View {
             isPresented: $isPresented,
             header: .init(title: "키보드 테스트", onClose: { isPresented = false }),
             contentVerticalPadding: Spacing.spacing400,
-            buttons: [.init(title: "확인") { isPresented = false }]
+            primaryButton: .init(title: "확인") { isPresented = false }
         ) {
             TextField("입력하세요", text: $text)
                 .textFieldStyle(.roundedBorder)
@@ -261,7 +259,7 @@ private struct OverlayKeyboardSection: View {
             isPresented: $isPresented,
             header: .init(title: "키보드 테스트 (Overlay)", onClose: { isPresented = false }),
             contentVerticalPadding: Spacing.spacing400,
-            buttons: [.init(title: "확인") { isPresented = false }]
+            primaryButton: .init(title: "확인") { isPresented = false }
         ) {
             TextField("입력하세요", text: $text)
                 .textFieldStyle(.roundedBorder)

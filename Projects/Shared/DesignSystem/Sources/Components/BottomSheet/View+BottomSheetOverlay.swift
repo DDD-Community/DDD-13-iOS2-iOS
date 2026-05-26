@@ -13,7 +13,8 @@ public extension View {
         isPresented: Binding<Bool>,
         header: BottomSheet<Content>.HeaderConfig? = nil,
         contentVerticalPadding: CGFloat = 0,
-        buttons: [BottomSheet<Content>.ButtonConfig] = [],
+        primaryButton: BottomSheet<Content>.ButtonConfig? = nil,
+        secondaryButton: BottomSheet<Content>.ButtonConfig? = nil,
         @ViewBuilder content: @escaping () -> Content
     ) -> some View {
         modifier(
@@ -21,7 +22,8 @@ public extension View {
                 isPresented: isPresented,
                 header: header,
                 contentVerticalPadding: contentVerticalPadding,
-                buttons: buttons,
+                primaryButton: primaryButton,
+                secondaryButton: secondaryButton,
                 content: content
             )
         )
@@ -34,7 +36,8 @@ private struct BottomSheetOverlayModifier<SheetContent: View>: ViewModifier {
     @Binding var isPresented: Bool
     let header: BottomSheet<SheetContent>.HeaderConfig?
     let contentVerticalPadding: CGFloat
-    let buttons: [BottomSheet<SheetContent>.ButtonConfig]
+    let primaryButton: BottomSheet<SheetContent>.ButtonConfig?
+    let secondaryButton: BottomSheet<SheetContent>.ButtonConfig?
     let content: () -> SheetContent
 
     @State private var keyboardHeight: CGFloat = 0
@@ -78,7 +81,8 @@ private struct BottomSheetOverlayModifier<SheetContent: View>: ViewModifier {
                     BottomSheet(
                         header: header,
                         contentVerticalPadding: contentVerticalPadding,
-                        buttons: buttons,
+                        primaryButton: primaryButton,
+                        secondaryButton: secondaryButton,
                         canExpand: $canExpand,
                         content: content
                     )
@@ -190,7 +194,7 @@ private struct BottomSheetOverlayModifier<SheetContent: View>: ViewModifier {
                         onClose: { isPresented = false }
                     ),
                     contentVerticalPadding: Spacing.spacing400,
-                    buttons: [.init(title: "확인") { isPresented = false }]
+                    primaryButton: .init(title: "확인") { isPresented = false }
                 ) {
                     Text("컨텐츠 영역")
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -214,10 +218,8 @@ private struct BottomSheetOverlayModifier<SheetContent: View>: ViewModifier {
                         onClose: { isPresented = false }
                     ),
                     contentVerticalPadding: Spacing.spacing400,
-                    buttons: [
-                        .init(title: "취소") { isPresented = false },
-                        .init(title: "확인") { isPresented = false }
-                    ]
+                    primaryButton: .init(title: "확인") { isPresented = false },
+                    secondaryButton: .init(title: "취소") { isPresented = false }
                 ) {
                     Text("컨텐츠 영역")
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -255,7 +257,7 @@ private struct BottomSheetOverlayModifier<SheetContent: View>: ViewModifier {
                     isPresented: $isPresented,
                     header: .init(title: "스크롤 + 확장 테스트", onClose: { isPresented = false }),
                     contentVerticalPadding: Spacing.spacing400,
-                    buttons: [.init(title: "확인") { isPresented = false }]
+                    primaryButton: .init(title: "확인") { isPresented = false }
                 ) {
                     VStack(spacing: Spacing.spacing200) {
                         ForEach(0..<10, id: \.self) { i in
@@ -280,7 +282,7 @@ private struct BottomSheetOverlayModifier<SheetContent: View>: ViewModifier {
                     isPresented: $isPresented,
                     header: .init(title: "키보드 테스트", onClose: { isPresented = false }),
                     contentVerticalPadding: Spacing.spacing400,
-                    buttons: [.init(title: "확인") { isPresented = false }]
+                    primaryButton: .init(title: "확인") { isPresented = false }
                 ) {
                     TextField("입력하세요", text: $text)
                         .textFieldStyle(.roundedBorder)
