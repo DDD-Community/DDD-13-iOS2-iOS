@@ -5,10 +5,11 @@
 //  LocationSearchRepositoryProtocol 구현체. Kakao Local 키워드 검색 호출
 //
 
+import Foundation
+
 import API
 import DataInterface
 import Entity
-import Foundation
 import Model
 import Networking
 

@@ -5,8 +5,9 @@
 //  Kakao Local 키워드 검색 API 응답 DTO와 도메인 매핑
 //
 
-import Entity
 import Foundation
+
+import Entity
 
 public struct KakaoLocalSearchResponseDTO: Decodable, Sendable {
     public let documents: [Document]

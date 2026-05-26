@@ -1,6 +1,8 @@
 import SwiftUI
-import DesignSystem
+
 @preconcurrency import KakaoMapsSDK
+
+import DesignSystem
 
 @main
 struct DesignSystemDemoApp: App {

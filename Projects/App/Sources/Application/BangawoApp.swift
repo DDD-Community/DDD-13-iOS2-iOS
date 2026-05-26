@@ -1,12 +1,14 @@
 import SwiftUI
+
 import ComposableArchitecture
+@preconcurrency import KakaoMapsSDK
+import KakaoSDKAuth
+import KakaoSDKCommon
+import NidThirdPartyLogin
+
 import CoreDependencies
 import Presentation
 import Utill
-import KakaoSDKCommon
-import KakaoSDKAuth
-import NidThirdPartyLogin
-@preconcurrency import KakaoMapsSDK
 
 @main
 struct BangawoApp: App {

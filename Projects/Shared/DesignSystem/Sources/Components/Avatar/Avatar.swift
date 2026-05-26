@@ -143,7 +143,7 @@ private struct IconArea: View {
 // MARK: - Preview
 
 #Preview {
-    ScrollView {
+    ScrollView([.vertical, .horizontal]) {
         VStack(alignment: .leading, spacing: 32) {
             BangawoText("3D Avatar", textStyle: .titleLarge)
             HStack(spacing: 12) {

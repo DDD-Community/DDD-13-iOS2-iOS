@@ -5,9 +5,11 @@
 //  출발지 검색 화면 Feature. 검색 트리거 + 검색 바텀시트
 //
 
-import ComposableArchitecture
-import Entity
 import Foundation
+
+import ComposableArchitecture
+
+import Entity
 
 @Reducer
 public struct DepartureSearchFeature {
@@ -15,7 +17,6 @@ public struct DepartureSearchFeature {
     public struct State: Equatable {
         public var name: String
         public var selectedStation: Station?
-        @Presents public var searchSheet: StationSearchSheetFeature.State?
 
         public init(name: String = "", selectedStation: Station? = nil) {
             self.name = name
@@ -28,13 +29,14 @@ public struct DepartureSearchFeature {
     public enum Action {
         case backButtonTapped
         case searchTriggerTapped
-        case searchSheet(PresentationAction<StationSearchSheetFeature.Action>)
+        case stationSelected(Station)
         case nextButtonTapped
         case delegate(Delegate)
 
         public enum Delegate: Equatable {
             case proceedToHome
             case dismiss
+            case stationSearchRequested
         }
     }
 
@@ -47,19 +49,10 @@ public struct DepartureSearchFeature {
                 return .send(.delegate(.dismiss))
 
             case .searchTriggerTapped:
-                state.searchSheet = StationSearchSheetFeature.State()
-                return .none
+                return .send(.delegate(.stationSearchRequested))
 
-            case let .searchSheet(.presented(.delegate(.stationSelected(station)))):
+            case let .stationSelected(station):
                 state.selectedStation = station
-                state.searchSheet = nil
-                return .none
-
-            case .searchSheet(.presented(.delegate(.dismissed))):
-                state.searchSheet = nil
-                return .none
-
-            case .searchSheet:
                 return .none
 
             case .nextButtonTapped:
@@ -70,9 +63,6 @@ public struct DepartureSearchFeature {
             case .delegate:
                 return .none
             }
-        }
-        .ifLet(\.$searchSheet, action: \.searchSheet) {
-            StationSearchSheetFeature()
         }
     }
 }

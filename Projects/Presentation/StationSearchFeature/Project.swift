@@ -5,8 +5,8 @@ import ProjectTemplatePlugin
 import DependencyPackagePlugin
 
 let project = Project.makeModule(
-  name: "AuthFlowFeature",
-  bundleId: .appBundleID(name: ".AuthFlowFeature"),
+  name: "StationSearchFeature",
+  bundleId: .appBundleID(name: ".StationSearchFeature"),
   product: .staticFramework,
   settings: .settings(),
   dependencies: [
@@ -14,9 +14,7 @@ let project = Project.makeModule(
     .Shared(implements: .Utill),
     .Shared(implements: .DesignSystem),
     .Domain(implements: .Entity),
-    .Domain(implements: .DomainInterface),
     .Core(implements: .CoreDependencies),
-    .Presentation(implements: .StationSearchFeature),
   ],
   sources: ["Sources/**"]
 )

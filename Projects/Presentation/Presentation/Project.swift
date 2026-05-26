@@ -13,6 +13,7 @@ let project = Project.makeModule(
     .Presentation(implements: .AuthFlowFeature),
     .Presentation(implements: .HomeFeature),
     .Presentation(implements: .RootFeature),
+    .Presentation(implements: .StationSearchFeature),
   ],
   sources: ["Sources/**"]
 )

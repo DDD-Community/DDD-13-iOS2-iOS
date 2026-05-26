@@ -3,10 +3,12 @@
 //  RootFeature
 //
 
-import AuthFlowFeature
-import ComposableArchitecture
-import HomeFeature
 import SwiftUI
+
+import ComposableArchitecture
+
+import AuthFlowFeature
+import HomeFeature
 
 public struct RootView: View {
     @Bindable private var store: StoreOf<RootFeature>

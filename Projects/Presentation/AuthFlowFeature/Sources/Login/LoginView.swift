@@ -6,7 +6,9 @@
 //
 
 import SwiftUI
+
 import ComposableArchitecture
+
 import DesignSystem
 
 public struct LoginView: View {
@@ -27,7 +29,7 @@ public struct LoginView: View {
 
             Spacer()
 
-            VStack(spacing: 12) {
+            VStack(spacing: Spacing.spacing250) {
                 KakaoLoginButton {
                     store.send(.kakaoLoginTapped)
                 }
@@ -38,8 +40,8 @@ public struct LoginView: View {
                     store.send(.appleLoginTapped)
                 }
             }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 32)
+            .padding(.horizontal, Spacing.spacing400)
+            .padding(.bottom, Spacing.spacing500)
         }
         .disabled(store.isLoading)
         .overlay {
@@ -61,7 +63,7 @@ private struct KakaoLoginButton: View {
                     .foregroundStyle(Color(hex: "000000").opacity(0.8))
                     .frame(maxWidth: .infinity)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.spacing350)
             .frame(maxWidth: .infinity)
             .frame(height: Sizing.sizing600)
             .background(Color(hex: "FEE500"))
@@ -81,7 +83,7 @@ private struct NaverLoginButton: View {
                     .foregroundStyle(.gray100)
                     .frame(maxWidth: .infinity)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.spacing350)
             .frame(maxWidth: .infinity)
             .frame(height: Sizing.sizing600)
             .background(Color(hex: "03A94D"))
@@ -101,7 +103,7 @@ private struct AppleLoginButton: View {
                     .foregroundStyle(Colors.gray900)
                     .frame(maxWidth: .infinity)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.spacing350)
             .frame(maxWidth: .infinity)
             .frame(height: Sizing.sizing600)
             .background(.gray100)

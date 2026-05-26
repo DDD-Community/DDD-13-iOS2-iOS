@@ -3,8 +3,9 @@
 //  DomainInterface
 //
 
-import Entity
 import Foundation
+
+import Entity
 
 /// 소셜 로그인 + 서버 인증 과정에서 Presentation 계층이 이해할 수 있는 공통 에러 타입입니다.
 ///
