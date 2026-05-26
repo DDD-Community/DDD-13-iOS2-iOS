@@ -15,6 +15,7 @@ public enum Sizing {
     public static let sizing300: CGFloat = 32
     public static let sizing325: CGFloat = 34
     public static let sizing350: CGFloat = 36
+    public static let sizing375: CGFloat = 38
     public static let sizing400: CGFloat = 40
     public static let sizing425: CGFloat = 42
     public static let sizing450: CGFloat = 44
