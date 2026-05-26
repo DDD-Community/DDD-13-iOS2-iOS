@@ -101,14 +101,12 @@ public struct ProfileInputView: View {
                 onClose: { store.send(.imagePicker(.dismiss)) }
             ),
             contentVerticalPadding: Spacing.spacing400,
-            buttons: [
-                .init(title: "삭제하기") {
-                    store.send(.imagePicker(.presented(.deleteButtonTapped)))
-                },
-                .init(title: "변경하기") {
-                    store.send(.imagePicker(.presented(.saveButtonTapped)))
-                }
-            ]
+            primaryButton: .init(title: "변경하기") {
+                store.send(.imagePicker(.presented(.saveButtonTapped)))
+            },
+            secondaryButton: .init(title: "삭제하기") {
+                store.send(.imagePicker(.presented(.deleteButtonTapped)))
+            }
         ) {
             if let pickerStore = $store.scope(state: \.imagePicker, action: \.imagePicker).wrappedValue {
                 ProfileImagePickerSheet(store: pickerStore)

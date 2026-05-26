@@ -100,8 +100,8 @@ public struct AuthFlowFeature {
                     if case .departure = state.path[id: id] { return true }
                     return false
                 }
+                guard let id = departureID else { return .none }
                 return .run { send in
-                    guard let id = departureID else { return }
                     await send(.path(.element(id: id, action: .departure(.stationSelected(station)))))
                 }
 
