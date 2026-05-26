@@ -4,6 +4,7 @@
 //
 
 import ComposableArchitecture
+import Entity
 
 @Reducer
 public struct MeetingDetailFeature {

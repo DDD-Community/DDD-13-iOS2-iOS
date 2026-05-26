@@ -4,6 +4,7 @@
 //
 
 import ComposableArchitecture
+import Entity
 import Foundation
 
 public enum MeetingPurpose: String, CaseIterable, Equatable, Identifiable {

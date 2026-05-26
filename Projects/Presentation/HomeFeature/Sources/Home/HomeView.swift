@@ -7,9 +7,11 @@ import SwiftUI
 
 import ComposableArchitecture
 import DesignSystem
+import Entity
 
 public struct HomeView: View {
     @Bindable private var store: StoreOf<HomeFeature>
+    @State private var isFABExpanded = false
     @State private var sheetDetents: Set<PresentationDetent> = [.fraction(0.5)]
 
     public init(store: StoreOf<HomeFeature>) {
@@ -41,8 +43,7 @@ public struct HomeView: View {
                 .background(.gray200)
 
                 HomeFAB(
-                    isExpanded: store.isFABExpanded,
-                    onTap: { store.send(.fabTapped) },
+                    isExpanded: $isFABExpanded,
                     onCreateMeeting: { store.send(.fabCreateMeetingTapped) },
                     onJoinMeeting: { store.send(.fabJoinMeetingTapped) }
                 )
@@ -78,7 +79,7 @@ private struct HomeNavigationBar: View {
     var body: some View {
         HStack(spacing: 0) {
             Text("반가워")
-                .pretendardCustomFont(textStyle: .heading1)
+                .pretendardCustomFont(textStyle: .headingSmall)
                 .foregroundStyle(.gray900)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -127,7 +128,7 @@ private struct FilterChip: View {
     var body: some View {
         Button(action: onTap) {
             Text(title)
-                .pretendardCustomFont(textStyle: .body2Medium)
+                .pretendardCustomFont(textStyle: .bodyMedium)
                 .foregroundStyle(isSelected ? Color(hex: "FFFFFF") : Color(hex: "545454"))
                 .padding(.horizontal, Spacing.spacing250)
                 .padding(.vertical, Spacing.spacing150)
@@ -179,17 +180,17 @@ private struct CreateMeetingRow: View {
                     .frame(width: Sizing.sizing550, height: Sizing.sizing550)
                     .overlay(
                         Text("+")
-                            .pretendardCustomFont(textStyle: .heading1)
+                            .pretendardCustomFont(textStyle: .headingSmall)
                             .foregroundStyle(.gray600)
                     )
 
                 VStack(alignment: .leading, spacing: Spacing.spacing100) {
                     Text("모임 생성하기")
-                        .pretendardCustomFont(textStyle: .bodyBold)
+                        .pretendardCustomFont(textStyle: .bodyLargeEmphasized)
                         .foregroundStyle(.gray900)
 
                     Text("새로운 모임을 만들어보세요")
-                        .pretendardCustomFont(textStyle: .body2Regular)
+                        .pretendardCustomFont(textStyle: .bodySmall)
                         .foregroundStyle(.gray600)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -237,11 +238,11 @@ private struct MeetingCardTopArea: View {
 
             VStack(alignment: .leading, spacing: Spacing.spacing100) {
                 Text(meeting.title)
-                    .pretendardCustomFont(textStyle: .bodyBold)
+                    .pretendardCustomFont(textStyle: .bodyLargeEmphasized)
                     .foregroundStyle(.gray900)
 
                 Text(meeting.hashtag)
-                    .pretendardCustomFont(textStyle: .body2Regular)
+                    .pretendardCustomFont(textStyle: .bodySmall)
                     .foregroundStyle(.gray600)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -265,7 +266,7 @@ private struct MeetingStatusBadge: View {
 
     var body: some View {
         Text(status.rawValue)
-            .pretendardCustomFont(textStyle: .caption)
+            .pretendardCustomFont(textStyle: .labelSmall)
             .foregroundStyle(Color(hex: "FFFFFF"))
             .padding(.horizontal, Spacing.spacing200)
             .padding(.vertical, Spacing.spacing100)
@@ -281,7 +282,7 @@ private struct MeetingCardBottomArea: View {
             OverlappingCircles(count: participantCount)
 
             Text("\(participantCount)명")
-                .pretendardCustomFont(textStyle: .body2Regular)
+                .pretendardCustomFont(textStyle: .bodySmall)
                 .foregroundStyle(.gray700)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -315,10 +316,19 @@ private struct OverlappingCircles: View {
 // MARK: - FAB
 
 private struct HomeFAB: View {
-    let isExpanded: Bool
-    let onTap: () -> Void
-    let onCreateMeeting: () -> Void
-    let onJoinMeeting: () -> Void
+    @Binding private var isExpanded: Bool
+    private let onCreateMeeting: () -> Void
+    private let onJoinMeeting: () -> Void
+
+    init(
+        isExpanded: Binding<Bool>,
+        onCreateMeeting: @escaping () -> Void,
+        onJoinMeeting: @escaping () -> Void
+    ) {
+        self._isExpanded = isExpanded
+        self.onCreateMeeting = onCreateMeeting
+        self.onJoinMeeting = onJoinMeeting
+    }
 
     private enum Metric {
         static let fabSize: CGFloat = Sizing.sizing600
@@ -329,18 +339,24 @@ private struct HomeFAB: View {
         VStack(alignment: .trailing, spacing: Metric.menuSpacing) {
             if isExpanded {
                 FABMenu(
-                    onCreateMeeting: onCreateMeeting,
-                    onJoinMeeting: onJoinMeeting
+                    onCreateMeeting: {
+                        isExpanded = false
+                        onCreateMeeting()
+                    },
+                    onJoinMeeting: {
+                        isExpanded = false
+                        onJoinMeeting()
+                    }
                 )
             }
 
-            Button(action: onTap) {
+            Button(action: { isExpanded.toggle() }) {
                 Circle()
                     .fill(Color(hex: "FF3C27"))
                     .frame(width: Metric.fabSize, height: Metric.fabSize)
                     .overlay(
                         Text("+")
-                            .pretendardCustomFont(textStyle: .heading1)
+                            .pretendardCustomFont(textStyle: .headingSmall)
                             .foregroundStyle(Color(hex: "FFFFFF"))
                     )
                     .shadow(
@@ -368,7 +384,7 @@ private struct FABMenu: View {
         VStack(spacing: 0) {
             Button(action: onCreateMeeting) {
                 Text("모임 만들기")
-                    .pretendardCustomFont(textStyle: .body2Medium)
+                    .pretendardCustomFont(textStyle: .bodyMedium)
                     .foregroundStyle(.gray900)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
@@ -378,7 +394,7 @@ private struct FABMenu: View {
 
             Button(action: onJoinMeeting) {
                 Text("모임 참여하기")
-                    .pretendardCustomFont(textStyle: .body2Medium)
+                    .pretendardCustomFont(textStyle: .bodyMedium)
                     .foregroundStyle(.gray900)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
