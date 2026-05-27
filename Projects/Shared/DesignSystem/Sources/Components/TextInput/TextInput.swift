@@ -69,6 +69,7 @@ public struct TextInput: View {
                 TextInputFieldArea(
                     placeholder: placeholder,
                     state: effectiveState,
+                    maxCount: maxCount,
                     text: $text,
                     isFocused: $isFocused
                 )
@@ -128,7 +129,7 @@ private struct TextInputTitleArea: View {
 private struct TextInputFieldArea: View {
     let placeholder: String
     let state: TextInputState
-
+    let maxCount: Int?
     @Binding var text: String
     @FocusState.Binding var isFocused: Bool
 
@@ -169,6 +170,7 @@ private struct TextInputFieldArea: View {
                     ) {
                         EmptyView()
                     }
+                    .maxLength(text: $text, maxCount)
                     .pretendardFont(family: .Regular, size: Typography.typographySize300)
                     .foregroundStyle(textColor)
                     .padding(.vertical, Spacing.spacing50)

@@ -94,7 +94,11 @@ public struct ProfileInputView: View {
         .bottomSheet(
             isPresented: Binding(
                 get: { store.imagePicker != nil },
-                set: { if !$0 { store.send(.imagePicker(.dismiss)) } }
+                set: {
+                    if !$0, store.imagePicker != nil {
+                        store.send(.imagePicker(.dismiss))
+                    }
+                }
             ),
             header: .init(
                 title: "프로필 설정",

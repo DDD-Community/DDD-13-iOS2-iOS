@@ -29,4 +29,11 @@ public final class AuthRepositoryImpl: AuthRepositoryProtocol {
         KeyChainManager.addItem(key: KeyChainKey.accessToken, value: tokens.accessToken)
         KeyChainManager.addItem(key: KeyChainKey.refreshToken, value: tokens.refreshToken)
     }
+    // 닉네임 검증
+    public func validateNickname(_ nickname: String) async throws {
+        let dto = NicknameValidateRequestDTO(nickname: nickname)
+        try await NetworkManager.shared.requestVoid(
+            AuthEndPoint.nicknameValidate(dto)
+        )
+    }
 }

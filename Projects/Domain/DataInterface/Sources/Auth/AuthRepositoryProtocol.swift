@@ -10,4 +10,6 @@ public protocol AuthRepositoryProtocol: Sendable {
     /// 소셜 로그인 토큰으로 서버 로그인을 요청합니다.
     func login(provider: String, providerToken: String) async throws -> LoginResult
     func saveAuthTokens(_ tokens: AuthTokens)
+    func validateNickname(_ nickname: String) async throws
+
 }

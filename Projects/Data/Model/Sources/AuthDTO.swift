@@ -18,6 +18,15 @@ public struct LoginRequestDTO: Encodable, Sendable {
     }
 }
 
+/// 서버 닉네임 검증 API 요청 바디
+public struct NicknameValidateRequestDTO: Encodable, Sendable {
+    public let nickname: String
+
+    public init(nickname: String) {
+        self.nickname = nickname
+    }
+}
+
 /// 서버 로그인 API 응답 데이터
 public struct LoginResponseDTO: Codable, Sendable {
     public let accessToken: String // 액세스 토큰

@@ -16,6 +16,9 @@ public enum AuthEndPoint: EndPoint {
     /// 로그인
     case login(LoginRequestDTO)
 
+    /// 닉네임 검증
+    case nicknameValidate(NicknameValidateRequestDTO)
+
     public var baseURL: String {
         AppEnvironment.serverBaseURL
     }
@@ -24,12 +27,14 @@ public enum AuthEndPoint: EndPoint {
         switch self {
         case .login:
             return "/api/v1/auth/login"
+        case .nicknameValidate:
+            return "/api/v1/members/nickname/validate"
         }
     }
 
     public var method: HTTPMethod {
         switch self {
-        case .login:
+        case .login, .nicknameValidate:
             return .post
         }
     }
@@ -38,6 +43,8 @@ public enum AuthEndPoint: EndPoint {
         switch self {
         case let .login(dto):
             return .requestWithoutInterceptor(body: dto) // 인터셉터가 필요 없는 요청
+        case let .nicknameValidate(dto):
+            return .requestJSONEncodable(body: dto)
         }
     }
 }
