@@ -44,6 +44,7 @@ public extension InfoPlist {
       .setNaverClientSecret("$(NAVER_CLIENT_SECRET)")
       .setNaverURLScheme("$(NAVER_URL_SCHEME)")
       .setKakaoRestAPIKey("$(KAKAO_REST_API_KEY)")
+      .setServerBaseURL("$(SERVER_BASE_URL)")
       .setNSCameraUsageDescription("프로필 사진 촬영을 위해 카메라 접근이 필요합니다")
       .setNSPhotoLibraryUsageDescription("프로필 사진 선택을 위해 사진 접근이 필요합니다")
   )
