@@ -11,5 +11,5 @@ public protocol AuthRepositoryProtocol: Sendable {
     func login(provider: String, providerToken: String) async throws -> LoginResult
     func saveAuthTokens(_ tokens: AuthTokens)
     func validateNickname(_ nickname: String) async throws
-
+    func registerMember(nickname: String, agreedTermsIds: [Int], departureLabel: String, departureAddress: String, latitude: Double, longitude: Double) async throws -> RegisterMemberResult
 }
