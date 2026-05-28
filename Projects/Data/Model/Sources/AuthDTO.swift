@@ -29,15 +29,15 @@ public struct NicknameValidateRequestDTO: Encodable, Sendable {
 /// 회원 가입 API 요청 바디
 public struct RegisterMemberRequestDTO: Encodable, Sendable {
     public let nickname: String
-    public let agreedTemrsIds: [Int]
+    public let agreedTermsIds: [Int]
     public let departureLabel: String
     public let departureAddress: String
     public let latitude: Double
     public let longitude: Double
     
-    public init(nickname: String, agreedTemrsIds: [Int], departureLabel: String, departureAddress: String, latitude: Double, longitude: Double) {
+    public init(nickname: String, agreedTermsIds: [Int], departureLabel: String, departureAddress: String, latitude: Double, longitude: Double) {
         self.nickname = nickname
-        self.agreedTemrsIds = agreedTemrsIds
+        self.agreedTermsIds = agreedTermsIds
         self.departureLabel = departureLabel
         self.departureAddress = departureAddress
         self.latitude = latitude

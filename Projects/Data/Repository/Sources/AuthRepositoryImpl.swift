@@ -40,10 +40,10 @@ public final class AuthRepositoryImpl: AuthRepositoryProtocol {
 
     /// 회원가입
     public func registerMember(nickname: String, agreedTermsIds: [Int], departureLabel: String, departureAddress: String, latitude: Double, longitude: Double) async throws -> RegisterMemberResult {
-        let dto = RegisterMemberRequestDTO(nickname: nickname, agreedTemrsIds: agreedTermsIds, departureLabel: departureLabel, departureAddress: departureAddress, latitude: latitude, longitude: longitude)
+        let dto = RegisterMemberRequestDTO(nickname: nickname, agreedTermsIds: agreedTermsIds, departureLabel: departureLabel, departureAddress: departureAddress, latitude: latitude, longitude: longitude)
 
         let response: RegisterMemberResponseDTO = try await NetworkManager.shared.request(AuthEndPoint.registerMember(dto))
-        
+
         return response.toEntity()
     }
 }

@@ -13,6 +13,8 @@ import Entity
 
 @Reducer
 public struct DepartureSearchFeature {
+    @Dependency(\.registerMemberClient) private var registerMemberClient
+    
     @ObservableState
     public struct State: Equatable {
         public var name: String
