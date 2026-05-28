@@ -25,18 +25,18 @@ public struct HomeView: View {
                     HomeNavigationBar()
                         .padding(.horizontal, Spacing.spacing300)
 
-                    if !store.meetings.isEmpty {
-                        MeetingFilterCarousel(
+                    if !store.groups.isEmpty {
+                        GroupFilterCarousel(
                             selectedFilter: store.selectedFilter,
                             onFilterTapped: { store.send(.filterTapped($0)) }
                         )
                         .padding(.top, Spacing.spacing250)
                     }
 
-                    MeetingListContent(
-                        meetings: store.filteredMeetings,
-                        onCreateTapped: { store.send(.createMeetingRowTapped) },
-                        onMeetingTapped: { store.send(.meetingCardTapped($0)) }
+                    GroupListContent(
+                        groups: store.filteredGroups,
+                        onCreateTapped: { store.send(.createGroupRowTapped) },
+                        onGroupTapped: { store.send(.groupCardTapped($0)) }
                     )
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -44,15 +44,15 @@ public struct HomeView: View {
 
                 HomeFAB(
                     isExpanded: $isFABExpanded,
-                    onCreateMeeting: { store.send(.fabCreateMeetingTapped) },
-                    onJoinMeeting: { store.send(.fabJoinMeetingTapped) }
+                    onCreateGroup: { store.send(.fabCreateGroupTapped) },
+                    onJoinGroup: { store.send(.fabJoinGroupTapped) }
                 )
                 .padding(.trailing, Spacing.spacing300)
                 .padding(.bottom, Spacing.spacing400)
             }
             .onAppear { store.send(.onAppear) }
             .sheet(item: $store.scope(state: \.creationSheet, action: \.creationSheet)) { sheetStore in
-                MeetingCreationSheet(store: sheetStore)
+                GroupCreationSheet(store: sheetStore)
                     .presentationDetents(sheetDetents)
                     .presentationDragIndicator(sheetStore.step == .purpose ? .visible : .hidden)
                     .onAppear { sheetDetents = [.fraction(0.5)] }
@@ -67,7 +67,7 @@ public struct HomeView: View {
         } destination: { pathStore in
             switch pathStore.case {
             case let .detail(detailStore):
-                MeetingDetailView(store: detailStore)
+                GroupDetailView(store: detailStore)
             }
         }
     }
@@ -99,14 +99,14 @@ private struct HomeNavigationBar: View {
 
 // MARK: - Filter Carousel
 
-private struct MeetingFilterCarousel: View {
-    let selectedFilter: MeetingFilter
-    let onFilterTapped: (MeetingFilter) -> Void
+private struct GroupFilterCarousel: View {
+    let selectedFilter: GroupFilter
+    let onFilterTapped: (GroupFilter) -> Void
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: Spacing.spacing200) {
-                ForEach(MeetingFilter.allCases, id: \.self) { filter in
+                ForEach(GroupFilter.allCases, id: \.self) { filter in
                     FilterChip(
                         title: filter.rawValue,
                         isSelected: selectedFilter == filter
@@ -141,24 +141,24 @@ private struct FilterChip: View {
     }
 }
 
-// MARK: - Meeting List
+// MARK: - Group List
 
-private struct MeetingListContent: View {
-    let meetings: [Meeting]
+private struct GroupListContent: View {
+    let groups: [Entity.Group]
     let onCreateTapped: () -> Void
-    let onMeetingTapped: (Meeting) -> Void
+    let onGroupTapped: (Entity.Group) -> Void
 
     var body: some View {
-        if meetings.isEmpty {
-            CreateMeetingRow(onTap: onCreateTapped)
+        if groups.isEmpty {
+            CreateGroupRow(onTap: onCreateTapped)
                 .padding(.horizontal, Spacing.spacing300)
                 .padding(.top, Spacing.spacing250)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         } else {
             ScrollView {
                 LazyVStack(spacing: Spacing.spacing250) {
-                    ForEach(meetings) { meeting in
-                        MeetingCard(meeting: meeting, onTap: { onMeetingTapped(meeting) })
+                    ForEach(groups) { group in
+                        GroupCard(group: group, onTap: { onGroupTapped(group) })
                     }
                 }
                 .padding(.horizontal, Spacing.spacing300)
@@ -169,7 +169,7 @@ private struct MeetingListContent: View {
     }
 }
 
-private struct CreateMeetingRow: View {
+private struct CreateGroupRow: View {
     let onTap: () -> Void
 
     var body: some View {
@@ -205,17 +205,17 @@ private struct CreateMeetingRow: View {
     }
 }
 
-// MARK: - Meeting Card
+// MARK: - Group Card
 
-private struct MeetingCard: View {
-    let meeting: Meeting
+private struct GroupCard: View {
+    let group: Entity.Group
     let onTap: () -> Void
 
     var body: some View {
         Button(action: onTap) {
             VStack(spacing: Spacing.spacing250) {
-                MeetingCardTopArea(meeting: meeting)
-                MeetingCardBottomArea(participantCount: meeting.participantCount)
+                GroupCardTopArea(group: group)
+                GroupCardBottomArea(memberCount: group.memberCount)
             }
             .padding(Spacing.spacing300)
             .background(
@@ -227,8 +227,8 @@ private struct MeetingCard: View {
     }
 }
 
-private struct MeetingCardTopArea: View {
-    let meeting: Meeting
+private struct GroupCardTopArea: View {
+    let group: Entity.Group
 
     var body: some View {
         HStack(alignment: .top, spacing: Spacing.spacing250) {
@@ -237,35 +237,44 @@ private struct MeetingCardTopArea: View {
                 .frame(width: Sizing.sizing550, height: Sizing.sizing550)
 
             VStack(alignment: .leading, spacing: Spacing.spacing100) {
-                Text(meeting.title)
+                Text(group.name)
                     .pretendardCustomFont(textStyle: .bodyLargeEmphasized)
                     .foregroundStyle(.gray900)
 
-                Text(meeting.hashtag)
+                Text(group.themeTagDisplay)
                     .pretendardCustomFont(textStyle: .bodySmall)
                     .foregroundStyle(.gray600)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            MeetingStatusBadge(status: meeting.status)
+            GroupStatusBadge(status: group.listStatus)
         }
     }
 }
 
-private struct MeetingStatusBadge: View {
-    let status: MeetingFilter
+private struct GroupStatusBadge: View {
+    let status: GroupListStatus
 
     private var badgeColor: Color {
         switch status {
-        case .all: return Color(hex: "D4D4D4")
         case .inProgress: return Color(hex: "FF6B5C")
         case .confirmed: return Color(hex: "4D6399")
         case .ended: return Color(hex: "A1A1A1")
+        case .unknown: return Color(hex: "D4D4D4")
+        }
+    }
+
+    private var displayText: String {
+        switch status {
+        case .inProgress: return "진행중"
+        case .confirmed: return "확정"
+        case .ended: return "종료"
+        case .unknown(let raw): return raw
         }
     }
 
     var body: some View {
-        Text(status.rawValue)
+        Text(displayText)
             .pretendardCustomFont(textStyle: .labelSmall)
             .foregroundStyle(Color(hex: "FFFFFF"))
             .padding(.horizontal, Spacing.spacing200)
@@ -274,14 +283,14 @@ private struct MeetingStatusBadge: View {
     }
 }
 
-private struct MeetingCardBottomArea: View {
-    let participantCount: Int
+private struct GroupCardBottomArea: View {
+    let memberCount: Int
 
     var body: some View {
         HStack(spacing: Spacing.spacing200) {
-            OverlappingCircles(count: participantCount)
+            OverlappingCircles(count: memberCount)
 
-            Text("\(participantCount)명")
+            Text("\(memberCount)명")
                 .pretendardCustomFont(textStyle: .bodySmall)
                 .foregroundStyle(.gray700)
         }
@@ -317,17 +326,17 @@ private struct OverlappingCircles: View {
 
 private struct HomeFAB: View {
     @Binding private var isExpanded: Bool
-    private let onCreateMeeting: () -> Void
-    private let onJoinMeeting: () -> Void
+    private let onCreateGroup: () -> Void
+    private let onJoinGroup: () -> Void
 
     init(
         isExpanded: Binding<Bool>,
-        onCreateMeeting: @escaping () -> Void,
-        onJoinMeeting: @escaping () -> Void
+        onCreateGroup: @escaping () -> Void,
+        onJoinGroup: @escaping () -> Void
     ) {
         self._isExpanded = isExpanded
-        self.onCreateMeeting = onCreateMeeting
-        self.onJoinMeeting = onJoinMeeting
+        self.onCreateGroup = onCreateGroup
+        self.onJoinGroup = onJoinGroup
     }
 
     private enum Metric {
@@ -339,13 +348,13 @@ private struct HomeFAB: View {
         VStack(alignment: .trailing, spacing: Metric.menuSpacing) {
             if isExpanded {
                 FABMenu(
-                    onCreateMeeting: {
+                    onCreateGroup: {
                         isExpanded = false
-                        onCreateMeeting()
+                        onCreateGroup()
                     },
-                    onJoinMeeting: {
+                    onJoinGroup: {
                         isExpanded = false
-                        onJoinMeeting()
+                        onJoinGroup()
                     }
                 )
             }
@@ -372,8 +381,8 @@ private struct HomeFAB: View {
 }
 
 private struct FABMenu: View {
-    let onCreateMeeting: () -> Void
-    let onJoinMeeting: () -> Void
+    let onCreateGroup: () -> Void
+    let onJoinGroup: () -> Void
 
     private enum Metric {
         static let width: CGFloat = 160
@@ -382,7 +391,7 @@ private struct FABMenu: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Button(action: onCreateMeeting) {
+            Button(action: onCreateGroup) {
                 Text("모임 만들기")
                     .pretendardCustomFont(textStyle: .bodyMedium)
                     .foregroundStyle(.gray900)
@@ -392,7 +401,7 @@ private struct FABMenu: View {
 
             Divider()
 
-            Button(action: onJoinMeeting) {
+            Button(action: onJoinGroup) {
                 Text("모임 참여하기")
                     .pretendardCustomFont(textStyle: .bodyMedium)
                     .foregroundStyle(.gray900)
@@ -413,38 +422,6 @@ private struct FABMenu: View {
 }
 
 // MARK: - Previews
-
-#Preview("모임 있음") {
-    var state = HomeFeature.State()
-    state.meetings = [
-        Meeting(
-            id: UUID(),
-            title: "주말 러닝 모임",
-            hashtag: "#러닝 #건강 #운동",
-            status: .inProgress,
-            participantCount: 5
-        ),
-        Meeting(
-            id: UUID(),
-            title: "독서 토론 클럽",
-            hashtag: "#독서 #인문학",
-            status: .confirmed,
-            participantCount: 8
-        ),
-        Meeting(
-            id: UUID(),
-            title: "요리 교실",
-            hashtag: "#요리 #취미",
-            status: .ended,
-            participantCount: 3
-        ),
-    ]
-    return HomeView(
-        store: Store(initialState: state) {
-            HomeFeature()
-        }
-    )
-}
 
 #Preview("모임 없음") {
     HomeView(

@@ -1,5 +1,5 @@
 //
-//  MeetingCreationSheet.swift
+//  GroupCreationSheet.swift
 //  HomeFeature
 //
 
@@ -7,8 +7,8 @@ import SwiftUI
 import ComposableArchitecture
 import DesignSystem
 
-struct MeetingCreationSheet: View {
-    @Bindable var store: StoreOf<MeetingCreationSheetFeature>
+struct GroupCreationSheet: View {
+    @Bindable var store: StoreOf<GroupCreationSheetFeature>
 
     var body: some View {
         VStack(spacing: 0) {
@@ -16,7 +16,7 @@ struct MeetingCreationSheet: View {
 
             Group {
                 if store.step == .info {
-                    MeetingInfoPage(store: store)
+                    GroupInfoPage(store: store)
                         .transition(
                             .asymmetric(
                                 insertion: .move(edge: .leading),
@@ -24,7 +24,7 @@ struct MeetingCreationSheet: View {
                             )
                         )
                 } else {
-                    MeetingPurposePage(store: store)
+                    GroupPurposePage(store: store)
                         .transition(
                             .asymmetric(
                                 insertion: .move(edge: .trailing),
@@ -66,8 +66,8 @@ private struct SheetHeader: View {
 
 // MARK: - 화면 A: 모임 정보 작성
 
-private struct MeetingInfoPage: View {
-    @Bindable var store: StoreOf<MeetingCreationSheetFeature>
+private struct GroupInfoPage: View {
+    @Bindable var store: StoreOf<GroupCreationSheetFeature>
 
     var body: some View {
         VStack(spacing: 0) {
@@ -77,7 +77,7 @@ private struct MeetingInfoPage: View {
                     isRequired: true,
                     placeholder: "모임명을 입력해주세요",
                     maxCount: 20,
-                    text: $store.meetingTitle
+                    text: $store.groupTitle
                 )
 
                 PurposeSelectField(
@@ -102,7 +102,7 @@ private struct MeetingInfoPage: View {
 }
 
 private struct PurposeSelectField: View {
-    let selectedPurpose: MeetingPurpose?
+    let selectedPurpose: GroupPurpose?
     let onTap: () -> Void
 
     var body: some View {
@@ -164,14 +164,14 @@ private struct CreateButton: View {
 
 // MARK: - 화면 B: 모임 목적 리스트
 
-private struct MeetingPurposePage: View {
-    @Bindable var store: StoreOf<MeetingCreationSheetFeature>
+private struct GroupPurposePage: View {
+    @Bindable var store: StoreOf<GroupCreationSheetFeature>
 
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
                 LazyVStack(spacing: 0) {
-                    ForEach(MeetingPurpose.allCases) { purpose in
+                    ForEach(GroupPurpose.allCases) { purpose in
                         PurposeRow(
                             purpose: purpose,
                             isSelected: store.pendingPurpose == purpose,
@@ -191,7 +191,7 @@ private struct MeetingPurposePage: View {
 }
 
 private struct PurposeRow: View {
-    let purpose: MeetingPurpose
+    let purpose: GroupPurpose
     let isSelected: Bool
     let onTap: () -> Void
 

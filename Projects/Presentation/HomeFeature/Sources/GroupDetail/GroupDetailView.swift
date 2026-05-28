@@ -1,5 +1,5 @@
 //
-//  MeetingDetailView.swift
+//  GroupDetailView.swift
 //  Presentation
 //
 
@@ -7,16 +7,16 @@ import SwiftUI
 import ComposableArchitecture
 import DesignSystem
 
-public struct MeetingDetailView: View {
-    private let store: StoreOf<MeetingDetailFeature>
+public struct GroupDetailView: View {
+    private let store: StoreOf<GroupDetailFeature>
 
-    public init(store: StoreOf<MeetingDetailFeature>) {
+    public init(store: StoreOf<GroupDetailFeature>) {
         self.store = store
     }
 
     public var body: some View {
         VStack(spacing: Spacing.spacing300) {
-            Text(store.meeting.title)
+            Text(store.group.name)
                 .pretendardCustomFont(textStyle: .headingSmall)
                 .foregroundStyle(.gray900)
 
@@ -26,7 +26,7 @@ public struct MeetingDetailView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.gray200)
-        .navigationTitle(store.meeting.title)
+        .navigationTitle(store.group.name)
         .navigationBarTitleDisplayMode(.inline)
     }
 }

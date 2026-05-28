@@ -1,13 +1,14 @@
 //
-//  MeetingCreationSheetFeature.swift
+//  GroupCreationSheetFeature.swift
 //  HomeFeature
 //
 
 import ComposableArchitecture
+import CoreDependencies
 import Entity
 import Foundation
 
-public enum MeetingPurpose: String, CaseIterable, Equatable, Identifiable {
+public enum GroupPurpose: String, CaseIterable, Equatable, Identifiable {
     case networking   = "네트워킹"
     case study        = "스터디"
     case hobby        = "취미/여가"
@@ -18,10 +19,25 @@ public enum MeetingPurpose: String, CaseIterable, Equatable, Identifiable {
     case business     = "비즈니스"
 
     public var id: String { rawValue }
+
+    public var themeTagCode: String {
+        switch self {
+        case .networking:   return "NETWORKING"
+        case .study:        return "STUDY"
+        case .hobby:        return "HOBBY"
+        case .sports:       return "SPORTS"
+        case .culture:      return "CULTURE"
+        case .social:       return "SOCIAL"
+        case .volunteering: return "VOLUNTEERING"
+        case .business:     return "BUSINESS"
+        }
+    }
 }
 
 @Reducer
-public struct MeetingCreationSheetFeature {
+public struct GroupCreationSheetFeature {
+    @Dependency(\.groupClient) private var groupClient
+
     public enum Step: Equatable {
         case info
         case purpose
@@ -30,13 +46,15 @@ public struct MeetingCreationSheetFeature {
     @ObservableState
     public struct State: Equatable {
         public var step: Step = .info
-        public var meetingTitle: String = ""
-        public var selectedPurpose: MeetingPurpose? = nil
-        public var pendingPurpose: MeetingPurpose? = nil
+        public var groupTitle: String = ""
+        public var selectedPurpose: GroupPurpose? = nil
+        public var pendingPurpose: GroupPurpose? = nil
+        public var isLoading: Bool = false
 
         public var isCreateEnabled: Bool {
-            !meetingTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            !groupTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && selectedPurpose != nil
+            && !isLoading
         }
 
         public init() {}
@@ -45,14 +63,15 @@ public struct MeetingCreationSheetFeature {
     public enum Action: BindableAction {
         case binding(BindingAction<State>)
         case purposeButtonTapped
-        case purposeTapped(MeetingPurpose)
+        case purposeTapped(GroupPurpose)
         case registerButtonTapped
         case createButtonTapped
+        case createGroupResponse(Result<CreateGroupResult, Error>)
         case closeButtonTapped
         case delegate(Delegate)
 
         public enum Delegate: Equatable {
-            case meetingCreated(Meeting)
+            case groupCreated
             case dismissed
         }
     }
@@ -83,15 +102,23 @@ public struct MeetingCreationSheetFeature {
 
             case .createButtonTapped:
                 guard state.isCreateEnabled, let purpose = state.selectedPurpose else { return .none }
+                state.isLoading = true
+                let name = state.groupTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+                let themeTagCode = purpose.themeTagCode
+                let client = groupClient
+                return .run { send in
+                    await send(.createGroupResponse(
+                        Result { try await client.createGroup(name, themeTagCode) }
+                    ))
+                }
 
-                let meeting = Meeting(
-                    id: UUID(),
-                    title: state.meetingTitle.trimmingCharacters(in: .whitespacesAndNewlines),
-                    hashtag: "#\(purpose.rawValue)",
-                    status: .inProgress,
-                    participantCount: 1
-                )
-                return .send(.delegate(.meetingCreated(meeting)))
+            case .createGroupResponse(.success):
+                state.isLoading = false
+                return .send(.delegate(.groupCreated))
+
+            case .createGroupResponse(.failure):
+                state.isLoading = false
+                return .none
 
             case .closeButtonTapped:
                 return .send(.delegate(.dismissed))

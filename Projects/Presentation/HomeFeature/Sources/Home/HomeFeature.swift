@@ -6,24 +6,32 @@
 import Foundation
 
 import ComposableArchitecture
+import CoreDependencies
 import Entity
 
 @Reducer
 public struct HomeFeature {
+    @Dependency(\.groupClient) private var groupClient
+
     @Reducer(state: .equatable)
     public enum Path {
-        case detail(MeetingDetailFeature)
+        case detail(GroupDetailFeature)
     }
 
     @ObservableState
     public struct State: Equatable {
-        public var meetings: [Meeting] = []
-        public var selectedFilter: MeetingFilter = .all
-        @Presents public var creationSheet: MeetingCreationSheetFeature.State?
+        public var groups: [Group] = []
+        public var selectedFilter: GroupFilter = .all
+        @Presents public var creationSheet: GroupCreationSheetFeature.State?
         public var path: StackState<Path.State> = StackState<Path.State>()
 
-        public var filteredMeetings: [Meeting] {
-            selectedFilter == .all ? meetings : meetings.filter { $0.status == selectedFilter }
+        public var filteredGroups: [Group] {
+            switch selectedFilter {
+            case .all: return groups
+            case .inProgress: return groups.filter { $0.listStatus == .inProgress }
+            case .confirmed: return groups.filter { $0.listStatus == .confirmed }
+            case .ended: return groups.filter { $0.listStatus == .ended }
+            }
         }
 
         public init() {}
@@ -31,12 +39,13 @@ public struct HomeFeature {
 
     public enum Action {
         case onAppear
-        case filterTapped(MeetingFilter)
-        case createMeetingRowTapped
-        case fabCreateMeetingTapped
-        case fabJoinMeetingTapped
-        case meetingCardTapped(Meeting)
-        case creationSheet(PresentationAction<MeetingCreationSheetFeature.Action>)
+        case groupsResponse(Result<[Group], Error>)
+        case filterTapped(GroupFilter)
+        case createGroupRowTapped
+        case fabCreateGroupTapped
+        case fabJoinGroupTapped
+        case groupCardTapped(Group)
+        case creationSheet(PresentationAction<GroupCreationSheetFeature.Action>)
         case path(StackActionOf<Path>)
     }
 
@@ -45,31 +54,38 @@ public struct HomeFeature {
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case .onAppear: return .none
+            case .onAppear:
+                return fetchGroupsEffect()
+
+            case .groupsResponse(.success(let groups)):
+                state.groups = groups
+                return .none
+
+            case .groupsResponse(.failure):
+                return .none
 
             case .filterTapped(let filter):
                 state.selectedFilter = filter
                 return .none
 
-            case .createMeetingRowTapped:
-                state.creationSheet = MeetingCreationSheetFeature.State()
+            case .createGroupRowTapped:
+                state.creationSheet = GroupCreationSheetFeature.State()
                 return .none
 
-            case .fabCreateMeetingTapped:
-                state.creationSheet = MeetingCreationSheetFeature.State()
+            case .fabCreateGroupTapped:
+                state.creationSheet = GroupCreationSheetFeature.State()
                 return .none
 
-            case .fabJoinMeetingTapped:
+            case .fabJoinGroupTapped:
                 return .none
 
-            case .meetingCardTapped(let meeting):
-                state.path.append(.detail(MeetingDetailFeature.State(meeting: meeting)))
+            case .groupCardTapped(let group):
+                state.path.append(.detail(GroupDetailFeature.State(group: group)))
                 return .none
 
-            case let .creationSheet(.presented(.delegate(.meetingCreated(meeting)))):
-                state.meetings.append(meeting)
+            case .creationSheet(.presented(.delegate(.groupCreated))):
                 state.creationSheet = nil
-                return .none
+                return fetchGroupsEffect()
 
             case .creationSheet(.presented(.delegate(.dismissed))):
                 state.creationSheet = nil
@@ -83,8 +99,17 @@ public struct HomeFeature {
             }
         }
         .ifLet(\.$creationSheet, action: \.creationSheet) {
-            MeetingCreationSheetFeature()
+            GroupCreationSheetFeature()
         }
         .forEach(\.path, action: \.path)
+    }
+
+    private func fetchGroupsEffect() -> Effect<Action> {
+        let client = groupClient
+        return .run { send in
+            await send(.groupsResponse(
+                Result { try await client.fetchGroups() }
+            ))
+        }
     }
 }
