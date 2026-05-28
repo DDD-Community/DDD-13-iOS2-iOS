@@ -19,14 +19,14 @@ public struct TermsAgreementFeature {
     @ObservableState
     public struct State: Equatable {
         public var clauses: [TermClause]
-        public var agreedIDs: Set<String>
+        public var agreedIDs: Set<Int>
         public var pdfClause: TermClause?
         public var isLoading: Bool
         public var errorMessage: String?
 
         public init(
             clauses: [TermClause] = [],
-            agreedIDs: Set<String> = [],
+            agreedIDs: Set<Int> = [],
             pdfClause: TermClause? = nil,
             isLoading: Bool = false,
             errorMessage: String? = nil
@@ -52,8 +52,8 @@ public struct TermsAgreementFeature {
         case onAppear // appear상태에서 이용약관 조회하기
         case signupTermsResponse(Result<[TermClause], FetchError>)
         case agreeAllToggleTapped
-        case clauseToggleTapped(id: String)
-        case clausePDFTapped(id: String)
+        case clauseToggleTapped(id: Int)
+        case clausePDFTapped(id: Int)
         case pdfDismissed
         case startButtonTapped
         case backButtonTapped
@@ -61,7 +61,7 @@ public struct TermsAgreementFeature {
         case delegate(Delegate)
 
         public enum Delegate: Equatable {
-            case completeAgreement
+            case completeAgreement(agreedTermIDs: [Int])
             case navigateBack
             case changeLoginID
         }
@@ -90,7 +90,7 @@ public struct TermsAgreementFeature {
             case let .signupTermsResponse(.success(clauses)):
                 state.isLoading = false
                 state.clauses = clauses
-                state.agreedIDs = state.agreedIDs.intersection(Set(clauses.map(\.id)))
+                state.agreedIDs =  state.agreedIDs.intersection(Set(clauses.map(\.id)))
                 return .none
 
             case let .signupTermsResponse(.failure(error)):
@@ -124,8 +124,8 @@ public struct TermsAgreementFeature {
 
             case .startButtonTapped:
                 guard state.isStartEnabled else { return .none }
-
-                return .send(.delegate(.completeAgreement))
+                let agreedTermIDs = state.clauses.map(\.id).filter { state.agreedIDs.contains($0)}
+                return .send(.delegate(.completeAgreement(agreedTermIDs: agreedTermIDs)))
 
             case .backButtonTapped:
                 return .send(.delegate(.navigateBack))
@@ -143,7 +143,7 @@ public struct TermsAgreementFeature {
 private extension TermClause {
     init(_ term: SignupTerm) {
         self.init(
-            id: String(term.id),
+            id: term.id,
             title: term.title,
             body: term.content,
             isRequired: term.isRequired

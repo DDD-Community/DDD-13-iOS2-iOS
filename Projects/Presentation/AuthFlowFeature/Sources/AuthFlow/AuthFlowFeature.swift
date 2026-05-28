@@ -6,15 +6,16 @@
 //  인증 완료 시 부모(RootFeature)에 delegate를 발행해 메인 플로우로 위임한다
 //
 
-import Foundation
-
 import ComposableArchitecture
-
 import Entity
+import Foundation
 import StationSearchFeature
+import Utill
 
 @Reducer
 public struct AuthFlowFeature {
+    @Dependency(\.registerMemberClient) private var registerMemberClient
+
     @Reducer(state: .equatable)
     public enum Path {
         case terms(TermsAgreementFeature)
@@ -27,17 +28,29 @@ public struct AuthFlowFeature {
         public var login: LoginFeature.State
         public var path: StackState<Path.State>
         @Presents public var stationSearch: StationSearchSheetFeature.State?
-        public var suggestedProfileName: String?
+        public var suggestedProfileName: String? // SNS인증후 받은 이름이나 닉네임
+        public var nickname: String // 실제 유저가 작성한 이름이나 닉네임(제안된 이름, 닉네임을 사용 안 할 수도 있기 때문에)
+        public var agreedTermIDs: [Int]
+        public var isRegistering: Bool
+        public var registerErrorMessage: String?
 
         public init(
             login: LoginFeature.State = LoginFeature.State(),
             path: StackState<Path.State> = StackState<Path.State>(),
-            suggestedProfileName: String? = nil
+            suggestedProfileName: String? = nil,
+            nickname: String = "",
+            agreedTermIDs: [Int] = [],
+            isRegistering: Bool = false,
+            registerErrorMessage: String? = nil
         ) {
             self.login = login
             self.path = path
             self.stationSearch = nil
             self.suggestedProfileName = suggestedProfileName
+            self.nickname = nickname
+            self.agreedTermIDs = agreedTermIDs
+            self.isRegistering = isRegistering
+            self.registerErrorMessage = registerErrorMessage
         }
     }
 
@@ -45,6 +58,7 @@ public struct AuthFlowFeature {
         case login(LoginFeature.Action)
         case path(StackActionOf<Path>)
         case stationSearch(PresentationAction<StationSearchSheetFeature.Action>)
+        case registerMemberResponse(Result<Void, Error>)
         case delegate(Delegate)
 
         public enum Delegate: Equatable {
@@ -72,16 +86,53 @@ public struct AuthFlowFeature {
             case .login:
                 return .none
 
-            case .path(.element(id: _, action: .terms(.delegate(.completeAgreement)))):
+            case let .path(.element(id: _, action: .terms(.delegate(.completeAgreement(agreedTermIDs))))):
+                state.agreedTermIDs = agreedTermIDs
                 state.path.append(.profile(ProfileInputFeature.State(name: state.suggestedProfileName ?? "")))
                 return .none
 
             case let .path(.element(id: _, action: .profile(.delegate(.proceedToDepartureSearch(name))))):
-                state.path.append(.departure(DepartureSearchFeature.State(name: name)))
+                state.nickname = name
+                state.path.append(.departure(DepartureSearchFeature.State()))
                 return .none
 
-            case .path(.element(id: _, action: .departure(.delegate(.proceedToHome)))):
-                return .send(.delegate(.authDidComplete))
+            case let .path(.element(id: _, action: .departure(.delegate(.registerRequested(station))))):
+                guard !state.isRegistering else { return .none } // 중복 요청 방어 코드
+                guard !state.nickname.isEmpty else {
+                    state.registerErrorMessage = "닉네임 정보가 없습니다."
+                    return .none
+                }
+                guard !state.agreedTermIDs.isEmpty else {
+                    state.registerErrorMessage = "약관 동의 정보가 없습니다."
+                    return .none
+                }
+                let registerMemberClient = self.registerMemberClient
+                let nickname = state.nickname
+                let agreedTermIDs = state.agreedTermIDs
+                let departureLabel = station.name
+                let departureAddress = station.roadAddressName.isEmpty ? station.addressName : station.roadAddressName
+                let latitude = station.y
+                let longitude = station.x
+                
+                state.isRegistering = true
+                state.registerErrorMessage = nil
+
+                return .run { send in
+                    do {
+                        _ = try await registerMemberClient.register(
+                            nickname,
+                            agreedTermIDs,
+                            departureLabel,
+                            departureAddress,
+                            latitude,
+                            longitude
+                        )
+                        await send(.registerMemberResponse(.success(())))
+                    } catch {
+                        Log.error("register failed: \(error)")
+                        await send(.registerMemberResponse(.failure(error)))
+                    }
+                }
 
             case .path(.element(id: _, action: .departure(.delegate(.dismiss)))):
                 state.path.removeLast()
@@ -109,6 +160,14 @@ public struct AuthFlowFeature {
                 return .run { send in
                     await send(.path(.element(id: id, action: .departure(.stationSelected(station)))))
                 }
+            case .registerMemberResponse(.success):
+                state.isRegistering = false
+                return .send(.delegate(.authDidComplete))
+                
+            case let .registerMemberResponse(.failure(error)):
+                state.isRegistering = false
+                state.registerErrorMessage = error.localizedDescription
+                return .none
 
             case .stationSearch(.presented(.delegate(.dismissed))):
                 state.stationSearch = nil

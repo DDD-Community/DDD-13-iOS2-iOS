@@ -14,7 +14,16 @@ public struct RegisterMemberClient: Sendable {
 
 public extension RegisterMemberClient {
     static func live(useCase: RegisterMemberUseCase) -> Self {
-        Self { nickname, agreedTermsIds, departureLabel, departureAddress, latitude, longitude in try await useCase.execute(nickname: nickname, agreedTermsIds: agreedTermsIds, departureLabel: departureLabel, departureAddress: departureAddress, latitude: latitude, longitude: longitude) }
+        Self { nickname, agreedTermsIds, departureLabel, departureAddress, latitude, longitude in
+            try await useCase.execute(
+                nickname: nickname,
+                agreedTermsIds: agreedTermsIds,
+                departureLabel: departureLabel,
+                departureAddress: departureAddress,
+                latitude: latitude,
+                longitude: longitude
+            )
+        }
     }
 }
 
