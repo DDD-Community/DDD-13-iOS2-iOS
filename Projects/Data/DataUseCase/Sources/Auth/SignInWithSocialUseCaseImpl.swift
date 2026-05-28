@@ -32,7 +32,6 @@ public final class SignInWithSocialUseCaseImpl: SignInWithSocialUseCase {
         switch provider {
         case .kakao:
             let socialAuthResult = try await kakaoLoginService.login() // 소셜인증 후
-            Log.debug("🔑 kakaoSocialToken: \(socialAuthResult.token)")
             return try await signInWithServer( // 서버 로그인 요청
                 provider: provider,
                 providerToken: socialAuthResult.token.accessToken,
@@ -41,7 +40,6 @@ public final class SignInWithSocialUseCaseImpl: SignInWithSocialUseCase {
 
         case .naver:
             let socialAuthResult = try await naverLoginService.login()
-            Log.debug("🔑 naverSocialToken: \(socialAuthResult.token)")
             return try await signInWithServer(
                 provider: provider,
                 providerToken: socialAuthResult.token.accessToken,
@@ -50,7 +48,6 @@ public final class SignInWithSocialUseCaseImpl: SignInWithSocialUseCase {
 
         case .apple:
             let socialAuthResult = try await appleLoginService.login()
-            Log.debug("🔑 appleSocialToken: \(socialAuthResult.token)")
             return try await signInWithServer(
                 provider: provider,
                 providerToken: socialAuthResult.token.accessToken,
