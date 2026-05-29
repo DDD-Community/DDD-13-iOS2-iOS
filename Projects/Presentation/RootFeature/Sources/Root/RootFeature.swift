@@ -48,11 +48,19 @@ public struct RootFeature {
             switch action {
             case .onAppear:
                 let hasToken = KeyChainManager.itemExists(key: KeyChainKey.accessToken)
-                #if DEBUG
-                state.mode = .auth // 테스트용
-                #else
-                state.mode = hasToken ? .main : .auth
-                #endif
+                let registrationCompleted = UserDefaults.standard.object(forKey: UserDefaultsKey.registrationCompleted) as? Bool
+                
+                if !hasToken {
+                // AccessToken이 없는 경우 -> 초기 진입한 회원
+                    state.mode = .auth
+                    state.auth = AuthFlowFeature.State(entryPoint: .login)
+                } else if registrationCompleted == true {
+                    state.mode = .main // 토큰이 있고, registrationCompleted도 true인 경우 -> 이미 SNS인증 후 회원가입까지 완료
+                } else {
+                    state.mode = .auth
+                    state.auth = AuthFlowFeature.State(entryPoint: .terms) // 토큰은 있지만, 회원가입까지 완료하지 못한 회원 -> 약관 동의부터 다시 진행
+                }
+                
                 return .none
 
             case .auth(.delegate(.authDidComplete)):

@@ -22,9 +22,15 @@ public struct AuthFlowFeature {
         case profile(ProfileInputFeature)
         case departure(DepartureSearchFeature)
     }
+    
+    public enum EntryPoint: Equatable { // 항상 로그인 화면부터 시작하지 않고, 상황에 따라 약관 화면부터 시작할 수 있게
+        case login
+        case terms
+    }
 
     @ObservableState
     public struct State: Equatable {
+      
         public var login: LoginFeature.State
         public var path: StackState<Path.State>
         @Presents public var stationSearch: StationSearchSheetFeature.State?
@@ -35,6 +41,7 @@ public struct AuthFlowFeature {
         public var registerErrorMessage: String?
 
         public init(
+            entryPoint: EntryPoint = .login,
             login: LoginFeature.State = LoginFeature.State(),
             path: StackState<Path.State> = StackState<Path.State>(),
             suggestedProfileName: String? = nil,
@@ -51,6 +58,10 @@ public struct AuthFlowFeature {
             self.agreedTermIDs = agreedTermIDs
             self.isRegistering = isRegistering
             self.registerErrorMessage = registerErrorMessage
+            
+            if entryPoint == .terms {
+                self.path.append(.terms(TermsAgreementFeature.State())) // .terms일 때 path에 약관 화면 쌓는다.
+            }
         }
     }
 
@@ -123,9 +134,10 @@ public struct AuthFlowFeature {
 
                 return .run { send in
                     do {
-                        _ = try await registerMemberClient.register(
+                        let result = try await registerMemberClient.register(
                             member
                         )
+                        UserDefaults.standard.set(result.registrationCompleted, forKey: UserDefaultsKey.registrationCompleted)
                         await send(.registerMemberResponse(.success(())))
                     } catch {
                         Log.error("register failed: \(error)")

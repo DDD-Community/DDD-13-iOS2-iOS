@@ -48,4 +48,9 @@ public final class AuthRepositoryImpl: AuthRepositoryProtocol {
 
         return response.toEntity()
     }
+    
+    /// 회원가입 완료 여부 저장
+    public func saveRegistrationCompleted(_ completed: Bool) {
+        UserDefaults.standard.set(completed, forKey: UserDefaultsKey.registrationCompleted)
+    }
 }
