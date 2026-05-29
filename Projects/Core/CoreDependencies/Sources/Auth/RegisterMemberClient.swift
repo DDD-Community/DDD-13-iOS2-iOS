@@ -9,19 +9,14 @@ import UseCase
 
 @DependencyClient
 public struct RegisterMemberClient: Sendable {
-    public var register: @Sendable (_ nickname: String, _ agreedTermsIds: [Int], _ departureLabel: String, _ departureAddress: String, _ latitude: Double, _ longitude: Double) async throws -> RegisterMemberResult
+    public var register: @Sendable (_ member: RegisterMember) async throws -> RegisterMemberResult
 }
 
 public extension RegisterMemberClient {
     static func live(useCase: RegisterMemberUseCase) -> Self {
-        Self { nickname, agreedTermsIds, departureLabel, departureAddress, latitude, longitude in
+        Self { member in
             try await useCase.execute(
-                nickname: nickname,
-                agreedTermsIds: agreedTermsIds,
-                departureLabel: departureLabel,
-                departureAddress: departureAddress,
-                latitude: latitude,
-                longitude: longitude
+                member
             )
         }
     }
@@ -30,7 +25,7 @@ public extension RegisterMemberClient {
 extension RegisterMemberClient: DependencyKey {
     public static let liveValue = RegisterMemberClient()
     public static let testValue = RegisterMemberClient(
-        register: { _, _, _, _, _, _ in
+        register: { _ in
             RegisterMemberResult(
                 id: 0,
                 nickname: "",

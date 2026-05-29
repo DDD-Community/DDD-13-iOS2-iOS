@@ -35,13 +35,13 @@ public struct RegisterMemberRequestDTO: Encodable, Sendable {
     public let latitude: Double
     public let longitude: Double
     
-    public init(nickname: String, agreedTermsIds: [Int], departureLabel: String, departureAddress: String, latitude: Double, longitude: Double) {
-        self.nickname = nickname
-        self.agreedTermsIds = agreedTermsIds
-        self.departureLabel = departureLabel
-        self.departureAddress = departureAddress
-        self.latitude = latitude
-        self.longitude = longitude
+    public init(member: RegisterMember) {
+        nickname = member.nickname
+        agreedTermsIds = member.agreedTermsIds
+        departureLabel = member.departureLabel
+        departureAddress = member.departureAddress
+        latitude = member.latitude
+        longitude = member.longitude
     }
 }
 

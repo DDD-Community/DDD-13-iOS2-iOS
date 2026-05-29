@@ -6,5 +6,5 @@
 import Entity
 
 public protocol RegisterMemberUseCase: Sendable {
-    func execute(nickname: String, agreedTermsIds: [Int], departureLabel: String, departureAddress: String, latitude: Double, longitude: Double) async throws -> RegisterMemberResult
+    func execute(_ member: RegisterMember) async throws -> RegisterMemberResult
 }

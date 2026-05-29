@@ -106,26 +106,25 @@ public struct AuthFlowFeature {
                     state.registerErrorMessage = "약관 동의 정보가 없습니다."
                     return .none
                 }
-                let registerMemberClient = self.registerMemberClient
-                let nickname = state.nickname
-                let agreedTermIDs = state.agreedTermIDs
-                let departureLabel = station.name
-                let departureAddress = station.roadAddressName.isEmpty ? station.addressName : station.roadAddressName
-                let latitude = station.y
-                let longitude = station.x
                 
+                let registerMemberClient = self.registerMemberClient
+
+                let member = RegisterMember(
+                    nickname: state.nickname,
+                    agreedTermsIds: state.agreedTermIDs,
+                    departureLabel: station.name,
+                    departureAddress: station.roadAddressName.isEmpty ? station.addressName : station.roadAddressName,
+                    latitude: station.y,
+                    longitude: station.x
+                )
+
                 state.isRegistering = true
                 state.registerErrorMessage = nil
 
                 return .run { send in
                     do {
                         _ = try await registerMemberClient.register(
-                            nickname,
-                            agreedTermIDs,
-                            departureLabel,
-                            departureAddress,
-                            latitude,
-                            longitude
+                            member
                         )
                         await send(.registerMemberResponse(.success(())))
                     } catch {
@@ -160,10 +159,11 @@ public struct AuthFlowFeature {
                 return .run { send in
                     await send(.path(.element(id: id, action: .departure(.stationSelected(station)))))
                 }
+
             case .registerMemberResponse(.success):
                 state.isRegistering = false
                 return .send(.delegate(.authDidComplete))
-                
+
             case let .registerMemberResponse(.failure(error)):
                 state.isRegistering = false
                 state.registerErrorMessage = error.localizedDescription

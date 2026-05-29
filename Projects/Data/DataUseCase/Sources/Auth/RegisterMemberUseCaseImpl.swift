@@ -15,7 +15,7 @@ public final class RegisterMemberUseCaseImpl: RegisterMemberUseCase {
         self.repository = repository
     }
     
-    public func execute(nickname: String, agreedTermsIds: [Int], departureLabel: String, departureAddress: String, latitude: Double, longitude: Double) async throws -> RegisterMemberResult {
-        return try await repository.registerMember(nickname: nickname, agreedTermsIds: agreedTermsIds, departureLabel: departureLabel, departureAddress: departureAddress, latitude: latitude, longitude: longitude)
+    public func execute(_ member: RegisterMember) async throws -> RegisterMemberResult {
+        return try await repository.registerMember(member)
     }
 }
