@@ -42,9 +42,10 @@ class Interceptor: RequestInterceptor, @unchecked Sendable {
                     Log.debug("refresh Token 만료")
                     // TODO: 로그인창으로 보내기
                     await MainActor.run {
-                        UserDefaults.standard.set(false, forKey: UserDefaultsKey.isLogin)
+                        expireSession()
                     }
-                    completion(.doNotRetry)
+                 
+                    completion(.doNotRetryWithError(NetworkError.refreshFailed))
                 }
             }
         } else {
@@ -66,11 +67,20 @@ class Interceptor: RequestInterceptor, @unchecked Sendable {
             KeyChainManager.updateItem(key: KeyChainKey.accessToken, value: tokens.accessToken)
             KeyChainManager.updateItem(key: KeyChainKey.refreshToken, value: tokens.refreshToken)
             UserDefaults.standard.set(Date(), forKey: UserDefaultsKey.tokenIssueDate)
-                
+                  
             return true
         } catch {
             Log.debug("❌ 토큰 리프레시 실패: \(error)")
             return false
         }
+    }
+    
+    private func expireSession() {
+        KeyChainManager.deleteItem(key: KeyChainKey.accessToken)
+        KeyChainManager.deleteItem(key: KeyChainKey.refreshToken)
+
+        UserDefaults.standard.set(false, forKey: UserDefaultsKey.isLogin)
+        UserDefaults.standard.set(false, forKey: UserDefaultsKey.registrationCompleted)
+        UserDefaults.standard.removeObject(forKey: UserDefaultsKey.tokenIssueDate)
     }
 }

@@ -174,6 +174,8 @@ public struct AuthFlowFeature {
 
             case .registerMemberResponse(.success):
                 state.isRegistering = false
+                UserDefaults.standard.set(true, forKey: UserDefaultsKey.registrationCompleted) // 회원가입 완료시에 true로 갱신
+                UserDefaults.standard.set(true, forKey: UserDefaultsKey.isLogin)
                 return .send(.delegate(.authDidComplete))
 
             case let .registerMemberResponse(.failure(error)):

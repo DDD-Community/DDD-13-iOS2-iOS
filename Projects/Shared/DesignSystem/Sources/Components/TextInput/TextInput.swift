@@ -170,7 +170,7 @@ private struct TextInputFieldArea: View {
                     ) {
                         EmptyView()
                     }
-                    .maxLength(text: $text, maxCount)
+                    .maxCount(text: $text, maxCount)
                     .pretendardFont(family: .Regular, size: Typography.typographySize300)
                     .foregroundStyle(textColor)
                     .padding(.vertical, Spacing.spacing50)

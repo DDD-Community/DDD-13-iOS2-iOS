@@ -9,6 +9,7 @@ import Entity
 import Service
 import UseCase
 import Utill
+import Foundation
 
 public final class SignInWithSocialUseCaseImpl: SignInWithSocialUseCase {
     private let repository: AuthRepositoryProtocol
@@ -70,6 +71,8 @@ private extension SignInWithSocialUseCaseImpl {
         // 직접 키체인에 접근하는 것이 아닌 repository를 통해 접근하도록
         repository.saveAuthTokens(loginResult.tokens)
         repository.saveRegistrationCompleted(loginResult.registrationCompleted)
+        
+        UserDefaults.standard.set(true, forKey: UserDefaultsKey.isLogin)
 
         return LoginResult(
             tokens: loginResult.tokens,

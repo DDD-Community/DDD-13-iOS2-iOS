@@ -6,17 +6,17 @@
 
 import SwiftUI
 
-struct MaxLengthModifier: ViewModifier {
+struct MaxCountModifier: ViewModifier {
     @Binding var text: String
-    let maxLength: Int?
+    let maxCount: Int?
 
     func body(content: Content) -> some View {
         content
             .onChange(of: text) { _, newValue in
-                guard let maxLength else { return }
+                guard let maxCount else { return }
 
-                if newValue.count > maxLength {
-                    text = String(newValue.prefix(maxLength))
+                if newValue.count > maxCount {
+                    text = String(newValue.prefix(maxCount))
                 }
             }
     }

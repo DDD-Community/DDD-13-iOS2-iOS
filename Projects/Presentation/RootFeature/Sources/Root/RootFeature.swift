@@ -31,6 +31,7 @@ public struct RootFeature {
         case onAppear
         case auth(AuthFlowFeature.Action)
         case home(HomeFeature.Action)
+        case sessionExpired // 세션 만료
     }
 
     public init() {}
@@ -47,20 +48,21 @@ public struct RootFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
+                let isLogin = UserDefaults.standard.bool(forKey: UserDefaultsKey.isLogin)
                 let hasToken = KeyChainManager.itemExists(key: KeyChainKey.accessToken)
                 let registrationCompleted = UserDefaults.standard.object(forKey: UserDefaultsKey.registrationCompleted) as? Bool
-                
-                if !hasToken {
-                // AccessToken이 없는 경우 -> 초기 진입한 회원
+
+                switch (isLogin && hasToken, registrationCompleted) {
+                case (false, _):
                     state.mode = .auth
                     state.auth = AuthFlowFeature.State(entryPoint: .login)
-                } else if registrationCompleted == true {
-                    state.mode = .main // 토큰이 있고, registrationCompleted도 true인 경우 -> 이미 SNS인증 후 회원가입까지 완료
-                } else {
+                case (true, true):
+                    state.mode = .main
+                case (true, false), (true, nil):
                     state.mode = .auth
-                    state.auth = AuthFlowFeature.State(entryPoint: .terms) // 토큰은 있지만, 회원가입까지 완료하지 못한 회원 -> 약관 동의부터 다시 진행
+                    state.auth = AuthFlowFeature.State(entryPoint: .terms)
                 }
-                
+
                 return .none
 
             case .auth(.delegate(.authDidComplete)):
@@ -71,6 +73,11 @@ public struct RootFeature {
                 return .none
 
             case .home:
+                return .none
+
+            case .sessionExpired:
+                state.mode = .auth
+                state.auth = AuthFlowFeature.State(entryPoint: .login)
                 return .none
             }
         }
