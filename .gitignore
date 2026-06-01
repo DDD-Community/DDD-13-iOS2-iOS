@@ -77,6 +77,10 @@ Config/
 
 # Secrets
 .env
+fastlane/.env
+
+# Bundler
+Gemfile.lock
 
 # Docs
 README.md

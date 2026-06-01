@@ -1,0 +1,39 @@
+git_url("https://github.com/Roy-wonji/FastlaneMatch.git")
+storage_mode("git")
+app_identifier(["com.ddd-ios2.Bangawo"])
+include_mac_in_profiles(true)
+include_all_certificates(true)
+shallow_clone(true)
+skip_certificate_matching(true)
+skip_confirmation(true)
+keychain_name("login")
+keychain_password(ENV["MATCH_KEYCHAIN_PASSWORD"])
+
+# .env 파일에서 API 키가 있으면 임시 JSON 파일 생성 후 사용 완료시 자동 삭제
+if ENV["APP_STORE_CONNECT_API_KEY_ID"] && ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"] && ENV["APP_STORE_CONNECT_API_KEY_KEY_CONTENT"]
+  require 'json'
+  require 'base64'
+
+  api_key_path = "fastlane/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_ID']}.json"
+
+  # 임시 JSON 파일 생성
+  decoded_key = Base64.decode64(ENV["APP_STORE_CONNECT_API_KEY_KEY_CONTENT"])
+
+  api_key_data = {
+    "key_id" => ENV["APP_STORE_CONNECT_API_KEY_ID"],
+    "issuer_id" => ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"],
+    "key" => decoded_key,
+    "duration" => 1200,
+    "in_house" => false
+  }
+
+  File.write(api_key_path, JSON.pretty_generate(api_key_data))
+
+  # API 키 경로 설정
+  api_key_path(api_key_path)
+
+  # 프로세스 종료 시 JSON 파일 자동 삭제
+  at_exit do
+    File.delete(api_key_path) if File.exist?(api_key_path)
+  end
+end
