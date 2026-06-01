@@ -21,6 +21,9 @@ public struct BottomSheet<Content: View>: View {
     private let primaryButton: ButtonConfig?
     private let secondaryButton: ButtonConfig?
     private let canExpand: Binding<Bool>?
+    private let dragHandlers: BottomSheetDragHandlers?
+    // 드래그·스냅 진행 중. 이 동안 그림자 재렌더와 GeometryReader 측정 갱신을 멈춰 리사이즈 비용을 줄인다.
+    private let isDragging: Bool
 
     @State private var isKeyboardVisible = false
     @State private var contentNaturalHeight: CGFloat = 0
@@ -41,21 +44,37 @@ public struct BottomSheet<Content: View>: View {
         self.primaryButton = primaryButton
         self.secondaryButton = secondaryButton
         self.canExpand = canExpand
+        dragHandlers = nil
+        isDragging = false
+        self.content = content
+    }
+
+    init(
+        header: HeaderConfig? = nil,
+        contentVerticalPadding: CGFloat = 0,
+        primaryButton: ButtonConfig? = nil,
+        secondaryButton: ButtonConfig? = nil,
+        canExpand: Binding<Bool>? = nil,
+        dragHandlers: BottomSheetDragHandlers?,
+        isDragging: Bool = false,
+        @ViewBuilder content: @escaping () -> Content
+    ) {
+        self.header = header
+        self.contentVerticalPadding = contentVerticalPadding
+        self.primaryButton = primaryButton
+        self.secondaryButton = secondaryButton
+        self.canExpand = canExpand
+        self.dragHandlers = dragHandlers
+        self.isDragging = isDragging
         self.content = content
     }
 
     // MARK: - Body
 
     public var body: some View {
-        SheetContainer {
+        SheetContainer(showShadow: !isDragging) {
             VStack(spacing: 0) {
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(Colors.gray300)
-                    .frame(width: Metric.handleBarWidth, height: Metric.handleBarHeight)
-                    .padding(.top, Spacing.spacing300)
-                if let header {
-                    HeaderView(config: header)
-                }
+                dragChrome
                 ScrollView {
                     content()
                         .padding(.horizontal, Spacing.spacing400)
@@ -64,6 +83,7 @@ public struct BottomSheet<Content: View>: View {
                             GeometryReader { geo in
                                 Color.clear
                                     .onChange(of: geo.size.height, initial: true) { _, h in
+                                        guard !isDragging else { return }
                                         contentNaturalHeight = h
                                         canExpand?.wrappedValue = h > scrollViewport
                                     }
@@ -74,6 +94,7 @@ public struct BottomSheet<Content: View>: View {
                     GeometryReader { geo in
                         Color.clear
                             .onChange(of: geo.size.height, initial: true) { _, h in
+                                guard !isDragging else { return }
                                 scrollViewport = h
                                 canExpand?.wrappedValue = contentNaturalHeight > h
                             }
@@ -105,25 +126,65 @@ public struct BottomSheet<Content: View>: View {
             NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
         ) { _ in isKeyboardVisible = false }
     }
+
+    // MARK: - Drag Chrome
+
+    // 핸들 + 헤더 영역. 드래그 제스처는 이 영역에만 부착해 ScrollView 스크롤과의 충돌을 막는다.
+    @ViewBuilder
+    private var dragChrome: some View {
+        let chrome = VStack(spacing: 0) {
+            RoundedRectangle(cornerRadius: 2)
+                .fill(Colors.gray300)
+                .frame(width: Metric.handleBarWidth, height: Metric.handleBarHeight)
+                .padding(.top, Spacing.spacing300)
+            if let header {
+                HeaderView(config: header)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .contentShape(Rectangle())
+
+        if let dragHandlers {
+            // coordinateSpace: .global — 시트의 .offset 변화로 인한 local 좌표계 시프트
+            // → translation 피드백 루프(떨림) 방지.
+            chrome.gesture(
+                DragGesture(coordinateSpace: .global)
+                    .onChanged(dragHandlers.onChanged)
+                    .onEnded(dragHandlers.onEnded)
+            )
+        } else {
+            chrome
+        }
+    }
+}
+
+// MARK: - BottomSheetDragHandlers
+
+/// 핸들/헤더 영역에서만 시트 리사이즈·dismiss 드래그를 처리하기 위한 콜백.
+/// `ScrollView`와 제스처가 충돌하지 않도록 chrome 영역에만 부착한다.
+struct BottomSheetDragHandlers {
+    let onChanged: (DragGesture.Value) -> Void
+    let onEnded: (DragGesture.Value) -> Void
 }
 
 // MARK: - SheetContainer
 
 private extension BottomSheet {
     struct SheetContainer<SheetContent: View>: View {
+        var showShadow: Bool = true
         let content: () -> SheetContent
 
         var body: some View {
             ZStack(alignment: .top) {
                 RoundedRectangle(cornerRadius: BorderRadius.borderRadius400)
-                .fill(Colors.gray00)
-                .shadow(
-                    color: BoxShadow.boxShadow400.color,
-                    radius: BoxShadow.boxShadow400.blur,
-                    x: BoxShadow.boxShadow400.offsetX,
-                    y: BoxShadow.boxShadow400.offsetY
-                )
-                .ignoresSafeArea(edges: .bottom)
+                    .fill(Colors.gray00)
+                    .shadow(
+                        color: showShadow ? BoxShadow.boxShadow400.color : .clear,
+                        radius: showShadow ? BoxShadow.boxShadow400.blur : 0,
+                        x: showShadow ? BoxShadow.boxShadow400.offsetX : 0,
+                        y: showShadow ? BoxShadow.boxShadow400.offsetY : 0
+                    )
+                    .ignoresSafeArea(edges: .bottom)
 
                 content()
             }
