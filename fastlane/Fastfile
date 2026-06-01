@@ -1,0 +1,325 @@
+# Fastlane 기본 설정
+update_fastlane
+default_platform(:ios)
+
+ENV["FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT"] = "600"
+
+# 앱 관련 변수
+APP_NAME = "DDDAttendance"
+SCHEME = "DDDAttendance"
+STAGE_SCHEME = "DDDAttendance-Stage"
+BUNDLE_ID = "io.DDD.Attendance"
+OUTPUT_DIR = "./fastlane/output"
+IPA_FILENAME = "#{APP_NAME}.ipa"
+TEAM_ID = ENV["TEAM_ID"] || "N94CS4N6VR"
+
+# 릴리스용 변수 (누락되어 있던 부분 보완)
+APP_RELEASE_NAME = APP_NAME
+APP_RELEASE_SCHEME = SCHEME
+
+APP_STAGE_NAME = STAGE_SCHEME
+APP_STAGE_SCHEME = STAGE_SCHEME
+
+platform :ios do
+
+
+
+  # 🚀 TestFlight 업로드 (Debug)
+  desc "Upload to TestFlight (Debug)"
+  lane :QA do
+
+    app_store_connect_api_key(
+      key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+      issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
+      key_content: ENV["APP_STORE_CONNECT_API_KEY_CONTENT"],
+      is_key_content_base64: true,
+      in_house: false
+    )
+
+    match(
+      type: "appstore",
+      readonly: true,
+      git_url: "git@github.com:Roy-wonji/FastlaneMatch.git",
+      storage_mode: "git",
+      app_identifier: ["io.DDD.Attendance"]
+    )
+
+    # Change to project root directory
+    Dir.chdir("..") do
+      puts "📁 Current directory: #{Dir.pwd}"
+      puts "📋 Available files: #{Dir.entries('.')}"
+
+      # Try to generate workspace if missing
+      workspace_files = Dir.glob("*.xcworkspace")
+      if workspace_files.empty?
+        puts "🔧 No workspace found, trying to generate..."
+
+        # Check if tuist is available
+        tuist_available = system("which tuist > /dev/null 2>&1")
+        puts "Tuist available: #{tuist_available}"
+
+        unless tuist_available
+          puts "🔧 Installing tuist with brew..."
+          sh("brew install tuist")
+        end
+
+        begin
+          if File.exist?("make")
+            puts "🔧 Trying ./make install..."
+            sh("./make install")
+            puts "🔧 Trying ./make generate..."
+            sh("./make generate")
+          else
+            puts "🔧 Trying tuist directly..."
+            sh("tuist install")
+            sh("tuist generate --no-open")
+          end
+        rescue => e
+          puts "❌ Generation failed: #{e.message}"
+        end
+
+        workspace_files = Dir.glob("*.xcworkspace")
+        puts "🔍 Workspace files found: #{workspace_files}"
+      end
+
+      if workspace_files.empty?
+        puts "❌ Still no workspace found!"
+        puts "🔍 All files in directory:"
+        Dir.entries('.').each { |f| puts "  #{f}" }
+        UI.user_error!("Cannot generate workspace file. Check tuist setup and plugins.")
+      end
+
+      workspace_name = workspace_files.first
+      workspace_path = File.expand_path(workspace_name)
+      puts "✅ Using workspace: #{workspace_name}"
+      puts "✅ Full workspace path: #{workspace_path}"
+
+      ipa_path = build_app(
+        workspace: workspace_path,
+        scheme: "DDDAttendance-Stage",
+        configuration: "Release",
+        export_method: "app-store",
+        output_directory: File.expand_path("../#{OUTPUT_DIR}"),
+        output_name: IPA_FILENAME,
+        clean: false,
+        silent: true,
+        xcargs: "CODE_SIGN_IDENTITY='Apple Distribution' CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=#{TEAM_ID} " +
+                "COMPILER_INDEX_STORE_ENABLE=NO ENABLE_BITCODE=NO " +
+                "SWIFT_COMPILATION_MODE=wholemodule -parallelizeTargets " +
+                "ENABLE_PARALLEL_SIGNING=YES DISABLE_MANUAL_TARGET_ORDER_BUILD_WARNING=YES " +
+                "FRAMEWORK_SEARCH_PATHS='$(inherited)' LIBRARY_SEARCH_PATHS='$(inherited)' " +
+                "-allowProvisioningUpdates -quiet",
+        export_options: {
+          signingStyle: "manual",
+          uploadBitcode: false,
+          teamID: TEAM_ID,
+          provisioningProfiles: {
+            "#{BUNDLE_ID}" => "match AppStore #{BUNDLE_ID}"
+          }
+        }
+      )
+    end
+
+    upload_to_testflight(
+      ipa: ipa_path,
+      changelog: "변경사항",
+      groups: ["DDD", "ddd"],
+      beta_app_description: "DDD 출석 앱입니다.",
+      notify_external_testers: true,
+      skip_waiting_for_build_processing: true,
+      demo_account_required: false,
+      uses_non_exempt_encryption: false
+    )
+  end
+
+  # 🚀 App Store 배포
+  desc "Submit to App Store"
+  lane :release do |options|
+    if options[:version]
+      app_store_connect_api_key(
+        key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+        issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
+        key_content: ENV["APP_STORE_CONNECT_API_KEY_CONTENT"],
+        is_key_content_base64: true,
+        in_house: false
+      )
+
+      # 자동으로 빌드 번호 증가
+      current_build_number = latest_testflight_build_number(
+        app_identifier: BUNDLE_ID,
+        platform: "ios"
+      )
+      new_build_number = current_build_number + 1
+      puts "🔢 Current build number: #{current_build_number}"
+      puts "🔢 New build number: #{new_build_number}"
+
+      # Extension+String.swift 파일에서 빌드 번호 업데이트
+      extension_file_path = "../Plugins/ProjectTemplatePlugin/ProjectDescriptionHelpers/Project+Templete/Extension+String.swift"
+      content = File.read(extension_file_path)
+
+      # 빌드 번호 라인 수정
+      updated_content = content.gsub(/public static func appBuildVersion\(buildVersion: String = "\d+"\) -> String \{/,
+                                   "public static func appBuildVersion(buildVersion: String = \"#{new_build_number}\") -> String {")
+
+      File.write(extension_file_path, updated_content)
+      puts "✅ Updated build number to #{new_build_number} in Extension+String.swift"
+
+      # Tuist 프로젝트 재생성
+      Dir.chdir("..") do
+        puts "🔧 Regenerating Tuist workspace with new build number..."
+        sh("tuist generate --no-open")
+        puts "✅ Tuist workspace regenerated"
+      end
+      match(
+        type: "appstore",
+        readonly: true,
+        git_url: "git@github.com:Roy-wonji/FastlaneMatch.git",
+        storage_mode: "git",
+        app_identifier: ["io.DDD.Attendance"]
+      )
+
+      ipa_path = build_app(
+        workspace: "#{APP_RELEASE_NAME}.xcworkspace",
+        scheme: "DDDAttendance-Prod",
+        configuration: "Release",
+        output_directory: OUTPUT_DIR,
+        output_name: IPA_FILENAME,
+        export_method: "app-store",
+        clean: true,
+        silent: false,
+        verbose: true,
+        xcargs: "CODE_SIGN_IDENTITY='Apple Distribution' CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=#{TEAM_ID} " +
+                "COMPILER_INDEX_STORE_ENABLE=NO ENABLE_BITCODE=NO " +
+                "SWIFT_COMPILATION_MODE=wholemodule " +
+                "-allowProvisioningUpdates",
+        export_options: {
+          signingStyle: "manual",
+          uploadBitcode: false,
+          teamID: TEAM_ID,
+          provisioningProfiles: {
+            "#{BUNDLE_ID}" => "match AppStore #{BUNDLE_ID}"
+          }
+        }
+      )
+
+      # clean_symbols_from_ipa(ipa_path: ipa_path)
+
+      # 업로드 후 자동으로 심사 요청
+      upload_to_app_store(
+        app_version: options[:version],
+        username: ENV["APPLE_ID"],
+        team_id: "KL4Y9PB9B8",
+        ipa: ipa_path,
+        skip_metadata: false,
+        metadata_path: "./fastlane/metadata",
+        skip_screenshots: true,
+        force: true,
+        submit_for_review: true,
+        automatic_release: false,
+        precheck_include_in_app_purchases: false,
+        reject_if_possible: true
+      )
+
+      UI.success("🎉 앱 업로드 및 심사 요청 완료!")
+      UI.important("")
+      UI.important("📱 심사 진행 상황 확인:")
+      UI.important("   1. https://appstoreconnect.apple.com 접속")
+      UI.important("   2. DDD Attendance 앱 선택")
+      UI.important("   3. 버전 #{options[:version]} 심사 상태 확인")
+      UI.important("")
+      UI.success("✅ 빌드, 업로드, 심사 요청이 모두 성공적으로 완료되었습니다!")
+      UI.success("🚀 이제 Apple의 심사를 기다리기만 하면 됩니다!")
+    else
+      UI.user_error!("⚠️ version 옵션을 지정해주세요: fastlane submit version:'1.0.0'")
+    end
+  end
+
+  # 🚀 이미 업로드된 버전을 심사에 제출
+  desc "Submit already uploaded version for review"
+  lane :submit_for_review do |options|
+    if options[:version]
+      app_store_connect_api_key(
+        key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+        issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
+        key_content: ENV["APP_STORE_CONNECT_API_KEY_CONTENT"],
+        is_key_content_base64: true,
+        in_house: false
+      )
+
+      begin
+        upload_to_app_store(
+          app_version: options[:version],
+          username: ENV["APPLE_ID"],
+          team_id: "KL4Y9PB9B8",
+          skip_binary_upload: true,
+          skip_metadata: false,
+          metadata_path: "./fastlane/metadata",
+          skip_screenshots: true,
+          force: true,
+          submit_for_review: true,
+          automatic_release: false,
+          precheck_include_in_app_purchases: false,
+          reject_if_possible: true
+        )
+        UI.success("🎉 심사 제출 완료!")
+      rescue => ex
+        UI.error("❌ 제출 실패: #{ex.message}")
+        UI.important("")
+        UI.important("🔍 App Store Connect에서 확인해야 할 사항:")
+        UI.important("   1. 현재 버전의 상태 (심사 중/대기 중인지)")
+        UI.important("   2. 필수 메타데이터 완성 여부")
+        UI.important("   3. 스크린샷 업로드 완료 여부")
+        UI.important("   4. 이전 버전 정리 완료 여부")
+        UI.important("")
+        UI.important("📱 App Store Connect 링크: https://appstoreconnect.apple.com")
+      end
+    else
+      UI.user_error!("⚠️ version 옵션을 지정해주세요: fastlane submit_for_review version:'1.0.0'")
+    end
+  end
+
+end
+
+# 🤖 TDD 자동화 CI 레인
+desc "TDD 테스트 및 자동 배포"
+lane :tdd_ci do |options|
+  domain = options[:domain] || "All"
+
+  UI.header "🧪 #{domain} 도메인 TDD CI 시작"
+
+  # 1. 클린 빌드
+  clear_derived_data
+
+  # 2. 테스트 실행
+  run_tests(
+    workspace: "DDD-Attendance.xcworkspace",
+    devices: ["iPhone 15"],
+    scheme: "DDD-Attendance"
+  )
+
+  # 3. 커버리지 체크
+  slather(
+    cobertura_xml: true,
+    jenkins: true,
+    scheme: "DDD-Attendance",
+    workspace: "DDD-Attendance.xcworkspace"
+  )
+
+  # 4. 성공 시 알림
+  slack(
+    message: "✅ #{domain} 도메인 TDD 테스트 성공!",
+    success: true,
+    channel: "#ios-dev"
+  ) if ENV["SLACK_URL"]
+
+  UI.success "🎉 #{domain} 도메인 TDD CI 완료!"
+end
+
+# 🚨 TDD 테스트 실패 시 처리
+error do |lane, exception|
+  slack(
+    message: "❌ TDD 테스트 실패: #{exception.message}",
+    success: false,
+    channel: "#ios-dev"
+  ) if ENV["SLACK_URL"]
+end
