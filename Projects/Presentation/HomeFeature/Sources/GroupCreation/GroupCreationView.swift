@@ -50,6 +50,34 @@ struct GroupCreationView: View {
                 text: $store.groupNameDraft
             )
         }
+        .bottomSheet(
+            isPresented: $store.isPurposeSheetPresented,
+            header: .init(
+                title: "모임 목적",
+                onClose: { store.send(.purposeSheetDismissed) }
+            ),
+            primaryButton: .init(
+                title: "등록하기",
+                action: { store.send(.purposeConfirmed) }
+            )
+        ) {
+            PurposeSheetContent(store: store)
+        }
+        .bottomSheet(
+            isPresented: $store.isAtmosphereSheetPresented,
+            header: .init(
+                title: "장소 분위기",
+                description: "원하는 분위기를 골라보세요 (최대 3개)",
+                onClose: { store.send(.atmosphereSheetDismissed) }
+            ),
+            primaryButton: .init(
+                title: "등록하기",
+                isEnabled: store.isAtmosphereDraftValid,
+                action: { store.send(.atmosphereConfirmed) }
+            )
+        ) {
+            AtmosphereSheetContent(store: store)
+        }
     }
 }
 
@@ -88,7 +116,7 @@ private struct GroupCreationContent: View {
             ListField(title: "장소 분위기") {
                 Button { store.send(.atmosphereFieldTapped) } label: {
                     Badge(
-                        store.selectedAtmosphere ?? "편안한",
+                        atmosphereBadgeTitle,
                         trailingIcon: Image.Asset.icArrowSmallDown16,
                         showTrailingIcon: true,
                         variant: .solid,
@@ -101,6 +129,125 @@ private struct GroupCreationContent: View {
         .padding(.top, Spacing.spacing800)
         .padding(.horizontal, Spacing.spacing450)
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var atmosphereBadgeTitle: String {
+        store.selectedAtmospheres.isEmpty
+            ? "편안한"
+            : store.selectedAtmospheres.map(\.rawValue).joined(separator: ", ")
+    }
+}
+
+// MARK: - AtmosphereSheetContent
+
+private struct AtmosphereSheetContent: View {
+    let store: StoreOf<GroupCreationFeature>
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ForEach(PlaceAtmosphere.allCases) { atmosphere in
+                AtmosphereRow(
+                    title: atmosphere.rawValue,
+                    isSelected: store.atmosphereDraft.contains(atmosphere),
+                    onTap: { store.send(.atmosphereToggled(atmosphere)) }
+                )
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+// MARK: - AtmosphereRow
+
+private struct AtmosphereRow: View {
+    let title: String
+    let isSelected: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: Spacing.spacing200) {
+                Checkbox(
+                    variant: .circle,
+                    state: isSelected ? .enabled : .disabled,
+                    size: .medium
+                )
+
+                BangawoText(title, textStyle: .bodyMedium)
+                    .foregroundStyle(Colors.gray900)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(.vertical, Spacing.spacing300)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - PurposeSheetContent
+
+private struct PurposeSheetContent: View {
+    let store: StoreOf<GroupCreationFeature>
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ForEach(GroupPurpose.allCases) { purpose in
+                PurposeRow(
+                    purpose: purpose,
+                    isSelected: store.purposeDraft == purpose,
+                    onTap: { store.send(.purposeSelected(purpose)) }
+                )
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+// MARK: - PurposeRow
+
+private struct PurposeRow: View {
+    let purpose: GroupPurpose
+    let isSelected: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: Spacing.spacing300) {
+                purpose.icon
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: Metric.iconLength, height: Metric.iconLength)
+                    .clipShape(Circle())
+
+                BangawoText(purpose.rawValue, textStyle: .bodyMedium)
+                    .foregroundStyle(Colors.gray900)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                if isSelected {
+                    Checkbox(variant: .ghost, state: .enabled, size: .medium)
+                }
+            }
+            .padding(.vertical, Spacing.spacing300)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private enum Metric {
+        static let iconLength: CGFloat = 32
+    }
+}
+
+private extension GroupPurpose {
+    var icon: Image {
+        switch self {
+        case .business:   return Image.Asset.icPurposeBusiness
+        case .birthday:   return Image.Asset.icPurposeBirthday
+        case .networking: return Image.Asset.icPurposeNetworking
+        case .wedding:    return Image.Asset.icPurposeWedding
+        case .dining:     return Image.Asset.icPurposeDining
+        case .family:     return Image.Asset.icPurposeFamily
+        }
     }
 }
 
@@ -145,8 +292,8 @@ private struct ListField<Content: View>: View {
                 initialState: {
                     var state = GroupCreationFeature.State()
                     state.groupTitle = "주말 등산 모임"
-                    state.selectedPurpose = .sports
-                    state.selectedAtmosphere = "활기찬"
+                    state.selectedPurpose = .networking
+                    state.selectedAtmospheres = [.openView, .spacious]
                     return state
                 }()
             ) {

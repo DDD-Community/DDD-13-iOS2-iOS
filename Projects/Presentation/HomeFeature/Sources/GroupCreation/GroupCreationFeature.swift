@@ -10,32 +10,42 @@ import Foundation
 
 private enum Constant {
     static let groupNameMaxCount = 30
+    static let atmosphereMaxSelection = 3
 }
 
 public enum GroupPurpose: String, CaseIterable, Equatable, Identifiable {
-    case networking   = "네트워킹"
-    case study        = "스터디"
-    case hobby        = "취미/여가"
-    case sports       = "운동/스포츠"
-    case culture      = "문화/예술"
-    case social       = "친목/소셜"
-    case volunteering = "봉사활동"
-    case business     = "비즈니스"
+    case business   = "비즈니스"
+    case birthday   = "생일 파티"
+    case networking = "친목 및 네트워킹"
+    case wedding    = "청첩장 모임"
+    case dining     = "가벼운 식사"
+    case family     = "가족 모임"
 
     public var id: String { rawValue }
 
+    // TODO: themeTagCode는 서버 스펙 확정 전 임시 값 (확정 시 교체 필요)
     public var themeTagCode: String {
         switch self {
-        case .networking:   return "NETWORKING"
-        case .study:        return "STUDY"
-        case .hobby:        return "HOBBY"
-        case .sports:       return "SPORTS"
-        case .culture:      return "CULTURE"
-        case .social:       return "SOCIAL"
-        case .volunteering: return "VOLUNTEERING"
-        case .business:     return "BUSINESS"
+        case .business:   return "BUSINESS"
+        case .birthday:   return "BIRTHDAY"
+        case .networking: return "NETWORKING"
+        case .wedding:    return "WEDDING"
+        case .dining:     return "DINING"
+        case .family:     return "FAMILY"
         }
     }
+}
+
+public enum PlaceAtmosphere: String, CaseIterable, Equatable, Identifiable {
+    case nice        = "분위기 좋은"
+    case quiet       = "조용한 공간"
+    case comfortable = "편안한 좌석"
+    case talkative   = "대화하기 좋은"
+    case photogenic  = "사진 맛집"
+    case openView    = "탁 트인 뷰"
+    case spacious    = "넓은 공간"
+
+    public var id: String { rawValue }
 }
 
 @Reducer
@@ -47,7 +57,9 @@ public struct GroupCreationFeature {
         public var groupTitle: String = ""
         public var groupNameDraft: String = ""
         public var selectedPurpose: GroupPurpose? = nil
-        public var selectedAtmosphere: String? = nil
+        public var purposeDraft: GroupPurpose = .business
+        public var selectedAtmospheres: [PlaceAtmosphere] = []
+        public var atmosphereDraft: [PlaceAtmosphere] = []
         public var isGroupNameSheetPresented: Bool = false
         public var isPurposeSheetPresented: Bool = false
         public var isAtmosphereSheetPresented: Bool = false
@@ -56,13 +68,17 @@ public struct GroupCreationFeature {
         public var isCreateEnabled: Bool {
             !groupTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && selectedPurpose != nil
-            && selectedAtmosphere != nil
+            && !selectedAtmospheres.isEmpty
             && !isLoading
         }
 
         public var isGroupNameDraftValid: Bool {
             let trimmed = groupNameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
             return !trimmed.isEmpty && groupNameDraft.count <= Constant.groupNameMaxCount
+        }
+
+        public var isAtmosphereDraftValid: Bool {
+            !atmosphereDraft.isEmpty
         }
 
         public init() {}
@@ -74,7 +90,13 @@ public struct GroupCreationFeature {
         case groupNameConfirmed
         case groupNameSheetDismissed
         case purposeFieldTapped
+        case purposeSelected(GroupPurpose)
+        case purposeConfirmed
+        case purposeSheetDismissed
         case atmosphereFieldTapped
+        case atmosphereToggled(PlaceAtmosphere)
+        case atmosphereConfirmed
+        case atmosphereSheetDismissed
         case createButtonTapped
         case createGroupResponse(Result<CreateGroupResult, Error>)
         case closeButtonTapped
@@ -112,14 +134,46 @@ public struct GroupCreationFeature {
                 state.isGroupNameSheetPresented = false
                 return .none
 
-            // TODO: 모임 목적 선택 BottomSheet UI 구현 (현재는 present 동작만 와이어링)
             case .purposeFieldTapped:
+                state.purposeDraft = state.selectedPurpose ?? .business
                 state.isPurposeSheetPresented = true
                 return .none
 
-            // TODO: 장소 분위기 선택 BottomSheet UI 구현 (현재는 present 동작만 와이어링)
+            case let .purposeSelected(purpose):
+                state.purposeDraft = purpose
+                return .none
+
+            case .purposeConfirmed:
+                state.selectedPurpose = state.purposeDraft
+                state.isPurposeSheetPresented = false
+                return .none
+
+            case .purposeSheetDismissed:
+                state.isPurposeSheetPresented = false
+                return .none
+
             case .atmosphereFieldTapped:
+                state.atmosphereDraft = state.selectedAtmospheres
                 state.isAtmosphereSheetPresented = true
+                return .none
+
+            case let .atmosphereToggled(atmosphere):
+                if let index = state.atmosphereDraft.firstIndex(of: atmosphere) {
+                    state.atmosphereDraft.remove(at: index)
+                } else if state.atmosphereDraft.count < Constant.atmosphereMaxSelection {
+                    state.atmosphereDraft.append(atmosphere)
+                }
+                return .none
+
+            case .atmosphereConfirmed:
+                guard state.isAtmosphereDraftValid else { return .none }
+
+                state.selectedAtmospheres = state.atmosphereDraft
+                state.isAtmosphereSheetPresented = false
+                return .none
+
+            case .atmosphereSheetDismissed:
+                state.isAtmosphereSheetPresented = false
                 return .none
 
             case .createButtonTapped:
