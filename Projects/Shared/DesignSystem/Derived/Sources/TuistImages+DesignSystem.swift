@@ -78,6 +78,7 @@ public extension Image {
     public static let icDotRed24: Image = Image("ic_dot_red_24", bundle: Bundle.module)
     public static let icEdit16: Image = Image("ic_edit_16", bundle: Bundle.module)
     public static let icEdit24: Image = Image("ic_edit_24", bundle: Bundle.module)
+    public static let icFab24: Image = Image("ic_fab_24", bundle: Bundle.module)
     public static let icFilter16: Image = Image("ic_filter_16", bundle: Bundle.module)
     public static let icFilter24: Image = Image("ic_filter_24", bundle: Bundle.module)
     public static let icFire16: Image = Image("ic_fire_16", bundle: Bundle.module)
