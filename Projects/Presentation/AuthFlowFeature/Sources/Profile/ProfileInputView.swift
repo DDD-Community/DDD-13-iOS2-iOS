@@ -104,7 +104,6 @@ public struct ProfileInputView: View {
                 title: "프로필 설정",
                 onClose: { store.send(.imagePicker(.dismiss)) }
             ),
-            contentVerticalPadding: Spacing.spacing400,
             primaryButton: .init(title: "변경하기") {
                 store.send(.imagePicker(.presented(.saveButtonTapped)))
             },

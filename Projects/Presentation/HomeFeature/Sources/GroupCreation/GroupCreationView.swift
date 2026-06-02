@@ -37,7 +37,6 @@ struct GroupCreationView: View {
                 title: "모임 만들기",
                 onClose: { store.send(.groupNameSheetDismissed) }
             ),
-            contentVerticalPadding: Spacing.spacing400,
             primaryButton: .init(
                 title: "완료",
                 isEnabled: store.isGroupNameDraftValid,

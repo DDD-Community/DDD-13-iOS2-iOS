@@ -42,7 +42,7 @@ private struct ContentOnlySection: View {
             .card()
         }
         .padding(.horizontal, 20)
-        .bottomSheet(isPresented: $isPresented, contentVerticalPadding: Spacing.spacing400) {
+        .bottomSheet(isPresented: $isPresented) {
             Text("컨텐츠만 있는 시트입니다.")
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -73,8 +73,7 @@ private struct HeaderOnlySection: View {
                 title: "제목입니다",
                 description: "설명 텍스트가 여기에 표시됩니다.",
                 onClose: { isPresented = false }
-            ),
-            contentVerticalPadding: Spacing.spacing400
+            )
         ) {
             Text("헤더만 있는 시트입니다.")
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -107,7 +106,6 @@ private struct SingleButtonSection: View {
                 description: "설명 텍스트가 여기에 표시됩니다.",
                 onClose: { isPresented = false }
             ),
-            contentVerticalPadding: Spacing.spacing400,
             primaryButton: .init(title: "확인") { isPresented = false }
         ) {
             Text("버튼이 1개인 시트입니다.")
@@ -141,7 +139,6 @@ private struct DoubleButtonSection: View {
                 description: "설명 텍스트가 여기에 표시됩니다.",
                 onClose: { isPresented = false }
             ),
-            contentVerticalPadding: Spacing.spacing400,
             primaryButton: .init(title: "확인") { isPresented = false },
             secondaryButton: .init(title: "취소") { isPresented = false }
         ) {
@@ -172,7 +169,6 @@ private struct ScrollableSection: View {
         .bottomSheet(
             isPresented: $isPresented,
             header: .init(title: "스크롤 테스트", onClose: { isPresented = false }),
-            contentVerticalPadding: Spacing.spacing400,
             primaryButton: .init(title: "확인") { isPresented = false }
         ) {
             VStack(spacing: Spacing.spacing200) {
@@ -207,7 +203,6 @@ private struct KeyboardSection: View {
         .bottomSheet(
             isPresented: $isPresented,
             header: .init(title: "키보드 테스트", onClose: { isPresented = false }),
-            contentVerticalPadding: Spacing.spacing400,
             primaryButton: .init(title: "확인") { isPresented = false }
         ) {
             TextField("입력하세요", text: $text)
@@ -258,7 +253,6 @@ private struct OverlayKeyboardSection: View {
         .customBottomSheet(
             isPresented: $isPresented,
             header: .init(title: "키보드 테스트 (Overlay)", onClose: { isPresented = false }),
-            contentVerticalPadding: Spacing.spacing400,
             primaryButton: .init(title: "확인") { isPresented = false }
         ) {
             TextField("입력하세요", text: $text)
