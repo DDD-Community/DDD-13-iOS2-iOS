@@ -15,4 +15,5 @@ public enum KeyChainKey {
 public enum UserDefaultsKey {
     public static let isLogin = "isLogin"
     public static let tokenIssueDate = "tokenIssueDate"
+    public static let registrationCompleted = "registrationCompleted"
 }

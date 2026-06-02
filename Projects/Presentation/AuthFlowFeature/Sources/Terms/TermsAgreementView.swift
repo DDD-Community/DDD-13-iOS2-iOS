@@ -46,19 +46,44 @@ public struct TermsAgreementView: View {
 
             Spacer().frame(height: Spacing.spacing300)
 
-            VStack(spacing: Spacing.spacing100) {
-                ForEach(store.clauses) { clause in
-                    Button { store.send(.clauseToggleTapped(id: clause.id)) } label: {
-                        CheckboxRow(
-                            clause.title,
-                            checkboxVariant: .circle,
-                            checkboxState: store.agreedIDs.contains(clause.id) ? .enabled : .disabled,
-                            size: .small,
-                            arrowDirection: .right,
-                            titleColor: Colors.gray700
-                        )
+            Group {
+                if store.isLoading {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, Spacing.spacing400)
+                } else if let errorMessage = store.errorMessage {
+                    BangawoText(errorMessage, textStyle: .bodySmall)
+                        .foregroundStyle(Colors.gray700)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, Spacing.spacing300)
+                } else {
+                    VStack(spacing: Spacing.spacing100) {
+                        ForEach(store.clauses) { clause in
+                            HStack(spacing: 0) {
+                                Button { store.send(.clauseToggleTapped(id: clause.id)) } label: {
+                                    CheckboxRow(
+                                        clause.displayTitle,
+                                        checkboxVariant: .circle,
+                                        checkboxState: store.agreedIDs.contains(clause.id) ? .enabled : .disabled,
+                                        size: .small,
+                                        titleColor: Colors.gray700
+                                    )
+                                }
+                                .buttonStyle(.plain)
+
+                                Button { store.send(.clausePDFTapped(id: clause.id)) } label: {
+                                    Image.Asset.icArrowSmallRight24
+                                        .resizable()
+                                        .renderingMode(.template)
+                                        .scaledToFit()
+                                        .frame(width: Sizing.sizing200, height: Sizing.sizing200)
+                                        .foregroundStyle(Colors.gray600)
+                                        .padding(Spacing.spacing200)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
                     }
-                    .buttonStyle(.plain)
                 }
             }
             .padding(.horizontal, Spacing.spacing450)
@@ -66,11 +91,36 @@ public struct TermsAgreementView: View {
             Color.clear.frame(maxHeight: .infinity)
 
             ActionButton(
-                buttonLayout: .single(title: "다음", action: { store.send(.startButtonTapped) }),
+                buttonLayout: .single(
+                    title: "다음",
+                    isDisabled: !store.isStartEnabled,
+                    action: { store.send(.startButtonTapped) }
+                ),
                 lowerContent: .init("로그인 아이디 변경", type: .textWithArrow, action: { store.send(.changeLoginIDTapped) })
             )
         }
-        // TODO: clausePDFTapped 시 약관 내용을 웹뷰로 present해야 합니다
+        .onAppear { store.send(.onAppear) }
+        .sheet(
+            isPresented: Binding(
+                get: { store.pdfClause != nil },
+                set: { isPresented in
+                    if !isPresented { store.send(.pdfDismissed) }
+                }
+            )
+        ) {
+            if let clause = store.pdfClause {
+                NavigationStack {
+                    TermPDFViewer(clause: clause)
+                        .navigationTitle(clause.displayTitle)
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .topBarTrailing) {
+                                Button("닫기") { store.send(.pdfDismissed) }
+                            }
+                        }
+                }
+            }
+        }
     }
 }
 

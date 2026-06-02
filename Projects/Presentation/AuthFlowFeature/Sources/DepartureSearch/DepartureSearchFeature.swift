@@ -5,25 +5,24 @@
 //  출발지 검색 화면 Feature. 검색 트리거 + 검색 바텀시트
 //
 
-import Foundation
-
 import ComposableArchitecture
-
 import Entity
+import Foundation
+import Utill
 
 @Reducer
 public struct DepartureSearchFeature {
     @ObservableState
     public struct State: Equatable {
-        public var name: String
         public var selectedStation: Station?
 
-        public init(name: String = "", selectedStation: Station? = nil) {
-            self.name = name
+        public init(selectedStation: Station? = nil) {
             self.selectedStation = selectedStation
         }
 
-        public var isNextEnabled: Bool { selectedStation != nil }
+        public var isNextEnabled: Bool {
+            selectedStation != nil
+        }
     }
 
     public enum Action {
@@ -34,7 +33,7 @@ public struct DepartureSearchFeature {
         case delegate(Delegate)
 
         public enum Delegate: Equatable {
-            case proceedToHome
+            case registerRequested(station: Station)
             case dismiss
             case stationSearchRequested
         }
@@ -56,9 +55,9 @@ public struct DepartureSearchFeature {
                 return .none
 
             case .nextButtonTapped:
-                guard state.isNextEnabled else { return .none }
-
-                return .send(.delegate(.proceedToHome))
+                guard let station = state.selectedStation else { return .none }
+                
+                return .send(.delegate(.registerRequested(station: station)))
 
             case .delegate:
                 return .none

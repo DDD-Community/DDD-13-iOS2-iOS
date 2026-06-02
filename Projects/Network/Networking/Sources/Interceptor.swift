@@ -3,10 +3,8 @@
 //  Networking
 //
 
-import Foundation
-
 import Alamofire
-
+import Foundation
 import Utill
 
 class Interceptor: RequestInterceptor, @unchecked Sendable {
@@ -44,9 +42,10 @@ class Interceptor: RequestInterceptor, @unchecked Sendable {
                     Log.debug("refresh Token 만료")
                     // TODO: 로그인창으로 보내기
                     await MainActor.run {
-                        UserDefaults.standard.set(false, forKey: UserDefaultsKey.isLogin)
+                        expireSession()
                     }
-                    completion(.doNotRetry)
+                 
+                    completion(.doNotRetryWithError(NetworkError.refreshFailed))
                 }
             }
         } else {
@@ -54,24 +53,34 @@ class Interceptor: RequestInterceptor, @unchecked Sendable {
         }
     }
     
-        // 토큰 리프레시 함수
-        private func refreshAccessToken() async -> Bool {
-            Log.debug("토큰 리프레시 함수 실행")
-            // TODO: 리프레시 함수 구현
-//            guard let refreshTokenResponse = await AuthService.refreshingToken() else {
-//                return false
-//            }
+    /// 토큰 리프레시 함수
+    private func refreshAccessToken() async -> Bool {
+        Log.debug("토큰 리프레시 함수 실행")
             
-            // TODO: 갱신된 토큰 저장
-//            if let newAccessToken = refreshTokenResponse.data?.accessToken,
-//               let newRefreshToken = refreshTokenResponse.data?.refreshToken {
-//                KeyChainManager.updateItem(key: KeyChainKey.accessToken, value: newAccessToken)
-//                KeyChainManager.updateItem(key: KeyChainKey.refreshToken, value: newRefreshToken)
-//                UserDefaults.standard.set(Date(), forKey: UserDefaultsKey.tokenIssueDate)
-//                return true
-//            } else {
-//                return false
-//            }
-            return true
+        guard let refreshToken = KeyChainManager.readItem(key: KeyChainKey.refreshToken) else {
+            return false
         }
+            
+        do {
+            let tokens = try await TokenRefreshService().refreshTokens(refreshToken: refreshToken)
+                
+            KeyChainManager.updateItem(key: KeyChainKey.accessToken, value: tokens.accessToken)
+            KeyChainManager.updateItem(key: KeyChainKey.refreshToken, value: tokens.refreshToken)
+            UserDefaults.standard.set(Date(), forKey: UserDefaultsKey.tokenIssueDate)
+                  
+            return true
+        } catch {
+            Log.debug("❌ 토큰 리프레시 실패: \(error)")
+            return false
+        }
+    }
+    
+    private func expireSession() {
+        KeyChainManager.deleteItem(key: KeyChainKey.accessToken)
+        KeyChainManager.deleteItem(key: KeyChainKey.refreshToken)
+
+        UserDefaults.standard.set(false, forKey: UserDefaultsKey.isLogin)
+        UserDefaults.standard.set(false, forKey: UserDefaultsKey.registrationCompleted)
+        UserDefaults.standard.removeObject(forKey: UserDefaultsKey.tokenIssueDate)
+    }
 }

@@ -36,7 +36,7 @@ public struct LoginFeature {
 
         public enum Delegate: Equatable {
             case didLoginSuccess // 이미 가입한 회원이면 로그인 성공
-            case needsSignUp(tempToken: String) // 가입한 이력이 없으면 회원가입으로
+            case needsSignUp(tempToken: String, suggestedName: String?) // 가입한 이력이 없으면 회원가입으로
         }
     }
 
@@ -65,9 +65,16 @@ public struct LoginFeature {
 
             case let .loginResponse(.success(loginResult)):
                 state.isLoading = false
-                Log.debug("로그인 성공 - isNewMember: \(loginResult.isNewMember), registrationCompleted: \(loginResult.registrationCompleted)")
+                Log.debug("로그인 성공 - firstSocialLogin: \(loginResult.firstSocialLogin), registrationCompleted: \(loginResult.registrationCompleted)")
                 if !loginResult.registrationCompleted {
-                    return .send(.delegate(.needsSignUp(tempToken: loginResult.tokens.accessToken))) // 회원 가입이 안된 상태
+                    return .send(
+                        .delegate(
+                            .needsSignUp(
+                                tempToken: loginResult.tokens.accessToken,
+                                suggestedName: loginResult.suggestedName
+                            )
+                        )
+                    ) // 회원 가입이 안된 상태
                 } else {
                     return .send(.delegate(.didLoginSuccess)) // 회원가입 이미 한 상태
                 }
