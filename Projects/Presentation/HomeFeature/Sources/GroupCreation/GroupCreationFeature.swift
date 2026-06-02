@@ -8,6 +8,10 @@ import CoreDependencies
 import Entity
 import Foundation
 
+private enum Constant {
+    static let groupNameMaxCount = 30
+}
+
 public enum GroupPurpose: String, CaseIterable, Equatable, Identifiable {
     case networking   = "네트워킹"
     case study        = "스터디"
@@ -41,6 +45,7 @@ public struct GroupCreationFeature {
     @ObservableState
     public struct State: Equatable {
         public var groupTitle: String = ""
+        public var groupNameDraft: String = ""
         public var selectedPurpose: GroupPurpose? = nil
         public var selectedAtmosphere: String? = nil
         public var isGroupNameSheetPresented: Bool = false
@@ -55,12 +60,19 @@ public struct GroupCreationFeature {
             && !isLoading
         }
 
+        public var isGroupNameDraftValid: Bool {
+            let trimmed = groupNameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+            return !trimmed.isEmpty && groupNameDraft.count <= Constant.groupNameMaxCount
+        }
+
         public init() {}
     }
 
     public enum Action: BindableAction {
         case binding(BindingAction<State>)
         case groupNameFieldTapped
+        case groupNameConfirmed
+        case groupNameSheetDismissed
         case purposeFieldTapped
         case atmosphereFieldTapped
         case createButtonTapped
@@ -84,9 +96,20 @@ public struct GroupCreationFeature {
             case .binding:
                 return .none
 
-            // TODO: 모임명 입력 BottomSheet UI 구현 (현재는 present 동작만 와이어링)
             case .groupNameFieldTapped:
+                state.groupNameDraft = state.groupTitle
                 state.isGroupNameSheetPresented = true
+                return .none
+
+            case .groupNameConfirmed:
+                guard state.isGroupNameDraftValid else { return .none }
+
+                state.groupTitle = state.groupNameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+                state.isGroupNameSheetPresented = false
+                return .none
+
+            case .groupNameSheetDismissed:
+                state.isGroupNameSheetPresented = false
                 return .none
 
             // TODO: 모임 목적 선택 BottomSheet UI 구현 (현재는 present 동작만 와이어링)

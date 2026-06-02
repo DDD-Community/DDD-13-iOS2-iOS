@@ -31,6 +31,26 @@ struct GroupCreationView: View {
             )
         }
         .background(.white)
+        .bottomSheet(
+            isPresented: $store.isGroupNameSheetPresented,
+            header: .init(
+                title: "모임 만들기",
+                onClose: { store.send(.groupNameSheetDismissed) }
+            ),
+            contentVerticalPadding: Spacing.spacing400,
+            primaryButton: .init(
+                title: "완료",
+                isEnabled: store.isGroupNameDraftValid,
+                action: { store.send(.groupNameConfirmed) }
+            )
+        ) {
+            TextInput(
+                title: "모임명",
+                placeholder: "ex: 삼총사 모임, 26기 대학동기",
+                maxCount: 30,
+                text: $store.groupNameDraft
+            )
+        }
     }
 }
 
