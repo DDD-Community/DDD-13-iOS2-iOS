@@ -1,5 +1,5 @@
 //
-//  GroupCreationSheetFeature.swift
+//  GroupCreationFeature.swift
 //  HomeFeature
 //
 
@@ -35,7 +35,7 @@ public enum GroupPurpose: String, CaseIterable, Equatable, Identifiable {
 }
 
 @Reducer
-public struct GroupCreationSheetFeature {
+public struct GroupCreationFeature {
     @Dependency(\.groupClient) private var groupClient
 
     public enum Step: Equatable {

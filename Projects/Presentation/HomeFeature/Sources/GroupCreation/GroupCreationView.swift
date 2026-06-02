@@ -1,5 +1,5 @@
 //
-//  GroupCreationSheet.swift
+//  GroupCreationView.swift
 //  HomeFeature
 //
 
@@ -7,12 +7,12 @@ import SwiftUI
 import ComposableArchitecture
 import DesignSystem
 
-struct GroupCreationSheet: View {
-    @Bindable var store: StoreOf<GroupCreationSheetFeature>
+struct GroupCreationView: View {
+    @Bindable var store: StoreOf<GroupCreationFeature>
 
     var body: some View {
         VStack(spacing: 0) {
-            SheetHeader(onClose: { store.send(.closeButtonTapped) })
+            GroupCreationHeader(onClose: { store.send(.closeButtonTapped) })
 
             Group {
                 if store.step == .info {
@@ -39,9 +39,9 @@ struct GroupCreationSheet: View {
     }
 }
 
-// MARK: - Sheet Header
+// MARK: - Header
 
-private struct SheetHeader: View {
+private struct GroupCreationHeader: View {
     let onClose: () -> Void
 
     var body: some View {
@@ -67,7 +67,7 @@ private struct SheetHeader: View {
 // MARK: - 화면 A: 모임 정보 작성
 
 private struct GroupInfoPage: View {
-    @Bindable var store: StoreOf<GroupCreationSheetFeature>
+    @Bindable var store: StoreOf<GroupCreationFeature>
 
     var body: some View {
         VStack(spacing: 0) {
@@ -165,7 +165,7 @@ private struct CreateButton: View {
 // MARK: - 화면 B: 모임 목적 리스트
 
 private struct GroupPurposePage: View {
-    @Bindable var store: StoreOf<GroupCreationSheetFeature>
+    @Bindable var store: StoreOf<GroupCreationFeature>
 
     var body: some View {
         VStack(spacing: 0) {
@@ -233,5 +233,51 @@ private struct RegisterButton: View {
                 )
         }
         .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Preview
+
+#Preview("모임 정보 작성") {
+    BangawoPreview {
+        GroupCreationView(
+            store: Store(initialState: GroupCreationFeature.State()) {
+                GroupCreationFeature()
+            }
+        )
+    }
+}
+
+#Preview("입력 완료") {
+    BangawoPreview {
+        GroupCreationView(
+            store: Store(
+                initialState: {
+                    var state = GroupCreationFeature.State()
+                    state.groupTitle = "주말 등산 모임"
+                    state.selectedPurpose = .sports
+                    return state
+                }()
+            ) {
+                GroupCreationFeature()
+            }
+        )
+    }
+}
+
+#Preview("모임 목적 선택") {
+    BangawoPreview {
+        GroupCreationView(
+            store: Store(
+                initialState: {
+                    var state = GroupCreationFeature.State()
+                    state.step = .purpose
+                    state.pendingPurpose = .study
+                    return state
+                }()
+            ) {
+                GroupCreationFeature()
+            }
+        )
     }
 }
