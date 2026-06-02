@@ -12,7 +12,6 @@ import Entity
 public struct HomeView: View {
     @Bindable private var store: StoreOf<HomeFeature>
     @State private var isFABExpanded = false
-    @State private var sheetDetents: Set<PresentationDetent> = [.fraction(0.5)]
 
     public init(store: StoreOf<HomeFeature>) {
         self.store = store
@@ -22,47 +21,59 @@ public struct HomeView: View {
         NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
             ZStack(alignment: .bottomTrailing) {
                 VStack(spacing: 0) {
-                    HomeNavigationBar()
-                        .padding(.horizontal, Spacing.spacing300)
-
-                    if !store.groups.isEmpty {
-                        GroupFilterCarousel(
-                            selectedFilter: store.selectedFilter,
-                            onFilterTapped: { store.send(.filterTapped($0)) }
-                        )
-                        .padding(.top, Spacing.spacing250)
-                    }
-
-                    GroupListContent(
-                        groups: store.filteredGroups,
-                        onCreateTapped: { store.send(.createGroupRowTapped) },
-                        onGroupTapped: { store.send(.groupCardTapped($0)) }
+                    NavigationMain(
+                        background: .clear,
+                        trailingIcons: [
+                            NavigationIconItem(
+                                icon: .bell24,
+                                showsBadge: store.hasUnreadNotifications
+                            ) { store.send(.notificationButtonTapped) },
+                            NavigationIconItem(icon: .user24) {
+                                store.send(.myPageButtonTapped)
+                            }
+                        ]
                     )
+
+                    Tab(
+                        labels: ["모임", "리마인더"],
+                        selectedIndex: Binding(
+                            get: { store.selectedTabIndex },
+                            set: { store.send(.tabSelected($0)) }
+                        ),
+                        variant: .scrollable,
+                        size: .large
+                    )
+
+                    if store.selectedTabIndex == 0 {
+                        GroupListContent(
+                            groups: store.groups,
+                            onCreateTapped: { store.send(.createGroupRowTapped) },
+                            onGroupTapped: { store.send(.groupCardTapped($0)) }
+                        )
+                    }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                .background(.gray200)
+                .background(Colors.gray200.ignoresSafeArea())
 
-                HomeFAB(
-                    isExpanded: $isFABExpanded,
-                    onCreateGroup: { store.send(.fabCreateGroupTapped) },
-                    onJoinGroup: { store.send(.fabJoinGroupTapped) }
+                FAB(
+                    isPressed: $isFABExpanded,
+                    menuItems: [
+                        Menu.Item(label: "모임 만들기", icon: .Asset.icPlus24) {
+                            isFABExpanded = false
+                            store.send(.fabCreateGroupTapped)
+                        },
+                        Menu.Item(label: "모임 참여하기", icon: .Asset.icUsersPlus24) {
+                            isFABExpanded = false
+                            store.send(.fabJoinGroupTapped)
+                        }
+                    ]
                 )
                 .padding(.trailing, Spacing.spacing300)
                 .padding(.bottom, Spacing.spacing400)
             }
             .onAppear { store.send(.onAppear) }
-            .sheet(item: $store.scope(state: \.creationSheet, action: \.creationSheet)) { sheetStore in
-                GroupCreationSheet(store: sheetStore)
-                    .presentationDetents(sheetDetents)
-                    .presentationDragIndicator(sheetStore.step == .purpose ? .visible : .hidden)
-                    .onAppear { sheetDetents = [.fraction(0.5)] }
-                    .onChange(of: sheetStore.step) { _, step in
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            sheetDetents = step == .purpose
-                                ? [.fraction(0.5), .fraction(0.9)]
-                                : [.fraction(0.5)]
-                        }
-                    }
+            .fullScreenCover(item: $store.scope(state: \.creationView, action: \.creationView)) { creationStore in
+                GroupCreationView(store: creationStore)
             }
         } destination: { pathStore in
             switch pathStore.case {
@@ -70,74 +81,6 @@ public struct HomeView: View {
                 GroupDetailView(store: detailStore)
             }
         }
-    }
-}
-
-// MARK: - Navigation Bar
-
-private struct HomeNavigationBar: View {
-    var body: some View {
-        HStack(spacing: 0) {
-            Text("반가워")
-                .pretendardCustomFont(textStyle: .headingSmall)
-                .foregroundStyle(.gray900)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            HStack(spacing: Spacing.spacing200) {
-                RoundedRectangle(cornerRadius: BorderRadius.borderRadius100)
-                    .fill(.gray400)
-                    .frame(width: Sizing.sizing200, height: Sizing.sizing200)
-
-                RoundedRectangle(cornerRadius: BorderRadius.borderRadius100)
-                    .fill(.gray400)
-                    .frame(width: Sizing.sizing200, height: Sizing.sizing200)
-            }
-        }
-        .frame(height: 56)
-    }
-}
-
-// MARK: - Filter Carousel
-
-private struct GroupFilterCarousel: View {
-    let selectedFilter: GroupFilter
-    let onFilterTapped: (GroupFilter) -> Void
-
-    var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: Spacing.spacing200) {
-                ForEach(GroupFilter.allCases, id: \.self) { filter in
-                    FilterChip(
-                        title: filter.rawValue,
-                        isSelected: selectedFilter == filter
-                    ) {
-                        onFilterTapped(filter)
-                    }
-                }
-            }
-            .padding(.horizontal, Spacing.spacing300)
-        }
-    }
-}
-
-private struct FilterChip: View {
-    let title: String
-    let isSelected: Bool
-    let onTap: () -> Void
-
-    var body: some View {
-        Button(action: onTap) {
-            Text(title)
-                .pretendardCustomFont(textStyle: .bodyMedium)
-                .foregroundStyle(isSelected ? Color(hex: "FFFFFF") : Color(hex: "545454"))
-                .padding(.horizontal, Spacing.spacing250)
-                .padding(.vertical, Spacing.spacing150)
-                .background(
-                    Capsule()
-                        .fill(isSelected ? Color(hex: "FF3C27") : Color(hex: "EDEDED"))
-                )
-        }
-        .buttonStyle(.plain)
     }
 }
 
@@ -151,8 +94,6 @@ private struct GroupListContent: View {
     var body: some View {
         if groups.isEmpty {
             CreateGroupRow(onTap: onCreateTapped)
-                .padding(.horizontal, Spacing.spacing300)
-                .padding(.top, Spacing.spacing250)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         } else {
             ScrollView {
@@ -172,36 +113,45 @@ private struct GroupListContent: View {
 private struct CreateGroupRow: View {
     let onTap: () -> Void
 
+    private enum Metric {
+        static let cornerRadius: CGFloat = BorderRadius.borderRadius250
+        static let gradientEndRadius: CGFloat = 240
+    }
+
     var body: some View {
         Button(action: onTap) {
-            HStack(spacing: Spacing.spacing300) {
-                RoundedRectangle(cornerRadius: BorderRadius.borderRadius200)
-                    .fill(.gray300)
-                    .frame(width: Sizing.sizing550, height: Sizing.sizing550)
-                    .overlay(
-                        Text("+")
-                            .pretendardCustomFont(textStyle: .headingSmall)
-                            .foregroundStyle(.gray600)
-                    )
+            VStack(spacing: Spacing.spacing300) {
+                Image.Asset.icPlus24
+                    .renderingMode(.template)
+                    .foregroundStyle(Colors.gray800)
 
-                VStack(alignment: .leading, spacing: Spacing.spacing100) {
-                    Text("모임 생성하기")
-                        .pretendardCustomFont(textStyle: .bodyLargeEmphasized)
-                        .foregroundStyle(.gray900)
-
-                    Text("새로운 모임을 만들어보세요")
-                        .pretendardCustomFont(textStyle: .bodySmall)
-                        .foregroundStyle(.gray600)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                BangawoText("모임 생성하기", textStyle: .titleLarge)
+                    .foregroundStyle(Colors.gray700)
             }
-            .padding(Spacing.spacing300)
-            .background(
-                RoundedRectangle(cornerRadius: BorderRadius.borderRadius250)
-                    .fill(Color(hex: "FFFFFF"))
-            )
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.vertical, Spacing.spacing500)
+            .padding(.horizontal, Spacing.spacing400)
+            .background(background)
         }
         .buttonStyle(.plain)
+        .padding(.top, Spacing.spacing600)
+        .padding(.horizontal, Spacing.spacing400)
+    }
+
+    private var background: some View {
+        RoundedRectangle(cornerRadius: Metric.cornerRadius)
+            .fill(
+                RadialGradient(
+                    colors: [Colors.grayAlpha50, Colors.grayAlpha200],
+                    center: .center,
+                    startRadius: 0,
+                    endRadius: Metric.gradientEndRadius
+                )
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: Metric.cornerRadius)
+                    .stroke(Colors.gray50, lineWidth: BorderWidth.borderWidth100)
+            )
     }
 }
 
@@ -319,105 +269,6 @@ private struct OverlappingCircles: View {
                     )
             }
         }
-    }
-}
-
-// MARK: - FAB
-
-private struct HomeFAB: View {
-    @Binding private var isExpanded: Bool
-    private let onCreateGroup: () -> Void
-    private let onJoinGroup: () -> Void
-
-    init(
-        isExpanded: Binding<Bool>,
-        onCreateGroup: @escaping () -> Void,
-        onJoinGroup: @escaping () -> Void
-    ) {
-        self._isExpanded = isExpanded
-        self.onCreateGroup = onCreateGroup
-        self.onJoinGroup = onJoinGroup
-    }
-
-    private enum Metric {
-        static let fabSize: CGFloat = Sizing.sizing600
-        static let menuSpacing: CGFloat = 7
-    }
-
-    var body: some View {
-        VStack(alignment: .trailing, spacing: Metric.menuSpacing) {
-            if isExpanded {
-                FABMenu(
-                    onCreateGroup: {
-                        isExpanded = false
-                        onCreateGroup()
-                    },
-                    onJoinGroup: {
-                        isExpanded = false
-                        onJoinGroup()
-                    }
-                )
-            }
-
-            Button(action: { isExpanded.toggle() }) {
-                Circle()
-                    .fill(Color(hex: "FF3C27"))
-                    .frame(width: Metric.fabSize, height: Metric.fabSize)
-                    .overlay(
-                        Text("+")
-                            .pretendardCustomFont(textStyle: .headingSmall)
-                            .foregroundStyle(Color(hex: "FFFFFF"))
-                    )
-                    .shadow(
-                        color: Color(hex: "FF3C27").opacity(0.3),
-                        radius: 8,
-                        x: 0,
-                        y: 4
-                    )
-            }
-            .buttonStyle(.plain)
-        }
-    }
-}
-
-private struct FABMenu: View {
-    let onCreateGroup: () -> Void
-    let onJoinGroup: () -> Void
-
-    private enum Metric {
-        static let width: CGFloat = 160
-        static let height: CGFloat = 120
-    }
-
-    var body: some View {
-        VStack(spacing: 0) {
-            Button(action: onCreateGroup) {
-                Text("모임 만들기")
-                    .pretendardCustomFont(textStyle: .bodyMedium)
-                    .foregroundStyle(.gray900)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-            .buttonStyle(.plain)
-
-            Divider()
-
-            Button(action: onJoinGroup) {
-                Text("모임 참여하기")
-                    .pretendardCustomFont(textStyle: .bodyMedium)
-                    .foregroundStyle(.gray900)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-            .buttonStyle(.plain)
-        }
-        .frame(width: Metric.width, height: Metric.height)
-        .background(Color(hex: "FFFFFF"))
-        .clipShape(RoundedRectangle(cornerRadius: BorderRadius.borderRadius250))
-        .shadow(
-            color: Color(hex: "D4D4D4").opacity(0.4),
-            radius: 8,
-            x: 0,
-            y: 4
-        )
     }
 }
 

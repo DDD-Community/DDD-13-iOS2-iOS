@@ -21,18 +21,10 @@ public struct HomeFeature {
     @ObservableState
     public struct State: Equatable {
         public var groups: [Group] = []
-        public var selectedFilter: GroupFilter = .all
-        @Presents public var creationSheet: GroupCreationSheetFeature.State?
+        public var selectedTabIndex: Int = 0
+        public var hasUnreadNotifications: Bool = false
+        @Presents public var creationView: GroupCreationFeature.State?
         public var path: StackState<Path.State> = StackState<Path.State>()
-
-        public var filteredGroups: [Group] {
-            switch selectedFilter {
-            case .all: return groups
-            case .inProgress: return groups.filter { $0.listStatus == .inProgress }
-            case .confirmed: return groups.filter { $0.listStatus == .confirmed }
-            case .ended: return groups.filter { $0.listStatus == .ended }
-            }
-        }
 
         public init() {}
     }
@@ -40,12 +32,14 @@ public struct HomeFeature {
     public enum Action {
         case onAppear
         case groupsResponse(Result<[Group], Error>)
-        case filterTapped(GroupFilter)
+        case tabSelected(Int)
+        case notificationButtonTapped
+        case myPageButtonTapped
         case createGroupRowTapped
         case fabCreateGroupTapped
         case fabJoinGroupTapped
         case groupCardTapped(Group)
-        case creationSheet(PresentationAction<GroupCreationSheetFeature.Action>)
+        case creationView(PresentationAction<GroupCreationFeature.Action>)
         case path(StackActionOf<Path>)
     }
 
@@ -64,16 +58,22 @@ public struct HomeFeature {
             case .groupsResponse(.failure):
                 return .none
 
-            case .filterTapped(let filter):
-                state.selectedFilter = filter
+            case .tabSelected(let index):
+                state.selectedTabIndex = index
+                return .none
+
+            case .notificationButtonTapped:
+                return .none
+
+            case .myPageButtonTapped:
                 return .none
 
             case .createGroupRowTapped:
-                state.creationSheet = GroupCreationSheetFeature.State()
+                state.creationView = GroupCreationFeature.State()
                 return .none
 
             case .fabCreateGroupTapped:
-                state.creationSheet = GroupCreationSheetFeature.State()
+                state.creationView = GroupCreationFeature.State()
                 return .none
 
             case .fabJoinGroupTapped:
@@ -83,23 +83,23 @@ public struct HomeFeature {
                 state.path.append(.detail(GroupDetailFeature.State(group: group)))
                 return .none
 
-            case .creationSheet(.presented(.delegate(.groupCreated))):
-                state.creationSheet = nil
+            case .creationView(.presented(.delegate(.groupCreated))):
+                state.creationView = nil
                 return fetchGroupsEffect()
 
-            case .creationSheet(.presented(.delegate(.dismissed))):
-                state.creationSheet = nil
+            case .creationView(.presented(.delegate(.dismissed))):
+                state.creationView = nil
                 return .none
 
-            case .creationSheet:
+            case .creationView:
                 return .none
 
             case .path:
                 return .none
             }
         }
-        .ifLet(\.$creationSheet, action: \.creationSheet) {
-            GroupCreationSheetFeature()
+        .ifLet(\.$creationView, action: \.creationView) {
+            GroupCreationFeature()
         }
         .forEach(\.path, action: \.path)
     }
