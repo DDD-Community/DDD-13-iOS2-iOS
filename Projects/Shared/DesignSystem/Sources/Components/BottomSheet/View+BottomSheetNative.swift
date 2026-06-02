@@ -157,6 +157,7 @@ private extension NativeSheetContent {
                         variant: .weak,
                         size: .large,
                         widthType: .maxWidth,
+                        isDisabled: !secondary.isEnabled,
                         isKeyboardAttached: isKeyboardVisible,
                         action: secondary.action
                     )
@@ -167,6 +168,7 @@ private extension NativeSheetContent {
                         variant: .solid,
                         size: .large,
                         widthType: .maxWidth,
+                        isDisabled: !primary.isEnabled,
                         isKeyboardAttached: isKeyboardVisible,
                         action: primary.action
                     )

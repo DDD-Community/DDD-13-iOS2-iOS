@@ -186,6 +186,7 @@ private extension BottomSheet {
                         variant: .weak,
                         size: .large,
                         widthType: .maxWidth,
+                        isDisabled: !secondary.isEnabled,
                         isKeyboardAttached: isKeyboardVisible,
                         action: secondary.action
                     )
@@ -196,6 +197,7 @@ private extension BottomSheet {
                         variant: .solid,
                         size: .large,
                         widthType: .maxWidth,
+                        isDisabled: !primary.isEnabled,
                         isKeyboardAttached: isKeyboardVisible,
                         action: primary.action
                     )
