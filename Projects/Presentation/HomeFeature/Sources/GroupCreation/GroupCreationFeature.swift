@@ -38,22 +38,20 @@ public enum GroupPurpose: String, CaseIterable, Equatable, Identifiable {
 public struct GroupCreationFeature {
     @Dependency(\.groupClient) private var groupClient
 
-    public enum Step: Equatable {
-        case info
-        case purpose
-    }
-
     @ObservableState
     public struct State: Equatable {
-        public var step: Step = .info
         public var groupTitle: String = ""
         public var selectedPurpose: GroupPurpose? = nil
-        public var pendingPurpose: GroupPurpose? = nil
+        public var selectedAtmosphere: String? = nil
+        public var isGroupNameSheetPresented: Bool = false
+        public var isPurposeSheetPresented: Bool = false
+        public var isAtmosphereSheetPresented: Bool = false
         public var isLoading: Bool = false
 
         public var isCreateEnabled: Bool {
             !groupTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && selectedPurpose != nil
+            && selectedAtmosphere != nil
             && !isLoading
         }
 
@@ -62,16 +60,16 @@ public struct GroupCreationFeature {
 
     public enum Action: BindableAction {
         case binding(BindingAction<State>)
-        case purposeButtonTapped
-        case purposeTapped(GroupPurpose)
-        case registerButtonTapped
+        case groupNameFieldTapped
+        case purposeFieldTapped
+        case atmosphereFieldTapped
         case createButtonTapped
         case createGroupResponse(Result<CreateGroupResult, Error>)
         case closeButtonTapped
         case delegate(Delegate)
 
         public enum Delegate: Equatable {
-            case groupCreated
+            case groupCreated(Group)
             case dismissed
         }
     }
@@ -86,22 +84,24 @@ public struct GroupCreationFeature {
             case .binding:
                 return .none
 
-            case .purposeButtonTapped:
-                state.pendingPurpose = state.selectedPurpose
-                state.step = .purpose
+            // TODO: 모임명 입력 BottomSheet UI 구현 (현재는 present 동작만 와이어링)
+            case .groupNameFieldTapped:
+                state.isGroupNameSheetPresented = true
                 return .none
 
-            case .purposeTapped(let purpose):
-                state.pendingPurpose = purpose
+            // TODO: 모임 목적 선택 BottomSheet UI 구현 (현재는 present 동작만 와이어링)
+            case .purposeFieldTapped:
+                state.isPurposeSheetPresented = true
                 return .none
 
-            case .registerButtonTapped:
-                state.selectedPurpose = state.pendingPurpose
-                state.step = .info
+            // TODO: 장소 분위기 선택 BottomSheet UI 구현 (현재는 present 동작만 와이어링)
+            case .atmosphereFieldTapped:
+                state.isAtmosphereSheetPresented = true
                 return .none
 
             case .createButtonTapped:
                 guard state.isCreateEnabled, let purpose = state.selectedPurpose else { return .none }
+
                 state.isLoading = true
                 let name = state.groupTitle.trimmingCharacters(in: .whitespacesAndNewlines)
                 let themeTagCode = purpose.themeTagCode
@@ -112,9 +112,10 @@ public struct GroupCreationFeature {
                     ))
                 }
 
-            case .createGroupResponse(.success):
+            case let .createGroupResponse(.success(result)):
                 state.isLoading = false
-                return .send(.delegate(.groupCreated))
+                let group = makeGroup(from: result, purpose: state.selectedPurpose)
+                return .send(.delegate(.groupCreated(group)))
 
             case .createGroupResponse(.failure):
                 state.isLoading = false
@@ -127,5 +128,21 @@ public struct GroupCreationFeature {
                 return .none
             }
         }
+    }
+
+    private func makeGroup(from result: CreateGroupResult, purpose: GroupPurpose?) -> Group {
+        Group(
+            id: result.groupId,
+            meetingId: result.meetingId,
+            name: result.name,
+            themeTagCode: result.themeTagCode,
+            themeTagDisplay: purpose?.rawValue ?? "",
+            listStatus: .inProgress,
+            locationStatus: .before,
+            dateVoteStatus: .before,
+            locationAddress: nil,
+            memberCount: 1,
+            members: []
+        )
     }
 }

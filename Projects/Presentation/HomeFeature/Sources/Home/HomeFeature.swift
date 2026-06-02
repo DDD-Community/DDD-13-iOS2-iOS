@@ -83,8 +83,9 @@ public struct HomeFeature {
                 state.path.append(.detail(GroupDetailFeature.State(group: group)))
                 return .none
 
-            case .creationView(.presented(.delegate(.groupCreated))):
+            case let .creationView(.presented(.delegate(.groupCreated(group)))):
                 state.creationView = nil
+                state.path.append(.detail(GroupDetailFeature.State(group: group)))
                 return fetchGroupsEffect()
 
             case .creationView(.presented(.delegate(.dismissed))):
