@@ -124,7 +124,9 @@ public struct AuthFlowFeature {
                     nickname: state.nickname,
                     agreedTermsIds: state.agreedTermIDs,
                     departureLabel: station.name,
-                    departureAddress: station.roadAddressName.isEmpty ? station.addressName : station.roadAddressName,
+                    departureAddress: station.addressName,
+                    departureRoadAddress: station.roadAddressName,
+                    departurePlaceName: station.name,
                     latitude: station.y,
                     longitude: station.x
                 )
