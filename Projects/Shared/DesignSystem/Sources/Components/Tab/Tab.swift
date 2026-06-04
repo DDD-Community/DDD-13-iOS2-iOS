@@ -97,7 +97,7 @@ private extension Tab {
         var body: some View {
             ZStack(alignment: .bottom) {
                 BangawoText(label, textStyle: labelTextStyle)
-                    .foregroundStyle(Colors.gray900)
+                    .foregroundStyle(labelColor)
                     .padding(.horizontal, labelHorizontalPadding)
                     .padding(.vertical, labelVerticalPadding)
 
@@ -113,6 +113,10 @@ private extension Tab {
             case .fixed: return UIScreen.screenWidth / CGFloat(itemCount)
             case .scrollable: return nil
             }
+        }
+
+        private var labelColor: Color {
+            isSelected ? Colors.gray900 : Colors.gray700
         }
 
         private var labelTextStyle: CustomSizeFont {
