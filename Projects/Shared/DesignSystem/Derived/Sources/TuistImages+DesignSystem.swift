@@ -101,7 +101,7 @@ public extension Image {
     public static let icPurposeBusiness: Image = Image("ic_purpose_business", bundle: Bundle.module)
     public static let icPurposeDining: Image = Image("ic_purpose_dining", bundle: Bundle.module)
     public static let icPurposeFamily: Image = Image("ic_purpose_family", bundle: Bundle.module)
-    public static let icPurposeNetworking: Image = Image("ic_purpose_networking", bundle: Bundle.module)
+    public static let icPurposeSocial: Image = Image("ic_purpose_social", bundle: Bundle.module)
     public static let icPurposeWedding: Image = Image("ic_purpose_wedding", bundle: Bundle.module)
     public static let icSearch16: Image = Image("ic_search_16", bundle: Bundle.module)
     public static let icSearch24: Image = Image("ic_search_24", bundle: Bundle.module)
