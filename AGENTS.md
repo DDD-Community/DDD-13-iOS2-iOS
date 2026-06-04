@@ -14,9 +14,12 @@
 | `./tuisttool clean` | 프로젝트 정리 |
 | `xcodebuild -workspace Bangawo.xcworkspace -scheme Bangawo build` | 빌드 |
 | `xcodebuild -workspace Bangawo.xcworkspace -scheme Bangawo test` | 테스트 |
+| `fastlane match_development` | 개발용 인증서·프로파일 로컬 설치 |
 
 > 파일 생성/삭제, `Project.swift` 수정, 의존성 추가/제거 시 반드시 `./tuisttool generate` 실행.
 > Tuist는 glob으로 소스를 수집하므로, generate 없이는 Xcode에 반영되지 않는다.
+
+> 디바이스 빌드 시 프로파일 에러(`No profile for team 'N94CS4N6VR'...`)가 나면 코드사이닝 설정이 필요하다. 상세: [`docs/code-signing.md`](docs/code-signing.md)
 
 ## Project Structure
 
