@@ -27,19 +27,15 @@ public struct MeetingDetailView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(.gray200)
-
+            // TODO: 임시로 여기다가 붙여놓음 나중에 상세 지도 뷰 위에 오버레이 시켜주기
             MapBottomSheet {
-                VStack(spacing: Spacing.spacing200) {
-                    Text("hello")
-                    Text("hello")
-                    Text("hello")
-                    Text("hello")
-                    Text("hello")
-                    Text("hello")
+                VStack(alignment: .leading, spacing: Spacing.spacing200) {
+                    NearbyPlaceRow()
+                    NearbyPlaceRow()
+                    NearbyPlaceRow()
                 }
-                .padding(.horizontal, Spacing.spacing300)
+                .padding(.horizontal, Spacing.spacing400)
             }
-            .padding(.horizontal, Spacing.spacing300)
         }
         .navigationTitle(store.meeting.title)
         .navigationBarTitleDisplayMode(.inline)

@@ -6,7 +6,7 @@
 import SwiftUI
 import DesignSystem
 
-private enum MapBottomSheetMetric {
+private enum MapBottomSheetMetric { // 상수 정의
     static let handleBarWidth: CGFloat = 36
     static let handleBarHeight: CGFloat = 4
     static let handleAreaHeight: CGFloat = 44
@@ -15,7 +15,7 @@ private enum MapBottomSheetMetric {
     static let largeHeightRatio: CGFloat = 0.9
     static let snapThreshold: CGFloat = 60
 }
-
+/// 아이폰 하단 노치랑 바텀시트가 겹쳐지는 문제가 있음..
 struct MapBottomSheet<Content: View>: View {
     // 시트가 멈출 수 있는 세 단계 높이입니다.
     private enum Detent {
@@ -56,6 +56,7 @@ struct MapBottomSheet<Content: View>: View {
 
 
                     content()
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, Spacing.spacing300)
                         .opacity(contentOpacity)
                 }
