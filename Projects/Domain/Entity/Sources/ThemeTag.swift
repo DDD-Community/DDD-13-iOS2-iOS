@@ -2,11 +2,12 @@
 //  ThemeTag.swift
 //  Entity
 //
-//  모임 목적(테마) 도메인 엔티티. 서버 theme-tags 마스터 데이터로부터 매핑된다.
+//  Created by khyeji98 on 2026-06-04.
 //
 
 import Foundation
 
+/// 모임 목적(테마)을 나타내는 도메인 엔티티.
 public struct ThemeTag: Equatable, Sendable, Identifiable {
     public let code: String
     public let displayName: String

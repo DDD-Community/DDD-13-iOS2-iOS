@@ -2,11 +2,14 @@
 //  ThemeTagEndpoint.swift
 //  API
 //
+//  Created by khyeji98 on 2026-06-04.
+//
 
 import Alamofire
 import Foundation
 import Foundations
 
+/// 모임 목적(테마) 관련 API 엔드포인트.
 public enum ThemeTagEndpoint: EndPoint {
     case fetchThemeTags
 

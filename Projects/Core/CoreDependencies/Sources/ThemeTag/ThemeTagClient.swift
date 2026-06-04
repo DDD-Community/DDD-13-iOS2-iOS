@@ -2,11 +2,14 @@
 //  ThemeTagClient.swift
 //  CoreDependencies
 //
+//  Created by khyeji98 on 2026-06-04.
+//
 
 import ComposableArchitecture
 import Entity
 import UseCase
 
+/// 모임 목적(테마) 조회를 위한 TCA Dependency Client.
 @DependencyClient
 public struct ThemeTagClient: Sendable {
     public var fetchThemeTags: @Sendable () async throws -> [ThemeTag]
