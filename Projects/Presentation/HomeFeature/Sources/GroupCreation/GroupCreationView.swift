@@ -250,20 +250,17 @@ private struct PurposeRow: View {
 
 // MARK: - PurposeIcon
 
-/// 모임 목적(theme tag) `code` → 로컬 아이콘 에셋 매핑.
-/// 서버 응답에는 아이콘 정보가 없으므로 code 기준으로 클라이언트가 매핑한다.
-/// 매핑 테이블에 없는 code(예: `DINING`, `STUDY`)는 아이콘 없이 표시한다.
+/// 모임 목적(theme tag) `code` → 로컬 아이콘.
+/// 서버 응답에는 아이콘 정보가 없으므로 클라이언트가 code 로 아이콘을 매칭한다.
+/// 목적 아이콘 에셋은 `ic_purpose_{keyword}` 포맷으로, 목적별로 trailing keyword 만 다르다.
+/// 서버 code(대문자 스네이크)를 소문자로 변환해 같은 포맷의 에셋 이름을 만들고,
+/// 그 이름의 에셋이 존재할 때만 매칭한다(목적별 매직스트링 분기 없음).
+/// 대응 에셋이 없는 code(예: `STUDY`)는 아이콘 없이 displayName 만 표시된다.
 private enum PurposeIcon {
+    private static let assetPrefix = "ic_purpose_"
+
     static func image(for code: String) -> Image? {
-        switch code {
-        case "BUSINESS":    return Image.Asset.icPurposeBusiness
-        case "SOCIAL":      return Image.Asset.icPurposeSocial
-        case "FAMILY":      return Image.Asset.icPurposeFamily
-        case "CASUAL_MEAL": return Image.Asset.icPurposeDining
-        case "BIRTHDAY":    return Image.Asset.icPurposeBirthday
-        case "WEDDING":     return Image.Asset.icPurposeWedding
-        default:            return nil
-        }
+        Image.assetIfExists(named: assetPrefix + code.lowercased())
     }
 }
 
