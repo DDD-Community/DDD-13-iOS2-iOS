@@ -8,6 +8,7 @@ import SwiftUI
 import ComposableArchitecture
 
 import DesignSystem
+import Entity
 
 struct GroupCreationView: View {
     @Bindable var store: StoreOf<GroupCreationFeature>
@@ -31,6 +32,8 @@ struct GroupCreationView: View {
             )
         }
         .background(.white)
+        // 모임 목적(theme tag) 목록 fetch. 뷰가 사라지면 Effect도 함께 취소되도록 .task 사용
+        .task { await store.send(.onAppear).finish() }
         .bottomSheet(
             isPresented: $store.isGroupNameSheetPresented,
             header: .init(
@@ -58,6 +61,7 @@ struct GroupCreationView: View {
             ),
             primaryButton: .init(
                 title: "등록하기",
+                isEnabled: store.isPurposeDraftValid,
                 action: { store.send(.purposeConfirmed) }
             )
         ) {
@@ -103,7 +107,7 @@ private struct GroupCreationContent: View {
             ListField(title: "모임 목적") {
                 Button { store.send(.purposeFieldTapped) } label: {
                     Badge(
-                        store.selectedPurpose?.rawValue ?? "비즈니스",
+                        store.selectedThemeTag?.displayName ?? "비즈니스",
                         trailingIcon: Image.Asset.icArrowSmallDown16,
                         showTrailingIcon: true,
                         variant: .solid,
@@ -186,16 +190,18 @@ private struct AtmosphereRow: View {
 
 // MARK: - PurposeSheetContent
 
+/// 모임 목적(theme tag) 선택 BottomSheet 내용.
+/// 서버에서 fetch 한 `store.themeTags`(모임 목적 목록)를 행으로 렌더링한다.
 private struct PurposeSheetContent: View {
     let store: StoreOf<GroupCreationFeature>
 
     var body: some View {
         VStack(spacing: 0) {
-            ForEach(GroupPurpose.allCases) { purpose in
+            ForEach(store.themeTags) { themeTag in
                 PurposeRow(
-                    purpose: purpose,
-                    isSelected: store.purposeDraft == purpose,
-                    onTap: { store.send(.purposeSelected(purpose)) }
+                    themeTag: themeTag,
+                    isSelected: store.purposeDraft == themeTag,
+                    onTap: { store.send(.purposeSelected(themeTag)) }
                 )
             }
         }
@@ -205,21 +211,25 @@ private struct PurposeSheetContent: View {
 
 // MARK: - PurposeRow
 
+/// 모임 목적(theme tag) 단일 행. `themeTag.code` 로 로컬 아이콘을 매핑하며,
+/// 매핑되는 아이콘이 없는 목적은 아이콘 없이 displayName 만 표시한다.
 private struct PurposeRow: View {
-    let purpose: GroupPurpose
+    let themeTag: ThemeTag
     let isSelected: Bool
     let onTap: () -> Void
 
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: Spacing.spacing300) {
-                purpose.icon
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: Metric.iconLength, height: Metric.iconLength)
-                    .clipShape(Circle())
+                if let icon = PurposeIcon.image(for: themeTag.code) {
+                    icon
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: Metric.iconLength, height: Metric.iconLength)
+                        .clipShape(Circle())
+                }
 
-                BangawoText(purpose.rawValue, textStyle: .bodyMedium)
+                BangawoText(themeTag.displayName, textStyle: .bodyMedium)
                     .foregroundStyle(Colors.gray900)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -238,15 +248,21 @@ private struct PurposeRow: View {
     }
 }
 
-private extension GroupPurpose {
-    var icon: Image {
-        switch self {
-        case .business:   return Image.Asset.icPurposeBusiness
-        case .birthday:   return Image.Asset.icPurposeBirthday
-        case .networking: return Image.Asset.icPurposeNetworking
-        case .wedding:    return Image.Asset.icPurposeWedding
-        case .dining:     return Image.Asset.icPurposeDining
-        case .family:     return Image.Asset.icPurposeFamily
+// MARK: - PurposeIcon
+
+/// 모임 목적(theme tag) `code` → 로컬 아이콘 에셋 매핑.
+/// 서버 응답에는 아이콘 정보가 없으므로 code 기준으로 클라이언트가 매핑한다.
+/// 매핑 테이블에 없는 code(예: `DINING`, `STUDY`)는 아이콘 없이 표시한다.
+private enum PurposeIcon {
+    static func image(for code: String) -> Image? {
+        switch code {
+        case "BUSINESS":    return Image.Asset.icPurposeBusiness
+        case "SOCIAL":      return Image.Asset.icPurposeSocial
+        case "FAMILY":      return Image.Asset.icPurposeFamily
+        case "CASUAL_MEAL": return Image.Asset.icPurposeDining
+        case "BIRTHDAY":    return Image.Asset.icPurposeBirthday
+        case "WEDDING":     return Image.Asset.icPurposeWedding
+        default:            return nil
         }
     }
 }
@@ -292,7 +308,8 @@ private struct ListField<Content: View>: View {
                 initialState: {
                     var state = GroupCreationFeature.State()
                     state.groupTitle = "주말 등산 모임"
-                    state.selectedPurpose = .networking
+                    state.themeTags = [ThemeTag(code: "SOCIAL", displayName: "친목")]
+                    state.selectedThemeTag = ThemeTag(code: "SOCIAL", displayName: "친목")
                     state.selectedAtmospheres = [.openView, .spacious]
                     return state
                 }()

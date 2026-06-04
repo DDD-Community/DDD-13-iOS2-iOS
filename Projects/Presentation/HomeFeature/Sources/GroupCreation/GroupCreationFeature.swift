@@ -13,29 +13,6 @@ private enum Constant {
     static let atmosphereMaxSelection = 3
 }
 
-public enum GroupPurpose: String, CaseIterable, Equatable, Identifiable {
-    case business   = "비즈니스"
-    case birthday   = "생일 파티"
-    case networking = "친목 및 네트워킹"
-    case wedding    = "청첩장 모임"
-    case dining     = "가벼운 식사"
-    case family     = "가족 모임"
-
-    public var id: String { rawValue }
-
-    // TODO: themeTagCode는 서버 스펙 확정 전 임시 값 (확정 시 교체 필요)
-    public var themeTagCode: String {
-        switch self {
-        case .business:   return "BUSINESS"
-        case .birthday:   return "BIRTHDAY"
-        case .networking: return "NETWORKING"
-        case .wedding:    return "WEDDING"
-        case .dining:     return "DINING"
-        case .family:     return "FAMILY"
-        }
-    }
-}
-
 public enum PlaceAtmosphere: String, CaseIterable, Equatable, Identifiable {
     case nice        = "분위기 좋은"
     case quiet       = "조용한 공간"
@@ -51,13 +28,15 @@ public enum PlaceAtmosphere: String, CaseIterable, Equatable, Identifiable {
 @Reducer
 public struct GroupCreationFeature {
     @Dependency(\.groupClient) private var groupClient
+    @Dependency(\.themeTagClient) private var themeTagClient
 
     @ObservableState
     public struct State: Equatable {
         public var groupTitle: String = ""
         public var groupNameDraft: String = ""
-        public var selectedPurpose: GroupPurpose? = nil
-        public var purposeDraft: GroupPurpose = .business
+        public var themeTags: [ThemeTag] = []
+        public var selectedThemeTag: ThemeTag? = nil
+        public var purposeDraft: ThemeTag? = nil
         public var selectedAtmospheres: [PlaceAtmosphere] = []
         public var atmosphereDraft: [PlaceAtmosphere] = []
         public var isGroupNameSheetPresented: Bool = false
@@ -67,7 +46,7 @@ public struct GroupCreationFeature {
 
         public var isCreateEnabled: Bool {
             !groupTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && selectedPurpose != nil
+            && selectedThemeTag != nil
             && !selectedAtmospheres.isEmpty
             && !isLoading
         }
@@ -75,6 +54,10 @@ public struct GroupCreationFeature {
         public var isGroupNameDraftValid: Bool {
             let trimmed = groupNameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
             return !trimmed.isEmpty && groupNameDraft.count <= Constant.groupNameMaxCount
+        }
+
+        public var isPurposeDraftValid: Bool {
+            purposeDraft != nil
         }
 
         public var isAtmosphereDraftValid: Bool {
@@ -86,11 +69,13 @@ public struct GroupCreationFeature {
 
     public enum Action: BindableAction {
         case binding(BindingAction<State>)
+        case onAppear
+        case themeTagsResponse(Result<[ThemeTag], Error>)
         case groupNameFieldTapped
         case groupNameConfirmed
         case groupNameSheetDismissed
         case purposeFieldTapped
-        case purposeSelected(GroupPurpose)
+        case purposeSelected(ThemeTag)
         case purposeConfirmed
         case purposeSheetDismissed
         case atmosphereFieldTapped
@@ -118,6 +103,23 @@ public struct GroupCreationFeature {
             case .binding:
                 return .none
 
+            case .onAppear:
+                guard state.themeTags.isEmpty else { return .none }
+
+                let client = themeTagClient
+                return .run { send in
+                    await send(.themeTagsResponse(
+                        Result { try await client.fetchThemeTags() }
+                    ))
+                }
+
+            case let .themeTagsResponse(.success(themeTags)):
+                state.themeTags = themeTags
+                return .none
+
+            case .themeTagsResponse(.failure):
+                return .none
+
             case .groupNameFieldTapped:
                 state.groupNameDraft = state.groupTitle
                 state.isGroupNameSheetPresented = true
@@ -135,16 +137,18 @@ public struct GroupCreationFeature {
                 return .none
 
             case .purposeFieldTapped:
-                state.purposeDraft = state.selectedPurpose ?? .business
+                state.purposeDraft = state.selectedThemeTag ?? state.themeTags.first
                 state.isPurposeSheetPresented = true
                 return .none
 
-            case let .purposeSelected(purpose):
-                state.purposeDraft = purpose
+            case let .purposeSelected(themeTag):
+                state.purposeDraft = themeTag
                 return .none
 
             case .purposeConfirmed:
-                state.selectedPurpose = state.purposeDraft
+                guard let purposeDraft = state.purposeDraft else { return .none }
+
+                state.selectedThemeTag = purposeDraft
                 state.isPurposeSheetPresented = false
                 return .none
 
@@ -177,11 +181,11 @@ public struct GroupCreationFeature {
                 return .none
 
             case .createButtonTapped:
-                guard state.isCreateEnabled, let purpose = state.selectedPurpose else { return .none }
+                guard state.isCreateEnabled, let themeTag = state.selectedThemeTag else { return .none }
 
                 state.isLoading = true
                 let name = state.groupTitle.trimmingCharacters(in: .whitespacesAndNewlines)
-                let themeTagCode = purpose.themeTagCode
+                let themeTagCode = themeTag.code
                 let client = groupClient
                 return .run { send in
                     await send(.createGroupResponse(
@@ -191,7 +195,7 @@ public struct GroupCreationFeature {
 
             case let .createGroupResponse(.success(result)):
                 state.isLoading = false
-                let group = makeGroup(from: result, purpose: state.selectedPurpose)
+                let group = makeGroup(from: result, themeTag: state.selectedThemeTag)
                 return .send(.delegate(.groupCreated(group)))
 
             case .createGroupResponse(.failure):
@@ -207,13 +211,13 @@ public struct GroupCreationFeature {
         }
     }
 
-    private func makeGroup(from result: CreateGroupResult, purpose: GroupPurpose?) -> Group {
+    private func makeGroup(from result: CreateGroupResult, themeTag: ThemeTag?) -> Group {
         Group(
             id: result.groupId,
             meetingId: result.meetingId,
             name: result.name,
             themeTagCode: result.themeTagCode,
-            themeTagDisplay: purpose?.rawValue ?? "",
+            themeTagDisplay: themeTag?.displayName ?? "",
             listStatus: .inProgress,
             locationStatus: .before,
             dateVoteStatus: .before,
