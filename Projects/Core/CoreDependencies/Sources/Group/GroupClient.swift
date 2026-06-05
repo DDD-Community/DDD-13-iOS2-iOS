@@ -4,6 +4,8 @@
 //
 
 import ComposableArchitecture
+
+import DomainInterface
 import Entity
 import UseCase
 
@@ -28,7 +30,13 @@ public extension GroupClient {
 }
 
 extension GroupClient: DependencyKey {
-    public static let liveValue: GroupClient = GroupClient()
+    public static var liveValue: GroupClient {
+        GroupClient(
+            fetchGroups: { throw GroupClientError.notImplemented },
+            createGroup: { _, _ in throw GroupClientError.notImplemented }
+        )
+    }
+
     public static let testValue: GroupClient = GroupClient()
 }
 

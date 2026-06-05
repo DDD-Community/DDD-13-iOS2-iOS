@@ -6,6 +6,8 @@
 //
 
 import ComposableArchitecture
+
+import DomainInterface
 import Entity
 import UseCase
 
@@ -24,7 +26,12 @@ public extension ThemeTagClient {
 }
 
 extension ThemeTagClient: DependencyKey {
-    public static let liveValue: ThemeTagClient = ThemeTagClient()
+    public static var liveValue: ThemeTagClient {
+        ThemeTagClient(
+            fetchThemeTags: { throw ThemeTagClientError.notImplemented }
+        )
+    }
+
     public static let testValue: ThemeTagClient = ThemeTagClient()
 }
 
