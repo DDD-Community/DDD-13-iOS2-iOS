@@ -16,16 +16,19 @@ struct NearbyPlaceListSheet: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.spacing200) {
+        VStack(alignment: .leading, spacing: 0) {
             Text("신사역")
-                .pretendardCustomFont(textStyle: .headingSmall)
+                .pretendardCustomFont(textStyle: .titleLarge)
                 .foregroundStyle(Colors.gray900)
                 .padding(.horizontal, Spacing.spacing400)
+                .padding(.bottom, Spacing.spacing250)
 
             NearbyPlaceCategoryFilter(
                 selectedCategory: store.selectedCategory,
                 onCategoryTapped: { store.send(.categoryTapped($0)) }
             )
+            .padding(.top, Spacing.spacing250)
+            .padding(.bottom, Spacing.spacing300)
 
             NearbyPlaceOptionFilter(
                 isParkingAvailableSelected: store.isParkingAvailableSelected,
@@ -34,6 +37,7 @@ struct NearbyPlaceListSheet: View {
                 onReservableTapped: { store.send(.reservableFilterTapped) }
             )
             .padding(.horizontal, Spacing.spacing400)
+            .padding(.bottom, Spacing.spacing250)
             
             Group {
                 NearbyPlaceRow()
@@ -42,7 +46,6 @@ struct NearbyPlaceListSheet: View {
                 NearbyPlaceRow()
                 NearbyPlaceRow()
             }
-            .padding(.horizontal, Spacing.spacing400)
         }
     }
 }
@@ -81,7 +84,7 @@ private struct NearbyPlaceOptionFilter: View {
     let onReservableTapped: () -> Void
 
     var body: some View {
-        HStack(spacing: Spacing.spacing300) {
+        HStack(spacing: Spacing.spacing200) {
             NearbyPlaceOptionFilterButton(
                 title: "주차 가능",
                 isSelected: isParkingAvailableSelected,
@@ -146,18 +149,18 @@ private struct NearbyPlaceOptionFilterButton: View {
                 )
 
                 Text(title)
-                    .pretendardCustomFont(textStyle: .bodyMedium)
-                    .foregroundStyle(Colors.gray700)
+                    .pretendardCustomFont(textStyle: .labelSmall)
+                    .foregroundStyle(Colors.gray800)
             }
             .padding(.horizontal, Spacing.spacing250)
             .padding(.vertical, Spacing.spacing150)
             .background(
                 RoundedRectangle(cornerRadius: BorderRadius.borderRadius400)
-                    .fill(Colors.gray100)
+                    .fill(isSelected ? Colors.grayAlpha100 : Colors.gray00)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: BorderRadius.borderRadius400)
-                    .stroke(Colors.gray200, lineWidth: 1)
+                    .stroke(Colors.gray300, lineWidth: 1)
             )
             .contentShape(Rectangle())
         }

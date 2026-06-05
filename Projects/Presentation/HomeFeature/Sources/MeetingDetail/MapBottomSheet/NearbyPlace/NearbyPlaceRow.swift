@@ -27,6 +27,8 @@ struct NearbyPlaceRow: View {
 
                 VStack(alignment: .leading, spacing: Spacing.spacing200) {
                     Text("이름")
+                        .pretendardCustomFont(textStyle: .bodyLargeEmphasized)
+                        .foregroundStyle(Color.gray800)
 
                     HStack(spacing: Spacing.spacing225) {
                         Text("18km")
@@ -74,6 +76,8 @@ struct NearbyPlaceRow: View {
         }
         // 툴팁이 열린 row 전체를 형제 row보다 위에 올려, 아래 row 텍스트가 툴팁 위로 노출되지 않게 합니다.
         .zIndex(isTooltipLayerElevated ? 1 : 0)
+        .padding(.horizontal, Spacing.spacing400)
+        .padding(.vertical, Spacing.spacing300)
     }
 }
 
@@ -115,15 +119,21 @@ private struct NearbyPlaceAddressTooltip: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.spacing200) {
-            AddressTooltipRow(title: "도로명", address: roadAddress)
-            AddressTooltipRow(title: "지번", address: lotAddress)
+            PlaceAddressRow(title: "도로명", address: roadAddress)
+            PlaceAddressRow(title: "지번", address: lotAddress)
         }
         .padding(.horizontal, Spacing.spacing250)
         .padding(.vertical, Spacing.spacing200)
         .frame(width: tooltipWidth, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: BorderRadius.borderRadius200)
-                .fill(Colors.gray100)
+                .fill(Colors.gray00)
+                .shadow(
+                    color: BoxShadow.boxShadow200.color,
+                    radius: BoxShadow.boxShadow200.blur,
+                    x: BoxShadow.boxShadow200.offsetX,
+                    y: BoxShadow.boxShadow200.offsetY
+                )
         )
     }
 }
@@ -140,54 +150,6 @@ private extension NearbyPlaceAddressTooltip {
 
 }
 
-private struct AddressTooltipRow: View {
-    let title: String
-    let address: String
-
-    var body: some View {
-        HStack(spacing: Spacing.spacing150) {
-            AddressTypeBadge(title: title)
-
-            Text(address)
-                .pretendardCustomFont(textStyle: .labelSmall)
-                .foregroundStyle(Colors.gray700)
-                .lineLimit(1)
-                .truncationMode(.tail)
-
-            Button {
-                UIPasteboard.general.string = address
-            } label: {
-                HStack(spacing: Spacing.spacing50) {
-                    Image(assetName: "ic_copy_16")
-                        .renderingMode(.template)
-                        .frame(width: 16, height: 16)
-                }
-                .foregroundStyle(Colors.gray600)
-            }
-            .buttonStyle(.plain)
-        }
-    }
-}
-
-private struct AddressTypeBadge: View {
-    let title: String
-
-    var body: some View {
-        Text(title)
-            .pretendardCustomFont(textStyle: .labelSmallEmphasized)
-            .foregroundStyle(Colors.gray800)
-            .padding(.horizontal, Spacing.spacing150)
-            .padding(.vertical, Spacing.spacing50)
-            .background(
-                RoundedRectangle(cornerRadius: BorderRadius.borderRadius150)
-                    .fill(Colors.gray00)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: BorderRadius.borderRadius150)
-                    .stroke(Colors.gray200, lineWidth: 1)
-            )
-    }
-}
 
 // MARK: - Thumbnail
 

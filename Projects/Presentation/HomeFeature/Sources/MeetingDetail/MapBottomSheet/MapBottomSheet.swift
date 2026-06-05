@@ -6,6 +6,13 @@
 import SwiftUI
 import DesignSystem
 
+
+// MARK: - Mode
+enum MapBottomSheetMode: Equatable {
+    case resizable // 크기 조절 가능 모드
+    case fixedMedium // 크기 조절 불가 모드
+}
+
 // MARK: - Metric
 
 private enum MapBottomSheetMetric {
@@ -14,14 +21,16 @@ private enum MapBottomSheetMetric {
     /// 핸들 바 자체의 높이입니다.
     static let handleBarHeight: CGFloat = 4
     /// 핸들 바 주변 터치 영역 높이입니다. collapsed 상태에서는 이 영역만 노출됩니다.
-    static let handleAreaHeight: CGFloat = 44
+    static let handleAreaHeight: CGFloat = 38
     /// 접힌 상태에서 화면에 보이는 시트 높이입니다.
-    static let collapsedHeight: CGFloat = 44
-    /// 중간 detent는 전체 화면 높이의 45%를 노출합니다.
+    static let collapsedHeight: CGFloat = 76
+    /// 중간 detent는 324pt 노출합니다.
     // TODO: 디테일 한 부분은 추후 수정 필요
-    static let mediumHeightRatio: CGFloat = 0.45
-    /// 큰 detent는 전체 화면 높이의 90%를 노출합니다.
-    static let largeHeightRatio: CGFloat = 0.9
+    static let mediumHeight: CGFloat = 324
+    /// 고정 모드에서는 376pt를 노출합니다.
+    static let fixedMediumHeight: CGFloat = 376
+    /// 큰 detent는 화면 크기의 91%를 노출합니다.
+    static let largeHeightRatio: CGFloat = 0.91
     /// 드래그 종료 시 다음/이전 detent로 넘어가기 위한 최소 이동 거리입니다.
     static let snapThreshold: CGFloat = 60
 }
@@ -42,22 +51,31 @@ struct MapBottomSheet<Content: View>: View {
         case large
     }
 
+    private let mode: MapBottomSheetMode // 모드 설정
     private let content: () -> Content
 
     /// 현재 시트가 머무는 높이 단계입니다.
     @State private var detent: Detent = .collapsed
     /// 드래그 중인 임시 이동 거리입니다. 드래그가 끝나면 detent를 갱신하고 0으로 되돌립니다.
     @State private var dragOffset: CGFloat = 0
+    
 
-    init(@ViewBuilder content: @escaping () -> Content) {
+    init(mode: MapBottomSheetMode = .resizable, @ViewBuilder content: @escaping () -> Content) {
+        self.mode = mode
         self.content = content
     }
 
     var body: some View {
         GeometryReader { proxy in
-            let mediumHeight = proxy.size.height * MapBottomSheetMetric.mediumHeightRatio
             let largeHeight = proxy.size.height * MapBottomSheetMetric.largeHeightRatio
-            let currentOffset = sheetOffset(mediumHeight: mediumHeight, largeHeight: largeHeight)
+            let mediumHeight = min(MapBottomSheetMetric.mediumHeight, largeHeight)
+            let fixedMediumHeight = min(MapBottomSheetMetric.fixedMediumHeight, largeHeight)
+            let effectiveDetent: Detent = mode == .fixedMedium ? .medium : detent
+            let currentOffset = sheetOffset(
+                for: effectiveDetent,
+                mediumHeight: mode == .fixedMedium ? fixedMediumHeight : mediumHeight,
+                largeHeight: largeHeight
+            )
 
             // 시트는 항상 largeHeight 크기로 배치한 뒤 offset으로 아래로 밀어냅니다.
             // 따라서 실제로 화면에 보이는 높이는 largeHeight - currentOffset입니다.
@@ -72,6 +90,8 @@ struct MapBottomSheet<Content: View>: View {
                         .contentShape(Rectangle())
                         .gesture(dragGesture)
                         .onTapGesture {
+                            guard mode == .resizable else { return }
+
                             withAnimation(.spring(duration: 0.35)) {
                                 detent = detent == .collapsed ? .medium : .collapsed
                             }
@@ -82,12 +102,11 @@ struct MapBottomSheet<Content: View>: View {
                     ScrollView(.vertical, showsIndicators: false) {
                         content()
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.top, Spacing.spacing300)
                             .padding(.bottom, 20)
                     }
                     .frame(height: contentHeight, alignment: .top)
-                    .scrollDisabled(detent == .collapsed)
-                    .opacity(contentOpacity)
+                    .scrollDisabled(effectiveDetent == .collapsed)
+                    //.opacity(contentOpacity)
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: largeHeight, alignment: .top)
@@ -119,7 +138,7 @@ private extension MapBottomSheet {
     ///
     /// 예를 들어 medium 상태라면 시트 자체의 frame은 largeHeight지만,
     /// `largeHeight - mediumHeight`만큼 아래로 내려 mediumHeight만 화면에 노출합니다.
-    func sheetOffset(mediumHeight: CGFloat, largeHeight: CGFloat) -> CGFloat {
+    private func sheetOffset(for detent: Detent, mediumHeight: CGFloat, largeHeight: CGFloat) -> CGFloat {
         let baseHeight = height(for: detent, mediumHeight: mediumHeight, largeHeight: largeHeight)
         let visibleHeight = min(max(baseHeight - dragOffset, MapBottomSheetMetric.collapsedHeight), largeHeight)
         return largeHeight - visibleHeight
@@ -148,9 +167,12 @@ private extension MapBottomSheet {
     var dragGesture: some Gesture {
         DragGesture(coordinateSpace: .global)
             .onChanged { value in
+                guard mode == .resizable else { return }
                 dragOffset = value.translation.height
             }
             .onEnded { value in
+                guard mode == .resizable else { return }
+
                 withAnimation(.spring(duration: 0.35)) {
                     if value.translation.height < -MapBottomSheetMetric.snapThreshold {
                         detent = nextDetent
@@ -223,14 +245,27 @@ private struct MapBottomSheetShape: Shape {
     }
 }
 
+/*
+나중에 지도 붙이면 이런식으로 사용하면 좋을듯
+ MapBottomSheet(
+mode: store.selectedPlace == nil ? .resizable : .fixedMedium
+) {
+if store.selectedPlace == nil {
+    NearbyPlaceListSheet(...)
+} else {
+    SelectedPlaceDetailSheet()
+}
+}
+*/
+
 #Preview {
     ZStack(alignment: .bottom) {
         Colors.gray200
             .ignoresSafeArea()
 
-        MapBottomSheet {
-            VStack(spacing: Spacing.spacing200) {
-                NearbyPlaceRow()
+        MapBottomSheet(mode: .fixedMedium) {
+            VStack(spacing: Spacing.spacing100) {
+                SelectedPlaceDetailSheet()
             }
             .padding(.horizontal, Spacing.spacing300)
         }
