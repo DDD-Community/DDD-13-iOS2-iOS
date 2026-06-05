@@ -29,7 +29,7 @@ public struct MeetingDetailFeature {
             NearbyPlaceListSheetFeature()
         }
 
-        Reduce { _, action in
+        Reduce { state, action in
             switch action {
             case .nearbyPlaceList:
                 return .none

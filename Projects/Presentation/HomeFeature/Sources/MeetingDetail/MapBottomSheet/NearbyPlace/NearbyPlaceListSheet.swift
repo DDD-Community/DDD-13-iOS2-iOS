@@ -3,9 +3,9 @@
 //  HomeFeature
 //
 
-import SwiftUI
 import ComposableArchitecture
 import DesignSystem
+import SwiftUI
 
 /// 역근처 정보 리스트 보여줄 시트
 struct NearbyPlaceListSheet: View {
@@ -20,6 +20,7 @@ struct NearbyPlaceListSheet: View {
             Text("신사역")
                 .pretendardCustomFont(textStyle: .headingSmall)
                 .foregroundStyle(Colors.gray900)
+                .padding(.horizontal, Spacing.spacing400)
 
             NearbyPlaceCategoryFilter(
                 selectedCategory: store.selectedCategory,
@@ -32,14 +33,17 @@ struct NearbyPlaceListSheet: View {
                 onParkingAvailableTapped: { store.send(.parkingAvailableFilterTapped) },
                 onReservableTapped: { store.send(.reservableFilterTapped) }
             )
-
-            NearbyPlaceRow()
-            NearbyPlaceRow()
-            NearbyPlaceRow()
-            NearbyPlaceRow()
-            NearbyPlaceRow()
+            .padding(.horizontal, Spacing.spacing400)
+            
+            Group {
+                NearbyPlaceRow()
+                NearbyPlaceRow()
+                NearbyPlaceRow()
+                NearbyPlaceRow()
+                NearbyPlaceRow()
+            }
+            .padding(.horizontal, Spacing.spacing400)
         }
-        .padding(.horizontal, Spacing.spacing400)
     }
 }
 
@@ -48,15 +52,24 @@ private struct NearbyPlaceCategoryFilter: View {
     let onCategoryTapped: (NearbyPlaceCategory) -> Void
 
     var body: some View {
-        HStack(spacing: Spacing.spacing200) {
-            ForEach(NearbyPlaceCategory.allCases, id: \.self) { category in
-                NearbyPlaceCategoryChip(
-                    title: category.title,
-                    isSelected: selectedCategory == category
-                ) {
-                    onCategoryTapped(category)
+        VStack(spacing: 0) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: Spacing.spacing200) {
+                    ForEach(NearbyPlaceCategory.allCases, id: \.self) { category in
+                        NearbyPlaceCategoryChip(
+                            title: category.title,
+                            isSelected: selectedCategory == category
+                        ) {
+                            onCategoryTapped(category)
+                        }
+                    }
                 }
+                .padding(.horizontal, Spacing.spacing400)
             }
+
+            Rectangle()
+                .fill(Colors.gray200)
+                .frame(height: 1)
         }
     }
 }
@@ -91,17 +104,30 @@ private struct NearbyPlaceCategoryChip: View {
 
     var body: some View {
         Button(action: onTap) {
-            Text(title)
-                .pretendardCustomFont(textStyle: .bodyMedium)
-                .foregroundStyle(isSelected ? Colors.gray00 : Colors.gray700)
-                .padding(.horizontal, Spacing.spacing250)
-                .padding(.vertical, Spacing.spacing150)
-                .background(
-                    Capsule()
-                        .fill(isSelected ? Colors.red500 : Colors.gray100)
-                )
+            VStack(spacing: Spacing.spacing150) {
+                Text(title)
+                    .pretendardCustomFont(textStyle: isSelected ? .bodyMediumEmphasized : .bodyMedium)
+                    .foregroundStyle(isSelected ? Colors.gray900 : Colors.gray700)
+                    .padding(.horizontal, Spacing.spacing250)
+
+                TopRoundedRectangle(cornerRadius: 2)
+                    .fill(isSelected ? Colors.gray900 : Color.clear)
+                    .frame(height: 2)
+            }
         }
         .buttonStyle(.plain)
+    }
+}
+
+private struct TopRoundedRectangle: Shape { // 카테고리 선택 시 underline shape
+    let cornerRadius: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        UnevenRoundedRectangle(
+            topLeadingRadius: cornerRadius,
+            topTrailingRadius: cornerRadius
+        )
+        .path(in: rect)
     }
 }
 
@@ -123,6 +149,16 @@ private struct NearbyPlaceOptionFilterButton: View {
                     .pretendardCustomFont(textStyle: .bodyMedium)
                     .foregroundStyle(Colors.gray700)
             }
+            .padding(.horizontal, Spacing.spacing250)
+            .padding(.vertical, Spacing.spacing150)
+            .background(
+                RoundedRectangle(cornerRadius: BorderRadius.borderRadius400)
+                    .fill(Colors.gray100)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: BorderRadius.borderRadius400)
+                    .stroke(Colors.gray200, lineWidth: 1)
+            )
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

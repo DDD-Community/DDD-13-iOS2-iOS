@@ -9,7 +9,11 @@ import Utill
 public enum NearbyPlaceCategory: String, CaseIterable, Equatable, Sendable {
     case all = "전체"
     case cafe = "카페"
-    case restaurant = "음식점"
+    case desert = "디저트"
+    case koreaFood = "한식"
+    case japaneseFood = "일식"
+    case snackBar = "분식"
+    case asianFood = "아시안"
 
     var title: String { rawValue }
 }
