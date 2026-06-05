@@ -13,6 +13,11 @@ import UIKit
 struct NearbyPlaceRow: View {
     // TODO: data 서버 모델로 변경 필요
     @State private var isTooltipPresented = false
+    @State private var isTooltipLayerElevated = false
+    @State private var addressWidth: CGFloat = 0
+
+    private let displayAddress = "서울 강남구 역삼동"
+    private let tooltipAnimationDuration = 0.2
 
     var body: some View {
         VStack(spacing: 0) {
@@ -24,32 +29,36 @@ struct NearbyPlaceRow: View {
                         Text("18km")
                             .pretendardCustomFont(textStyle: .bodyMedium)
                             .foregroundStyle(Color.gray600)
-                        HStack(spacing: Spacing.spacing100) {
-                            Text("서울 강남구 역삼동")
-                                .pretendardCustomFont(textStyle: .bodyMedium)
-                                .foregroundStyle(Color.gray700)
+                        Button {
+                            toggleTooltip()
+                        } label: {
+                            HStack(spacing: Spacing.spacing100) {
+                                Text(displayAddress)
+                                    .pretendardCustomFont(textStyle: .bodyMedium)
+                                    .foregroundStyle(Color.gray700)
+                                    .background(
+                                        GeometryReader { proxy in
+                                            Color.clear.preference(
+                                                key: AddressWidthPreferenceKey.self,
+                                                value: proxy.size.width
+                                            )
+                                        }
+                                    )
 
-                            Button {
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    isTooltipPresented.toggle()
-                                }
-                            } label: {
                                 Image(assetName: "ic_arrow_small_down_16")
                                     .renderingMode(.template)
                                     .foregroundStyle(Colors.gray500)
                                     .frame(width: 16, height: 16)
+                                    .rotationEffect(.degrees(isTooltipPresented ? 180 : 0))
+                                    .animation(.easeInOut(duration: tooltipAnimationDuration), value: isTooltipPresented)
                             }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel("주소 안내 보기")
+                            .contentShape(Rectangle())
                         }
-                        .overlay(alignment: .bottomLeading) {
-                            if isTooltipPresented {
-                                NearbyPlaceAddressTooltip()
-                                    .offset(y: 32)
-                                    .transition(.opacity.combined(with: .move(edge: .bottom)))
-                            }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("주소 안내 보기")
+                        .onPreferenceChange(AddressWidthPreferenceKey.self) { width in
+                            addressWidth = width
                         }
-                        .zIndex(1)
                     }
                     .zIndex(1)
 
@@ -61,12 +70,52 @@ struct NearbyPlaceRow: View {
                     }
                     .zIndex(0)
                 }
+                .overlay(alignment: .bottomLeading) {
+                    if isTooltipPresented {
+                        NearbyPlaceAddressTooltip(minimumWidth: addressWidth)
+                            .offset(y: Spacing.spacing600)
+                            .transition(.opacity.combined(with: .scale(scale: 0.96, anchor: .top)))
+                    }
+                }
+                .zIndex(1)
+            }
+        }
+        .zIndex(isTooltipLayerElevated ? 1 : 0)
+    }
+}
+
+private extension NearbyPlaceRow {
+    func toggleTooltip() {
+        if isTooltipPresented {
+            withAnimation(.easeInOut(duration: tooltipAnimationDuration)) {
+                isTooltipPresented = false
+            }
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + tooltipAnimationDuration) {
+                if !isTooltipPresented {
+                    isTooltipLayerElevated = false
+                }
+            }
+        } else {
+            isTooltipLayerElevated = true
+            withAnimation(.easeInOut(duration: tooltipAnimationDuration)) {
+                isTooltipPresented = true
             }
         }
     }
 }
 
+private struct AddressWidthPreferenceKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+
 private struct NearbyPlaceAddressTooltip: View {
+    let minimumWidth: CGFloat
+
     private let roadAddress = "서울 강남구 테헤란로 123"
     private let lotAddress = "서울 강남구 역삼동 123-45"
 
@@ -77,6 +126,8 @@ private struct NearbyPlaceAddressTooltip: View {
         }
         .padding(.horizontal, Spacing.spacing250)
         .padding(.vertical, Spacing.spacing200)
+        .frame(minWidth: minimumWidth, alignment: .leading)
+        .fixedSize(horizontal: true, vertical: false)
         .background(
             RoundedRectangle(cornerRadius: BorderRadius.borderRadius200)
                 .fill(Colors.gray100)
@@ -94,6 +145,8 @@ private extension NearbyPlaceAddressTooltip {
             Text(address)
                 .pretendardCustomFont(textStyle: .labelSmall)
                 .foregroundStyle(Colors.gray700)
+                .lineLimit(1)
+                .truncationMode(.tail)
 
             Button {
                 UIPasteboard.general.string = address

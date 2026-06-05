@@ -11,17 +11,29 @@ public struct MeetingDetailFeature {
     @ObservableState
     public struct State: Equatable {
         public let meeting: Meeting
+        public var nearbyPlaceList: NearbyPlaceListSheetFeature.State = .init()
 
         public init(meeting: Meeting) {
             self.meeting = meeting
         }
     }
 
-    public enum Action {}
+    public enum Action {
+        case nearbyPlaceList(NearbyPlaceListSheetFeature.Action)
+    }
 
     public init() {}
 
     public var body: some ReducerOf<Self> {
-        Reduce { _, _ in .none }
+        Scope(state: \.nearbyPlaceList, action: \.nearbyPlaceList) {
+            NearbyPlaceListSheetFeature()
+        }
+
+        Reduce { _, action in
+            switch action {
+            case .nearbyPlaceList:
+                return .none
+            }
+        }
     }
 }
