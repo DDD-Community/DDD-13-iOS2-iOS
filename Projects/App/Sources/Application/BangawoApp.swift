@@ -7,13 +7,24 @@ import KakaoSDKCommon
 import NidThirdPartyLogin
 
 import CoreDependencies
+import Entity
 import Presentation
 import Utill
 
 @main
 struct BangawoApp: App {
-    private let store = Store(initialState: RootFeature.State()) {
-        RootFeature()
+    private let store = Store(
+        initialState: MeetingDetailFeature.State(
+            meeting: Meeting(
+                id: UUID(),
+                title: "주말 러닝 모임",
+                hashtag: "#러닝 #건강 #운동",
+                status: .inProgress,
+                participantCount: 5
+            )
+        )
+    ) {
+        MeetingDetailFeature()
     }
 
     init() {
@@ -34,15 +45,17 @@ struct BangawoApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView(store: store)
-                .dismissKeyboardOnTap()
-                .onOpenURL { url in
-                    if AuthApi.isKakaoTalkLoginUrl(url) {
-                        AuthController.handleOpenUrl(url: url)
-                    } else if NidOAuth.shared.handleURL(url) {
-                        Log.debug("👤 [Naver] Login callback 처리 완료")
-                    }
+            NavigationStack {
+                MeetingDetailView(store: store)
+            }
+            .dismissKeyboardOnTap()
+            .onOpenURL { url in
+                if AuthApi.isKakaoTalkLoginUrl(url) {
+                    _ = AuthController.handleOpenUrl(url: url)
+                } else if NidOAuth.shared.handleURL(url) {
+                    Log.debug("👤 [Naver] Login callback 처리 완료")
                 }
+            }
         }
     }
 
