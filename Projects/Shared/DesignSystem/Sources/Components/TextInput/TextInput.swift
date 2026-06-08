@@ -207,7 +207,7 @@ private struct TextInputContainer<Content: View>: View {
 
     private var borderColor: Color {
         switch state {
-        case .typing, .typed: return Colors.gray700
+        case .focused, .typing: return Colors.gray700
         case .error: return Colors.red600
         default: return Colors.gray200
         }

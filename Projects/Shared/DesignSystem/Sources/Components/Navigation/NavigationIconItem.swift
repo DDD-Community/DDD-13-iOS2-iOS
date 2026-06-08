@@ -28,20 +28,32 @@ public enum NavigationIcon {
 public struct NavigationIconItem: Identifiable {
     public let id: UUID
     public let icon: NavigationIcon
+    public let showsBadge: Bool
     public let action: () -> Void
 
-    public init(icon: NavigationIcon, action: @escaping () -> Void) {
+    public init(
+        icon: NavigationIcon,
+        showsBadge: Bool = false,
+        action: @escaping () -> Void
+    ) {
         self.id = UUID()
         self.icon = icon
+        self.showsBadge = showsBadge
         self.action = action
     }
 }
 
 struct NavigationIconButton: View {
     let image: Image
+    let showsBadge: Bool
     let action: () -> Void
 
     @GestureState private var isPressed = false
+
+    private enum Metric {
+        static let badgeLength: CGFloat = Spacing.spacing100
+        static let badgePadding: CGFloat = Spacing.spacing250
+    }
 
     var body: some View {
         image
@@ -52,6 +64,15 @@ struct NavigationIconButton: View {
                     .frame(width: Spacing.spacing450, height: Spacing.spacing450)
             }
             .frame(width: Sizing.sizing450, height: Sizing.sizing450)
+            .overlay(alignment: .topTrailing) {
+                if showsBadge {
+                    Circle()
+                        .fill(Colors.red500)
+                        .frame(width: Metric.badgeLength, height: Metric.badgeLength)
+                        .padding(.top, Metric.badgePadding)
+                        .padding(.trailing, Metric.badgePadding)
+                }
+            }
             .animation(.easeInOut(duration: 0.1), value: isPressed)
             .gesture(
                 DragGesture(minimumDistance: 0)

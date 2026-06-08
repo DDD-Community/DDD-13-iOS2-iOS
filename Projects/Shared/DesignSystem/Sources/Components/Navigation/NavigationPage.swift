@@ -39,7 +39,11 @@ public struct NavigationPage: View {
                 if !trailingIcons.isEmpty {
                     HStack(spacing: 0) {
                         ForEach(trailingIcons) { item in
-                            NavigationIconButton(image: item.icon.image, action: item.action)
+                            NavigationIconButton(
+                                image: item.icon.image,
+                                showsBadge: item.showsBadge,
+                                action: item.action
+                            )
                         }
                     }
                     .padding(.trailing, Spacing.spacing300)
@@ -71,7 +75,7 @@ public struct NavigationPage: View {
         let action: () -> Void
 
         var body: some View {
-            NavigationIconButton(image: Image.Asset.icArrowBigLeft24, action: action)
+            NavigationIconButton(image: Image.Asset.icArrowBigLeft24, showsBadge: false, action: action)
                 .padding(.leading, Spacing.spacing225)
                 .padding(.trailing, Spacing.spacing150)
         }

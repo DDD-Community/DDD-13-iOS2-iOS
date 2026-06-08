@@ -41,7 +41,11 @@ public struct NavigationMain: View {
             if !trailingIcons.isEmpty {
                 HStack(spacing: 0) {
                     ForEach(trailingIcons) { item in
-                        NavigationIconButton(image: item.icon.image, action: item.action)
+                        NavigationIconButton(
+                            image: item.icon.image,
+                            showsBadge: item.showsBadge,
+                            action: item.action
+                        )
                     }
                 }
                 .padding(.trailing, Spacing.spacing300)

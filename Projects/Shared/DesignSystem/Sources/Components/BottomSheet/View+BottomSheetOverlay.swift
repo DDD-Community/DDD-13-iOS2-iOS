@@ -12,7 +12,6 @@ public extension View {
     func customBottomSheet<Content: View>(
         isPresented: Binding<Bool>,
         header: BottomSheet<Content>.HeaderConfig? = nil,
-        contentVerticalPadding: CGFloat = 0,
         primaryButton: BottomSheet<Content>.ButtonConfig? = nil,
         secondaryButton: BottomSheet<Content>.ButtonConfig? = nil,
         @ViewBuilder content: @escaping () -> Content
@@ -21,7 +20,6 @@ public extension View {
             BottomSheetOverlayModifier(
                 isPresented: isPresented,
                 header: header,
-                contentVerticalPadding: contentVerticalPadding,
                 primaryButton: primaryButton,
                 secondaryButton: secondaryButton,
                 content: content
@@ -35,7 +33,6 @@ public extension View {
 private struct BottomSheetOverlayModifier<SheetContent: View>: ViewModifier {
     @Binding var isPresented: Bool
     let header: BottomSheet<SheetContent>.HeaderConfig?
-    let contentVerticalPadding: CGFloat
     let primaryButton: BottomSheet<SheetContent>.ButtonConfig?
     let secondaryButton: BottomSheet<SheetContent>.ButtonConfig?
     let content: () -> SheetContent
@@ -80,7 +77,6 @@ private struct BottomSheetOverlayModifier<SheetContent: View>: ViewModifier {
                     Spacer()
                     BottomSheet(
                         header: header,
-                        contentVerticalPadding: contentVerticalPadding,
                         primaryButton: primaryButton,
                         secondaryButton: secondaryButton,
                         canExpand: $canExpand,
@@ -193,7 +189,6 @@ private struct BottomSheetOverlayModifier<SheetContent: View>: ViewModifier {
                         description: "설명 텍스트가 여기에 표시됩니다.",
                         onClose: { isPresented = false }
                     ),
-                    contentVerticalPadding: Spacing.spacing400,
                     primaryButton: .init(title: "확인") { isPresented = false }
                 ) {
                     Text("컨텐츠 영역")
@@ -217,7 +212,6 @@ private struct BottomSheetOverlayModifier<SheetContent: View>: ViewModifier {
                         description: "설명 텍스트가 여기에 표시됩니다.",
                         onClose: { isPresented = false }
                     ),
-                    contentVerticalPadding: Spacing.spacing400,
                     primaryButton: .init(title: "확인") { isPresented = false },
                     secondaryButton: .init(title: "취소") { isPresented = false }
                 ) {
@@ -236,8 +230,7 @@ private struct BottomSheetOverlayModifier<SheetContent: View>: ViewModifier {
         var body: some View {
             Button("시트 열기") { isPresented = true }
                 .customBottomSheet(
-                    isPresented: $isPresented,
-                    contentVerticalPadding: Spacing.spacing400
+                    isPresented: $isPresented
                 ) {
                     Text("컨텐츠만 있는 시트")
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -256,7 +249,6 @@ private struct BottomSheetOverlayModifier<SheetContent: View>: ViewModifier {
                 .customBottomSheet(
                     isPresented: $isPresented,
                     header: .init(title: "스크롤 + 확장 테스트", onClose: { isPresented = false }),
-                    contentVerticalPadding: Spacing.spacing400,
                     primaryButton: .init(title: "확인") { isPresented = false }
                 ) {
                     VStack(spacing: Spacing.spacing200) {
@@ -281,7 +273,6 @@ private struct BottomSheetOverlayModifier<SheetContent: View>: ViewModifier {
                 .customBottomSheet(
                     isPresented: $isPresented,
                     header: .init(title: "키보드 테스트", onClose: { isPresented = false }),
-                    contentVerticalPadding: Spacing.spacing400,
                     primaryButton: .init(title: "확인") { isPresented = false }
                 ) {
                     TextField("입력하세요", text: $text)

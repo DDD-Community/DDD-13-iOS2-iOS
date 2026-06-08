@@ -15,6 +15,7 @@ let project = Project.makeModule(
     .Shared(implements: .DesignSystem),
     .Domain(implements: .UseCase),
     .Domain(implements: .Entity),
+    .Core(implements: .CoreDependencies),
     .SPM.composableArchitecture,
   ],
   sources: ["Sources/**"]

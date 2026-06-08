@@ -17,7 +17,6 @@ public struct BottomSheet<Content: View>: View {
 
     private let header: HeaderConfig?
     private let content: () -> Content
-    private let contentVerticalPadding: CGFloat
     private let primaryButton: ButtonConfig?
     private let secondaryButton: ButtonConfig?
     private let canExpand: Binding<Bool>?
@@ -30,14 +29,12 @@ public struct BottomSheet<Content: View>: View {
 
     public init(
         header: HeaderConfig? = nil,
-        contentVerticalPadding: CGFloat = 0,
         primaryButton: ButtonConfig? = nil,
         secondaryButton: ButtonConfig? = nil,
         canExpand: Binding<Bool>? = nil,
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.header = header
-        self.contentVerticalPadding = contentVerticalPadding
         self.primaryButton = primaryButton
         self.secondaryButton = secondaryButton
         self.canExpand = canExpand
@@ -59,7 +56,8 @@ public struct BottomSheet<Content: View>: View {
                 ScrollView {
                     content()
                         .padding(.horizontal, Spacing.spacing400)
-                        .padding(.vertical, contentVerticalPadding)
+                        .padding(.top, Spacing.spacing300)
+                        .padding(.bottom, Spacing.spacing200)
                         .background(
                             GeometryReader { geo in
                                 Color.clear
@@ -186,6 +184,7 @@ private extension BottomSheet {
                         variant: .weak,
                         size: .large,
                         widthType: .maxWidth,
+                        isDisabled: !secondary.isEnabled,
                         isKeyboardAttached: isKeyboardVisible,
                         action: secondary.action
                     )
@@ -196,6 +195,7 @@ private extension BottomSheet {
                         variant: .solid,
                         size: .large,
                         widthType: .maxWidth,
+                        isDisabled: !primary.isEnabled,
                         isKeyboardAttached: isKeyboardVisible,
                         action: primary.action
                     )
@@ -224,7 +224,6 @@ private extension BottomSheet {
             description: "설명 텍스트가 여기에 표시됩니다.",
             onClose: {}
         ),
-        contentVerticalPadding: Spacing.spacing400,
         primaryButton: .init(title: "확인") {},
         secondaryButton: .init(title: "취소") {}
     ) {

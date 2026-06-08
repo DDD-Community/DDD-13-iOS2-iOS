@@ -6,37 +6,40 @@
 import Foundation
 
 import ComposableArchitecture
+import CoreDependencies
 import Entity
 
 @Reducer
 public struct HomeFeature {
+    @Dependency(\.groupClient) private var groupClient
+
     @Reducer(state: .equatable)
     public enum Path {
-        case detail(MeetingDetailFeature)
+        case detail(GroupDetailFeature)
     }
 
     @ObservableState
     public struct State: Equatable {
-        public var meetings: [Meeting] = []
-        public var selectedFilter: MeetingFilter = .all
-        @Presents public var creationSheet: MeetingCreationSheetFeature.State?
+        public var groups: [Group] = []
+        public var selectedTabIndex: Int = 0
+        public var hasUnreadNotifications: Bool = false
+        @Presents public var creationView: GroupCreationFeature.State?
         public var path: StackState<Path.State> = StackState<Path.State>()
-
-        public var filteredMeetings: [Meeting] {
-            selectedFilter == .all ? meetings : meetings.filter { $0.status == selectedFilter }
-        }
 
         public init() {}
     }
 
     public enum Action {
         case onAppear
-        case filterTapped(MeetingFilter)
-        case createMeetingRowTapped
-        case fabCreateMeetingTapped
-        case fabJoinMeetingTapped
-        case meetingCardTapped(Meeting)
-        case creationSheet(PresentationAction<MeetingCreationSheetFeature.Action>)
+        case groupsResponse(Result<[Group], Error>)
+        case tabSelected(Int)
+        case notificationButtonTapped
+        case myPageButtonTapped
+        case createGroupRowTapped
+        case fabCreateGroupTapped
+        case fabJoinGroupTapped
+        case groupCardTapped(Group)
+        case creationView(PresentationAction<GroupCreationFeature.Action>)
         case path(StackActionOf<Path>)
     }
 
@@ -45,46 +48,69 @@ public struct HomeFeature {
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case .onAppear: return .none
+            case .onAppear:
+                return fetchGroupsEffect()
 
-            case .filterTapped(let filter):
-                state.selectedFilter = filter
+            case .groupsResponse(.success(let groups)):
+                state.groups = groups
                 return .none
 
-            case .createMeetingRowTapped:
-                state.creationSheet = MeetingCreationSheetFeature.State()
+            case .groupsResponse(.failure):
                 return .none
 
-            case .fabCreateMeetingTapped:
-                state.creationSheet = MeetingCreationSheetFeature.State()
+            case .tabSelected(let index):
+                state.selectedTabIndex = index
                 return .none
 
-            case .fabJoinMeetingTapped:
+            case .notificationButtonTapped:
                 return .none
 
-            case .meetingCardTapped(let meeting):
-                state.path.append(.detail(MeetingDetailFeature.State(meeting: meeting)))
+            case .myPageButtonTapped:
                 return .none
 
-            case let .creationSheet(.presented(.delegate(.meetingCreated(meeting)))):
-                state.meetings.append(meeting)
-                state.creationSheet = nil
+            case .createGroupRowTapped:
+                state.creationView = GroupCreationFeature.State()
                 return .none
 
-            case .creationSheet(.presented(.delegate(.dismissed))):
-                state.creationSheet = nil
+            case .fabCreateGroupTapped:
+                state.creationView = GroupCreationFeature.State()
                 return .none
 
-            case .creationSheet:
+            case .fabJoinGroupTapped:
+                return .none
+
+            case .groupCardTapped(let group):
+                state.path.append(.detail(GroupDetailFeature.State(group: group)))
+                return .none
+
+            case let .creationView(.presented(.delegate(.groupCreated(group)))):
+                state.creationView = nil
+                state.path.append(.detail(GroupDetailFeature.State(group: group)))
+                return fetchGroupsEffect()
+
+            case .creationView(.presented(.delegate(.dismissed))):
+                state.creationView = nil
+                return .none
+
+            case .creationView:
                 return .none
 
             case .path:
                 return .none
             }
         }
-        .ifLet(\.$creationSheet, action: \.creationSheet) {
-            MeetingCreationSheetFeature()
+        .ifLet(\.$creationView, action: \.creationView) {
+            GroupCreationFeature()
         }
         .forEach(\.path, action: \.path)
+    }
+
+    private func fetchGroupsEffect() -> Effect<Action> {
+        let client = groupClient
+        return .run { send in
+            await send(.groupsResponse(
+                Result { try await client.fetchGroups() }
+            ))
+        }
     }
 }

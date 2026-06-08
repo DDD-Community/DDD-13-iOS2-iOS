@@ -1,5 +1,5 @@
 //
-//  MeetingDetailFeature.swift
+//  GroupDetailFeature.swift
 //  Presentation
 //
 
@@ -7,14 +7,14 @@ import ComposableArchitecture
 import Entity
 
 @Reducer
-public struct MeetingDetailFeature {
+public struct GroupDetailFeature {
     @ObservableState
     public struct State: Equatable {
-        public let meeting: Meeting
+        public let group: Group
         public var nearbyPlaceList: NearbyPlaceListSheetFeature.State = .init()
 
-        public init(meeting: Meeting) {
-            self.meeting = meeting
+        public init(group: Group) {
+            self.group = group
         }
     }
 

@@ -22,10 +22,16 @@ public extension BottomSheet {
 
     struct ButtonConfig {
         public let title: String
+        public let isEnabled: Bool
         public let action: () -> Void
 
-        public init(title: String, action: @escaping () -> Void) {
+        public init(
+            title: String,
+            isEnabled: Bool = true,
+            action: @escaping () -> Void
+        ) {
             self.title = title
+            self.isEnabled = isEnabled
             self.action = action
         }
     }
