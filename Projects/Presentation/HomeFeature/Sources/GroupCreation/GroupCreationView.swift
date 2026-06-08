@@ -26,14 +26,17 @@ struct GroupCreationView: View {
             GroupCreationContent(store: store)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
 
-            // TODO: ActionButton 확장 PR 머지 후 isEnabled(store.isCreateEnabled) 반영
             ActionButton(
-                buttonLayout: .single(title: "만들기", action: { store.send(.createButtonTapped) })
+                buttonLayout: .single(
+                    title: "만들기",
+                    isDisabled: !store.isCreateEnabled,
+                    action: { store.send(.createButtonTapped) }
+                )
             )
         }
         .background(.white)
-        // 모임 목적(theme tag) 목록 fetch. 뷰가 사라지면 Effect도 함께 취소되도록 .task 사용
-        .task { await store.send(.onAppear).finish() }
+        // 모임 목적(theme tag) 목록 fetch
+        .task { await store.send(.onAppear) }
         .bottomSheet(
             isPresented: $store.isGroupNameSheetPresented,
             header: .init(

@@ -195,7 +195,9 @@ public struct GroupCreationFeature {
 
             case let .createGroupResponse(.success(result)):
                 state.isLoading = false
-                let group = makeGroup(from: result, themeTag: state.selectedThemeTag)
+                guard let themeTag = state.selectedThemeTag else { return .none }
+
+                let group = makeGroup(from: result, themeTag: themeTag)
                 return .send(.delegate(.groupCreated(group)))
 
             case .createGroupResponse(.failure):
@@ -211,13 +213,13 @@ public struct GroupCreationFeature {
         }
     }
 
-    private func makeGroup(from result: CreateGroupResult, themeTag: ThemeTag?) -> Group {
+    private func makeGroup(from result: CreateGroupResult, themeTag: ThemeTag) -> Group {
         Group(
             id: result.groupId,
             meetingId: result.meetingId,
             name: result.name,
             themeTagCode: result.themeTagCode,
-            themeTagDisplay: themeTag?.displayName ?? "",
+            themeTagDisplay: themeTag.displayName,
             listStatus: .inProgress,
             locationStatus: .before,
             dateVoteStatus: .before,
