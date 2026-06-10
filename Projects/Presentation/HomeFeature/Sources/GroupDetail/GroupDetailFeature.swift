@@ -12,6 +12,7 @@ public struct GroupDetailFeature {
     public struct State: Equatable {
         public let group: Group
         public var nearbyPlaceList: NearbyPlaceListSheetFeature.State = .init()
+        public var selectedPlaceDetail: SelectedPlaceDetailSheetFeature.State = .mock
 
         public init(group: Group) {
             self.group = group
@@ -20,6 +21,7 @@ public struct GroupDetailFeature {
 
     public enum Action {
         case nearbyPlaceList(NearbyPlaceListSheetFeature.Action)
+        case selectedPlaceDetail(SelectedPlaceDetailSheetFeature.Action)
     }
 
     public init() {}
@@ -29,9 +31,15 @@ public struct GroupDetailFeature {
             NearbyPlaceListSheetFeature()
         }
 
-        Reduce { state, action in
+        Scope(state: \.selectedPlaceDetail, action: \.selectedPlaceDetail) {
+            SelectedPlaceDetailSheetFeature()
+        }
+
+        Reduce { _, action in
             switch action {
             case .nearbyPlaceList:
+                return .none
+            case .selectedPlaceDetail:
                 return .none
             }
         }
