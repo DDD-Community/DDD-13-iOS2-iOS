@@ -9,18 +9,18 @@ struct KakaoMapRepresentable: UIViewRepresentable {
     let pins: [MapPin]
     let initialCenter: MapCoordinate
     let initialZoomLevel: Int
+    let focusedCoordinate: MapCoordinate?
     var onPinTapped: ((MapPin) -> Void)?
 
     func makeUIView(context: Context) -> KMViewContainer {
         let container = KMViewContainer()
         context.coordinator.container = container
         context.coordinator.createController(container: container)
-        // 다음 run loop에서 엔진을 준비한다.
-        // 현재 run loop에서는 Auto Layout이 완료되지 않아 bounds가 .zero일 수 있으므로,
-        // 레이아웃 커밋 이후 시점으로 미뤄 SDK가 정상적인 렌더 서피스를 생성하도록 한다.
+
         DispatchQueue.main.async {
             context.coordinator.controller?.prepareEngine()
         }
+
         return container
     }
 
@@ -32,6 +32,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
         let coordinator = context.coordinator
         coordinator.pendingRoutes = routes
         coordinator.pendingPins = pins
+        coordinator.pendingFocus = focusedCoordinate
         coordinator.onPinTapped = onPinTapped
 
         if isVisible {
@@ -39,6 +40,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
 
             if coordinator.isMapReady {
                 coordinator.applyOverlays()
+                coordinator.applyFocus()
             }
         } else {
             coordinator.controller?.resetEngine()
@@ -51,6 +53,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             pins: pins,
             initialCenter: initialCenter,
             initialZoomLevel: initialZoomLevel,
+            focusedCoordinate: focusedCoordinate,
             onPinTapped: onPinTapped
         )
     }
@@ -70,6 +73,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
 
         var pendingRoutes: [MapRoute]
         var pendingPins: [MapPin]
+        var pendingFocus: MapCoordinate?
         var onPinTapped: ((MapPin) -> Void)?
 
         private let initialCenter: MapCoordinate
@@ -77,6 +81,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
 
         private var currentRoutes: [MapRoute] = []
         private var currentPins: [MapPin] = []
+        private var currentFocus: MapCoordinate?
         private var pinMap: [String: MapPin] = [:]
 
         init(
@@ -84,10 +89,12 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             pins: [MapPin],
             initialCenter: MapCoordinate,
             initialZoomLevel: Int,
+            focusedCoordinate: MapCoordinate?,
             onPinTapped: ((MapPin) -> Void)?
         ) {
             self.pendingRoutes = routes
             self.pendingPins = pins
+            self.pendingFocus = focusedCoordinate
             self.initialCenter = initialCenter
             self.initialZoomLevel = initialZoomLevel
             self.onPinTapped = onPinTapped
@@ -125,6 +132,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             mapView.eventDelegate = self
             isMapReady = true
             applyOverlays()
+            applyFocus()
         }
 
         func addViewFailed(_ viewName: String, viewInfoName: String) {
@@ -170,6 +178,25 @@ struct KakaoMapRepresentable: UIViewRepresentable {
                 applyPins(pendingPins, on: mapView)
                 currentPins = pendingPins
             }
+        }
+
+        // 포커스 좌표가 갱신되면 해당 위치로 카메라를 애니메이션 이동한다.
+        // 현재 줌 레벨을 유지하기 위해 target만 지정하는 CameraUpdate를 사용한다.
+        func applyFocus() {
+            guard
+                isMapReady,
+                let focus = pendingFocus,
+                focus != currentFocus,
+                let mapView = controller?.getView(MapIdentifier.viewName) as? KakaoMapsSDK.KakaoMap
+            else { return }
+
+            let target = MapPoint(longitude: focus.longitude, latitude: focus.latitude)
+            let cameraUpdate = CameraUpdate.make(target: target, mapView: mapView)
+            mapView.animateCamera(
+                cameraUpdate: cameraUpdate,
+                options: CameraAnimationOptions(autoElevation: false, consecutive: false, durationInMillis: 300)
+            )
+            currentFocus = focus
         }
 
         private func applyRoutes(_ routes: [MapRoute], on mapView: KakaoMapsSDK.KakaoMap) {
@@ -221,6 +248,9 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             }
         }
 
+        // 핀 표현은 SwiftUI 뷰를 렌더한 단일 이미지(아이콘+라벨)로 통일한다.
+        // 네이티브 PoiText/TextStyle은 사용하지 않고, 스타일 등록(createPoiStyle)과
+        // POI 추가(createPois)를 분리한다. (juhee-dev velog createPoiStyle 패턴 참고)
         private func applyPins(_ pins: [MapPin], on mapView: KakaoMapsSDK.KakaoMap) {
             let labelManager = mapView.getLabelManager()
             labelManager.removeLabelLayer(layerID: MapIdentifier.pinLayer)
@@ -228,18 +258,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
 
             guard !pins.isEmpty else { return }
 
-            for (index, pin) in pins.enumerated() {
-                let styleID = MapIdentifier.pinStyle(index: index)
-                let iconStyle: PoiIconStyle
-                if let image = pin.iconImage {
-                    iconStyle = PoiIconStyle(symbol: image, anchorPoint: CGPoint(x: 0.5, y: 1.0))
-                } else {
-                    iconStyle = PoiIconStyle(symbol: defaultPinImage(), anchorPoint: CGPoint(x: 0.5, y: 1.0))
-                }
-                let perLevel = PerLevelPoiStyle(iconStyle: iconStyle, level: 0)
-                let poiStyle = PoiStyle(styleID: styleID, styles: [perLevel])
-                labelManager.addPoiStyle(poiStyle)
-            }
+            createPoiStyles(pins, on: labelManager)
 
             let layerOptions = LabelLayerOptions(
                 layerID: MapIdentifier.pinLayer,
@@ -251,9 +270,26 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             guard let layer = labelManager.addLabelLayer(option: layerOptions) else { return }
             layer.setClickable(true)
 
+            createPois(pins, on: layer)
+        }
+
+        // 핀마다 SwiftUI 렌더 이미지를 심볼로 갖는 PoiStyle을 등록한다.
+        // PoiIconStyle은 심볼 크기 지정 파라미터가 없어 전달된 이미지를 원본 크기로 렌더하므로,
+        // 표시 크기는 호출부에서 이미지로 맞춰 전달한다.
+        private func createPoiStyles(_ pins: [MapPin], on labelManager: LabelManager) {
             for (index, pin) in pins.enumerated() {
-                let styleID = MapIdentifier.pinStyle(index: index)
-                let options = PoiOptions(styleID: styleID, poiID: pin.id)
+                let symbol = pin.iconImage ?? defaultPinImage()
+                let iconStyle = PoiIconStyle(symbol: symbol, anchorPoint: pin.iconAnchor)
+                let perLevel = PerLevelPoiStyle(iconStyle: iconStyle, level: 0)
+                let poiStyle = PoiStyle(styleID: MapIdentifier.pinStyle(index: index), styles: [perLevel])
+                labelManager.addPoiStyle(poiStyle)
+            }
+        }
+
+        // 등록된 스타일을 참조해 좌표마다 POI를 추가하고 탭 매칭용 pinMap을 구성한다.
+        private func createPois(_ pins: [MapPin], on layer: LabelLayer) {
+            for (index, pin) in pins.enumerated() {
+                let options = PoiOptions(styleID: MapIdentifier.pinStyle(index: index), poiID: pin.id)
                 options.rank = index
                 options.clickable = true
 
