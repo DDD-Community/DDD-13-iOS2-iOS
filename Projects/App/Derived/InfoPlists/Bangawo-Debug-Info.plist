@@ -47,6 +47,7 @@
 		<string>kakaolink</string>
 		<string>naversearchapp</string>
 		<string>naversearchthirdlogin</string>
+		<string>nmap</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>

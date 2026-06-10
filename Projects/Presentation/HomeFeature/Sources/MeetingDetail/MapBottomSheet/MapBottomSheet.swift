@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import ComposableArchitecture
 import DesignSystem
 
 
@@ -253,7 +254,7 @@ mode: store.selectedPlace == nil ? .resizable : .fixedMedium
 if store.selectedPlace == nil {
     NearbyPlaceListSheet(...)
 } else {
-    SelectedPlaceDetailSheet()
+    SelectedPlaceDetailSheet(...)
 }
 }
 */
@@ -265,7 +266,11 @@ if store.selectedPlace == nil {
 
         MapBottomSheet(mode: .fixedMedium) {
             VStack(spacing: Spacing.spacing100) {
-                SelectedPlaceDetailSheet()
+                SelectedPlaceDetailSheet(
+                    store: Store(initialState: .mock) {
+                        SelectedPlaceDetailSheetFeature()
+                    }
+                )
             }
             .padding(.horizontal, Spacing.spacing300)
         }
