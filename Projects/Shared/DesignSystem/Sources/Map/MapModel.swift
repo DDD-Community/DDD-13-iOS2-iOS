@@ -12,6 +12,20 @@ public struct MapCoordinate: Sendable, Equatable {
     }
 }
 
+// MARK: - MapViewport
+
+/// 카메라 정지 시점의 지도 화면 상태.
+/// 중심 좌표를 기준으로 주변 데이터(지하철역·장소 등)를 조회할 때 사용한다.
+public struct MapViewport: Sendable, Equatable {
+    public let center: MapCoordinate
+    public let zoomLevel: Int
+
+    public init(center: MapCoordinate, zoomLevel: Int) {
+        self.center = center
+        self.zoomLevel = zoomLevel
+    }
+}
+
 // MARK: - MapRoute
 
 public struct MapRoute: Sendable, Equatable, Identifiable {

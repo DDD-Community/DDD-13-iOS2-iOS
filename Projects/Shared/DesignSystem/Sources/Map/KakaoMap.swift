@@ -7,6 +7,7 @@ public struct KakaoMap: View {
     private let initialZoomLevel: Int
     private let focusedCoordinate: MapCoordinate?
     private var onPinTapped: ((MapPin) -> Void)?
+    private var onCenterChanged: ((MapViewport) -> Void)?
 
     /// 화면 이탈/재진입 시 엔진을 토글하기 위한 상태값.
     /// onAppear(true) → activateEngine, onDisappear(false) → resetEngine
@@ -32,6 +33,14 @@ public struct KakaoMap: View {
         return copy
     }
 
+    /// 사용자가 드래그로 지도를 이동한 뒤 카메라 움직임이 멈췄을 때
+    /// 변경된 중심 좌표와 현재 줌 레벨을 `MapViewport`로 전달한다.
+    public func onCenterChanged(_ handler: @escaping (MapViewport) -> Void) -> KakaoMap {
+        var copy = self
+        copy.onCenterChanged = handler
+        return copy
+    }
+
     public var body: some View {
         KakaoMapRepresentable(
             isVisible: $isVisible,
@@ -40,7 +49,8 @@ public struct KakaoMap: View {
             initialCenter: initialCenter,
             initialZoomLevel: initialZoomLevel,
             focusedCoordinate: focusedCoordinate,
-            onPinTapped: onPinTapped
+            onPinTapped: onPinTapped,
+            onCenterChanged: onCenterChanged
         )
         .onAppear {
             self.isVisible = true

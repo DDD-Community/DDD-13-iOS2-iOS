@@ -11,6 +11,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
     let initialZoomLevel: Int
     let focusedCoordinate: MapCoordinate?
     var onPinTapped: ((MapPin) -> Void)?
+    var onCenterChanged: ((MapViewport) -> Void)?
 
     func makeUIView(context: Context) -> KMViewContainer {
         let container = KMViewContainer()
@@ -34,6 +35,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
         coordinator.pendingPins = pins
         coordinator.pendingFocus = focusedCoordinate
         coordinator.onPinTapped = onPinTapped
+        coordinator.onCenterChanged = onCenterChanged
 
         if isVisible {
             coordinator.controller?.activateEngine()
@@ -54,7 +56,8 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             initialCenter: initialCenter,
             initialZoomLevel: initialZoomLevel,
             focusedCoordinate: focusedCoordinate,
-            onPinTapped: onPinTapped
+            onPinTapped: onPinTapped,
+            onCenterChanged: onCenterChanged
         )
     }
 
@@ -75,6 +78,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
         var pendingPins: [MapPin]
         var pendingFocus: MapCoordinate?
         var onPinTapped: ((MapPin) -> Void)?
+        var onCenterChanged: ((MapViewport) -> Void)?
 
         private let initialCenter: MapCoordinate
         private let initialZoomLevel: Int
@@ -90,7 +94,8 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             initialCenter: MapCoordinate,
             initialZoomLevel: Int,
             focusedCoordinate: MapCoordinate?,
-            onPinTapped: ((MapPin) -> Void)?
+            onPinTapped: ((MapPin) -> Void)?,
+            onCenterChanged: ((MapViewport) -> Void)?
         ) {
             self.pendingRoutes = routes
             self.pendingPins = pins
@@ -98,6 +103,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             self.initialCenter = initialCenter
             self.initialZoomLevel = initialZoomLevel
             self.onPinTapped = onPinTapped
+            self.onCenterChanged = onCenterChanged
         }
 
         func createController(container: KMViewContainer) {
@@ -160,6 +166,24 @@ struct KakaoMapRepresentable: UIViewRepresentable {
         func poiDidTapped(kakaoMap: KakaoMapsSDK.KakaoMap, layerID: String, poiID: String, position: MapPoint) {
             guard let pin = pinMap[poiID] else { return }
             onPinTapped?(pin)
+        }
+
+        // 사용자가 드래그(패닝/롱탭 후 드래그)로 지도를 이동한 뒤 카메라가 멈추면
+        // 변경된 중심 좌표를 전달한다.
+        // animateCamera로 인한 프로그래매틱 이동(applyFocus)은 by 값으로 제외한다.
+        func cameraDidStopped(kakaoMap: KakaoMapsSDK.KakaoMap, by: MoveBy) {
+            guard by == .pan || by == .longTapAndDrag else { return }
+
+            let viewRect = kakaoMap.viewRect
+            let centerPoint = CGPoint(x: viewRect.midX, y: viewRect.midY)
+            let center = kakaoMap.getPosition(centerPoint).wgsCoord
+
+            onCenterChanged?(
+                MapViewport(
+                    center: MapCoordinate(latitude: center.latitude, longitude: center.longitude),
+                    zoomLevel: kakaoMap.zoomLevel
+                )
+            )
         }
 
         // MARK: - Overlay Management
