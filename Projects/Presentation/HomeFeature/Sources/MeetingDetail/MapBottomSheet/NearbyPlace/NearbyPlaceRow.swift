@@ -153,29 +153,13 @@ private extension NearbyPlaceAddressTooltip {
 // MARK: - Thumbnail
 
 private struct NearbyPlaceThumbnail: View {
-    private let imageURL = URL(string: "https://picsum.photos/seed/bangawo-place/160")
-
     var body: some View {
-        AsyncImage(url: imageURL) { phase in
-            switch phase {
-            case .success(let image):
-                image
-                    .resizable()
-                    .scaledToFill()
-            case .empty, .failure:
-                Circle()
-                    .fill(Colors.gray100)
-                    .overlay(
-                        Image(systemName: "photo")
-                            .foregroundStyle(Colors.gray500)
-                    )
-            @unknown default:
-                Circle()
-                    .fill(Colors.gray100)
-            }
-        }
-        .frame(width: 32, height: 32)
-        .clipShape(Circle())
+        // TODO: API 명세보고 카테고리별 이미지 수정해야 할 듯.
+        Image(assetName: "ic_food_32")
+            .resizable()
+            .scaledToFill()
+            .frame(width: 32, height: 32)
+            .clipShape(Circle())
     }
 }
 
