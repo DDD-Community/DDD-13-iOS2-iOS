@@ -40,7 +40,7 @@ struct SelectedPlaceDetailSheet: View {
         .padding(.horizontal, Spacing.spacing400)
     }
 }
-
+// MARK: - 장소 디테일 헤더 뷰
 private struct SelectedPlaceDetailHeaderView: View {
     let name: String
     let distanceText: String
@@ -78,7 +78,7 @@ private struct SelectedPlaceDetailHeaderView: View {
         }
     }
 }
-
+// MARK: - 장소 영업 시간 뷰
 private struct SelectedPlaceBusinessHoursView: View {
     let closedDayText: String
     let businessHoursText: String
@@ -98,7 +98,7 @@ private struct SelectedPlaceBusinessHoursView: View {
         }
     }
 }
-
+// MARK: - 장소 주소 뷰
 private struct SelectedPlaceAddressView: View {
     let roadAddress: String
     let lotAddress: String
@@ -116,7 +116,7 @@ private struct SelectedPlaceAddressView: View {
         }
     }
 }
-
+// MARK: - 네이버 지도 이동 버튼
 private struct SelectedPlaceNaverMapButton: View {
     let onTap: () -> Void
 

@@ -22,7 +22,7 @@ struct NearbyPlaceRow: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack(alignment: .top, spacing: Spacing.spacing300) {
+            HStack(alignment: .center, spacing: Spacing.spacing300) {
                 NearbyPlaceThumbnail()
 
                 VStack(alignment: .leading, spacing: Spacing.spacing200) {
@@ -53,7 +53,6 @@ struct NearbyPlaceRow: View {
                             .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
-                        .accessibilityLabel("주소 안내 보기")
                     }
                     .zIndex(1)
 
