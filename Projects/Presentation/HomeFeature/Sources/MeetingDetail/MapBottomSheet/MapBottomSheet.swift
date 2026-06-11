@@ -30,8 +30,6 @@ private enum MapBottomSheetMetric {
     static let mediumHeight: CGFloat = 324
     /// 고정 모드에서는 376pt를 노출합니다.
     static let fixedMediumHeight: CGFloat = 376
-    /// 큰 detent는 화면 크기의 91%를 노출합니다.
-    static let largeHeightRatio: CGFloat = 0.91
     /// 드래그 종료 시 다음/이전 detent로 넘어가기 위한 최소 이동 거리입니다.
     static let snapThreshold: CGFloat = 60
 }
@@ -68,7 +66,7 @@ struct MapBottomSheet<Content: View>: View {
 
     var body: some View {
         GeometryReader { proxy in
-            let largeHeight = proxy.size.height * MapBottomSheetMetric.largeHeightRatio
+            let largeHeight = proxy.size.height
             let mediumHeight = min(MapBottomSheetMetric.mediumHeight, largeHeight)
             let fixedMediumHeight = min(MapBottomSheetMetric.fixedMediumHeight, largeHeight)
             let effectiveDetent: Detent = mode == .fixedMedium ? .medium : detent
@@ -77,6 +75,7 @@ struct MapBottomSheet<Content: View>: View {
                 mediumHeight: mode == .fixedMedium ? fixedMediumHeight : mediumHeight,
                 largeHeight: largeHeight
             )
+            let topCornerRadius = effectiveDetent == .large ? 0 : BorderRadius.borderRadius400
 
             // 시트는 항상 largeHeight 크기로 배치한 뒤 offset으로 아래로 밀어냅니다.
             // 따라서 실제로 화면에 보이는 높이는 largeHeight - currentOffset입니다.
@@ -111,8 +110,8 @@ struct MapBottomSheet<Content: View>: View {
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: largeHeight, alignment: .top)
-                .background(MapBottomSheetBackground())
-                .clipShape(MapBottomSheetShape())
+                .background(MapBottomSheetBackground(topCornerRadius: topCornerRadius))
+                .clipShape(MapBottomSheetShape(topCornerRadius: topCornerRadius))
                 .offset(y: currentOffset)
                 .transaction { transaction in
                     // 드래그 중에는 offset이 손가락을 즉시 따라가야 하므로 암시적 애니메이션을 끕니다.
@@ -224,8 +223,10 @@ private struct MapBottomSheetHandleBar: View {
 }
 
 private struct MapBottomSheetBackground: View {
+    let topCornerRadius: CGFloat
+
     var body: some View {
-        MapBottomSheetShape()
+        MapBottomSheetShape(topCornerRadius: topCornerRadius)
             .fill(Colors.gray00)
             .shadow(
                 color: BoxShadow.boxShadow400.color,
@@ -237,10 +238,12 @@ private struct MapBottomSheetBackground: View {
 }
 
 private struct MapBottomSheetShape: Shape {
+    let topCornerRadius: CGFloat
+
     func path(in rect: CGRect) -> Path {
         UnevenRoundedRectangle(
-            topLeadingRadius: BorderRadius.borderRadius400,
-            topTrailingRadius: BorderRadius.borderRadius400
+            topLeadingRadius: topCornerRadius,
+            topTrailingRadius: topCornerRadius
         )
         .path(in: rect)
     }
