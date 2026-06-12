@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "img_face_3d_02.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
