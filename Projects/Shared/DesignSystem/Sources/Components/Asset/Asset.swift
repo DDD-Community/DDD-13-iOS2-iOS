@@ -21,20 +21,21 @@ public struct Asset: View {
     // MARK: - Body
 
     public var body: some View {
-        switch assetType {
-        case .d3(let image):
-            image
-                .resizable()
-                .scaledToFit()
-                .frame(width: size.length, height: size.length)
+        Group {
+            switch assetType {
+            case .d3(let d3):
+                d3.image
+                    .resizable()
+                    .scaledToFit()
 
-        case .image(let image):
-            image
-                .resizable()
-                .scaledToFill()
-                .frame(width: size.length, height: size.length)
-                .clipShape(Circle())
+            case .image(let image):
+                image
+                    .resizable()
+                    .scaledToFill()
+            }
         }
+        .frame(width: size.length, height: size.length)
+            .clipShape(Circle())
     }
 }
 
@@ -44,9 +45,9 @@ public struct Asset: View {
             BangawoText("3D Asset (fit)", textStyle: .titleLarge)
 
             HStack(spacing: 16) {
-                Asset(assetType: .d3(Image(systemName: "star.fill")), size: .s32)
-                Asset(assetType: .d3(Image(systemName: "star.fill")), size: .s64)
-                Asset(assetType: .d3(Image(systemName: "star.fill")), size: .s104)
+                Asset(assetType: .d3(.face01), size: .s32)
+                Asset(assetType: .d3(.face01), size: .s64)
+                Asset(assetType: .d3(.face01), size: .s104)
             }
 
             Divider()

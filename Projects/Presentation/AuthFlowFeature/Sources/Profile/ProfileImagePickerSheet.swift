@@ -40,11 +40,11 @@ private struct ProfileTileGrid: View {
     var body: some View {
         let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 5)
         LazyVGrid(columns: columns, spacing: Spacing.spacing400) {
-            ForEach(0..<ProfileImagePickerFeature.presetCount, id: \.self) { index in
+            ForEach(Array(Asset.D3.profileFaces.enumerated()), id: \.offset) { index, face in
                 Button {
                     onPresetTapped(index)
                 } label: {
-                    Asset(assetType: .d3(Image.Asset.imgAvatar3d), size: .s48)
+                    Asset(assetType: .d3(face), size: .s48)
                         .background(Circle().fill(Colors.grayAlpha200))
                         .overlay {
                             if selectedIndex == index {
@@ -81,17 +81,20 @@ private struct ProfileImageDisplay: View {
         Group {
             switch image {
             case .none:
-                Asset(assetType: .d3(Image.Asset.imgAvatarPlaceholder), size: .s104)
+                Asset(assetType: .d3(.avatarPlaceholder), size: .s104)
 
             case let .data(data):
                 if let uiImage = UIImage(data: data) {
                     Asset(assetType: .image(Image(uiImage: uiImage)), size: .s104)
                 } else {
-                    Asset(assetType: .d3(Image.Asset.imgAvatarPlaceholder), size: .s104)
+                    Asset(assetType: .d3(.avatarPlaceholder), size: .s104)
                 }
 
-            case .preset:
-                Asset(assetType: .d3(Image.Asset.imgAvatar3d), size: .s104)
+            case let .preset(index):
+                let face = Asset.D3.profileFaces.indices.contains(index)
+                    ? Asset.D3.profileFaces[index]
+                    : .avatarPlaceholder
+                Asset(assetType: .d3(face), size: .s104)
             }
         }
         .background(Circle().fill(Colors.grayAlpha200))

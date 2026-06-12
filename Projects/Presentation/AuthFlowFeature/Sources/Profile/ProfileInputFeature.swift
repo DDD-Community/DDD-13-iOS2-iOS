@@ -66,7 +66,7 @@ public struct ProfileInputFeature {
         }
 
         public var nameHelperText: String? {
-            guard !name.isEmpty else { return "이름 그대로 작성해주세요" }
+            guard !name.isEmpty else { return nil }
 
             if let nicknameValidationMessage {
                 return nicknameValidationMessage

@@ -126,7 +126,6 @@ public extension Image {
     public static let icVerticalMenu16: Image = Image("ic_vertical_menu_16", bundle: Bundle.module)
     public static let icVerticalMenu24: Image = Image("ic_vertical_menu_24", bundle: Bundle.module)
     public static let imgAgreement3d: Image = Image("img_agreement_3d", bundle: Bundle.module)
-    public static let imgAvatar3d: Image = Image("img_avatar_3d", bundle: Bundle.module)
     public static let imgAvatarPlaceholder: Image = Image("img_avatar_placeholder", bundle: Bundle.module)
     public static let imgDeparture3d: Image = Image("img_departure_3d", bundle: Bundle.module)
     public static let imgFace3d01: Image = Image("img_face_3d_01", bundle: Bundle.module)
