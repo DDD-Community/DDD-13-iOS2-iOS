@@ -12,6 +12,7 @@ public struct RegisterMember: Sendable, Equatable {
     public let departurePlaceName: String
     public let latitude: Double
     public let longitude: Double
+    
 
     public init(nickname: String, agreedTermsIds: [Int], departureLabel: String, departureAddress: String, departureRoadAddress: String, departurePlaceName: String, latitude: Double, longitude: Double) {
         self.nickname = nickname

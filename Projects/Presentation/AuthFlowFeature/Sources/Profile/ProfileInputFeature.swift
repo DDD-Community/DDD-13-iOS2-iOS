@@ -111,7 +111,7 @@ public struct ProfileInputFeature {
         case delegate(Delegate)
 
         public enum Delegate: Equatable {
-            case proceedToDepartureSearch(name: String)
+            case proceedToDepartureSearch(name: String, profileImage: ProfileImage) // profileImage추가 전달
             case navigateBack
         }
     }
@@ -161,7 +161,7 @@ public struct ProfileInputFeature {
                     return .none
                 }
                 state.nicknameValidationMessage = nil
-                return .send(.delegate(.proceedToDepartureSearch(name: name)))
+                return .send(.delegate(.proceedToDepartureSearch(name: name, profileImage: state.profileImage)))
 
             case let .nicknameValidateResponse(name, .failure):
                 state.isNicknameValidating = false

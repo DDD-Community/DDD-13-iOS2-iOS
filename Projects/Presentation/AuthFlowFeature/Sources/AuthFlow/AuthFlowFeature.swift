@@ -15,6 +15,7 @@ import Utill
 @Reducer
 public struct AuthFlowFeature {
     @Dependency(\.registerMemberClient) private var registerMemberClient
+    @Dependency(\.profileImageUploadClient) private var profileImageUploadClient
 
     @Reducer(state: .equatable)
     public enum Path {
@@ -22,7 +23,7 @@ public struct AuthFlowFeature {
         case profile(ProfileInputFeature)
         case departure(DepartureSearchFeature)
     }
-    
+
     public enum EntryPoint: Equatable { // 항상 로그인 화면부터 시작하지 않고, 상황에 따라 약관 화면부터 시작할 수 있게
         case login
         case terms
@@ -30,7 +31,6 @@ public struct AuthFlowFeature {
 
     @ObservableState
     public struct State: Equatable {
-      
         public var login: LoginFeature.State
         public var path: StackState<Path.State>
         @Presents public var stationSearch: StationSearchSheetFeature.State?
@@ -39,6 +39,7 @@ public struct AuthFlowFeature {
         public var agreedTermIDs: [Int]
         public var isRegistering: Bool
         public var registerErrorMessage: String?
+        public var profileImage: ProfileImage
 
         public init(
             entryPoint: EntryPoint = .login,
@@ -48,7 +49,8 @@ public struct AuthFlowFeature {
             nickname: String = "",
             agreedTermIDs: [Int] = [],
             isRegistering: Bool = false,
-            registerErrorMessage: String? = nil
+            registerErrorMessage: String? = nil,
+            profileImage: ProfileImage = .none
         ) {
             self.login = login
             self.path = path
@@ -58,7 +60,8 @@ public struct AuthFlowFeature {
             self.agreedTermIDs = agreedTermIDs
             self.isRegistering = isRegistering
             self.registerErrorMessage = registerErrorMessage
-            
+            self.profileImage = profileImage
+
             if entryPoint == .terms {
                 self.path.append(.terms(TermsAgreementFeature.State())) // .terms일 때 path에 약관 화면 쌓는다.
             }
@@ -102,8 +105,9 @@ public struct AuthFlowFeature {
                 state.path.append(.profile(ProfileInputFeature.State(name: state.suggestedProfileName ?? "")))
                 return .none
 
-            case let .path(.element(id: _, action: .profile(.delegate(.proceedToDepartureSearch(name))))):
+            case let .path(.element(id: _, action: .profile(.delegate(.proceedToDepartureSearch(name, profileImage))))):
                 state.nickname = name
+                state.profileImage = profileImage // 프로필 이미지 추가 저장
                 state.path.append(.departure(DepartureSearchFeature.State()))
                 return .none
 
@@ -117,8 +121,10 @@ public struct AuthFlowFeature {
                     state.registerErrorMessage = "약관 동의 정보가 없습니다."
                     return .none
                 }
-                
+
                 let registerMemberClient = self.registerMemberClient
+                let profileImage = state.profileImage
+                let profileImageUploadClient = self.profileImageUploadClient
 
                 let member = RegisterMember(
                     nickname: state.nickname,
@@ -136,6 +142,10 @@ public struct AuthFlowFeature {
 
                 return .run { send in
                     do {
+                        if let uploadableImage = try ProfileImageUploadMapper.makeUploadableImage(from: profileImage) { // 프로필 이미지를 바이너리 데이터로 변환
+                            try await profileImageUploadClient.upload(uploadableImage) // signedurl get
+                        }
+
                         let result = try await registerMemberClient.register(
                             member
                         )
