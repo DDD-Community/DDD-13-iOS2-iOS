@@ -134,6 +134,7 @@ public struct ProfileInputView: View {
         .onTapGesture {
             if isShowingMenu { isShowingMenu = false }
         }
+        .dismissKeyboardOnTap()
     }
 }
 
