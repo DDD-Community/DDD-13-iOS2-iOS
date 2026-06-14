@@ -10,7 +10,8 @@ let project = Project.makeModule(
   product: .staticFramework,
   settings:  .settings(),
   dependencies: [
-    .SPM.kakaoMapsSDK
+    .SPM.kakaoMapsSDK,
+    .Shared(implements: .Utill)
   ],
   sources: ["Sources/**"],
   resources: ["Resources/**", "FontAsset/**"],

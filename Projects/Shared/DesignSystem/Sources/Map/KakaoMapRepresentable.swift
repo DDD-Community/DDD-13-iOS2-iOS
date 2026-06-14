@@ -1,6 +1,8 @@
 @preconcurrency import KakaoMapsSDK
 import SwiftUI
 
+import Utill
+
 struct KakaoMapRepresentable: UIViewRepresentable {
     /// 화면 이탈/재진입 시 엔진을 토글하기 위한 상태값.
     /// onAppear(true) → activateEngine, onDisappear(false) → resetEngine
@@ -140,8 +142,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
 
         func addViewSucceeded(_ viewName: String, viewInfoName: String) {
             guard let mapView = controller?.getView(viewName) as? KakaoMapsSDK.KakaoMap else {
-                // TODO: Logger로 대체
-                print("[KakaoMap] getView failed - could not cast to KakaoMap")
+                Log.error("getView failed - could not cast to KakaoMap")
                 return
             }
             mapView.eventDelegate = self
@@ -154,8 +155,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
         }
 
         func addViewFailed(_ viewName: String, viewInfoName: String) {
-            // TODO: Logger로 대체
-            print("[KakaoMap] addView failed - viewName: \(viewName), viewInfoName: \(viewInfoName)")
+            Log.error("addView failed - viewName: \(viewName), viewInfoName: \(viewInfoName)")
             isMapReady = false
         }
 
@@ -169,8 +169,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
         }
 
         func authenticationFailed(_ errorCode: Int, desc: String) {
-            // TODO: Logger로 대체
-            print("[KakaoMap] Authentication failed - code: \(errorCode), desc: \(desc)")
+            Log.error("Authentication failed - code: \(errorCode), desc: \(desc)")
         }
 
         // MARK: - POI Tap
