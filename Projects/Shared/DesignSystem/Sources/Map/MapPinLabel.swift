@@ -58,6 +58,7 @@ public extension MapPinLabel {
         return MapPin(
             id: id,
             coordinate: coordinate,
+            title: title,
             iconImage: image,
             iconAnchor: CGPoint(x: 0.5, y: anchorY)
         )

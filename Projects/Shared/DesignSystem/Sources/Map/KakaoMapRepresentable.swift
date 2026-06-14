@@ -38,6 +38,11 @@ struct KakaoMapRepresentable: UIViewRepresentable {
         coordinator.onCenterChanged = onCenterChanged
 
         if isVisible {
+            // 컨테이너 크기가 확정되기 전(bounds .zero)에 activateEngine을 호출하면
+            // 카카오 엔진의 입력(터치) 영역이 0으로 초기화되어, 이후 컨테이너가 커져도
+            // 탭 이벤트가 도달하지 않는다. 유효 크기가 잡힌 뒤에 엔진을 활성화한다.
+            guard uiView.bounds.size != .zero else { return }
+
             coordinator.controller?.activateEngine()
 
             if coordinator.isMapReady {
@@ -88,6 +93,10 @@ struct KakaoMapRepresentable: UIViewRepresentable {
         private var currentFocus: MapCoordinate?
         private var pinMap: [String: MapPin] = [:]
 
+        // LodPoi 탭 핸들러 등록 시 반환되는 DisposableEventHandler.
+        // 보관하지 않으면 dispose 되어 탭 이벤트가 끊길 수 있어 방어적으로 retain 한다.
+        private var poiTapHandlers: [any DisposableEventHandler] = []
+
         init(
             routes: [MapRoute],
             pins: [MapPin],
@@ -136,6 +145,9 @@ struct KakaoMapRepresentable: UIViewRepresentable {
                 return
             }
             mapView.eventDelegate = self
+            // 전역 POI 클릭 게이트를 활성화한다. 비활성 상태면 개별 POI 의
+            // clickable 설정과 무관하게 탭 이벤트가 전달되지 않는다.
+            mapView.poiClickable = true
             isMapReady = true
             applyOverlays()
             applyFocus()
@@ -161,12 +173,17 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             print("[KakaoMap] Authentication failed - code: \(errorCode), desc: \(desc)")
         }
 
-        // MARK: - KakaoMapEventDelegate
+        // MARK: - POI Tap
 
-        func poiDidTapped(kakaoMap: KakaoMapsSDK.KakaoMap, layerID: String, poiID: String, position: MapPoint) {
-            guard let pin = pinMap[poiID] else { return }
+        // LOD POI 탭은 개별 POI 의 addPoiTappedEventHandler 로만 전달된다.
+        // poiItem.itemID 가 생성 시 부여한 poiID(= pin.id)이므로 pinMap 으로 매칭한다.
+        private func handlePoiTapped(_ param: PoiInteractionEventParam) {
+            guard let pin = pinMap[param.poiItem.itemID] else { return }
+
             onPinTapped?(pin)
         }
+
+        // MARK: - KakaoMapEventDelegate
 
         // 사용자가 드래그(패닝/롱탭 후 드래그)로 지도를 이동한 뒤 카메라가 멈추면
         // 변경된 중심 좌표를 전달한다.
@@ -272,29 +289,52 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             }
         }
 
-        // 핀 표현은 SwiftUI 뷰를 렌더한 단일 이미지(아이콘+라벨)로 통일한다.
-        // 네이티브 PoiText/TextStyle은 사용하지 않고, 스타일 등록(createPoiStyle)과
-        // POI 추가(createPois)를 분리한다. (juhee-dev velog createPoiStyle 패턴 참고)
+        // 핀을 LOD 라벨 레이어에 그린다. 화면상 가까운 핀이 겹칠 경우
+        // LOD 반경(radius)·경쟁(competition) 규칙에 따라 우선순위가 낮은 핀은 숨겨진다.
+        // 스타일 등록(createPoiStyles)과 POI 추가(createPois)를 분리한다.
         private func applyPins(_ pins: [MapPin], on mapView: KakaoMapsSDK.KakaoMap) {
             let labelManager = mapView.getLabelManager()
+            labelManager.removeLodLabelLayer(layerID: MapIdentifier.pinLayer)
             labelManager.removeLabelLayer(layerID: MapIdentifier.pinLayer)
+            poiTapHandlers.forEach { $0.dispose() }
+            poiTapHandlers.removeAll()
             pinMap.removeAll()
 
             guard !pins.isEmpty else { return }
 
             createPoiStyles(pins, on: labelManager)
 
-            let layerOptions = LabelLayerOptions(
+            // competitionType .same + orderType .rank: 같은 레이어 핀끼리 rank로 경쟁하고,
+            // radius 안에서 겹치면 우선순위(rank)가 낮은 핀이 표출되지 않는다.
+            let layerOptions = LodLabelLayerOptions(
                 layerID: MapIdentifier.pinLayer,
-                competitionType: .none,
+                competitionType: .same,
                 competitionUnit: .poi,
                 orderType: .rank,
-                zOrder: 10001
+                zOrder: 10001,
+                radius: Constant.lodRadius
             )
-            guard let layer = labelManager.addLabelLayer(option: layerOptions) else { return }
+            guard let layer = labelManager.addLodLabelLayer(option: layerOptions) else { return }
             layer.setClickable(true)
 
             createPois(pins, on: layer)
+        }
+
+        // 핀별 PoiOptions 와 위치 배열을 함께 구성한다. 배치 추가(addLodPois)는
+        // 다중 옵션·다중 위치 변형을 사용하므로 옵션 배열과 위치 배열을 index 쌍으로 맞춘다.
+        // 핀마다 styleID/rank/poiID 가 달라 단일 옵션 변형은 사용할 수 없다.
+        private func makePoiOptions(_ pins: [MapPin]) -> ([PoiOptions], [MapPoint]) {
+            var optionsList: [PoiOptions] = []
+            var positions: [MapPoint] = []
+            for (index, pin) in pins.enumerated() {
+                let options = PoiOptions(styleID: MapIdentifier.pinStyle(index: index), poiID: pin.id)
+                options.rank = index
+                options.clickable = true
+                optionsList.append(options)
+                positions.append(MapPoint(longitude: pin.coordinate.longitude, latitude: pin.coordinate.latitude))
+                pinMap[pin.id] = pin
+            }
+            return (optionsList, positions)
         }
 
         // 핀마다 SwiftUI 렌더 이미지를 심볼로 갖는 PoiStyle을 등록한다.
@@ -310,18 +350,25 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             }
         }
 
-        // 등록된 스타일을 참조해 좌표마다 POI를 추가하고 탭 매칭용 pinMap을 구성한다.
-        private func createPois(_ pins: [MapPin], on layer: LabelLayer) {
-            for (index, pin) in pins.enumerated() {
-                let options = PoiOptions(styleID: MapIdentifier.pinStyle(index: index), poiID: pin.id)
-                options.rank = index
-                options.clickable = true
+        // 등록된 스타일을 참조해 좌표마다 LodPoi를 배치 추가하고 탭 매칭용 pinMap을 구성한다.
+        // rank는 입력 순서대로 부여한다(겹침 시 앞선 핀이 우선 표출).
+        //
+        // LodPoi 는 LOD 사전처리로 인해 실제 객체가 addLodPois 의 콜백 시점에 확정된다.
+        // 동기 반환 핸들이 아닌 콜백으로 전달된 LodPoi 에 탭 핸들러를 등록해야
+        // 클릭 디스패처에 정상 반영되므로, 배치 콜백 안에서 입력 순서(index)대로 매칭한다.
+        private func createPois(_ pins: [MapPin], on layer: LodLabelLayer) {
+            let (optionsList, positions) = makePoiOptions(pins)
 
-                let position = MapPoint(longitude: pin.coordinate.longitude, latitude: pin.coordinate.latitude)
-                if let poi = layer.addPoi(option: options, at: position, callback: nil) {
-                    poi.show()
+            _ = layer.addLodPois(options: optionsList, at: positions) { [weak self] lodPois in
+                guard let self, let lodPois, lodPois.count == pins.count else { return }
+
+                for (index, lodPoi) in lodPois.enumerated() {
+                    let pin = pins[index]
+                    self.pinMap[lodPoi.itemID] = pin
+                    let handler = lodPoi.addPoiTappedEventHandler(target: self, handler: Coordinator.handlePoiTapped)
+                    self.poiTapHandlers.append(handler)
+                    lodPoi.show()
                 }
-                pinMap[pin.id] = pin
             }
         }
 
@@ -361,4 +408,10 @@ private enum MapIdentifier {
     static func pinStyle(index: Int) -> String {
         "bangawo_pin_style_\(index)"
     }
+}
+
+private enum Constant {
+    /// LOD 겹침 판정 반경(화면 point). 이 반경 안에서 겹치는 핀은
+    /// 우선순위(rank)가 낮은 쪽이 표출되지 않는다. 값이 클수록 더 적극적으로 숨긴다.
+    static let lodRadius: Float = 40
 }
