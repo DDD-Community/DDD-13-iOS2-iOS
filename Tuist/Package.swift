@@ -14,7 +14,7 @@ let packageSettings = PackageSettings(
     "Clocks": .staticFramework,
     "ConcurrencyExtras": .staticFramework,
     "Sharing": .staticFramework,
-    "KakaoMapsSDK-SPM": .staticFramework,
+    "KakaoMapsSDK-SPM": .staticLibrary,
     "NidThirdPartyLogin": .staticFramework
   ],
   targetSettings: [
