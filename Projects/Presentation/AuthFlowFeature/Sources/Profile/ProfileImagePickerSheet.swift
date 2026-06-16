@@ -44,29 +44,16 @@ private struct ProfileTileGrid: View {
                 Button {
                     onPresetTapped(index)
                 } label: {
-                    Asset(assetType: .d3(face), size: .s48)
-                        .background(Circle().fill(Colors.gray300))
-                        .overlay {
-                            if selectedIndex == index {
-                                ProfileTileSelectedOverlay()
-                            }
-                        }
+                    Asset(
+                        assetType: .d3(face),
+                        size: .s48,
+                        isSelected: selectedIndex == index
+                    )
+                    .background(Circle().fill(Colors.gray300))
                 }
                 .buttonStyle(.plain)
             }
         }
-    }
-}
-
-private struct ProfileTileSelectedOverlay: View {
-    var body: some View {
-        Circle()
-            .fill(Colors.grayAlpha500)
-            .overlay {
-                // TODO: 이미지 에셋으로 대체 예정
-                Image(systemName: "checkmark")
-                    .foregroundStyle(Colors.gray00)
-            }
     }
 }
 

@@ -10,12 +10,18 @@ public struct Asset: View {
 
     private let assetType: AssetType
     private let size: Size
+    private let isSelected: Bool
 
     // MARK: - Init
 
-    public init(assetType: AssetType, size: Size) {
+    public init(
+        assetType: AssetType,
+        size: Size,
+        isSelected: Bool = false
+    ) {
         self.assetType = assetType
         self.size = size
+        self.isSelected = isSelected
     }
 
     // MARK: - Body
@@ -35,7 +41,26 @@ public struct Asset: View {
             }
         }
         .frame(width: size.length, height: size.length)
-            .clipShape(Circle())
+        .overlay {
+            if isSelected {
+                SelectedOverlay(checkBoxLength: size.selectionCheckBoxLength)
+            }
+        }
+    }
+}
+
+private struct SelectedOverlay: View {
+    let checkBoxLength: CGFloat
+
+    var body: some View {
+        Circle()
+            .fill(Colors.grayAlpha500)
+            .overlay {
+                Image.Asset.icCheckboxGhostEnabledMd
+                    .resizable()
+                    .frame(width: checkBoxLength, height: checkBoxLength)
+                    .foregroundStyle(Colors.gray00)
+            }
     }
 }
 

@@ -86,4 +86,17 @@ extension Asset.Size {
         case .s280: return 280
         }
     }
+
+    var selectionCheckBoxLength: CGFloat {
+        switch self {
+        case .s32: return 12
+        case .s40: return 16
+        case .s48: return 18
+        case .s64: return 24
+        case .s82: return 30
+        case .s104: return 40
+        case .s124: return 48
+        case .s280: return 100
+        }
+    }
 }
