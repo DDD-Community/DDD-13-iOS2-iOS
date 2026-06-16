@@ -109,3 +109,33 @@ private enum Metric {
     static let cornerRadius: CGFloat = 0.71
     static let borderWidth: CGFloat = 1
 }
+
+// MARK: - Preview
+
+#Preview("RouteDotMarker") {
+    // dot 이 10×9 로 매우 작아 실제 크기로는 확인이 어렵다.
+    // 색 후보군별로 실제 크기 · 확대(×8) · 점선 반복 배치를 함께 보여준다.
+    VStack(alignment: .leading, spacing: 20) {
+        ForEach(RouteDotColor.allCases, id: \.self) { color in
+            HStack(spacing: 24) {
+                RouteDotMarker(color: color)
+
+                RouteDotMarker(color: color)
+                    .scaleEffect(8)
+                    .frame(width: 80, height: 72)
+
+                // 점선 경로처럼 진행 방향(▶)을 향해 회전 반복 배치한 모습
+                HStack(spacing: 4) {
+                    ForEach(0 ..< 6, id: \.self) { _ in
+                        RouteDotMarker(color: color)
+                            .scaleEffect(2)
+                            .frame(width: 20, height: 18)
+                            .rotationEffect(.degrees(90))
+                    }
+                }
+            }
+        }
+    }
+    .padding(40)
+    .background(Colors.gray00)
+}
