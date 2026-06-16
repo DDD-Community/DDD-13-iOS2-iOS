@@ -17,10 +17,12 @@ struct MyPlaceTab: View {
 
     // TODO: 디버깅용 임시 핀. 실제 장소 데이터 연동 시 제거한다.
     @State private var pins: [MapPin] = []
+    /// 바텀시트가 화면 하단을 덮는 높이. detent에 따라 핀 포커싱 중심을 위로 보정하는 데 쓴다.
+    @State private var sheetCoveredHeight: CGFloat = 0
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            KakaoMap(pins: pins, initialCenter: Constant.defaultCenter)
+            KakaoMap(pins: pins, initialCenter: Constant.defaultCenter, focusBottomInset: sheetCoveredHeight)
                 .onPinTapped { pin in
                     Log.debug("핀 선택: id=\(pin.id), title=\(pin.title), coordinate=(\(pin.coordinate.latitude), \(pin.coordinate.longitude))")
                 }
@@ -34,6 +36,7 @@ struct MyPlaceTab: View {
                     store: store.scope(state: \.nearbyPlaceList, action: \.nearbyPlaceList)
                 )
             }
+            .onVisibleHeightChanged { sheetCoveredHeight = $0 }
         }
         .task {
             buildSamplePins()

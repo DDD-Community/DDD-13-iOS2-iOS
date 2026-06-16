@@ -6,6 +6,7 @@ public struct KakaoMap: View {
     private let initialCenter: MapCoordinate
     private let initialZoomLevel: Int
     private let focusedCoordinate: MapCoordinate?
+    private let focusBottomInset: CGFloat
     private var onPinTapped: ((MapPin) -> Void)?
     private var onCenterChanged: ((MapViewport) -> Void)?
 
@@ -18,13 +19,15 @@ public struct KakaoMap: View {
         pins: [MapPin] = [],
         initialCenter: MapCoordinate,
         initialZoomLevel: Int = 15,
-        focusedCoordinate: MapCoordinate? = nil
+        focusedCoordinate: MapCoordinate? = nil,
+        focusBottomInset: CGFloat = 0
     ) {
         self.routes = routes
         self.pins = pins
         self.initialCenter = initialCenter
         self.initialZoomLevel = initialZoomLevel
         self.focusedCoordinate = focusedCoordinate
+        self.focusBottomInset = focusBottomInset
     }
 
     public func onPinTapped(_ handler: @escaping (MapPin) -> Void) -> KakaoMap {
@@ -49,6 +52,7 @@ public struct KakaoMap: View {
             initialCenter: initialCenter,
             initialZoomLevel: initialZoomLevel,
             focusedCoordinate: focusedCoordinate,
+            focusBottomInset: focusBottomInset,
             onPinTapped: onPinTapped,
             onCenterChanged: onCenterChanged
         )

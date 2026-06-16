@@ -12,6 +12,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
     let initialCenter: MapCoordinate
     let initialZoomLevel: Int
     let focusedCoordinate: MapCoordinate?
+    let focusBottomInset: CGFloat
     var onPinTapped: ((MapPin) -> Void)?
     var onCenterChanged: ((MapViewport) -> Void)?
 
@@ -36,6 +37,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
         coordinator.pendingRoutes = routes
         coordinator.pendingPins = pins
         coordinator.pendingFocus = focusedCoordinate
+        coordinator.pendingFocusBottomInset = focusBottomInset
         coordinator.onPinTapped = onPinTapped
         coordinator.onCenterChanged = onCenterChanged
 
@@ -63,6 +65,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             initialCenter: initialCenter,
             initialZoomLevel: initialZoomLevel,
             focusedCoordinate: focusedCoordinate,
+            focusBottomInset: focusBottomInset,
             onPinTapped: onPinTapped,
             onCenterChanged: onCenterChanged
         )
@@ -84,6 +87,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
         var pendingRoutes: [MapRoute]
         var pendingPins: [MapPin]
         var pendingFocus: MapCoordinate?
+        var pendingFocusBottomInset: CGFloat
         var onPinTapped: ((MapPin) -> Void)?
         var onCenterChanged: ((MapViewport) -> Void)?
 
@@ -105,12 +109,14 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             initialCenter: MapCoordinate,
             initialZoomLevel: Int,
             focusedCoordinate: MapCoordinate?,
+            focusBottomInset: CGFloat,
             onPinTapped: ((MapPin) -> Void)?,
             onCenterChanged: ((MapViewport) -> Void)?
         ) {
             self.pendingRoutes = routes
             self.pendingPins = pins
             self.pendingFocus = focusedCoordinate
+            self.pendingFocusBottomInset = focusBottomInset
             self.initialCenter = initialCenter
             self.initialZoomLevel = initialZoomLevel
             self.onPinTapped = onPinTapped
@@ -236,7 +242,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
                 let mapView = controller?.getView(MapIdentifier.viewName) as? KakaoMapsSDK.KakaoMap
             else { return }
 
-            moveCamera(to: focus, on: mapView)
+            moveCamera(to: focusTarget(for: focus, on: mapView), on: mapView)
             currentFocus = focus
         }
 
@@ -248,8 +254,25 @@ struct KakaoMapRepresentable: UIViewRepresentable {
                 let mapView = controller?.getView(MapIdentifier.viewName) as? KakaoMapsSDK.KakaoMap
             else { return }
 
-            moveCamera(to: coordinate, on: mapView)
+            moveCamera(to: focusTarget(for: coordinate, on: mapView), on: mapView)
             currentFocus = coordinate
+        }
+
+        // 바텀시트가 하단을 덮는 만큼(pendingFocusBottomInset) 핀이 가려지지 않도록,
+        // 가려지지 않은 지도 영역의 중앙에 핀이 오게 카메라 target 을 화면상 위로 올린다.
+        // 줌 레벨이 바뀌지 않으므로 현재 투영의 픽셀→좌표 델타를 그대로 적용한다.
+        // 화면 중앙 아래 dY 지점의 좌표만큼 카메라 중심을 옮기면 핀은 화면상 dY 만큼 위로 올라간다.
+        private func focusTarget(for coordinate: MapCoordinate, on mapView: KakaoMapsSDK.KakaoMap) -> MapCoordinate {
+            guard pendingFocusBottomInset > 0 else { return coordinate }
+
+            let rect = mapView.viewRect
+            let dY = pendingFocusBottomInset / 2
+            let center = mapView.getPosition(CGPoint(x: rect.midX, y: rect.midY)).wgsCoord
+            let below = mapView.getPosition(CGPoint(x: rect.midX, y: rect.midY + dY)).wgsCoord
+            return MapCoordinate(
+                latitude: coordinate.latitude + (below.latitude - center.latitude),
+                longitude: coordinate.longitude + (below.longitude - center.longitude)
+            )
         }
 
         // 현재 줌 레벨을 유지하며 target 좌표로 카메라를 애니메이션 이동한다.
