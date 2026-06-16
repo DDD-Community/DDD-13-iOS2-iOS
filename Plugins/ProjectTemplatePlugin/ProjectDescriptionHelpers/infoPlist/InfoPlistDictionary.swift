@@ -124,7 +124,8 @@ extension InfoPlistDictionary {
         .string("kakaokompassauth"),
         .string("kakaolink"),
         .string("naversearchapp"),
-        .string("naversearchthirdlogin")
+        .string("naversearchthirdlogin"),
+        .string("nmap")
       ])
     ]
     return self.merging(dict) { (_, new) in new }
