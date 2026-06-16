@@ -42,10 +42,15 @@ public final class AuthRepositoryImpl: AuthRepositoryProtocol {
     public func registerMember(
         _ member: RegisterMember
     ) async throws -> RegisterMemberResult {
+        
         let dto = RegisterMemberRequestDTO(member: member)
+        
+        if let data = try? JSONEncoder().encode(dto), let body = String(data: data, encoding: .utf8) {
+            Log.debug("회원가입 요청 body: \(body)")
+        }
 
         let response: RegisterMemberResponseDTO = try await NetworkManager.shared.request(AuthEndPoint.registerMember(dto))
-
+      
         return response.toEntity()
     }
     

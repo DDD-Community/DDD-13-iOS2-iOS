@@ -34,6 +34,7 @@ public struct RegisterMemberRequestDTO: Encodable, Sendable {
     public let departureAddress: String
     public let departureRoadAddress: String
     public let departurePlaceName: String
+    public let departureIsDefault: Bool
     public let latitude: Double
     public let longitude: Double
     
@@ -44,6 +45,7 @@ public struct RegisterMemberRequestDTO: Encodable, Sendable {
         departureAddress = member.departureAddress
         departureRoadAddress = member.departureRoadAddress
         departurePlaceName = member.departurePlaceName
+        departureIsDefault = true
         latitude = member.latitude
         longitude = member.longitude
     }
