@@ -106,7 +106,7 @@ private struct RoundedTriangle: Shape {
 private enum Metric {
     static let width: CGFloat = 10
     static let height: CGFloat = 9
-    static let cornerRadius: CGFloat = 0.71
+    static let cornerRadius: CGFloat = 1.05
     static let borderWidth: CGFloat = 1
 }
 
