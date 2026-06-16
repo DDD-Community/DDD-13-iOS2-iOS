@@ -71,7 +71,8 @@ public extension MemberRoutePinLabel {
             id: id,
             coordinate: coordinate,
             iconImage: image,
-            iconAnchor: CGPoint(x: 0.5, y: anchorY)
+            iconAnchor: CGPoint(x: 0.5, y: anchorY),
+            focusesOnTap: false
         )
     }
 }

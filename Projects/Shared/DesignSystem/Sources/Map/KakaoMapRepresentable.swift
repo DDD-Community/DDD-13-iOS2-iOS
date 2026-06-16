@@ -179,6 +179,11 @@ struct KakaoMapRepresentable: UIViewRepresentable {
         private func handlePoiTapped(_ param: PoiInteractionEventParam) {
             guard let pin = pinMap[param.poiItem.itemID] else { return }
 
+            // 멤버 핀(focusesOnTap == false)을 제외한 핀은 탭 시 해당 좌표로 카메라를 포커싱한다.
+            if pin.focusesOnTap {
+                focusCamera(on: pin.coordinate)
+            }
+
             onPinTapped?(pin)
         }
 
@@ -231,13 +236,30 @@ struct KakaoMapRepresentable: UIViewRepresentable {
                 let mapView = controller?.getView(MapIdentifier.viewName) as? KakaoMapsSDK.KakaoMap
             else { return }
 
-            let target = MapPoint(longitude: focus.longitude, latitude: focus.latitude)
+            moveCamera(to: focus, on: mapView)
+            currentFocus = focus
+        }
+
+        // 핀 탭 시 해당 좌표로 카메라를 이동한다. 이후 외부 focus 갱신이 같은 좌표면
+        // 중복 애니메이션이 일어나지 않도록 currentFocus 도 함께 갱신한다.
+        private func focusCamera(on coordinate: MapCoordinate) {
+            guard
+                isMapReady,
+                let mapView = controller?.getView(MapIdentifier.viewName) as? KakaoMapsSDK.KakaoMap
+            else { return }
+
+            moveCamera(to: coordinate, on: mapView)
+            currentFocus = coordinate
+        }
+
+        // 현재 줌 레벨을 유지하며 target 좌표로 카메라를 애니메이션 이동한다.
+        private func moveCamera(to coordinate: MapCoordinate, on mapView: KakaoMapsSDK.KakaoMap) {
+            let target = MapPoint(longitude: coordinate.longitude, latitude: coordinate.latitude)
             let cameraUpdate = CameraUpdate.make(target: target, mapView: mapView)
             mapView.animateCamera(
                 cameraUpdate: cameraUpdate,
                 options: CameraAnimationOptions(autoElevation: false, consecutive: false, durationInMillis: 300)
             )
-            currentFocus = focus
         }
 
         private func applySolidRoutes(_ routes: [MapRoute], on mapView: KakaoMapsSDK.KakaoMap) {

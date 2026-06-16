@@ -37,12 +37,11 @@ struct KakaoMapDemoView: View {
                 focusedCoordinate: focusedCoordinate
             )
             .onPinTapped { pin in
-                // 샘플 장소(MapPinLabel) 핀을 탭하면 해당 핀을 중심으로 포커스를 이동한다.
-                // 멤버 핀(MemberRoutePinLabel) 탭은 포커스 이동 대상이 아니다.
+                // 핀 탭 시 포커싱은 KakaoMap 내부에서 처리한다(멤버 핀 제외).
+                // 데모는 탭된 샘플 장소를 리스트에서 강조 표시하는 용도로만 사용한다.
                 guard let place = samplePlaces.first(where: { $0.id == pin.id }) else { return }
 
                 selectedPlaceID = place.id
-                focusedCoordinate = place.coordinate
             }
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .frame(height: 300)
