@@ -4,29 +4,52 @@
 //
 
 import SwiftUI
+import ComposableArchitecture
 import DesignSystem
 
 /// 특정 장소 핀 선택시 보여줄 디테일 시트
 struct SelectedPlaceDetailSheet: View {
+    private let store: StoreOf<SelectedPlaceDetailSheetFeature>
+
+    init(store: StoreOf<SelectedPlaceDetailSheetFeature>) {
+        self.store = store
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SelectedPlaceDetailHeaderView()
+            SelectedPlaceDetailHeaderView(
+                name: store.name,
+                distanceText: store.distanceText,
+                categoryName: store.categoryName
+            )
                 .padding(.bottom, Spacing.spacing350)
-            SelectedPlaceBusinessHoursView()
+            SelectedPlaceBusinessHoursView(
+                closedDayText: store.closedDayText,
+                businessHoursText: store.businessHoursText
+            )
                 .padding(.bottom, Spacing.spacing350)
-            SelectedPlaceAddressView()
+            SelectedPlaceAddressView(
+                roadAddress: store.roadAddress,
+                lotAddress: store.lotAddress
+            )
                 .padding(.bottom, Spacing.spacing500)
-            SelectedPlaceNaverMapButton()
+            SelectedPlaceNaverMapButton {
+                store.send(.naverMapButtonTapped)
+            }
         }
         .padding(.horizontal, Spacing.spacing400)
     }
 }
-
+// MARK: - 장소 디테일 헤더 뷰
 private struct SelectedPlaceDetailHeaderView: View {
+    let name: String
+    let distanceText: String
+    let categoryName: String
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 0) {
-                Text("서촌김씨")
+                Text(name)
                     .pretendardCustomFont(textStyle: .titleLarge)
                     .foregroundStyle(Color.gray800)
 
@@ -41,13 +64,13 @@ private struct SelectedPlaceDetailHeaderView: View {
             .padding(.bottom, 4)
 
             HStack(spacing: Spacing.spacing150) {
-                Text("18km")
+                Text(distanceText)
                     .pretendardCustomFont(textStyle: .bodyMedium)
                     .foregroundStyle(Colors.gray600)
 
                 SelectedPlaceMetadataDivider()
 
-                Text("디저트")
+                Text(categoryName)
                     .pretendardCustomFont(textStyle: .bodyMedium)
                     .foregroundStyle(Colors.gray700)
             }
@@ -55,28 +78,30 @@ private struct SelectedPlaceDetailHeaderView: View {
         }
     }
 }
-
+// MARK: - 장소 영업 시간 뷰
 private struct SelectedPlaceBusinessHoursView: View {
+    let closedDayText: String
+    let businessHoursText: String
+
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.spacing100) {
             Text("영업 시간")
                 .pretendardCustomFont(textStyle: .bodySmall)
                 .foregroundStyle(Color.gray900)
+
             Group {
-                Text("월 휴무")
-                    
-                Text("평일 08:00 - 22:00 / 주말 11:11 - 22:22")
+                Text(closedDayText)
+                Text(businessHoursText)
             }
             .pretendardCustomFont(textStyle: .bodySmall)
             .foregroundStyle(Color.gray700)
-           
         }
     }
 }
-
+// MARK: - 장소 주소 뷰
 private struct SelectedPlaceAddressView: View {
-    private let roadAddress = "서울 강남구 테헤란로 123"
-    private let lotAddress = "서울 강남구 역삼동 123-45"
+    let roadAddress: String
+    let lotAddress: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.spacing200) {
@@ -91,11 +116,12 @@ private struct SelectedPlaceAddressView: View {
         }
     }
 }
-
+// MARK: - 네이버 지도 이동 버튼
 private struct SelectedPlaceNaverMapButton: View {
+    let onTap: () -> Void
+
     var body: some View {
-        Button {
-        } label: {
+        Button(action: onTap) {
             Text("네이버 지도로 보기")
                 .pretendardCustomFont(textStyle: .labelLarge)
                 .foregroundStyle(Colors.gray00)
@@ -119,7 +145,11 @@ private struct SelectedPlaceMetadataDivider: View {
 }
 
 #Preview {
-    SelectedPlaceDetailSheet()
+    SelectedPlaceDetailSheet(
+        store: Store(initialState: .mock) {
+            SelectedPlaceDetailSheetFeature()
+        }
+    )
         .padding(.vertical, Spacing.spacing300)
         .frame(maxWidth: .infinity, alignment: .topLeading)
         .background(Colors.gray00)
