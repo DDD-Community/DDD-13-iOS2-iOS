@@ -71,7 +71,8 @@ public struct KakaoMap: View {
                     MapCoordinate(latitude: 37.5665, longitude: 126.9780),
                     MapCoordinate(latitude: 37.5637, longitude: 126.9850),
                     MapCoordinate(latitude: 37.5512, longitude: 126.9882),
-                ]
+                ],
+                dotStyle: RouteDotStyle(color: .blue, spacing: 2)
             )
         ],
         pins: [

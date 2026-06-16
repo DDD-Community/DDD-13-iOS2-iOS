@@ -210,7 +210,8 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             else { return }
 
             if pendingRoutes != currentRoutes {
-                applyRoutes(pendingRoutes, on: mapView)
+                applySolidRoutes(pendingRoutes.filter { $0.dotStyle == nil }, on: mapView)
+                applyDottedRoutes(pendingRoutes.filter { $0.dotStyle != nil }, on: mapView)
                 currentRoutes = pendingRoutes
             }
 
@@ -239,7 +240,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             currentFocus = focus
         }
 
-        private func applyRoutes(_ routes: [MapRoute], on mapView: KakaoMapsSDK.KakaoMap) {
+        private func applySolidRoutes(_ routes: [MapRoute], on mapView: KakaoMapsSDK.KakaoMap) {
             let shapeManager = mapView.getShapeManager()
             shapeManager.removeShapeLayer(layerID: MapIdentifier.polylineLayer)
 
@@ -285,6 +286,78 @@ struct KakaoMapRepresentable: UIViewRepresentable {
 
             if let shape = layer.addMapPolylineShape(shapeOptions, callback: nil) {
                 shape.show()
+            }
+        }
+
+        // 점선 경로를 RouteManager 로 그린다. 삼각형 dot 이미지를 RoutePattern.symbol 로 넣어
+        // 경로 진행 방향을 따라 회전 배치되게 한다(본선 텍스처는 투명, dot 만 노출).
+        // distance(점 간격) = dot 진행방향 길이 + dotStyle.spacing 으로 둔다.
+        private func applyDottedRoutes(_ routes: [MapRoute], on mapView: KakaoMapsSDK.KakaoMap) {
+            let routeManager = mapView.getRouteManager()
+            routeManager.removeRouteLayer(layerID: MapIdentifier.dottedRouteLayer)
+
+            guard !routes.isEmpty else { return }
+
+            let styleSetID = MapIdentifier.dottedRouteStyleSet
+            let styleSet = RouteStyleSet(styleID: styleSetID)
+
+            for route in routes {
+                guard let dotStyle = route.dotStyle else { continue }
+
+                // applyDottedRoutes 는 updateUIView·SDK delegate 등 항상 메인에서 호출되므로
+                // @MainActor 인 이미지 렌더를 assumeIsolated 로 동기 실행한다.
+                let dot = MainActor.assumeIsolated {
+                    RouteDotMarker(color: dotStyle.color).makeImage()
+                }
+
+                // dot 이미지를 본선 패턴으로 반복 배치한다. 패턴은 경로 진행 방향을 따라
+                // 회전 배치되므로 ▲ dot 이 진행 방향을 가리킨다.
+                // distance(점 간격) = dot 진행축 길이 + dotStyle.spacing.
+                let pattern = RoutePattern(
+                    pattern: dot,
+                    distance: Float(dotStyle.spacing),
+                    symbol: nil,
+                    pinStart: false,
+                    pinEnd: false
+                )
+                styleSet.addPattern(pattern)
+
+                // 본선은 보이지 않게 한다. color: .clear 는 SDK 가 본선을 컬링해 pattern 까지
+                // 사라지므로, 거의 투명한 알파로 두어 컬링은 피하되 연결선은 보이지 않게 한다.
+                let patternIndex = styleSet.patterns.count - 1
+                let perLevel = PerLevelRouteStyle(
+                    width: Constant.dottedRouteWidth,
+                    color: dotStyle.color.routeUIColor.withAlphaComponent(Constant.dottedRouteLineAlpha),
+                    strokeWidth: 0,
+                    strokeColor: .clear,
+                    level: 0,
+                    patternIndex: patternIndex
+                )
+                styleSet.addStyle(RouteStyle(styles: [perLevel]))
+            }
+
+            routeManager.addRouteStyleSet(styleSet)
+
+            guard let layer = routeManager.addRouteLayer(
+                layerID: MapIdentifier.dottedRouteLayer,
+                zOrder: 2
+            ) else {
+                Log.error("addRouteLayer returned nil")
+                return
+            }
+
+            for (index, route) in routes.enumerated() {
+                let points = route.coordinates.map {
+                    MapPoint(longitude: $0.longitude, latitude: $0.latitude)
+                }
+                let options = RouteOptions(routeID: route.id, styleID: styleSetID, zOrder: 0)
+                options.segments = [RouteSegment(points: points, styleIndex: UInt(index))]
+
+                if let drawn = layer.addRoute(option: options) {
+                    drawn.show()
+                } else {
+                    Log.error("addRoute returned nil - routeID: \(route.id)")
+                }
             }
         }
 
@@ -402,6 +475,8 @@ private enum MapIdentifier {
     static let polylineLayer = "bangawo_polyline_layer"
     static let polylineStyleSet = "bangawo_polyline_styles"
     static let polylineShape = "bangawo_polylines"
+    static let dottedRouteLayer = "bangawo_dotted_route_layer"
+    static let dottedRouteStyleSet = "bangawo_dotted_route_styles"
     static let pinLayer = "bangawo_pin_layer"
 
     static func pinStyle(index: Int) -> String {
@@ -413,4 +488,16 @@ private enum Constant {
     /// LOD 겹침 판정 반경(화면 point). 이 반경 안에서 겹치는 핀은
     /// 우선순위(rank)가 낮은 쪽이 표출되지 않는다. 값이 클수록 더 적극적으로 숨긴다.
     static let lodRadius: Float = 40
+
+    /// dot symbol 의 진행방향(apex 축) 길이(point). `RouteDotMarker` 의 height(9) 와 맞춘다.
+    /// `distance`(점 간격) = 이 값 + `dotStyle.spacing` 으로 계산한다.
+    static let dotLength: CGFloat = 9
+
+    /// 점선 본선(route body) 폭(point). pattern(▲)은 이 폭에 맞춰 렌더되므로
+    /// dot 크기(`RouteDotMarker` width 10) 만큼 확보한다.
+    static let dottedRouteWidth: UInt = 10
+
+    /// 점선 본선(연결선) 알파. `.clear`(알파 0)는 SDK 가 본선을 컬링해 pattern 까지 사라지므로,
+    /// 컬링은 피하되 연결선은 보이지 않도록 거의 0에 가까운 값을 사용한다.
+    static let dottedRouteLineAlpha: CGFloat = 0.01
 }

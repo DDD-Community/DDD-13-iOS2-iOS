@@ -36,13 +36,18 @@ public struct MapRoute: Sendable, Equatable, Identifiable {
     public let strokeColor: UIColor
     public let strokeWidth: UInt
 
+    /// 점선(dot line) 스타일. `nil` 이면 위 line/stroke 속성으로 실선을 그린다.
+    /// 값이 있으면 삼각형 dot 가 진행 방향을 향해 회전 배치된 점선으로 그린다.
+    public let dotStyle: RouteDotStyle?
+
     public init(
         id: String = UUID().uuidString,
         coordinates: [MapCoordinate],
         lineColor: UIColor = .systemBlue,
         lineWidth: UInt = 4,
         strokeColor: UIColor = .clear,
-        strokeWidth: UInt = 0
+        strokeWidth: UInt = 0,
+        dotStyle: RouteDotStyle? = nil
     ) {
         self.id = id
         self.coordinates = coordinates
@@ -50,6 +55,22 @@ public struct MapRoute: Sendable, Equatable, Identifiable {
         self.lineWidth = lineWidth
         self.strokeColor = strokeColor
         self.strokeWidth = strokeWidth
+        self.dotStyle = dotStyle
+    }
+}
+
+// MARK: - RouteDotStyle
+
+/// dot line 의 점 모양·간격 스타일.
+public struct RouteDotStyle: Sendable, Equatable {
+    public let color: RouteDotColor
+
+    /// 점 사이 간격(point). `RoutePattern.distance` 계산에 사용한다.
+    public let spacing: CGFloat
+
+    public init(color: RouteDotColor, spacing: CGFloat = 2) {
+        self.color = color
+        self.spacing = spacing
     }
 }
 
