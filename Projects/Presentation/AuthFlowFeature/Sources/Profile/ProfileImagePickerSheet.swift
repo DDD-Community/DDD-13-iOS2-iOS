@@ -45,7 +45,7 @@ private struct ProfileTileGrid: View {
                     onPresetTapped(index)
                 } label: {
                     Asset(assetType: .d3(face), size: .s48)
-                        .background(Circle().fill(Colors.grayAlpha200))
+                        .background(Circle().fill(Colors.gray300))
                         .overlay {
                             if selectedIndex == index {
                                 ProfileTileSelectedOverlay()
@@ -97,7 +97,13 @@ private struct ProfileImageDisplay: View {
                 Asset(assetType: .d3(face), size: .s104)
             }
         }
-        .background(Circle().fill(Colors.grayAlpha200))
+        .background(Circle().fill(backgroundColor))
+    }
+
+    private var backgroundColor: Color {
+        if case .preset = image { return Colors.gray300 }
+
+        return Colors.gray200
     }
 }
 

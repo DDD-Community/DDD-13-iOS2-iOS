@@ -50,6 +50,8 @@ private struct AvatarContent: View {
                 asset.image
                     .resizable()
                     .scaledToFit()
+                    .frame(width: size.length, height: size.length)
+                    .background(Colors.gray200)
 
             case .image(let url):
                 AsyncImage(url: url) { phase in
