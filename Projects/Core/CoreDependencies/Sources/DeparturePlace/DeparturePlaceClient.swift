@@ -13,7 +13,7 @@ import UseCase
 public struct DeparturePlaceClient: Sendable {
     public var fetchDeparturePlaces: @Sendable () async throws -> [DeparturePlace]
     public var updateDeparturePlace: @Sendable (
-        _ id: Int64,
+        _ id: Int,
         _ label: String,
         _ address: String,
         _ roadAddress: String,
@@ -30,8 +30,8 @@ public struct DeparturePlaceClient: Sendable {
         _ longitude: Double,
         _ isDefault: Bool
     ) async throws -> DeparturePlace
-    public var deleteDeparturePlace: @Sendable (_ id: Int64) async throws -> Void
-    public var setDefaultDeparturePlace: @Sendable (_ id: Int64) async throws -> DeparturePlace
+    public var deleteDeparturePlace: @Sendable (_ id: Int) async throws -> Void
+    public var setDefaultDeparturePlace: @Sendable (_ id: Int) async throws -> DeparturePlace
 }
 
 public extension DeparturePlaceClient {

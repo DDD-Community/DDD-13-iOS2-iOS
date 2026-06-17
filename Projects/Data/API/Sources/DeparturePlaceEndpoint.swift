@@ -10,10 +10,10 @@ import Model
 
 public enum DeparturePlaceEndpoint: EndPoint {
     case fetchDeparturePlaces
-    case updateDeparturePlace(id: Int64, UpdateDeparturePlaceRequestDTO)
+    case updateDeparturePlace(id: Int, UpdateDeparturePlaceRequestDTO)
     case addDeparturePlace(AddDeparturePlaceRequestDTO)
-    case deleteDeparturePlace(id: Int64)
-    case setDefaultDeparturePlace(id: Int64)
+    case deleteDeparturePlace(id: Int)
+    case setDefaultDeparturePlace(id: Int)
 
     public var baseURL: String { APIConfiguration.serverBaseURL }
 

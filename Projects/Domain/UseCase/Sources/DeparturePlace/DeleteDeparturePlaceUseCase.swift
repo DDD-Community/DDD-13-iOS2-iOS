@@ -6,5 +6,5 @@
 import Entity
 
 public protocol DeleteDeparturePlaceUseCase: Sendable {
-    func execute(id: Int64) async throws
+    func execute(id: Int) async throws
 }

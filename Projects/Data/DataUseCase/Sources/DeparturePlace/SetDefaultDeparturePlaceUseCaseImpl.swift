@@ -14,7 +14,7 @@ public final class SetDefaultDeparturePlaceUseCaseImpl: SetDefaultDeparturePlace
         self.repository = repository
     }
 
-    public func execute(id: Int64) async throws -> DeparturePlace {
+    public func execute(id: Int) async throws -> DeparturePlace {
         try await repository.setDefaultDeparturePlace(id: id)
     }
 }

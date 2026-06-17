@@ -7,7 +7,7 @@ import Entity
 
 public protocol UpdateDeparturePlaceUseCase: Sendable {
     func execute(
-        id: Int64,
+        id: Int,
         label: String,
         address: String,
         roadAddress: String,

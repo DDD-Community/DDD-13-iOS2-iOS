@@ -6,7 +6,7 @@
 import Foundation
 
 public struct DeparturePlace: Identifiable, Equatable, Sendable {
-    public let id: Int64
+    public let id: Int
     public let label: String
     public let address: String
     public let roadAddress: String
@@ -16,7 +16,7 @@ public struct DeparturePlace: Identifiable, Equatable, Sendable {
     public let isDefault: Bool
 
     public init(
-        id: Int64,
+        id: Int,
         label: String,
         address: String,
         roadAddress: String,

@@ -20,7 +20,7 @@ public final class DeparturePlaceRepositoryImpl: DeparturePlaceRepositoryProtoco
     }
 
     public func updateDeparturePlace(
-        id: Int64,
+        id: Int,
         label: String,
         address: String,
         roadAddress: String,
@@ -66,13 +66,13 @@ public final class DeparturePlaceRepositoryImpl: DeparturePlaceRepositoryProtoco
         return response.toEntity()
     }
 
-    public func deleteDeparturePlace(id: Int64) async throws {
+    public func deleteDeparturePlace(id: Int) async throws {
         try await NetworkManager.shared.requestVoid(
             DeparturePlaceEndpoint.deleteDeparturePlace(id: id)
         )
     }
 
-    public func setDefaultDeparturePlace(id: Int64) async throws -> DeparturePlace {
+    public func setDefaultDeparturePlace(id: Int) async throws -> DeparturePlace {
         let response: DeparturePlaceResponseDTO = try await NetworkManager.shared.request(
             DeparturePlaceEndpoint.setDefaultDeparturePlace(id: id)
         )

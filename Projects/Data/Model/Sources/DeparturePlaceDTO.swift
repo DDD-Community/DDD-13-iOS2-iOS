@@ -6,7 +6,7 @@
 import Entity
 
 public struct DeparturePlaceResponseDTO: Decodable, Sendable {
-    public let id: Int64
+    public let id: Int
     public let label: String
     public let address: String
     public let roadAddress: String

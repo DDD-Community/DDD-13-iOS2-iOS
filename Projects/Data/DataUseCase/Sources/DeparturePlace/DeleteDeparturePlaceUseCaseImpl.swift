@@ -14,7 +14,7 @@ public final class DeleteDeparturePlaceUseCaseImpl: DeleteDeparturePlaceUseCase 
         self.repository = repository
     }
 
-    public func execute(id: Int64) async throws {
+    public func execute(id: Int) async throws {
         try await repository.deleteDeparturePlace(id: id)
     }
 }

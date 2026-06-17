@@ -15,7 +15,7 @@ public final class UpdateDeparturePlaceUseCaseImpl: UpdateDeparturePlaceUseCase 
     }
 
     public func execute(
-        id: Int64,
+        id: Int,
         label: String,
         address: String,
         roadAddress: String,
