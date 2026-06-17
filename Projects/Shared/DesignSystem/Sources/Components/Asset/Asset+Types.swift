@@ -28,6 +28,7 @@ extension Asset {
         case face08
         case face09
         case face10
+        case groupDetail
 
         /// 프로필 선택 그리드에 노출되는 3D 얼굴 (노출 순서)
         public static let profileFaces: [D3] = [
@@ -67,6 +68,7 @@ extension Asset.D3 {
         case .face08: return Image.Asset.imgFace3d08
         case .face09: return Image.Asset.imgFace3d09
         case .face10: return Image.Asset.imgFace3d10
+        case .groupDetail: return Image.Asset.imgGroupDetail3d
         }
     }
 }

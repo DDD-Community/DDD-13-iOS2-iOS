@@ -11,7 +11,7 @@ import SwiftUI
 public struct TopPage: View {
     // MARK: - Properties
 
-    private let asset: Image
+    private let d3Asset: Asset.D3
     private let title: String
     private let description: String
     private let buttonTitle: String
@@ -25,7 +25,7 @@ public struct TopPage: View {
     // MARK: - Init
 
     public init(
-        asset: Image,
+        d3Asset: Asset.D3,
         title: String,
         description: String,
         buttonTitle: String,
@@ -36,7 +36,7 @@ public struct TopPage: View {
         badgeLeadingIcon: Image? = nil,
         buttonAction: @escaping () -> Void
     ) {
-        self.asset = asset
+        self.d3Asset = d3Asset
         self.title = title
         self.description = description
         self.buttonTitle = buttonTitle
@@ -52,7 +52,7 @@ public struct TopPage: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            TopArea(asset: asset)
+            TopArea(d3Asset: d3Asset)
 
             TitleArea(
                 title: title,
@@ -78,10 +78,15 @@ public struct TopPage: View {
 
 private extension TopPage {
     struct TopArea: View {
-        let asset: Image
+        let d3Asset: Asset.D3
+
+        /// d3Asset : 3D 에셋
+        init(d3Asset: Asset.D3) {
+            self.d3Asset = d3Asset
+        }
 
         var body: some View {
-            Asset(assetType: .d3(asset), size: .s64)
+            Asset(assetType: .d3(d3Asset), size: .s64)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
@@ -151,7 +156,7 @@ private extension TopPage {
         ScrollView {
             VStack(spacing: 48) {
                 TopPage(
-                    asset: Image(systemName: "star.fill"),
+                    d3Asset: .avatarPlaceholder,
                     title: "모임 정보를\n확인해 보세요",
                     description: "참여 중인 모임의 상세 정보예요",
                     buttonTitle: "수정",
@@ -163,7 +168,7 @@ private extension TopPage {
                 Divider()
 
                 TopPage(
-                    asset: Image(systemName: "star.fill"),
+                    d3Asset: .avatarPlaceholder,
                     title: "모임 정보를\n확인해 보세요",
                     description: "참여 중인 모임의 상세 정보예요",
                     buttonTitle: "초대하기",

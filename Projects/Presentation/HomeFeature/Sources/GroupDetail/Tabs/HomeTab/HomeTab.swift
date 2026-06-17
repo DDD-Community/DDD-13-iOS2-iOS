@@ -18,7 +18,7 @@ struct HomeTab: View {
         ScrollView {
             VStack(spacing: 0) {
                 TopPage(
-                    asset: Image.Asset.imgGroupDetail3d,
+                    d3Asset: .groupDetail,
                     title: store.group.name,
                     description: store.group.themeTagDisplay,
                     buttonTitle: "장소 정하기",
