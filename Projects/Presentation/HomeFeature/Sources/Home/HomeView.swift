@@ -47,8 +47,17 @@ public struct HomeView: View {
                     if store.selectedTabIndex == 0 {
                         GroupListContent(
                             groups: store.groups,
+                            inviteCardDesign: store.inviteCardDesign,
+                            showsInviteCard: store.isInviteCardVisible,
                             onCreateTapped: { store.send(.createGroupRowTapped) },
-                            onGroupTapped: { store.send(.groupCardTapped($0)) }
+                            onGroupTapped: { store.send(.groupCardTapped($0)) },
+                            onInviteClose: {
+                                store.send(
+                                    .inviteCardCloseButtonTapped,
+                                    animation: .easeInOut(duration: 0.3)
+                                )
+                            },
+                            onInviteTapped: { store.send(.inviteButtonTapped) }
                         )
                     }
                 }
@@ -88,8 +97,12 @@ public struct HomeView: View {
 
 private struct GroupListContent: View {
     let groups: [Entity.Group]
+    let inviteCardDesign: HomeFeature.InviteCardDesign
+    let showsInviteCard: Bool
     let onCreateTapped: () -> Void
     let onGroupTapped: (Entity.Group) -> Void
+    let onInviteClose: () -> Void
+    let onInviteTapped: () -> Void
 
     var body: some View {
         if groups.isEmpty {
@@ -97,16 +110,41 @@ private struct GroupListContent: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         } else {
             ScrollView {
-                LazyVStack(spacing: Spacing.spacing250) {
-                    ForEach(groups) { group in
-                        GroupCard(group: group, onTap: { onGroupTapped(group) })
+                VStack(spacing: 0) {
+                    if showsInviteCard {
+                        InviteCard(
+                            design: inviteCardDesign,
+                            onClose: onInviteClose,
+                            onInvite: onInviteTapped
+                        )
+                        .padding(.horizontal, Spacing.spacing300)
+                        .padding(.top, Spacing.spacing400)
+                        .transition(.scale.combined(with: .opacity))
                     }
+
+                    GroupListHeader()
+
+                    LazyVStack(spacing: Spacing.spacing250) {
+                        ForEach(groups) { group in
+                            GroupCard(group: group, onTap: { onGroupTapped(group) })
+                        }
+                    }
+                    .padding(.horizontal, Spacing.spacing300)
                 }
-                .padding(.horizontal, Spacing.spacing300)
-                .padding(.top, Spacing.spacing250)
                 .padding(.bottom, 80)
             }
         }
+    }
+}
+
+private struct GroupListHeader: View {
+    var body: some View {
+        BangawoText("참여 중인 모임", textStyle: .titleSmall)
+            .foregroundStyle(Colors.gray900)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, Spacing.spacing500)
+            .padding(.bottom, Spacing.spacing300)
+            .padding(.horizontal, Spacing.spacing400)
     }
 }
 
@@ -161,123 +199,267 @@ private struct GroupCard: View {
     let group: Entity.Group
     let onTap: () -> Void
 
+    private enum Metric {
+        static let cornerRadius: CGFloat = BorderRadius.borderRadius350
+    }
+
     var body: some View {
         Button(action: onTap) {
-            VStack(spacing: Spacing.spacing250) {
-                GroupCardTopArea(group: group)
-                GroupCardBottomArea(memberCount: group.memberCount)
+            VStack(spacing: 0) {
+                GroupInfoArea(group: group)
+
+                if group.memberCount > 1 {
+                    GroupMemberArea(group: group)
+                }
             }
-            .padding(Spacing.spacing300)
-            .background(
-                RoundedRectangle(cornerRadius: BorderRadius.borderRadius250)
-                    .fill(Color(hex: "FFFFFF"))
-            )
+            .clipShape(RoundedRectangle(cornerRadius: Metric.cornerRadius))
         }
         .buttonStyle(.plain)
     }
 }
 
-private struct GroupCardTopArea: View {
+// MARK: - Group Info Area
+
+private struct GroupInfoArea: View {
     let group: Entity.Group
 
+    private enum Metric {
+        static let cornerRadius: CGFloat = BorderRadius.borderRadius350
+        static let gradientEndRadius: CGFloat = 200
+        static let themeIconLength: CGFloat = Spacing.spacing400
+    }
+
+    private var shape: UnevenRoundedRectangle {
+        UnevenRoundedRectangle(
+            topLeadingRadius: Metric.cornerRadius,
+            topTrailingRadius: Metric.cornerRadius
+        )
+    }
+
+    private var isSelectionInProgress: Bool {
+        group.locationStatus == .before
+            || group.dateVoteStatus == .before
+    }
+
     var body: some View {
-        HStack(alignment: .top, spacing: Spacing.spacing250) {
-            RoundedRectangle(cornerRadius: BorderRadius.borderRadius200)
-                .fill(.gray300)
-                .frame(width: Sizing.sizing550, height: Sizing.sizing550)
+        HStack(alignment: .top, spacing: Spacing.spacing300) {
+            themeIcon
+                .frame(width: Metric.themeIconLength, height: Metric.themeIconLength)
+                .clipShape(Circle())
 
-            VStack(alignment: .leading, spacing: Spacing.spacing100) {
-                Text(group.name)
-                    .pretendardCustomFont(textStyle: .bodyLargeEmphasized)
-                    .foregroundStyle(.gray900)
+            VStack(alignment: .leading, spacing: Spacing.spacing50) {
+                BangawoText(group.themeTagDisplay, textStyle: .bodyMedium)
+                    .foregroundStyle(Colors.gray700)
 
-                Text(group.themeTagDisplay)
-                    .pretendardCustomFont(textStyle: .bodySmall)
-                    .foregroundStyle(.gray600)
+                BangawoText(group.name, textStyle: .titleMediumEmphasized)
+                    .foregroundStyle(Colors.gray800)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            GroupStatusBadge(status: group.listStatus)
+            if isSelectionInProgress {
+                Badge(
+                    "진행 중",
+                    leadingIcon: Image.Asset.icStatus16,
+                    showLeadingIcon: true,
+                    variant: .solid,
+                    size: .medium
+                )
+                .frame(maxHeight: .infinity, alignment: .top)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, Spacing.spacing400)
+        .padding(.horizontal, Spacing.spacing300)
+        .background(
+            shape.fill(
+                RadialGradient(
+                    colors: [Colors.neutralAlpha500, Colors.neutralAlpha900],
+                    center: .center,
+                    startRadius: 0,
+                    endRadius: Metric.gradientEndRadius
+                )
+            )
+        )
+        .overlay(
+            shape.stroke(Colors.gray00, lineWidth: BorderWidth.borderWidth100)
+        )
+        .fixedSize(horizontal: false, vertical: true)
+    }
+
+    @ViewBuilder
+    private var themeIcon: some View {
+        if let icon = Image.assetIfExists(named: "ic_purpose_" + group.themeTagCode.lowercased()) {
+            icon
+                .resizable()
+                .scaledToFit()
+        } else {
+            Circle().fill(Colors.gray200)
         }
     }
 }
 
-private struct GroupStatusBadge: View {
-    let status: GroupListStatus
+// MARK: - Group Member Area
 
-    private var badgeColor: Color {
-        switch status {
-        case .inProgress: return Color(hex: "FF6B5C")
-        case .confirmed: return Color(hex: "4D6399")
-        case .ended: return Color(hex: "A1A1A1")
-        case .unknown: return Color(hex: "D4D4D4")
-        }
+private struct GroupMemberArea: View {
+    let group: Entity.Group
+
+    private enum Metric {
+        static let cornerRadius: CGFloat = BorderRadius.borderRadius350
     }
 
-    private var displayText: String {
-        switch status {
-        case .inProgress: return "진행중"
-        case .confirmed: return "확정"
-        case .ended: return "종료"
-        case .unknown(let raw): return raw
-        }
+    private var shape: UnevenRoundedRectangle {
+        UnevenRoundedRectangle(
+            bottomLeadingRadius: Metric.cornerRadius,
+            bottomTrailingRadius: Metric.cornerRadius
+        )
     }
-
-    var body: some View {
-        Text(displayText)
-            .pretendardCustomFont(textStyle: .labelSmall)
-            .foregroundStyle(Color(hex: "FFFFFF"))
-            .padding(.horizontal, Spacing.spacing200)
-            .padding(.vertical, Spacing.spacing100)
-            .background(Capsule().fill(badgeColor))
-    }
-}
-
-private struct GroupCardBottomArea: View {
-    let memberCount: Int
 
     var body: some View {
         HStack(spacing: Spacing.spacing200) {
-            OverlappingCircles(count: memberCount)
+            HStack(spacing: Spacing.spacing100) {
+                MemberAvatarStack(members: group.members)
 
-            Text("\(memberCount)명")
-                .pretendardCustomFont(textStyle: .bodySmall)
-                .foregroundStyle(.gray700)
+                if group.memberCount > MemberAvatarStack.Metric.maxVisible {
+                    BangawoText(
+                        "외 \(group.memberCount - MemberAvatarStack.Metric.maxVisible)명",
+                        textStyle: .bodySmall
+                    )
+                    .foregroundStyle(Colors.gray700)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            Image.Asset.icArrowSmallRight24
+                .renderingMode(.template)
+                .foregroundStyle(Colors.gray700)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, Spacing.spacing250)
+        .padding(.horizontal, Spacing.spacing300)
+        .background(shape.fill(Colors.gray50))
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(Colors.gray200)
+                .frame(height: BorderWidth.borderWidth100)
+        }
     }
 }
 
-private struct OverlappingCircles: View {
-    let count: Int
+// MARK: - Member Avatar Stack
 
-    private enum Metric {
-        static let circleSize: CGFloat = Sizing.sizing200
-        static let overlap: CGFloat = Spacing.spacing200
-        static let maxVisible: Int = 3
+private struct MemberAvatarStack: View {
+    let members: [GroupMember]
+
+    enum Metric {
+        static let maxVisible: Int = 4
+        static let overlap: CGFloat = 6
     }
 
     var body: some View {
         HStack(spacing: -Metric.overlap) {
-            ForEach(0..<min(count, Metric.maxVisible), id: \.self) { _ in
-                Circle()
-                    .fill(.gray400)
-                    .frame(width: Metric.circleSize, height: Metric.circleSize)
-                    .overlay(
-                        Circle()
-                            .stroke(Color(hex: "FFFFFF"), lineWidth: 2)
-                    )
+            ForEach(Array(members.prefix(Metric.maxVisible).enumerated()), id: \.element.id) { index, member in
+                Avatar(avatarType: avatarType(for: member), size: .s24)
+                    .zIndex(Double(index))
             }
         }
+    }
+
+    private func avatarType(for member: GroupMember) -> Avatar.AvatarType {
+        guard
+            let urlString = member.profileImageUrl,
+            let url = URL(string: urlString)
+        else { return .placeholder }
+
+        return .image(url)
     }
 }
 
 // MARK: - Previews
 
-#Preview("모임 없음") {
-    HomeView(
-        store: Store(initialState: HomeFeature.State()) {
+#if DEBUG
+private enum HomePreview {
+    static func member(_ id: Int64) -> GroupMember {
+        GroupMember(id: id, nickname: "멤버\(id)", profileImageUrl: nil, attendanceStatus: .join)
+    }
+
+    static func group(
+        id: Int64,
+        name: String,
+        locationStatus: GroupLocationStatus,
+        dateVoteStatus: GroupDateVoteStatus,
+        memberCount: Int
+    ) -> Entity.Group {
+        Entity.Group(
+            id: id,
+            meetingId: id,
+            name: name,
+            themeTagCode: "BIRTHDAY",
+            themeTagDisplay: "생일 파티",
+            listStatus: .inProgress,
+            locationStatus: locationStatus,
+            dateVoteStatus: dateVoteStatus,
+            locationAddress: nil,
+            memberCount: memberCount,
+            members: (1...memberCount).map { member(Int64($0)) }
+        )
+    }
+
+    static func store(groups: [Entity.Group]) -> StoreOf<HomeFeature> {
+        Store(initialState: HomeFeature.State()) {
             HomeFeature()
+        } withDependencies: {
+            $0.groupClient.fetchGroups = { groups }
         }
+    }
+}
+
+#Preview("모임 0개") {
+    HomeView(store: HomePreview.store(groups: []))
+}
+
+// 모임이 1개일 때 친구 초대 카드(배너) 노출 확인
+#Preview("모임 1개 - 친구 초대 카드") {
+    HomeView(
+        store: HomePreview.store(groups: [
+            HomePreview.group(
+                id: 1,
+                name: "첫 모임",
+                locationStatus: .before,
+                dateVoteStatus: .before,
+                memberCount: 4
+            )
+        ])
     )
 }
+
+// GroupCard를 케이스별로 노출 (3개이므로 친구 초대 카드 미노출)
+#Preview("모임 3개 - 케이스별") {
+    HomeView(
+        store: HomePreview.store(groups: [
+            // 초대된 친구가 없는 경우 (멤버가 나 1명만 존재 → 멤버 영역 미노출)
+            HomePreview.group(
+                id: 1,
+                name: "혼자 있는 모임",
+                locationStatus: .before,
+                dateVoteStatus: .before,
+                memberCount: 1
+            ),
+            // 친구가 있고, 날짜나 장소 선정을 진행 중인 경우 (Badge 노출)
+            HomePreview.group(
+                id: 2,
+                name: "선정 진행 중 모임",
+                locationStatus: .before,
+                dateVoteStatus: .before,
+                memberCount: 4
+            ),
+            // 친구가 있고, 선정이 진행 중이 아닌 경우 (Badge 미노출)
+            HomePreview.group(
+                id: 3,
+                name: "선정 완료 모임",
+                locationStatus: .confirmed,
+                dateVoteStatus: .confirmed,
+                memberCount: 4
+            )
+        ])
+    )
+}
+#endif
