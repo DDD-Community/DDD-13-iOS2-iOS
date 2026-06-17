@@ -25,17 +25,6 @@ public struct GroupDetailMemberResponseDTO: Decodable, Sendable {
     public let departurePlaces: [DeparturePlaceResponseDTO]
 }
 
-public struct DeparturePlaceResponseDTO: Decodable, Sendable {
-    public let id: Int64
-    public let label: String
-    public let address: String
-    public let roadAddress: String
-    public let placeName: String
-    public let latitude: Double
-    public let longitude: Double
-    public let isDefault: Bool
-}
-
 public struct UpdateAttendanceRequestDTO: Encodable, Sendable {
     public let attendanceStatus: String
 
@@ -70,21 +59,6 @@ public extension GroupDetailMemberResponseDTO {
             isHost: isHost,
             isMe: isMe,
             departurePlaces: departurePlaces.map { $0.toEntity() }
-        )
-    }
-}
-
-public extension DeparturePlaceResponseDTO {
-    func toEntity() -> DeparturePlace {
-        DeparturePlace(
-            id: id,
-            label: label,
-            address: address,
-            roadAddress: roadAddress,
-            placeName: placeName,
-            latitude: latitude,
-            longitude: longitude,
-            isDefault: isDefault
         )
     }
 }

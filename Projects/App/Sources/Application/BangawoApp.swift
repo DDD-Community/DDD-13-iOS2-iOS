@@ -29,6 +29,7 @@ struct BangawoApp: App {
             $0.registerMemberClient = AuthFactory.makeRegisterMemberClient()
             $0.groupClient = GroupFactory.makeClient()
             $0.themeTagClient = ThemeTagFactory.makeClient()
+            $0.departurePlaceClient = DeparturePlaceFactory.makeClient()
         }
 
         initializeNaverLoginSDK()
