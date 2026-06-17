@@ -22,7 +22,7 @@ struct NearbyPlaceRow: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack(alignment: .top, spacing: Spacing.spacing300) {
+            HStack(alignment: .center, spacing: Spacing.spacing300) {
                 NearbyPlaceThumbnail()
 
                 VStack(alignment: .leading, spacing: Spacing.spacing200) {
@@ -53,7 +53,6 @@ struct NearbyPlaceRow: View {
                             .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
-                        .accessibilityLabel("주소 안내 보기")
                     }
                     .zIndex(1)
 
@@ -154,29 +153,13 @@ private extension NearbyPlaceAddressTooltip {
 // MARK: - Thumbnail
 
 private struct NearbyPlaceThumbnail: View {
-    private let imageURL = URL(string: "https://picsum.photos/seed/bangawo-place/160")
-
     var body: some View {
-        AsyncImage(url: imageURL) { phase in
-            switch phase {
-            case .success(let image):
-                image
-                    .resizable()
-                    .scaledToFill()
-            case .empty, .failure:
-                Circle()
-                    .fill(Colors.gray100)
-                    .overlay(
-                        Image(systemName: "photo")
-                            .foregroundStyle(Colors.gray500)
-                    )
-            @unknown default:
-                Circle()
-                    .fill(Colors.gray100)
-            }
-        }
-        .frame(width: 32, height: 32)
-        .clipShape(Circle())
+        // TODO: API 명세보고 카테고리별 이미지 수정해야 할 듯.
+        Image.Asset.icMapPinRestaurant
+            .resizable()
+            .scaledToFill()
+            .frame(width: 32, height: 32)
+            .clipShape(Circle())
     }
 }
 

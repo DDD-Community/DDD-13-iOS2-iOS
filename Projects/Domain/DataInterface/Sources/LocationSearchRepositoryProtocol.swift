@@ -11,4 +11,5 @@ import Entity
 
 public protocol LocationSearchRepositoryProtocol: Sendable {
     func searchStations(keyword: String) async throws -> [Station]
+    func searchNearestStation(longitude: Double, latitude: Double) async throws -> Station?
 }

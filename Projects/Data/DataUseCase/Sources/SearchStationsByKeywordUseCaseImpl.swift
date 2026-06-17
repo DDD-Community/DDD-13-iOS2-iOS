@@ -1,5 +1,5 @@
 //
-//  SearchStationsUseCaseImpl.swift
+//  SearchStationsByKeywordUseCaseImpl.swift
 //  DataUseCase
 //
 //  Repository에서 받은 원본 결과에 서울 한정 필터/역명 prefix 필터/anchor 거리 정렬을 적용한다
@@ -11,7 +11,7 @@ import DataInterface
 import Entity
 import UseCase
 
-public final class SearchStationsUseCaseImpl: SearchStationsUseCase {
+public final class SearchStationsByKeywordUseCaseImpl: SearchStationsByKeywordUseCase {
     private let repository: LocationSearchRepositoryProtocol
 
     public init(repository: LocationSearchRepositoryProtocol) {

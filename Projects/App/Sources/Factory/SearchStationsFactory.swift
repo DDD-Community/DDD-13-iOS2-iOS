@@ -12,7 +12,8 @@ import Repository
 enum SearchStationsFactory {
     static func makeClient() -> SearchStationsClient {
         let repository = LocationSearchRepositoryImpl()
-        let useCase = SearchStationsUseCaseImpl(repository: repository)
-        return .live(useCase: useCase)
+        let searchByKeyword = SearchStationsByKeywordUseCaseImpl(repository: repository)
+        let findNearest = FindNearestStationUseCaseImpl(repository: repository)
+        return .live(searchByKeyword: searchByKeyword, findNearest: findNearest)
     }
 }
