@@ -19,15 +19,22 @@ struct InviteCard: View {
     }
 
     var body: some View {
-        content
+        InviteCardContent(design: design, onClose: onClose, onInvite: onInvite)
             .overlay(
                 RoundedRectangle(cornerRadius: Metric.cornerRadius)
                     .stroke(Colors.grayAlpha100, lineWidth: BorderWidth.borderWidth100)
             )
     }
+}
 
-    @ViewBuilder
-    private var content: some View {
+// MARK: - Content
+
+private struct InviteCardContent: View {
+    let design: HomeFeature.InviteCardDesign
+    let onClose: () -> Void
+    let onInvite: () -> Void
+
+    var body: some View {
         switch design {
         case .design1:
             InviteCardCompact(onClose: onClose, onInvite: onInvite)
@@ -74,12 +81,16 @@ private struct InviteCardCompact: View {
                 InviteCloseButton(onClose: onClose)
             }
             .overlay(alignment: .bottom) {
-                bottomElement
+                InviteCardCompactBottomElement(onInvite: onInvite)
                     .padding([.horizontal, .bottom], Spacing.spacing300)
             }
     }
+}
 
-    private var bottomElement: some View {
+private struct InviteCardCompactBottomElement: View {
+    let onInvite: () -> Void
+
+    var body: some View {
         HStack(spacing: Spacing.spacing250) {
             VStack(alignment: .leading, spacing: Spacing.spacing100) {
                 Text("친구 초대하러가기")
@@ -121,13 +132,17 @@ private struct InviteCardLarge: View {
                 InviteCloseButton(onClose: onClose)
             }
             .overlay(alignment: .bottom) {
-                bottomElement
+                InviteCardLargeBottomElement(onInvite: onInvite)
                     .padding(.horizontal, Spacing.spacing400)
                     .padding(.bottom, Spacing.spacing300)
             }
     }
+}
 
-    private var bottomElement: some View {
+private struct InviteCardLargeBottomElement: View {
+    let onInvite: () -> Void
+
+    var body: some View {
         VStack(spacing: Spacing.spacing500) {
             VStack(spacing: Spacing.spacing100) {
                 BangawoText("친구 초대하고 장소 함께 고르기", textStyle: .titleMediumEmphasized)

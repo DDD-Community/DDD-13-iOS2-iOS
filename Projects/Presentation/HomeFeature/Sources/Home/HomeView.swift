@@ -243,7 +243,7 @@ private struct GroupInfoArea: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: Spacing.spacing300) {
-            themeIcon
+            ThemeIcon(themeTagCode: group.themeTagCode)
                 .frame(width: Metric.themeIconLength, height: Metric.themeIconLength)
                 .clipShape(Circle())
 
@@ -285,10 +285,15 @@ private struct GroupInfoArea: View {
         )
         .fixedSize(horizontal: false, vertical: true)
     }
+}
 
-    @ViewBuilder
-    private var themeIcon: some View {
-        if let icon = Image.assetIfExists(named: "ic_purpose_" + group.themeTagCode.lowercased()) {
+// MARK: - Theme Icon
+
+private struct ThemeIcon: View {
+    let themeTagCode: String
+
+    var body: some View {
+        if let icon = Image.assetIfExists(named: "ic_purpose_" + themeTagCode.lowercased()) {
             icon
                 .resizable()
                 .scaledToFit()
