@@ -55,7 +55,9 @@ extension GroupClient: DependencyKey {
         fetchGroups: { previewGroups },
         createGroup: { name, themeTagCode in
             CreateGroupResult(groupId: 0, meetingId: 0, name: name, themeTagCode: themeTagCode)
-        }
+        },
+        fetchGroupDetail: { _ in previewGroupDetail },
+        updateAttendance: { _, _ in }
     )
 }
 
@@ -95,6 +97,46 @@ public extension GroupClient {
             members: []
         )
     ]
+
+    /// 프리뷰/디자인 확인용 샘플 모임 상세. 출발지가 있는 멤버와 없는 멤버를 함께 제공한다.
+    static let previewGroupDetail: GroupDetail = GroupDetail(
+        id: 1,
+        name: "주말 등산 모임",
+        themeTagCode: "ACTIVITY",
+        themeTagDisplay: "함께 땀 흘리며 친해지는 액티비티 모임",
+        locationStatus: .before,
+        dateVoteStatus: .before,
+        confirmedDate: nil,
+        members: [
+            GroupDetailMember(
+                id: 1,
+                nickname: "지혜",
+                profileImageUrl: nil,
+                isHost: true,
+                isMe: true,
+                departurePlaces: [
+                    DeparturePlace(
+                        id: 1,
+                        label: "집",
+                        address: "서울 강남구 역삼동",
+                        roadAddress: "서울 강남구 테헤란로 123",
+                        placeName: "강남역",
+                        latitude: 37.4979,
+                        longitude: 127.0276,
+                        isDefault: true
+                    )
+                ]
+            ),
+            GroupDetailMember(
+                id: 2,
+                nickname: "민수",
+                profileImageUrl: nil,
+                isHost: false,
+                isMe: false,
+                departurePlaces: []
+            )
+        ]
+    )
 }
 
 public extension DependencyValues {
