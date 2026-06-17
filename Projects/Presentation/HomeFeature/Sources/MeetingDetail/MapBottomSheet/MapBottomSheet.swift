@@ -30,6 +30,8 @@ private enum MapBottomSheetMetric {
     static let mediumHeight: CGFloat = 324
     /// 고정 모드에서는 376pt를 노출합니다.
     static let fixedMediumHeight: CGFloat = 376
+    /// 큰 detent는 화면 크기의 100%를 노출합니다.
+    static let largeHeightRatio: CGFloat = 1.0
     /// 드래그 종료 시 다음/이전 detent로 넘어가기 위한 최소 이동 거리입니다.
     static let snapThreshold: CGFloat = 60
 }
@@ -46,18 +48,20 @@ struct MapBottomSheet<Content: View>: View {
         case collapsed
         /// 화면의 일부를 덮는 기본 정보 표시 상태입니다.
         case medium
-        /// 대부분의 화면을 덮는 확장 상태입니다.
+        /// 전체 화면을 덮는 확장 상태입니다.
         case large
     }
 
     private let mode: MapBottomSheetMode // 모드 설정
     private let content: () -> Content
+    /// 시트가 정착한 detent에서 화면을 덮는 높이가 바뀔 때 전달하는 콜백입니다.
+    /// 지도 핀 포커싱 시 시트에 가려지지 않도록 보정량을 계산하는 데 사용합니다.
+    private var onVisibleHeightChanged: ((CGFloat) -> Void)?
 
     /// 현재 시트가 머무는 높이 단계입니다.
     @State private var detent: Detent = .collapsed
     /// 드래그 중인 임시 이동 거리입니다. 드래그가 끝나면 detent를 갱신하고 0으로 되돌립니다.
     @State private var dragOffset: CGFloat = 0
-    
 
     init(mode: MapBottomSheetMode = .resizable, @ViewBuilder content: @escaping () -> Content) {
         self.mode = mode
@@ -70,9 +74,10 @@ struct MapBottomSheet<Content: View>: View {
             let mediumHeight = min(MapBottomSheetMetric.mediumHeight, largeHeight)
             let fixedMediumHeight = min(MapBottomSheetMetric.fixedMediumHeight, largeHeight)
             let effectiveDetent: Detent = mode == .fixedMedium ? .medium : detent
+            let effectiveMediumHeight = mode == .fixedMedium ? fixedMediumHeight : mediumHeight
             let currentOffset = sheetOffset(
                 for: effectiveDetent,
-                mediumHeight: mode == .fixedMedium ? fixedMediumHeight : mediumHeight,
+                mediumHeight: effectiveMediumHeight,
                 largeHeight: largeHeight
             )
             let topCornerRadius = effectiveDetent == .large ? 0 : BorderRadius.borderRadius400
@@ -81,6 +86,8 @@ struct MapBottomSheet<Content: View>: View {
             // 따라서 실제로 화면에 보이는 높이는 largeHeight - currentOffset입니다.
             let visibleHeight = largeHeight - currentOffset
             let contentHeight = max(visibleHeight - MapBottomSheetMetric.handleAreaHeight, 0)
+            // large detent에서는 화면 전체를 덮으므로 상단 모서리를 직각으로 만듭니다.
+            let topRadius: CGFloat = effectiveDetent == .large ? 0 : BorderRadius.borderRadius400
 
             VStack {
                 Spacer(minLength: 0)
@@ -120,8 +127,26 @@ struct MapBottomSheet<Content: View>: View {
                     }
                 }
             }
+            .onAppear {
+                onVisibleHeightChanged?(focusInset(for: effectiveDetent, mediumHeight: effectiveMediumHeight))
+            }
+            .onChange(of: effectiveDetent) { _, newDetent in
+                onVisibleHeightChanged?(focusInset(for: newDetent, mediumHeight: effectiveMediumHeight))
+            }
         }
         .ignoresSafeArea(edges: .bottom)
+    }
+}
+
+// MARK: - Modifier
+
+extension MapBottomSheet {
+    /// 시트가 화면을 덮는 높이(정착 시점 기준)가 바뀔 때 호출됩니다.
+    /// collapsed/medium 은 해당 detent 높이를, large 는 0(지도 전체가 가려져 보정 무의미)을 전달합니다.
+    func onVisibleHeightChanged(_ handler: @escaping (CGFloat) -> Void) -> MapBottomSheet {
+        var copy = self
+        copy.onVisibleHeightChanged = handler
+        return copy
     }
 }
 
@@ -153,6 +178,16 @@ private extension MapBottomSheet {
             return mediumHeight
         case .large:
             return largeHeight
+        }
+    }
+
+    /// 지도 핀 포커싱 보정에 사용할 "시트가 가리는 높이"를 반환합니다.
+    /// large 는 지도 전체가 가려져 보정이 무의미하므로 0을 반환합니다.
+    private func focusInset(for detent: Detent, mediumHeight: CGFloat) -> CGFloat {
+        switch detent {
+        case .collapsed: return MapBottomSheetMetric.collapsedHeight
+        case .medium: return mediumHeight
+        case .large: return 0
         }
     }
 }

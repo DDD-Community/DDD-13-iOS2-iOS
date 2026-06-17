@@ -155,7 +155,7 @@ private extension NearbyPlaceAddressTooltip {
 private struct NearbyPlaceThumbnail: View {
     var body: some View {
         // TODO: API 명세보고 카테고리별 이미지 수정해야 할 듯.
-        Image(assetName: "ic_food_32")
+        Image.Asset.icMapPinRestaurant
             .resizable()
             .scaledToFill()
             .frame(width: 32, height: 32)
