@@ -39,6 +39,7 @@ struct StationSearchSheet: View {
             )
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .dismissKeyboardOnTap()
     }
 }
 

@@ -15,13 +15,20 @@ import UseCase
 @DependencyClient
 public struct SearchStationsClient: Sendable {
     public var searchStations: @Sendable (_ keyword: String) async throws -> [Station]
+    public var findNearestStation: @Sendable (_ longitude: Double, _ latitude: Double) async throws -> Station?
 }
 
 public extension SearchStationsClient {
-    static func live(useCase: SearchStationsUseCase) -> Self {
+    static func live(
+        searchByKeyword: SearchStationsByKeywordUseCase,
+        findNearest: FindNearestStationUseCase
+    ) -> Self {
         Self(
             searchStations: { keyword in
-                try await useCase.execute(keyword: keyword)
+                try await searchByKeyword.execute(keyword: keyword)
+            },
+            findNearestStation: { longitude, latitude in
+                try await findNearest.execute(longitude: longitude, latitude: latitude)
             }
         )
     }

@@ -28,6 +28,7 @@ public struct NearbyPlaceListSheetFeature {
         public var selectedCategory: NearbyPlaceCategory = .all // 카테고리
         public var isParkingAvailableSelected = false // 주차 가능 여부
         public var isReservableSelected = false // 예약 가능여부
+        public var selectedPlaceDetail: SelectedPlaceDetailSheetFeature.State = .mock
 
         public init() {}
     }
@@ -36,11 +37,16 @@ public struct NearbyPlaceListSheetFeature {
         case categoryTapped(NearbyPlaceCategory)
         case parkingAvailableFilterTapped
         case reservableFilterTapped
+        case selectedPlaceDetail(SelectedPlaceDetailSheetFeature.Action)
     }
 
     public init() {}
 
     public var body: some ReducerOf<Self> {
+        Scope(state: \.selectedPlaceDetail, action: \.selectedPlaceDetail) {
+            SelectedPlaceDetailSheetFeature()
+        }
+
         Reduce { state, action in
             switch action {
             case .categoryTapped(let category):
@@ -56,6 +62,9 @@ public struct NearbyPlaceListSheetFeature {
             case .reservableFilterTapped:
                 state.isReservableSelected.toggle()
                 Log.debug("역근처 장소 예약 가능 필터: \(state.isReservableSelected ? "선택" : "해제")")
+                return .none
+
+            case .selectedPlaceDetail:
                 return .none
             }
         }

@@ -4,35 +4,105 @@
 //
 
 import SwiftUI
+
 import ComposableArchitecture
+
+import CoreDependencies
 import DesignSystem
+import Entity
 
 public struct GroupDetailView: View {
     private let store: StoreOf<GroupDetailFeature>
+
+    @Environment(\.dismiss) private var dismiss
 
     public init(store: StoreOf<GroupDetailFeature>) {
         self.store = store
     }
 
     public var body: some View {
-        ZStack(alignment: .bottom) {
-            VStack(spacing: Spacing.spacing300) {
-                Text(store.group.name)
-                    .pretendardCustomFont(textStyle: .headingSmall)
-                    .foregroundStyle(.gray900)
+        VStack(spacing: 0) {
+            NavigationPage(
+                background: .clear,
+                leadingAction: { dismiss() },
+                trailingIcons: [
+                    NavigationIconItem(icon: .userPlus24) {},
+                    NavigationIconItem(icon: .verticalMenu24) {}
+                ]
+            )
 
-                Text("모임 상세 화면 (임시)")
-                    .pretendardCustomFont(textStyle: .bodySmall)
-                    .foregroundStyle(.gray600)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(.gray200)
-            // TODO: 임시로 여기다가 붙여놓음 나중에 상세 지도 뷰 위에 오버레이 시켜주기
-            MapBottomSheet(mode: .resizable) {
-                NearbyPlaceListSheet(store: store.scope(state: \.nearbyPlaceList, action: \.nearbyPlaceList))
+            Tab(
+                labels: store.tabs.map(\.label),
+                selectedIndex: tabBinding,
+                variant: .fixed,
+                size: .small
+            )
+
+            TabContent(store: store)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .toolbar(.hidden, for: .navigationBar)
+    }
+
+    private var tabBinding: Binding<Int> {
+        Binding(
+            get: { store.selectedTabIndex },
+            set: { store.send(.tabSelected($0)) }
+        )
+    }
+}
+
+// MARK: - Tab Content
+
+private struct TabContent: View {
+    let store: StoreOf<GroupDetailFeature>
+
+    var body: some View {
+        switch store.selectedTab {
+        case .home:
+            HomeTab(store: store)
+
+        case .vote:
+            VoteTab()
+
+        case .myPlace:
+            MyPlaceTab(store: store)
+        }
+    }
+}
+
+// MARK: - Preview
+
+private struct GroupDetailPreview: View {
+    let groupIndex: Int
+
+    @State private var group: Entity.Group?
+
+    var body: some View {
+        NavigationStack {
+            if let group {
+                GroupDetailView(
+                    store: Store(initialState: GroupDetailFeature.State(group: group)) {
+                        GroupDetailFeature()
+                    }
+                )
+            } else {
+                ProgressView()
+                    .task {
+                        let groups = (try? await GroupClient.previewValue.fetchGroups()) ?? []
+                        group = groups.indices.contains(groupIndex) ? groups[groupIndex] : groups.first
+                    }
             }
         }
-        .navigationTitle(store.group.name)
-        .navigationBarTitleDisplayMode(.inline)
     }
+}
+
+#Preview("멤버 있음") {
+    BangawoPreview {
+        GroupDetailPreview(groupIndex: 0)
+    }
+}
+
+#Preview("멤버 없음") {
+    GroupDetailPreview(groupIndex: 1)
 }
