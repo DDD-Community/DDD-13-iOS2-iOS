@@ -459,7 +459,7 @@ private enum HomePreview {
                 id: 3,
                 name: "선정 완료 모임",
                 locationStatus: .confirmed,
-                dateVoteStatus: .confirmed,
+                dateVoteStatus: .completed,
                 memberCount: 4
             )
         ])
