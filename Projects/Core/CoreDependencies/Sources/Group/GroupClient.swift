@@ -114,6 +114,7 @@ public extension GroupClient {
                 profileImageUrl: nil,
                 isHost: true,
                 isMe: true,
+                attendanceStatus: .join,
                 departurePlaces: [
                     DeparturePlace(
                         id: 1,
@@ -133,6 +134,7 @@ public extension GroupClient {
                 profileImageUrl: nil,
                 isHost: false,
                 isMe: false,
+                attendanceStatus: .late,
                 departurePlaces: []
             )
         ]

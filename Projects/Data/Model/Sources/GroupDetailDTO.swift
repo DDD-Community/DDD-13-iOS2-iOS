@@ -58,6 +58,8 @@ public extension GroupDetailMemberResponseDTO {
             profileImageUrl: profileImageUrl,
             isHost: isHost,
             isMe: isMe,
+            // TODO: 서버 참여 상태 필드 연동 시 응답값으로 교체
+            attendanceStatus: .join,
             departurePlaces: departurePlaces.map { $0.toEntity() }
         )
     }
