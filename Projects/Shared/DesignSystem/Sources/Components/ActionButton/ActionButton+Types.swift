@@ -5,7 +5,7 @@
 
 extension ActionButton {
     public enum ButtonLayout {
-        case single(title: String, action: () -> Void)
+        case single(title: String, isDisabled: Bool = false, action: () -> Void)
         case dual(
             primaryTitle: String,
             primaryAction: () -> Void,

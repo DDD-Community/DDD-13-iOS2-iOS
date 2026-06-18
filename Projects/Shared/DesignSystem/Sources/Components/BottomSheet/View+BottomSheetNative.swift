@@ -9,7 +9,6 @@ public extension View {
     func bottomSheet<Content: View>(
         isPresented: Binding<Bool>,
         header: BottomSheet<Content>.HeaderConfig? = nil,
-        contentVerticalPadding: CGFloat = 0,
         primaryButton: BottomSheet<Content>.ButtonConfig? = nil,
         secondaryButton: BottomSheet<Content>.ButtonConfig? = nil,
         @ViewBuilder content: @escaping () -> Content
@@ -17,7 +16,6 @@ public extension View {
         sheet(isPresented: isPresented) {
             NativeSheetContent(
                 header: header,
-                contentVerticalPadding: contentVerticalPadding,
                 primaryButton: primaryButton,
                 secondaryButton: secondaryButton,
                 content: content
@@ -35,7 +33,6 @@ private enum Metric {
 
 private struct NativeSheetContent<Content: View>: View {
     let header: BottomSheet<Content>.HeaderConfig?
-    let contentVerticalPadding: CGFloat
     let primaryButton: BottomSheet<Content>.ButtonConfig?
     let secondaryButton: BottomSheet<Content>.ButtonConfig?
     let content: () -> Content
@@ -62,7 +59,8 @@ private struct NativeSheetContent<Content: View>: View {
             ScrollView {
                 content()
                     .padding(.horizontal, Spacing.spacing400)
-                    .padding(.vertical, contentVerticalPadding)
+                    .padding(.top, Spacing.spacing300)
+                    .padding(.bottom, Spacing.spacing200)
                     .background(
                         GeometryReader { geo in
                             Color.clear
@@ -157,6 +155,7 @@ private extension NativeSheetContent {
                         variant: .weak,
                         size: .large,
                         widthType: .maxWidth,
+                        isDisabled: !secondary.isEnabled,
                         isKeyboardAttached: isKeyboardVisible,
                         action: secondary.action
                     )
@@ -167,6 +166,7 @@ private extension NativeSheetContent {
                         variant: .solid,
                         size: .large,
                         widthType: .maxWidth,
+                        isDisabled: !primary.isEnabled,
                         isKeyboardAttached: isKeyboardVisible,
                         action: primary.action
                     )
@@ -201,7 +201,6 @@ private extension NativeSheetContent {
                         description: "설명 텍스트가 여기에 표시됩니다.",
                         onClose: { isPresented = false }
                     ),
-                    contentVerticalPadding: Spacing.spacing400,
                     primaryButton: .init(title: "확인") { isPresented = false }
                 ) {
                     Text("컨텐츠 영역")
@@ -225,7 +224,6 @@ private extension NativeSheetContent {
                         description: "설명 텍스트가 여기에 표시됩니다.",
                         onClose: { isPresented = false }
                     ),
-                    contentVerticalPadding: Spacing.spacing400,
                     primaryButton: .init(title: "확인") { isPresented = false },
                     secondaryButton: .init(title: "취소") { isPresented = false }
                 ) {
@@ -247,7 +245,6 @@ private extension NativeSheetContent {
                 .bottomSheet(
                     isPresented: $isPresented,
                     header: .init(title: "키보드 테스트", onClose: { isPresented = false }),
-                    contentVerticalPadding: Spacing.spacing400,
                     primaryButton: .init(title: "확인") { isPresented = false }
                 ) {
                     TextField("입력하세요", text: $text)

@@ -27,7 +27,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     prepareDependencies {
       $0.searchStationsClient = SearchStationsFactory.makeClient()
-      $0.socialAuthClient = AuthFactory.makeClient()
+      $0.socialAuthClient = AuthFactory.makeSocialAuthClient()
+      $0.signupTermsClient = AuthFactory.makeSignupTermsClient()
+      $0.nicknameClient = AuthFactory.makeNicknameClient()
+      $0.registerMemberClient = AuthFactory.makeRegisterMemberClient()
+      $0.groupClient = GroupFactory.makeClient()
+      $0.themeTagClient = ThemeTagFactory.makeClient()
     }
     
     initializeNaverLoginSDK()

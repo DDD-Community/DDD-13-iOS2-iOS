@@ -14,6 +14,7 @@ import Utill
 
 public enum KakaoLocalEndpoint {
     case searchKeyword(query: String, categoryGroupCode: String)
+    case searchCategory(x: String, y: String, radius: Int, categoryGroupCode: String, sort: String)
 }
 
 extension KakaoLocalEndpoint: EndPoint {
@@ -24,12 +25,14 @@ extension KakaoLocalEndpoint: EndPoint {
     public var path: String {
         switch self {
         case .searchKeyword: return "/v2/local/search/keyword.json"
+        case .searchCategory: return "/v2/local/search/category.json"
         }
     }
 
     public var method: HTTPMethod {
         switch self {
         case .searchKeyword: return .get
+        case .searchCategory: return .get
         }
     }
 
@@ -46,6 +49,15 @@ extension KakaoLocalEndpoint: EndPoint {
             return .requestParametersWithoutInterceptor(parameters: [
                 "query": query,
                 "category_group_code": categoryGroupCode
+            ])
+
+        case let .searchCategory(x, y, radius, categoryGroupCode, sort):
+            return .requestParametersWithoutInterceptor(parameters: [
+                "category_group_code": categoryGroupCode,
+                "x": x,
+                "y": y,
+                "radius": radius,
+                "sort": sort
             ])
         }
     }

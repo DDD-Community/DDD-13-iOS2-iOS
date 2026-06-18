@@ -16,6 +16,10 @@ public enum AppEnvironment {
         readRequired(key: "KAKAO_APP_KEY")
     }
 
+    public static var serverBaseURL: String {
+        readRequired(key: "SERVER_BASE_URL")
+    }
+
     private static func readRequired(key: String) -> String {
         guard
             let value = Bundle.main.object(forInfoDictionaryKey: key) as? String,

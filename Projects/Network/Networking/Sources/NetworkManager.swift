@@ -45,7 +45,7 @@ public final class NetworkManager: Sendable {
         
         do {
             let decodedData = try JSONDecoder().decode(T.self, from: data)
-            Log.debug("✅ [Decode Success] \(T.self)")
+            Log.debug("✅ [Decode Success] \(decodedData)")
             return decodedData
         } catch {
             if let raw = String(data: data, encoding: .utf8) {
@@ -55,6 +55,33 @@ public final class NetworkManager: Sendable {
             throw .decodingFailed
         }
 
+    }
+    // 서버에서 빈 body를 응답해줄 경우 사용
+    public func requestVoid(_ endPoint: EndPoint) async throws(NetworkError) {
+        let request = makeDataRequest(endPoint)
+        Log.debug("🌐 [Request] \(endPoint.method.rawValue) \(endPoint.baseURL)\(endPoint.path)")
+        let response = await request.serializingData().response
+
+        switch response.result {
+        case .success(let responseData):
+            Log.debug("✅ [Response] \(responseData.count) bytes")
+            return
+        case .failure(let afError):
+            Log.debug("❌ [Response Failed] \(afError.localizedDescription)")
+            if let underlyingError = afError.underlyingError as? NetworkError {
+                throw underlyingError
+            }
+            if let statusCode = response.response?.statusCode {
+                let message = response.data.flatMap { String(data: $0, encoding: .utf8) }
+                if (200..<300).contains(statusCode) { // body가 비면 response를 serialized하지 못하기 때문에 에러로 빠진다. 이후 상태코드를 통해 api 성공인지 실패인지 확인한다.
+                    Log.debug("✅ [HTTP \(statusCode)] Empty response body")
+                    return
+                }
+                Log.debug("❌ [HTTP \(statusCode)] \(message ?? "No response body")")
+                throw .serverError(statusCode: statusCode, message: message)
+            }
+            throw .connectionFailed
+        }
     }
     
     private func makeDataRequest(_ endPoint: EndPoint) -> DataRequest {

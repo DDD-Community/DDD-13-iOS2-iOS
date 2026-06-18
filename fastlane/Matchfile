@@ -1,4 +1,4 @@
-git_url("git@github.com:Roy-wonji/FastlaneMatch.git")
+git_url("https://github.com/Roy-wonji/FastlaneMatch.git")
 storage_mode("git")
 app_identifier(["com.ddd-ios2.Bangawo"])
 include_mac_in_profiles(true)

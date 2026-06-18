@@ -124,7 +124,8 @@ extension InfoPlistDictionary {
         .string("kakaokompassauth"),
         .string("kakaolink"),
         .string("naversearchapp"),
-        .string("naversearchthirdlogin")
+        .string("naversearchthirdlogin"),
+        .string("nmap")
       ])
     ]
     return self.merging(dict) { (_, new) in new }
@@ -203,6 +204,10 @@ extension InfoPlistDictionary {
   
   func setBaseURL(_ value: String) -> InfoPlistDictionary {
     return self.merging(["BASE_URL": .string(value)]) { (_, new) in new }
+  }
+
+  func setServerBaseURL(_ value: String) -> InfoPlistDictionary {
+    return self.merging(["SERVER_BASE_URL": .string(value)]) { (_, new) in new }
   }
 
   func setKakaoAppKey(_ value: String) -> InfoPlistDictionary {

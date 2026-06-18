@@ -18,7 +18,7 @@ public struct AuthFlowView: View {
 
     public var body: some View {
         NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
-            LoginView(store: store.scope(state: \.login, action: \.login))
+            LoginView(store: store.scope(state: \.login, action: \.login)) // 기본 로그인뷰 부터 스택 쌓고
                 .toolbar(.hidden, for: .navigationBar)
         } destination: { pathStore in
             switch pathStore.case {
