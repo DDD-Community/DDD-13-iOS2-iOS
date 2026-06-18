@@ -7,110 +7,111 @@ import SwiftUI
 
 import ComposableArchitecture
 
+import CoreDependencies
 import DesignSystem
+import Entity
 
 /// 모임 상세 "홈" 탭.
-/// 상단 `TopPage`부터 멤버 리스트(`MemberList`)까지 전체가 세로 스크롤된다.
+/// 상단 영역(`HomeTopArea`)부터 멤버 리스트(`MemberList`)까지 전체가 세로 스크롤된다.
 struct HomeTab: View {
     let store: StoreOf<GroupDetailFeature>
 
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                TopPage(
-                    d3Asset: .groupDetail,
-                    title: store.group.name,
-                    description: store.group.themeTagDisplay,
-                    buttonTitle: "장소 정하기",
-                    buttonVariant: .solid,
-                    buttonSize: .small,
-                    showLowerArea: false,
-                    buttonAction: { store.send(.decidePlaceTapped) }
-                )
+                HomeTopArea(store: store)
 
                 MemberList(store: store)
                     .padding(.horizontal, Spacing.spacing400)
             }
         }
+        .background(Colors.gray200)
     }
 }
 
-// MARK: - Member List
+// MARK: - Preview
 
-/// 홈 탭의 멤버 리스트 영역.
-/// 멤버가 있으면 "나"/"팀원" 카드를, 없으면 친구 초대 버튼을 노출한다.
-private struct MemberList: View {
-    let store: StoreOf<GroupDetailFeature>
+#if DEBUG
+private extension Entity.Group {
+    static func preview(
+        name: String,
+        dateVoteStatus: GroupDateVoteStatus,
+        locationStatus: GroupLocationStatus
+    ) -> Entity.Group {
+        Entity.Group(
+            id: 1,
+            meetingId: 1,
+            name: name,
+            themeTagCode: "FOOD",
+            themeTagDisplay: "맛집 탐방",
+            listStatus: .inProgress,
+            locationStatus: locationStatus,
+            dateVoteStatus: dateVoteStatus,
+            locationAddress: "서울 강남구 테헤란로 1",
+            memberCount: 2,
+            members: [
+                GroupMember(id: 1, nickname: "나", profileImageUrl: nil, attendanceStatus: .join),
+                GroupMember(id: 2, nickname: "팀원", profileImageUrl: nil, attendanceStatus: .join)
+            ]
+        )
+    }
+}
 
-    var body: some View {
-        VStack(spacing: Spacing.spacing250) {
-            if store.hasMembers {
-                // TODO: 카드뷰 디자인 확정 시 실제 멤버 카드로 교체
-                PlaceholderMemberCard()
-                ForEach(store.group.members) { _ in
-                    PlaceholderMemberCard()
-                }
-            } else {
-                InviteFriendButton {
-                    store.send(.inviteFriendTapped)
-                }
-            }
+private struct HomeTabStatePreview: View {
+    private let store: StoreOf<GroupDetailFeature>
+
+    init(group: Entity.Group) {
+        self.store = Store(initialState: GroupDetailFeature.State(group: group)) {
+            GroupDetailFeature()
+        } withDependencies: {
+            $0.groupClient = .previewValue
         }
     }
-}
 
-// MARK: - Placeholder Member Card
-
-private struct PlaceholderMemberCard: View {
     var body: some View {
-        RoundedRectangle(cornerRadius: BorderRadius.borderRadius300)
-            .fill(
-                RadialGradient(
-                    colors: [Colors.grayAlpha50, Colors.grayAlpha200],
-                    center: .center,
-                    startRadius: 0,
-                    endRadius: Metric.cardGradientRadius
-                )
-            )
-            .frame(maxWidth: .infinity)
-            .frame(height: Metric.cardHeight)
+        // 멤버 영역은 GroupDetailView 의 onAppear 로 fetch 되므로, 단독 프리뷰에서는 직접 트리거한다.
+        HomeTab(store: store)
+            .task { store.send(.onAppear) }
     }
 }
 
-// MARK: - Invite Friend Button
-
-private struct InviteFriendButton: View {
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: Spacing.spacing250) {
-                Image.Asset.icPlus24
-                    .resizable()
-                    .frame(width: Sizing.sizing200, height: Sizing.sizing200)
-
-                BangawoText("친구 초대하기", textStyle: .bodyLarge)
-                    .foregroundStyle(Colors.gray800)
-            }
-            .padding(Spacing.spacing200)
-            .padding(Spacing.spacing200)
-            .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: BorderRadius.borderRadius300)
-                    .fill(Colors.gray50)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: BorderRadius.borderRadius300)
-                    .stroke(Colors.gray200, lineWidth: BorderWidth.borderWidth150)
-            )
-        }
-        .buttonStyle(.plain)
+#Preview("기본 (before/before)") {
+    BangawoPreview {
+        HomeTabStatePreview(
+            group: .preview(name: "강남 모임", dateVoteStatus: .before, locationStatus: .before)
+        )
     }
 }
 
-// MARK: - Constants
-
-private enum Metric {
-    static let cardHeight: CGFloat = 88
-    static let cardGradientRadius: CGFloat = 160
+#Preview("케이스1 날짜 투표 (inProgress/before)") {
+    BangawoPreview {
+        HomeTabStatePreview(
+            group: .preview(name: "강남 모임", dateVoteStatus: .inProgress, locationStatus: .before)
+        )
+    }
 }
+
+#Preview("케이스2 날짜 확정 (completed/recommended)") {
+    BangawoPreview {
+        HomeTabStatePreview(
+            group: .preview(name: "강남 모임", dateVoteStatus: .completed, locationStatus: .recommended)
+        )
+    }
+}
+
+#Preview("케이스3 장소 투표 (completed/voting)") {
+    BangawoPreview {
+        HomeTabStatePreview(
+            group: .preview(name: "강남 모임", dateVoteStatus: .completed, locationStatus: .voting)
+        )
+    }
+}
+
+#Preview("케이스4 확정 장소 (completed/confirmed)") {
+    BangawoPreview {
+        HomeTabStatePreview(
+            group: .preview(name: "강남 모임", dateVoteStatus: .completed, locationStatus: .confirmed)
+        )
+    }
+}
+#endif
