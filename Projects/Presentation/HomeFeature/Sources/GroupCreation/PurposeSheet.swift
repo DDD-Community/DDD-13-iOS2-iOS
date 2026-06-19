@@ -17,7 +17,7 @@ private struct PurposeSheetModifier: ViewModifier {
     @Bindable var store: StoreOf<GroupCreationFeature>
 
     func body(content: Content) -> some View {
-        content.bottomSheet(
+        content.bottomSheetNative(
             isPresented: $store.isPurposeSheetPresented,
             header: .init(
                 title: "모임 목적",

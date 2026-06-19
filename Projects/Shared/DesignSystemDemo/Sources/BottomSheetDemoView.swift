@@ -42,7 +42,7 @@ private struct ContentOnlySection: View {
             .card()
         }
         .padding(.horizontal, 20)
-        .bottomSheet(isPresented: $isPresented) {
+        .bottomSheetNative(isPresented: $isPresented) {
             Text("컨텐츠만 있는 시트입니다.")
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -67,7 +67,7 @@ private struct HeaderOnlySection: View {
             .card()
         }
         .padding(.horizontal, 20)
-        .bottomSheet(
+        .bottomSheetNative(
             isPresented: $isPresented,
             header: .init(
                 title: "제목입니다",
@@ -99,7 +99,7 @@ private struct SingleButtonSection: View {
             .card()
         }
         .padding(.horizontal, 20)
-        .bottomSheet(
+        .bottomSheetNative(
             isPresented: $isPresented,
             header: .init(
                 title: "제목입니다",
@@ -132,7 +132,7 @@ private struct DoubleButtonSection: View {
             .card()
         }
         .padding(.horizontal, 20)
-        .bottomSheet(
+        .bottomSheetNative(
             isPresented: $isPresented,
             header: .init(
                 title: "제목입니다",
@@ -166,7 +166,7 @@ private struct ScrollableSection: View {
             .card()
         }
         .padding(.horizontal, 20)
-        .bottomSheet(
+        .bottomSheetNative(
             isPresented: $isPresented,
             header: .init(title: "스크롤 테스트", onClose: { isPresented = false }),
             primaryButton: .init(title: "확인") { isPresented = false }
@@ -200,7 +200,7 @@ private struct KeyboardSection: View {
             .card()
         }
         .padding(.horizontal, 20)
-        .bottomSheet(
+        .bottomSheetNative(
             isPresented: $isPresented,
             header: .init(title: "키보드 테스트", onClose: { isPresented = false }),
             primaryButton: .init(title: "확인") { isPresented = false }
@@ -250,7 +250,7 @@ private struct OverlayKeyboardSection: View {
             .card()
         }
         .padding(.horizontal, 20)
-        .customBottomSheet(
+        .bottomSheet(
             isPresented: $isPresented,
             header: .init(title: "키보드 테스트 (Overlay)", onClose: { isPresented = false }),
             primaryButton: .init(title: "확인") { isPresented = false }

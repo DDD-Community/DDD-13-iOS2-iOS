@@ -91,7 +91,7 @@ public struct ProfileInputView: View {
             .padding(.horizontal, Spacing.spacing450)
             .padding(.bottom, Spacing.spacing400)
         }
-        .bottomSheet(
+        .bottomSheetNative(
             isPresented: Binding(
                 get: { store.imagePicker != nil },
                 set: {
