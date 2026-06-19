@@ -63,9 +63,9 @@ public struct TopPage: View {
                 buttonAction: buttonAction
             )
 
-            if showLowerArea {
-                LowerArea(label: badgeLabel, leadingIcon: badgeLeadingIcon)
-            }
+            LowerArea(label: badgeLabel, leadingIcon: badgeLeadingIcon)
+                .opacity(showLowerArea ? 1 : 0)
+                .accessibilityHidden(!showLowerArea)
         }
         .padding(.horizontal, Spacing.spacing400)
         .padding(.top, Spacing.spacing400)
@@ -176,6 +176,17 @@ private extension TopPage {
                     buttonSize: .medium,
                     badgeLabel: "강남역 인근",
                     badgeLeadingIcon: Image.Asset.icStar24,
+                    buttonAction: {}
+                )
+
+                Divider()
+
+                TopPage(
+                    d3Asset: .avatarPlaceholder,
+                    title: "모임 정보를\n확인해 보세요",
+                    description: "참여 중인 모임의 상세 정보예요",
+                    buttonTitle: "수정",
+                    showLowerArea: false,
                     buttonAction: {}
                 )
             }

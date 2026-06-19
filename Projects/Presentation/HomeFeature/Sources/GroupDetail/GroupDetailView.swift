@@ -12,7 +12,7 @@ import DesignSystem
 import Entity
 
 public struct GroupDetailView: View {
-    private let store: StoreOf<GroupDetailFeature>
+    @Bindable private var store: StoreOf<GroupDetailFeature>
 
     @Environment(\.dismiss) private var dismiss
 
@@ -42,6 +42,12 @@ public struct GroupDetailView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .toolbar(.hidden, for: .navigationBar)
+        .task { store.send(.onAppear) }
+        .fullScreenCover(
+            item: $store.scope(state: \.destination?.dateVote, action: \.destination.dateVote)
+        ) { dateVoteStore in
+            DateVoteView(store: dateVoteStore)
+        }
     }
 
     private var tabBinding: Binding<Int> {
@@ -84,6 +90,8 @@ private struct GroupDetailPreview: View {
                 GroupDetailView(
                     store: Store(initialState: GroupDetailFeature.State(group: group)) {
                         GroupDetailFeature()
+                    } withDependencies: {
+                        $0.groupClient = .previewValue
                     }
                 )
             } else {

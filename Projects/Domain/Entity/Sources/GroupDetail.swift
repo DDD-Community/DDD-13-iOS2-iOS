@@ -44,6 +44,7 @@ public struct GroupDetailMember: Identifiable, Equatable, Sendable {
     public let profileImageUrl: String?
     public let isHost: Bool
     public let isMe: Bool
+    public let attendanceStatus: AttendanceStatus
     public let departurePlaces: [DeparturePlace]
 
     public init(
@@ -52,6 +53,7 @@ public struct GroupDetailMember: Identifiable, Equatable, Sendable {
         profileImageUrl: String?,
         isHost: Bool,
         isMe: Bool,
+        attendanceStatus: AttendanceStatus,
         departurePlaces: [DeparturePlace]
     ) {
         self.id = id
@@ -59,6 +61,7 @@ public struct GroupDetailMember: Identifiable, Equatable, Sendable {
         self.profileImageUrl = profileImageUrl
         self.isHost = isHost
         self.isMe = isMe
+        self.attendanceStatus = attendanceStatus
         self.departurePlaces = departurePlaces
     }
 }
