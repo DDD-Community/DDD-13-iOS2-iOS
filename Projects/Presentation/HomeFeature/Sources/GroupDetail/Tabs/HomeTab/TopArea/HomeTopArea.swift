@@ -39,7 +39,7 @@ struct HomeTopArea: View {
 
 // MARK: - Default Top Page (before / before)
 
-struct DefaultTopPage: View {
+private struct DefaultTopPage: View {
     let store: StoreOf<GroupDetailFeature>
 
     var body: some View {
@@ -50,6 +50,7 @@ struct DefaultTopPage: View {
             buttonTitle: "장소 정하기",
             buttonVariant: .solid,
             buttonSize: .small,
+            showButton: store.isMeHost,
             showLowerArea: false,
             buttonAction: { store.send(.decidePlaceTapped) }
         )
