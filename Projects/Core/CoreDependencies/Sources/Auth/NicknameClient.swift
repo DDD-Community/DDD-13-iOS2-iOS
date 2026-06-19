@@ -5,6 +5,8 @@
 //
 
 import ComposableArchitecture
+
+import DomainInterface
 import UseCase
 
 @DependencyClient
@@ -21,7 +23,12 @@ public extension NicknameClient {
 }
 
 extension NicknameClient: DependencyKey {
-    public static let liveValue = NicknameClient()
+    public static var liveValue: NicknameClient {
+        NicknameClient(
+            validate: { _ in throw NicknameClientError.notImplemented }
+        )
+    }
+
     public static let testValue = NicknameClient(
         validate: { _ in }
     )

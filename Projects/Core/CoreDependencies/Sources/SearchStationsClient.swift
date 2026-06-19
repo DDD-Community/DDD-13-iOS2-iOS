@@ -9,6 +9,7 @@ import Foundation
 
 import ComposableArchitecture
 
+import DomainInterface
 import Entity
 import UseCase
 
@@ -35,7 +36,13 @@ public extension SearchStationsClient {
 }
 
 extension SearchStationsClient: DependencyKey {
-    public static let liveValue: SearchStationsClient = SearchStationsClient()
+    public static var liveValue: SearchStationsClient {
+        SearchStationsClient(
+            searchStations: { _ in throw SearchStationsClientError.notImplemented },
+            findNearestStation: { _, _ in throw SearchStationsClientError.notImplemented }
+        )
+    }
+
     public static let testValue: SearchStationsClient = SearchStationsClient()
 }
 
