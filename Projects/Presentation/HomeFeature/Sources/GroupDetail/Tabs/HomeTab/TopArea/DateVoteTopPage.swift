@@ -37,7 +37,7 @@ struct DateVoteTopPage: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             DateVoteTopArea(
-                deadlineLabel: DateVoteFormatter.deadlineLabel(store.dateVote?.deadline),
+                deadline: store.dateVote?.deadline,
                 participantCount: store.dateVoteParticipantCount,
                 participationRatio: store.dateVoteParticipationRatio
             )
@@ -115,16 +115,20 @@ struct DateVoteTopPage: View {
 // MARK: - Date Vote Top Area
 
 private struct DateVoteTopArea: View {
-    let deadlineLabel: String
+    let deadline: String?
     let participantCount: Int
     let participationRatio: Double
+
+    @State private var now = Date()
+
+    private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.spacing100) {
             BangawoText("날짜 투표하기", textStyle: .titleMediumEmphasized)
                 .foregroundStyle(Colors.gray900)
 
-            BangawoText(deadlineLabel, textStyle: .bodyXSmall)
+            BangawoText(DateVoteFormatter.deadlineLabel(deadline, now: now), textStyle: .bodyXSmall)
                 .foregroundStyle(Colors.gray600)
 
             HStack(spacing: Spacing.spacing100) {
@@ -137,6 +141,7 @@ private struct DateVoteTopArea: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, Spacing.spacing200)
         .padding(.bottom, Spacing.spacing300)
+        .onReceive(timer) { now = $0 }
     }
 }
 
@@ -321,10 +326,23 @@ private enum DateVoteFormatter {
         return DateFormatterStore.string(from: date, format: "yyyy. MM. dd (E)")
     }
 
-    static func deadlineLabel(_ raw: String?) -> String {
-        guard let raw, let date = DateFormatterStore.date(from: raw, format: "yyyy-MM-dd") else { return "" }
+    static func deadlineLabel(_ raw: String?, now: Date) -> String {
+        guard
+            let raw,
+            let date = DateFormatterStore.date(from: raw, format: "yyyy-MM-dd"),
+            // 임시: deadline에 시각이 없어 해당 날짜의 23:59:59를 마감 시각으로 사용
+            let deadline = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: date)
+        else { return "" }
 
-        return "\(DateFormatterStore.string(from: date, format: "yyyy. MM. dd"))까지 투표할 수 있어요"
+        let remaining = max(0, Int(deadline.timeIntervalSince(now)))
+        let days = remaining / 86400
+        let hours = (remaining % 86400) / 3600
+        let minutes = (remaining % 3600) / 60
+        let seconds = remaining % 60
+
+        let time = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+        let dayPrefix = days > 0 ? "+\(days)일 " : ""
+        return "투표 시작일 기준 \(dayPrefix)\(time) 남았어요"
     }
 }
 
