@@ -17,9 +17,7 @@ struct BangawoApp: App {
         RootFeature()
     }
 
-    init() {
-        
-    }
+    init() {}
 
     var body: some Scene {
         WindowGroup {
