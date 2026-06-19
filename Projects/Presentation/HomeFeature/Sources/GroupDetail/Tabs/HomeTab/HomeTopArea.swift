@@ -10,6 +10,7 @@ import ComposableArchitecture
 
 import DesignSystem
 import Entity
+import Utill
 
 // MARK: - Home Top Area
 
@@ -317,18 +318,4 @@ private enum Constant {
         TempPlace(name: "강남역 모임 장소 B"),
         TempPlace(name: "강남역 모임 장소 C")
     ]
-}
-
-// TODO: 날짜 포맷 유틸리티 모듈화 시 공통 위치로 이동
-private enum DateFormatterStore {
-    static let day = formatter(locale: "ko_KR", format: "d")
-    static let weekdayEnglish = formatter(locale: "en_US", format: "EEE")
-    static let full = formatter(locale: "ko_KR", format: "M월 d일(E) a h시 m분")
-
-    private static func formatter(locale: String, format: String) -> DateFormatter {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: locale)
-        formatter.dateFormat = format
-        return formatter
-    }
 }
