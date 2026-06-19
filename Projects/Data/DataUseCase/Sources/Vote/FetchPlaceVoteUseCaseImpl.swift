@@ -14,7 +14,7 @@ public final class FetchPlaceVoteUseCaseImpl: FetchPlaceVoteUseCase {
         self.repository = repository
     }
 
-    public func execute(meetingId: Int64) async throws -> PlaceVote {
+    public func execute(meetingId: Int) async throws -> PlaceVote {
         try await repository.fetchPlaceVote(meetingId: meetingId)
     }
 }

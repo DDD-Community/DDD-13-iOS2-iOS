@@ -14,14 +14,14 @@ public struct PlaceVoteResponseDTO: Decodable, Sendable {
 }
 
 public struct PlaceVoteCandidateResponseDTO: Decodable, Sendable {
-    public let placeId: Int64
+    public let placeId: Int
     public let voteCount: Int
     public let isMyVote: Bool
     public let travelBurdens: [PlaceTravelBurdenResponseDTO]
 }
 
 public struct PlaceTravelBurdenResponseDTO: Decodable, Sendable {
-    public let memberId: Int64
+    public let memberId: Int
     public let seconds: Int
     public let transfers: Int
     public let isLongest: Bool

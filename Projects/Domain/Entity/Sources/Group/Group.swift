@@ -6,8 +6,8 @@
 import Foundation
 
 public struct Group: Identifiable, Equatable, Sendable {
-    public let id: Int64
-    public let meetingId: Int64
+    public let id: Int
+    public let meetingId: Int
     public let name: String
     public let themeTagCode: String
     public let themeTagDisplay: String
@@ -19,8 +19,8 @@ public struct Group: Identifiable, Equatable, Sendable {
     public let members: [GroupMember]
 
     public init(
-        id: Int64,
-        meetingId: Int64,
+        id: Int,
+        meetingId: Int,
         name: String,
         themeTagCode: String,
         themeTagDisplay: String,
@@ -46,13 +46,13 @@ public struct Group: Identifiable, Equatable, Sendable {
 }
 
 public struct GroupMember: Identifiable, Equatable, Sendable {
-    public let id: Int64
+    public let id: Int
     public let nickname: String
     public let profileImageUrl: String?
     public let attendanceStatus: GroupAttendanceStatus
 
     public init(
-        id: Int64,
+        id: Int,
         nickname: String,
         profileImageUrl: String?,
         attendanceStatus: GroupAttendanceStatus

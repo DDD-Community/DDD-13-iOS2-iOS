@@ -12,14 +12,14 @@ import Networking
 public final class VoteRepositoryImpl: VoteRepositoryProtocol {
     public init() {}
 
-    public func fetchDateVote(meetingId: Int64) async throws -> DateVote {
+    public func fetchDateVote(meetingId: Int) async throws -> DateVote {
         let response: DateVoteResponseDTO = try await NetworkManager.shared.request(
             VoteEndpoint.fetchDateVote(meetingId: meetingId)
         )
         return response.toEntity()
     }
 
-    public func fetchPlaceVote(meetingId: Int64) async throws -> PlaceVote {
+    public func fetchPlaceVote(meetingId: Int) async throws -> PlaceVote {
         let response: PlaceVoteResponseDTO = try await NetworkManager.shared.request(
             VoteEndpoint.fetchPlaceVote(meetingId: meetingId)
         )

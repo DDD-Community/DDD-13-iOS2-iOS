@@ -11,8 +11,8 @@ import UseCase
 
 @DependencyClient
 public struct VoteClient: Sendable {
-    public var fetchDateVote: @Sendable (_ meetingId: Int64) async throws -> DateVote
-    public var fetchPlaceVote: @Sendable (_ meetingId: Int64) async throws -> PlaceVote
+    public var fetchDateVote: @Sendable (_ meetingId: Int) async throws -> DateVote
+    public var fetchPlaceVote: @Sendable (_ meetingId: Int) async throws -> PlaceVote
 }
 
 public extension VoteClient {

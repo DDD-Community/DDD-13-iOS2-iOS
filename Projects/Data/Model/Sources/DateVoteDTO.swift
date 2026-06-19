@@ -13,7 +13,7 @@ public struct DateVoteResponseDTO: Decodable, Sendable {
 }
 
 public struct DateVoteOptionResponseDTO: Decodable, Sendable {
-    public let optionId: Int64
+    public let optionId: Int
     public let candidateDate: String
     public let voteCount: Int
     public let isMyVote: Bool
@@ -21,7 +21,7 @@ public struct DateVoteOptionResponseDTO: Decodable, Sendable {
 }
 
 public struct DateVoteVoterResponseDTO: Decodable, Sendable {
-    public let memberId: Int64
+    public let memberId: Int
     // TODO: 가입 미완료 테스트 계정으로 인한 임시 옵셔널 처리. 테스트 계정 정리 후 non-optional(String)로 복구
     public let nickname: String?
     public let profileImageUrl: String?

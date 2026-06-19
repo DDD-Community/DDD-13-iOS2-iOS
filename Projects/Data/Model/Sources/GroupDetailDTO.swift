@@ -6,7 +6,7 @@
 import Entity
 
 public struct GroupDetailResponseDTO: Decodable, Sendable {
-    public let meetingId: Int64
+    public let meetingId: Int
     public let name: String
     public let themeTagCode: String
     public let themeTagDisplay: String
@@ -17,7 +17,7 @@ public struct GroupDetailResponseDTO: Decodable, Sendable {
 }
 
 public struct GroupDetailMemberResponseDTO: Decodable, Sendable {
-    public let memberId: Int64
+    public let memberId: Int
     // TODO: 가입 미완료 테스트 계정으로 인한 임시 옵셔널 처리. 테스트 계정 정리 후 non-optional(String)로 복구
     public let nickname: String?
     public let profileImageUrl: String?

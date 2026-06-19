@@ -14,7 +14,7 @@ public final class UpdateAttendanceUseCaseImpl: UpdateAttendanceUseCase {
         self.repository = repository
     }
 
-    public func execute(groupId: Int64, attendanceStatus: AttendanceStatus) async throws {
+    public func execute(groupId: Int, attendanceStatus: AttendanceStatus) async throws {
         try await repository.updateAttendance(groupId: groupId, attendanceStatus: attendanceStatus)
     }
 }

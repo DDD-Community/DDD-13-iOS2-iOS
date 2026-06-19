@@ -29,15 +29,15 @@ public struct PlaceVote: Equatable, Sendable {
 }
 
 public struct PlaceVoteCandidate: Identifiable, Equatable, Sendable {
-    public let id: Int64
+    public let id: Int
     public let voteCount: Int
     public let isMyVote: Bool
     public let travelBurdens: [PlaceTravelBurden]
 
-    public var placeId: Int64 { id }
+    public var placeId: Int { id }
 
     public init(
-        id: Int64,
+        id: Int,
         voteCount: Int,
         isMyVote: Bool,
         travelBurdens: [PlaceTravelBurden]
@@ -50,15 +50,15 @@ public struct PlaceVoteCandidate: Identifiable, Equatable, Sendable {
 }
 
 public struct PlaceTravelBurden: Identifiable, Equatable, Sendable {
-    public let id: Int64
+    public let id: Int
     public let seconds: Int
     public let transfers: Int
     public let isLongest: Bool
 
-    public var memberId: Int64 { id }
+    public var memberId: Int { id }
 
     public init(
-        id: Int64,
+        id: Int,
         seconds: Int,
         transfers: Int,
         isLongest: Bool

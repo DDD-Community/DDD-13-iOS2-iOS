@@ -25,17 +25,18 @@ public struct DateVote: Equatable, Sendable {
     }
 }
 
+/// 날짜 후보. 
 public struct DateVoteOption: Identifiable, Equatable, Sendable {
-    public let id: Int64
+    public let id: Int
     public let candidateDate: String
     public let voteCount: Int
     public let isMyVote: Bool
     public let voters: [DateVoteVoter]
 
-    public var optionId: Int64 { id }
+    public var optionId: Int { id }
 
     public init(
-        id: Int64,
+        id: Int,
         candidateDate: String,
         voteCount: Int,
         isMyVote: Bool,
@@ -50,14 +51,14 @@ public struct DateVoteOption: Identifiable, Equatable, Sendable {
 }
 
 public struct DateVoteVoter: Identifiable, Equatable, Sendable {
-    public let id: Int64
+    public let id: Int
     public let nickname: String
     public let profileImageUrl: String?
 
-    public var memberId: Int64 { id }
+    public var memberId: Int { id }
 
     public init(
-        id: Int64,
+        id: Int,
         nickname: String,
         profileImageUrl: String?
     ) {

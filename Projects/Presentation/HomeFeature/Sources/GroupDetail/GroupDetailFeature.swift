@@ -152,7 +152,7 @@ public struct GroupDetailFeature {
         .ifLet(\.$destination, action: \.destination)
     }
 
-    private func fetchGroupDetailEffect(meetingId: Int64) -> Effect<Action> {
+    private func fetchGroupDetailEffect(meetingId: Int) -> Effect<Action> {
         let client = groupClient
         return .run { send in
             await send(.groupDetailResponse(
@@ -163,7 +163,7 @@ public struct GroupDetailFeature {
 
     /// 상단 영역 종류에 따라 날짜/장소 투표 현황을 조회한다.
     /// `HomeTopArea`가 `DateVoteTopPage`/`LocationVoteArea`를 노출하는 케이스에서만 호출된다.
-    private func fetchVoteEffect(meetingId: Int64, kind: HomeTopAreaKind) -> Effect<Action> {
+    private func fetchVoteEffect(meetingId: Int, kind: HomeTopAreaKind) -> Effect<Action> {
         let client = voteClient
 
         switch kind {

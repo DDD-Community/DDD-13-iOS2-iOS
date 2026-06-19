@@ -11,8 +11,8 @@ import Model
 public enum GroupEndpoint: EndPoint {
     case fetchGroups
     case createGroup(CreateGroupRequestDTO)
-    case fetchGroupDetail(meetingId: Int64)
-    case updateAttendance(groupId: Int64, UpdateAttendanceRequestDTO)
+    case fetchGroupDetail(meetingId: Int)
+    case updateAttendance(groupId: Int, UpdateAttendanceRequestDTO)
 
     public var baseURL: String { APIConfiguration.serverBaseURL }
 

@@ -13,8 +13,8 @@ import UseCase
 public struct GroupClient: Sendable {
     public var fetchGroups: @Sendable () async throws -> [Group]
     public var createGroup: @Sendable (_ name: String, _ themeTagCode: String) async throws -> CreateGroupResult
-    public var fetchGroupDetail: @Sendable (_ meetingId: Int64) async throws -> GroupDetail
-    public var updateAttendance: @Sendable (_ groupId: Int64, _ attendanceStatus: AttendanceStatus) async throws -> Void
+    public var fetchGroupDetail: @Sendable (_ meetingId: Int) async throws -> GroupDetail
+    public var updateAttendance: @Sendable (_ groupId: Int, _ attendanceStatus: AttendanceStatus) async throws -> Void
 }
 
 public extension GroupClient {

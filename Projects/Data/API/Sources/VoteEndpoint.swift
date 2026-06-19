@@ -9,8 +9,8 @@ import Foundations
 import Model
 
 public enum VoteEndpoint: EndPoint {
-    case fetchDateVote(meetingId: Int64)
-    case fetchPlaceVote(meetingId: Int64)
+    case fetchDateVote(meetingId: Int)
+    case fetchPlaceVote(meetingId: Int)
 
     public var baseURL: String { APIConfiguration.serverBaseURL }
 

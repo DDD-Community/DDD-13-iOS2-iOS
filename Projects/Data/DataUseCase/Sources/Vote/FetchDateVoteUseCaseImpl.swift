@@ -14,7 +14,7 @@ public final class FetchDateVoteUseCaseImpl: FetchDateVoteUseCase {
         self.repository = repository
     }
 
-    public func execute(meetingId: Int64) async throws -> DateVote {
+    public func execute(meetingId: Int) async throws -> DateVote {
         try await repository.fetchDateVote(meetingId: meetingId)
     }
 }

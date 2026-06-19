@@ -6,5 +6,5 @@
 import Entity
 
 public protocol FetchDateVoteUseCase: Sendable {
-    func execute(meetingId: Int64) async throws -> DateVote
+    func execute(meetingId: Int) async throws -> DateVote
 }

@@ -381,12 +381,12 @@ private struct MemberAvatarStack: View {
 
 #if DEBUG
 private enum HomePreview {
-    static func member(_ id: Int64) -> GroupMember {
+    static func member(_ id: Int) -> GroupMember {
         GroupMember(id: id, nickname: "멤버\(id)", profileImageUrl: nil, attendanceStatus: .join)
     }
 
     static func group(
-        id: Int64,
+        id: Int,
         name: String,
         locationStatus: GroupLocationStatus,
         dateVoteStatus: GroupDateVoteStatus,
@@ -403,7 +403,7 @@ private enum HomePreview {
             dateVoteStatus: dateVoteStatus,
             locationAddress: nil,
             memberCount: memberCount,
-            members: (1...memberCount).map { member(Int64($0)) }
+            members: (1...memberCount).map { member($0) }
         )
     }
 

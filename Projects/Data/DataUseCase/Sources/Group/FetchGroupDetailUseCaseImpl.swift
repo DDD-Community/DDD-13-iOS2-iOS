@@ -14,7 +14,7 @@ public final class FetchGroupDetailUseCaseImpl: FetchGroupDetailUseCase {
         self.repository = repository
     }
 
-    public func execute(meetingId: Int64) async throws -> GroupDetail {
+    public func execute(meetingId: Int) async throws -> GroupDetail {
         try await repository.fetchGroupDetail(meetingId: meetingId)
     }
 }

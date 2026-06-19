@@ -6,5 +6,5 @@
 import Entity
 
 public protocol FetchGroupDetailUseCase: Sendable {
-    func execute(meetingId: Int64) async throws -> GroupDetail
+    func execute(meetingId: Int) async throws -> GroupDetail
 }
