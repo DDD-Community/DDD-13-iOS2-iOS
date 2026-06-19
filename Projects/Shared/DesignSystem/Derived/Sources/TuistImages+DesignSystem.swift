@@ -144,6 +144,8 @@ public extension Image {
     public static let imgFace3d09: Image = Image("img_face_3d_09", bundle: Bundle.module)
     public static let imgFace3d10: Image = Image("img_face_3d_10", bundle: Bundle.module)
     public static let imgGroupDetail3d: Image = Image("img_group_detail_3d", bundle: Bundle.module)
+    public static let imgInviteBackground1: Image = Image("img_invite_background1", bundle: Bundle.module)
+    public static let imgInviteBackground2: Image = Image("img_invite_background2", bundle: Bundle.module)
     public static let imgLogin3d: Image = Image("img_login_3d", bundle: Bundle.module)
     public static let symApple: Image = Image("sym_apple", bundle: Bundle.module)
     public static let symKakao: Image = Image("sym_kakao", bundle: Bundle.module)
