@@ -13,7 +13,7 @@ public struct GroupDetailFeature {
     /// 모임 진행 단계에 따른 상단 영역 종류. `HomeTopArea`의 뷰 분기와 투표 현황 조회가 동일 기준을 공유한다.
     public enum HomeTopAreaKind: Equatable, Sendable {
         case dateVote        // (.inProgress, .before)
-        case confirmedDate   // (.completed, .recommended)
+        case confirmedDate   // (.completed, .before) or (.completed, .recommended)
         case locationVote    // (.completed, .voting)
         case confirmedPlace  // (.completed, .confirmed)
         case `default`
@@ -51,7 +51,7 @@ public struct GroupDetailFeature {
         public var homeTopAreaKind: HomeTopAreaKind {
             switch (group.dateVoteStatus, group.locationStatus) {
             case (.inProgress, .before): return .dateVote
-            case (.completed, .recommended): return .confirmedDate
+            case (.completed, .before), (.completed, .recommended): return .confirmedDate
             case (.completed, .voting): return .locationVote
             case (.completed, .confirmed): return .confirmedPlace
             default: return .default
