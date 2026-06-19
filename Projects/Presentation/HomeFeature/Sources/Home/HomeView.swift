@@ -226,7 +226,6 @@ private struct GroupInfoArea: View {
     private enum Metric {
         static let cornerRadius: CGFloat = BorderRadius.borderRadius350
         static let gradientEndRadius: CGFloat = 200
-        static let themeIconLength: CGFloat = Spacing.spacing400
     }
 
     private var shape: UnevenRoundedRectangle {
@@ -242,29 +241,30 @@ private struct GroupInfoArea: View {
     }
 
     var body: some View {
-        HStack(alignment: .top, spacing: Spacing.spacing300) {
+        HStack(spacing: Spacing.spacing300) {
             ThemeIcon(themeTagCode: group.themeTagCode)
-                .frame(width: Metric.themeIconLength, height: Metric.themeIconLength)
                 .clipShape(Circle())
 
-            VStack(alignment: .leading, spacing: Spacing.spacing50) {
-                BangawoText(group.themeTagDisplay, textStyle: .bodyMedium)
-                    .foregroundStyle(Colors.gray700)
+            HStack(alignment: .top, spacing: Spacing.spacing200) {
+                VStack(alignment: .leading, spacing: Spacing.spacing50) {
+                    BangawoText(group.themeTagDisplay, textStyle: .bodyMedium)
+                        .foregroundStyle(Colors.gray700)
 
-                BangawoText(group.name, textStyle: .titleMediumEmphasized)
-                    .foregroundStyle(Colors.gray800)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+                    BangawoText(group.name, textStyle: .titleMediumEmphasized)
+                        .foregroundStyle(Colors.gray800)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-            if isSelectionInProgress {
-                Badge(
-                    "진행 중",
-                    leadingIcon: Image.Asset.icStatus16,
-                    showLeadingIcon: true,
-                    variant: .solid,
-                    size: .medium
-                )
-                .frame(maxHeight: .infinity, alignment: .top)
+                if isSelectionInProgress {
+                    Badge(
+                        "진행 중",
+                        leadingIcon: Image.Asset.icStatus16,
+                        showLeadingIcon: true,
+                        variant: .solid,
+                        size: .medium
+                    )
+                    .frame(maxHeight: .infinity, alignment: .top)
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -294,9 +294,7 @@ private struct ThemeIcon: View {
 
     var body: some View {
         if let icon = Image.assetIfExists(named: "ic_purpose_" + themeTagCode.lowercased()) {
-            icon
-                .resizable()
-                .scaledToFit()
+            Asset(assetType: .image(icon), size: .s40)
         } else {
             Circle().fill(Colors.gray200)
         }
