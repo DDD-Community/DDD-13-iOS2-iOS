@@ -16,28 +16,47 @@ import Entity
 struct DateVoteTopPage: View {
     let store: StoreOf<GroupDetailFeature>
 
-    // TODO: 투표 모델 연동 시 로컬 상태 제거 후 store 데이터로 교체
+    // 투표/다시투표 토글은 로컬 인터랙션. 서버의 isMyVote 결과로 초기 동기화한다.
     @State private var hasVoted = false
     @State private var selectedIndices: Set<Int> = []
 
-    private var candidates: [DateVoteCandidate] { Constant.tempCandidates }
+    private var options: [DateVoteOption] {
+        store.dateVote?.options ?? []
+    }
 
     private var isAllSelected: Bool {
-        !candidates.isEmpty && selectedIndices.count == candidates.count
+        !options.isEmpty && selectedIndices.count == options.count
     }
 
     private var isHostAndMe: Bool {
         store.groupDetail?.members.first(where: { $0.isMe })?.isHost ?? false
     }
 
+    /// 후보 날짜에 표를 던진 고유 참여자 수.
+    private var participantCount: Int {
+        Set(options.flatMap { $0.voters.map(\.id) }).count
+    }
+
+    private var totalMemberCount: Int {
+        store.groupDetail?.members.count ?? 0
+    }
+
+    private var participationRatio: Double {
+        totalMemberCount > 0 ? Double(participantCount) / Double(totalMemberCount) : 0
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            DateVoteTopArea()
+            DateVoteTopArea(
+                deadlineLabel: DateVoteFormatter.deadlineLabel(store.dateVote?.deadline),
+                participantCount: participantCount,
+                participationRatio: participationRatio
+            )
 
             DateVoteSelectAllButton(isAllSelected: isAllSelected, onSelectAll: toggleSelectAll)
 
             DateVoteList(
-                candidates: candidates,
+                options: options,
                 hasVoted: hasVoted,
                 selectedIndices: selectedIndices,
                 onSelect: toggleSelection
@@ -61,6 +80,9 @@ struct DateVoteTopPage: View {
         .padding(.horizontal, Spacing.spacing400)
         .padding(.top, Spacing.spacing400)
         .padding(.bottom, Spacing.spacing500)
+        .onChange(of: store.dateVote, initial: true) { _, newValue in
+            syncVoteState(from: newValue)
+        }
     }
 
     // MARK: Actions
@@ -78,27 +100,41 @@ struct DateVoteTopPage: View {
     private func toggleSelectAll() {
         guard !hasVoted else { return }
 
-        let allIndices = Set(candidates.indices)
+        let allIndices = Set(options.indices)
         selectedIndices = selectedIndices == allIndices ? [] : allIndices
+    }
+
+    /// 서버가 내려준 `isMyVote`로 투표 완료 여부와 선택 상태를 초기화한다.
+    private func syncVoteState(from dateVote: DateVote?) {
+        guard let dateVote else { return }
+
+        let votedIndices = dateVote.options.enumerated()
+            .filter { $0.element.isMyVote }
+            .map(\.offset)
+        hasVoted = !votedIndices.isEmpty
+        selectedIndices = Set(votedIndices)
     }
 }
 
 // MARK: - Date Vote Top Area
 
 private struct DateVoteTopArea: View {
+    let deadlineLabel: String
+    let participantCount: Int
+    let participationRatio: Double
+
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.spacing100) {
             BangawoText("날짜 투표하기", textStyle: .titleMediumEmphasized)
                 .foregroundStyle(Colors.gray900)
 
-            // TODO: deadline 모델 연동 시 임시값 교체
-            BangawoText(Constant.tempRemainingLabel, textStyle: .bodyXSmall)
+            BangawoText(deadlineLabel, textStyle: .bodyXSmall)
                 .foregroundStyle(Colors.gray600)
 
             HStack(spacing: Spacing.spacing100) {
-                DateVoteProgressBar(ratio: Constant.tempParticipationRatio)
+                DateVoteProgressBar(ratio: participationRatio)
 
-                BangawoText("\(Constant.tempParticipantCount)명 참여", textStyle: .bodyXSmall)
+                BangawoText("\(participantCount)명 참여", textStyle: .bodyXSmall)
                     .foregroundStyle(Colors.gray600)
             }
         }
@@ -138,16 +174,16 @@ private struct DateVoteSelectAllButton: View {
 // MARK: - Date Vote List
 
 private struct DateVoteList: View {
-    let candidates: [DateVoteCandidate]
+    let options: [DateVoteOption]
     let hasVoted: Bool
     let selectedIndices: Set<Int>
     let onSelect: (Int) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ForEach(Array(candidates.enumerated()), id: \.element.id) { index, candidate in
+            ForEach(Array(options.enumerated()), id: \.element.id) { index, option in
                 DateVoteRow(
-                    candidate: candidate,
+                    option: option,
                     hasVoted: hasVoted,
                     isSelected: selectedIndices.contains(index),
                     onSelect: { onSelect(index) }
@@ -217,7 +253,7 @@ private struct DateVoteProgressBar: View {
 // MARK: - Date Vote Row
 
 private struct DateVoteRow: View {
-    let candidate: DateVoteCandidate
+    let option: DateVoteOption
     let hasVoted: Bool
     let isSelected: Bool
     let onSelect: () -> Void
@@ -237,12 +273,12 @@ private struct DateVoteRow: View {
         HStack(spacing: Spacing.spacing250) {
             DateVoteRowIndicator(hasVoted: hasVoted, isSelected: isSelected)
 
-            BangawoText(candidate.dateLabel, textStyle: .bodyMediumEmphasized)
+            BangawoText(DateVoteFormatter.dateLabel(option.candidateDate), textStyle: .bodyMediumEmphasized)
                 .foregroundStyle(Colors.gray800)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             if hasVoted {
-                Text("\(candidate.voteCount)명 투표")
+                Text("\(option.voteCount)명 투표")
                     .pretendardFont(family: .Medium, size: Metric.voteLabelFontSize)
                     .foregroundStyle(isSelected ? Colors.red500 : Colors.gray800)
             }
@@ -277,13 +313,41 @@ private struct DateVoteRowIndicator: View {
     }
 }
 
-// MARK: - Temp Models
+// MARK: - Date Vote Formatter
 
-// TODO: 날짜 투표 모델 구현 시 Entity 로 교체
-private struct DateVoteCandidate: Identifiable {
-    let id = UUID()
-    let dateLabel: String
-    let voteCount: Int
+private enum DateVoteFormatter {
+    static let inputFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = Locale(identifier: "ko_KR")
+        return formatter
+    }()
+
+    static let dateDisplayFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy. MM. dd (E)"
+        formatter.locale = Locale(identifier: "ko_KR")
+        return formatter
+    }()
+
+    static let deadlineDisplayFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy. MM. dd"
+        formatter.locale = Locale(identifier: "ko_KR")
+        return formatter
+    }()
+
+    static func dateLabel(_ raw: String) -> String {
+        guard let date = inputFormatter.date(from: raw) else { return raw }
+
+        return dateDisplayFormatter.string(from: date)
+    }
+
+    static func deadlineLabel(_ raw: String?) -> String {
+        guard let raw, let date = inputFormatter.date(from: raw) else { return "" }
+
+        return "\(deadlineDisplayFormatter.string(from: date))까지 투표할 수 있어요"
+    }
 }
 
 // MARK: - Constants
@@ -297,13 +361,4 @@ private enum Metric {
 private enum Constant {
     static let mutedIconHex = "#888692"
     static let progressTrackHex = "#E2E1E5"
-    // TODO: 날짜 투표 모델 연동 시 임시값 교체
-    static let tempRemainingLabel = "투표 시작일 기준 +3일 12:34:56 남았어요"
-    static let tempParticipantCount = 3
-    static let tempParticipationRatio = 0.6
-    static let tempCandidates: [DateVoteCandidate] = [
-        DateVoteCandidate(dateLabel: "2026. 06. 17 (수)", voteCount: 2),
-        DateVoteCandidate(dateLabel: "2026. 06. 18 (목)", voteCount: 1),
-        DateVoteCandidate(dateLabel: "2026. 06. 19 (금)", voteCount: 3)
-    ]
 }

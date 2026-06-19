@@ -18,20 +18,20 @@ struct HomeTopArea: View {
     let store: StoreOf<GroupDetailFeature>
 
     var body: some View {
-        switch (store.group.dateVoteStatus, store.group.locationStatus) {
-        case (.inProgress, .before):
+        switch store.homeTopAreaKind {
+        case .dateVote:
             DateVoteTopPage(store: store)
 
-        case (.completed, .recommended):
+        case .confirmedDate:
             ConfirmedDateArea(store: store)
 
-        case (.completed, .voting):
+        case .locationVote:
             LocationVoteArea(store: store)
 
-        case (.completed, .confirmed):
+        case .confirmedPlace:
             ConfirmedPlaceArea(store: store)
 
-        default:
+        case .default:
             DefaultTopPage(store: store)
         }
     }

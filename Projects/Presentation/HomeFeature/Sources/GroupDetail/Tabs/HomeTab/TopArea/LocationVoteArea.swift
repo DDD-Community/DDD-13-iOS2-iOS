@@ -16,20 +16,27 @@ import Entity
 struct LocationVoteArea: View {
     let store: StoreOf<GroupDetailFeature>
 
-    // TODO: 투표 모델 연동 시 로컬 상태 제거 후 store 데이터로 교체
+    // 투표/다시투표 토글은 로컬 인터랙션. 서버의 isMyVote 결과로 초기 동기화한다.
     @State private var hasVoted = false
     @State private var selectedIndex: Int?
 
-    private var places: [TempPlace] { Constant.tempPlaces }
+    private var candidates: [PlaceVoteCandidate] {
+        store.placeVote?.candidates ?? []
+    }
 
-    private var maxVoteCount: Int { places.map(\.voteCount).max() ?? 0 }
+    private var maxVoteCount: Int { candidates.map(\.voteCount).max() ?? 0 }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            LocationVoteTopArea(hasVoted: hasVoted)
+            LocationVoteTopArea(
+                hasVoted: hasVoted,
+                deadlineLabel: PlaceVoteFormatter.deadlineLabel(store.placeVote?.deadline),
+                totalParticipants: store.placeVote?.totalParticipants ?? 0,
+                votedCount: store.placeVote?.votedCount ?? 0
+            )
 
             LocationVoteList(
-                places: places,
+                candidates: candidates,
                 hasVoted: hasVoted,
                 selectedIndex: selectedIndex,
                 maxVoteCount: maxVoteCount,
@@ -56,6 +63,18 @@ struct LocationVoteArea: View {
         .padding(.horizontal, Spacing.spacing400)
         .padding(.top, Spacing.spacing400)
         .padding(.bottom, Spacing.spacing500)
+        .onChange(of: store.placeVote, initial: true) { _, newValue in
+            syncVoteState(from: newValue)
+        }
+    }
+
+    /// 서버가 내려준 `isMyVote`로 투표 완료 여부와 선택 상태를 초기화한다.
+    private func syncVoteState(from placeVote: PlaceVote?) {
+        guard let placeVote else { return }
+
+        let votedIndex = placeVote.candidates.firstIndex(where: { $0.isMyVote })
+        hasVoted = votedIndex != nil
+        selectedIndex = votedIndex
     }
 }
 
@@ -63,10 +82,14 @@ struct LocationVoteArea: View {
 
 private struct LocationVoteTopArea: View {
     let hasVoted: Bool
+    let deadlineLabel: String
+    let totalParticipants: Int
+    let votedCount: Int
 
     private var descriptionText: String {
-        // TODO: 투표 deadline / 참여 현황 모델 연동 시 임시값 교체
-        hasVoted ? Constant.tempPlaceVoteParticipationLabel : Constant.tempPlaceVoteRemainingLabel
+        hasVoted
+            ? "모임원 \(totalParticipants)명 / 참여 \(votedCount)명"
+            : deadlineLabel
     }
 
     var body: some View {
@@ -86,7 +109,7 @@ private struct LocationVoteTopArea: View {
 // MARK: - Location Vote List
 
 private struct LocationVoteList: View {
-    let places: [TempPlace]
+    let candidates: [PlaceVoteCandidate]
     let hasVoted: Bool
     let selectedIndex: Int?
     let maxVoteCount: Int
@@ -95,12 +118,12 @@ private struct LocationVoteList: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ForEach(Array(places.enumerated()), id: \.offset) { index, place in
+            ForEach(Array(candidates.enumerated()), id: \.element.id) { index, candidate in
                 LocationVoteRow(
-                    place: place,
+                    candidate: candidate,
                     hasVoted: hasVoted,
                     isSelected: selectedIndex == index,
-                    isFirstPlace: maxVoteCount > 0 && place.voteCount == maxVoteCount,
+                    isFirstPlace: maxVoteCount > 0 && candidate.voteCount == maxVoteCount,
                     onSelect: { onSelect(index) },
                     onDetail: onDetail
                 )
@@ -112,7 +135,7 @@ private struct LocationVoteList: View {
 // MARK: - Location Vote Row
 
 private struct LocationVoteRow: View {
-    let place: TempPlace
+    let candidate: PlaceVoteCandidate
     let hasVoted: Bool
     let isSelected: Bool
     let isFirstPlace: Bool
@@ -135,7 +158,7 @@ private struct LocationVoteRow: View {
                         .resizable()
                         .frame(width: Sizing.sizing200, height: Sizing.sizing200)
 
-                    LocationVotePlaceInfo(place: place)
+                    LocationVotePlaceInfo(candidate: candidate)
                 }
                 .contentShape(Rectangle())
             }
@@ -148,7 +171,7 @@ private struct LocationVoteRow: View {
 
     private var votedRow: some View {
         HStack(spacing: Spacing.spacing250) {
-            LocationVotePlaceInfo(place: place)
+            LocationVotePlaceInfo(candidate: candidate)
 
             BangawoText(voteStatusText, textStyle: .labelSmallEmphasized)
                 .foregroundStyle(isFirstPlace ? Colors.blue600 : Colors.gray700)
@@ -163,28 +186,29 @@ private struct LocationVoteRow: View {
 
     private var voteStatusText: String {
         isFirstPlace
-            ? "1위 / \(place.voteCount)명 투표"
-            : "\(place.voteCount)명 투표"
+            ? "1위 / \(candidate.voteCount)명 투표"
+            : "\(candidate.voteCount)명 투표"
     }
 }
 
 // MARK: - Location Vote Place Info
 
 private struct LocationVotePlaceInfo: View {
-    let place: TempPlace
+    let candidate: PlaceVoteCandidate
 
     var body: some View {
         HStack(spacing: Spacing.spacing250) {
-            place.categoryIcon
+            // TODO: 장소 상세(이름/주소/카테고리) API 연동 시 placeId 노출·임시 아이콘 교체
+            Constant.placeholderIcon
                 .resizable()
                 .frame(width: Sizing.sizing300, height: Sizing.sizing300)
                 .clipShape(Circle())
 
             VStack(alignment: .leading, spacing: Spacing.spacing50) {
-                BangawoText(place.name, textStyle: .bodyMediumEmphasized)
+                BangawoText("\(candidate.placeId)", textStyle: .bodyMediumEmphasized)
                     .foregroundStyle(Colors.gray800)
 
-                BangawoText(place.address, textStyle: .bodySmall)
+                BangawoText("\(candidate.placeId)", textStyle: .bodySmall)
                     .foregroundStyle(Colors.gray700)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -220,40 +244,34 @@ private struct LocationVoteConfirmArea: View {
     }
 }
 
-// MARK: - Temp Models
+// MARK: - Place Vote Formatter
 
-// TODO: 장소 리스트 모델 구현 시 Entity 로 교체
-private struct TempPlace: Identifiable {
-    let id = UUID()
-    let categoryIcon: Image
-    let name: String
-    let address: String
-    let voteCount: Int
+private enum PlaceVoteFormatter {
+    static let inputFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        return formatter
+    }()
+
+    static let displayFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy. MM. dd HH:mm"
+        formatter.locale = Locale(identifier: "ko_KR")
+        return formatter
+    }()
+
+    static func deadlineLabel(_ raw: String?) -> String {
+        guard let raw, let date = inputFormatter.date(from: raw) else { return "" }
+
+        return "\(displayFormatter.string(from: date))까지 투표할 수 있어요"
+    }
 }
 
 // MARK: - Constants
 
 private enum Constant {
-    static let tempPlaceVoteRemainingLabel = "투표 시작일 기준 +3일 12:34:56 남았어요"
-    static let tempPlaceVoteParticipationLabel = "모임원 5명 / 참여 3명"
-    static let tempPlaces: [TempPlace] = [
-        TempPlace(
-            categoryIcon: Image.Asset.icMapPinRestaurant,
-            name: "강남역 모임 장소 A",
-            address: "서울 강남구 테헤란로 1",
-            voteCount: 3
-        ),
-        TempPlace(
-            categoryIcon: Image.Asset.icMapPinCafe,
-            name: "강남역 모임 장소 B",
-            address: "서울 강남구 테헤란로 2",
-            voteCount: 2
-        ),
-        TempPlace(
-            categoryIcon: Image.Asset.icMapPinDessert,
-            name: "강남역 모임 장소 C",
-            address: "서울 강남구 테헤란로 3",
-            voteCount: 1
-        )
-    ]
+    // TODO: 장소 카테고리 API 연동 시 카테고리별 아이콘으로 교체
+    static let placeholderIcon = Image.Asset.icMapPinRestaurant
 }
