@@ -220,6 +220,7 @@ private extension AttendanceStatus {
         case .join: return Image.Asset.icDotGreen16
         case .late: return Image.Asset.icDotOrange16
         case .absent: return Image.Asset.icDotRed16
+        case .unknown: return Image.Asset.icDotGray16
         }
     }
 }
