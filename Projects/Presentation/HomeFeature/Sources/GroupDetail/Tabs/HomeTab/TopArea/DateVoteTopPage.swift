@@ -261,16 +261,24 @@ private struct DateVoteRow: View {
 
     var body: some View {
         if hasVoted {
-            rowContent
+            DateVoteRowContent(option: option, hasVoted: hasVoted, isSelected: isSelected)
         } else {
             Button(action: onSelect) {
-                rowContent
+                DateVoteRowContent(option: option, hasVoted: hasVoted, isSelected: isSelected)
             }
             .buttonStyle(.plain)
         }
     }
+}
 
-    private var rowContent: some View {
+// MARK: - Date Vote Row Content
+
+private struct DateVoteRowContent: View {
+    let option: DateVoteOption
+    let hasVoted: Bool
+    let isSelected: Bool
+
+    var body: some View {
         HStack(spacing: Spacing.spacing250) {
             DateVoteRowIndicator(hasVoted: hasVoted, isSelected: isSelected)
 
@@ -297,19 +305,14 @@ private struct DateVoteRowIndicator: View {
     let isSelected: Bool
 
     var body: some View {
-        if hasVoted {
-            if isSelected {
-                Image.Asset.icCheckboxGhostEnabledMd
-                    .renderingMode(.template)
-                    .resizable()
-                    .frame(width: Metric.checkIconLength, height: Metric.checkIconLength)
-                    .foregroundStyle(Colors.gray800)
-            } else {
-                Color.clear
-                    .frame(width: Metric.checkIconLength, height: Metric.checkIconLength)
-            }
-        } else {
+        if !hasVoted {
             Checkbox(variant: .circle, state: isSelected ? .enabled : .disabled, size: .small)
+        } else if isSelected {
+            Image.Asset.icCheckboxGhostEnabledMd
+                .renderingMode(.template)
+                .resizable()
+                .frame(width: Metric.checkIconLength, height: Metric.checkIconLength)
+                .foregroundStyle(Colors.gray800)
         }
     }
 }

@@ -145,13 +145,27 @@ private struct LocationVoteRow: View {
 
     var body: some View {
         if hasVoted {
-            votedRow
+            LocationVoteVotedRow(candidate: candidate, isFirstPlace: isFirstPlace)
         } else {
-            unvotedRow
+            LocationVoteUnvotedRow(
+                candidate: candidate,
+                isSelected: isSelected,
+                onSelect: onSelect,
+                onDetail: onDetail
+            )
         }
     }
+}
 
-    private var unvotedRow: some View {
+// MARK: - Location Vote Unvoted Row
+
+private struct LocationVoteUnvotedRow: View {
+    let candidate: PlaceVoteCandidate
+    let isSelected: Bool
+    let onSelect: () -> Void
+    let onDetail: () -> Void
+
+    var body: some View {
         HStack(spacing: Spacing.spacing250) {
             Button(action: onSelect) {
                 HStack(spacing: Spacing.spacing250) {
@@ -169,8 +183,21 @@ private struct LocationVoteRow: View {
         }
         .padding(.vertical, Spacing.spacing300)
     }
+}
 
-    private var votedRow: some View {
+// MARK: - Location Vote Voted Row
+
+private struct LocationVoteVotedRow: View {
+    let candidate: PlaceVoteCandidate
+    let isFirstPlace: Bool
+
+    private var voteStatusText: String {
+        isFirstPlace
+            ? "1위 / \(candidate.voteCount)명 투표"
+            : "\(candidate.voteCount)명 투표"
+    }
+
+    var body: some View {
         HStack(spacing: Spacing.spacing250) {
             LocationVotePlaceInfo(candidate: candidate)
 
@@ -183,12 +210,6 @@ private struct LocationVoteRow: View {
             RoundedRectangle(cornerRadius: BorderRadius.borderRadius250)
                 .fill(isFirstPlace ? Colors.blue100 : .clear)
         )
-    }
-
-    private var voteStatusText: String {
-        isFirstPlace
-            ? "1위 / \(candidate.voteCount)명 투표"
-            : "\(candidate.voteCount)명 투표"
     }
 }
 
