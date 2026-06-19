@@ -48,8 +48,12 @@ public struct GroupDetailFeature {
         }
 
         /// 모임 진행 단계(`dateVoteStatus` × `locationStatus`)에 따른 상단 영역 종류.
+        /// 투표 확정 등으로 상태가 갱신되면 `groupDetail`을 우선 반영하고, 로드 전에는 `group`으로 폴백한다.
         public var homeTopAreaKind: HomeTopAreaKind {
-            switch (group.dateVoteStatus, group.locationStatus) {
+            let dateVoteStatus = groupDetail?.dateVoteStatus ?? group.dateVoteStatus
+            let locationStatus = groupDetail?.locationStatus ?? group.locationStatus
+
+            switch (dateVoteStatus, locationStatus) {
             case (.inProgress, .before): return .dateVote
             case (.completed, .before), (.completed, .recommended): return .confirmedDate
             case (.completed, .voting): return .locationVote
@@ -71,6 +75,10 @@ public struct GroupDetailFeature {
         case decidePlaceTapped
         case inviteFriendTapped
         case dateVoteTapped
+        case dateVoteSubmitTapped(optionIds: [Int])
+        case dateVoteSubmitResponse(Result<Void, Error>)
+        case dateVoteConfirmTapped
+        case dateVoteConfirmResponse(Result<Void, Error>)
         case selectPlaceTapped
         case voteForLocationTapped
         case placeDetailTapped
@@ -132,6 +140,44 @@ public struct GroupDetailFeature {
                 state.destination = .dateVote(DateVoteFeature.State())
                 return .none
 
+            case let .dateVoteSubmitTapped(optionIds):
+                let client = voteClient
+                let meetingId = state.group.meetingId
+                return .run { send in
+                    await send(.dateVoteSubmitResponse(
+                        Result { try await client.submitDateVote(meetingId: meetingId, optionIds: optionIds) }
+                    ))
+                }
+
+            // 투표 참여 성공 시 dateVote만 재조회한다. isMyVote/득표수가 갱신되어 View의 hasVoted가 동기화된다.
+            case .dateVoteSubmitResponse(.success):
+                return fetchDateVoteEffect(meetingId: state.group.meetingId)
+
+            case .dateVoteSubmitResponse(.failure):
+                return .none
+
+            case .dateVoteConfirmTapped:
+                guard
+                    let options = state.dateVote?.options,
+                    let maxCount = options.map(\.voteCount).max(),
+                    let winnerId = options.first(where: { $0.voteCount == maxCount })?.id
+                else { return .none }
+
+                let client = voteClient
+                let meetingId = state.group.meetingId
+                return .run { send in
+                    await send(.dateVoteConfirmResponse(
+                        Result { try await client.confirmDateVote(meetingId: meetingId, optionId: winnerId) }
+                    ))
+                }
+
+            // 확정 성공 시 groupDetail을 재조회해 상단 영역을 confirmedDate로 전환한다.
+            case .dateVoteConfirmResponse(.success):
+                return fetchGroupDetailEffect(meetingId: state.group.meetingId)
+
+            case .dateVoteConfirmResponse(.failure):
+                return .none
+
             // TODO: 케이스 2~4 버튼 네비게이션 연동 시 구현
             case .selectPlaceTapped:
                 return .none
@@ -164,25 +210,28 @@ public struct GroupDetailFeature {
     /// 상단 영역 종류에 따라 날짜/장소 투표 현황을 조회한다.
     /// `HomeTopArea`가 `DateVoteTopPage`/`LocationVoteArea`를 노출하는 케이스에서만 호출된다.
     private func fetchVoteEffect(meetingId: Int, kind: HomeTopAreaKind) -> Effect<Action> {
-        let client = voteClient
-
         switch kind {
-        case .dateVote:
-            return .run { send in
-                await send(.dateVoteResponse(
-                    Result { try await client.fetchDateVote(meetingId: meetingId) }
-                ))
-            }
+        case .dateVote: return fetchDateVoteEffect(meetingId: meetingId)
+        case .locationVote: return fetchPlaceVoteEffect(meetingId: meetingId)
+        default: return .none
+        }
+    }
 
-        case .locationVote:
-            return .run { send in
-                await send(.placeVoteResponse(
-                    Result { try await client.fetchPlaceVote(meetingId: meetingId) }
-                ))
-            }
+    private func fetchDateVoteEffect(meetingId: Int) -> Effect<Action> {
+        let client = voteClient
+        return .run { send in
+            await send(.dateVoteResponse(
+                Result { try await client.fetchDateVote(meetingId: meetingId) }
+            ))
+        }
+    }
 
-        default:
-            return .none
+    private func fetchPlaceVoteEffect(meetingId: Int) -> Effect<Action> {
+        let client = voteClient
+        return .run { send in
+            await send(.placeVoteResponse(
+                Result { try await client.fetchPlaceVote(meetingId: meetingId) }
+            ))
         }
     }
 }

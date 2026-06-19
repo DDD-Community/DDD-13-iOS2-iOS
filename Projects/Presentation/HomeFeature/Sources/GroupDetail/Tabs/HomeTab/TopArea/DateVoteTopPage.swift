@@ -67,9 +67,9 @@ struct DateVoteTopPage: View {
                 hasVoted: hasVoted,
                 canVote: !selectedIndices.isEmpty,
                 isHostAndMe: isHostAndMe,
-                onVote: { hasVoted = true },
+                onVote: submitVote,
                 onRevote: { hasVoted = false },
-                onConfirm: { store.send(.dateVoteTapped) }
+                onConfirm: { store.send(.dateVoteConfirmTapped) }
             )
         }
         .padding(.vertical, Spacing.spacing300)
@@ -87,6 +87,17 @@ struct DateVoteTopPage: View {
     }
 
     // MARK: Actions
+
+    /// 선택한 후보 인덱스를 옵션 id로 매핑해 투표 참여를 요청한다.
+    /// 성공 시 Feature가 dateVote를 재조회하고, `syncVoteState`가 서버의 `isMyVote` 기준으로 `hasVoted`를 동기화한다.
+    private func submitVote() {
+        let optionIds = selectedIndices
+            .filter { options.indices.contains($0) }
+            .map { options[$0].id }
+        guard !optionIds.isEmpty else { return }
+
+        store.send(.dateVoteSubmitTapped(optionIds: optionIds))
+    }
 
     private func toggleSelection(at index: Int) {
         guard !hasVoted else { return }

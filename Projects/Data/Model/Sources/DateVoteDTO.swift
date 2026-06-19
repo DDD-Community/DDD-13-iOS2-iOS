@@ -27,6 +27,24 @@ public struct DateVoteVoterResponseDTO: Decodable, Sendable {
     public let profileImageUrl: String?
 }
 
+// MARK: - Request DTO
+
+public struct SubmitDateVoteRequestDTO: Encodable, Sendable {
+    public let optionIds: [Int]
+
+    public init(optionIds: [Int]) {
+        self.optionIds = optionIds
+    }
+}
+
+public struct ConfirmDateVoteRequestDTO: Encodable, Sendable {
+    public let optionId: Int
+
+    public init(optionId: Int) {
+        self.optionId = optionId
+    }
+}
+
 // MARK: - toEntity
 
 public extension DateVoteResponseDTO {

@@ -13,12 +13,16 @@ import UseCase
 public struct VoteClient: Sendable {
     public var fetchDateVote: @Sendable (_ meetingId: Int) async throws -> DateVote
     public var fetchPlaceVote: @Sendable (_ meetingId: Int) async throws -> PlaceVote
+    public var submitDateVote: @Sendable (_ meetingId: Int, _ optionIds: [Int]) async throws -> Void
+    public var confirmDateVote: @Sendable (_ meetingId: Int, _ optionId: Int) async throws -> Void
 }
 
 public extension VoteClient {
     static func live(
         fetchDateVoteUseCase: any FetchDateVoteUseCase,
-        fetchPlaceVoteUseCase: any FetchPlaceVoteUseCase
+        fetchPlaceVoteUseCase: any FetchPlaceVoteUseCase,
+        submitDateVoteUseCase: any SubmitDateVoteUseCase,
+        confirmDateVoteUseCase: any ConfirmDateVoteUseCase
     ) -> Self {
         Self(
             fetchDateVote: { meetingId in
@@ -26,6 +30,12 @@ public extension VoteClient {
             },
             fetchPlaceVote: { meetingId in
                 try await fetchPlaceVoteUseCase.execute(meetingId: meetingId)
+            },
+            submitDateVote: { meetingId, optionIds in
+                try await submitDateVoteUseCase.execute(meetingId: meetingId, optionIds: optionIds)
+            },
+            confirmDateVote: { meetingId, optionId in
+                try await confirmDateVoteUseCase.execute(meetingId: meetingId, optionId: optionId)
             }
         )
     }
@@ -35,7 +45,9 @@ extension VoteClient: DependencyKey {
     public static var liveValue: VoteClient {
         VoteClient(
             fetchDateVote: { _ in throw VoteClientError.notImplemented },
-            fetchPlaceVote: { _ in throw VoteClientError.notImplemented }
+            fetchPlaceVote: { _ in throw VoteClientError.notImplemented },
+            submitDateVote: { _, _ in throw VoteClientError.notImplemented },
+            confirmDateVote: { _, _ in throw VoteClientError.notImplemented }
         )
     }
 
@@ -43,7 +55,9 @@ extension VoteClient: DependencyKey {
 
     public static let previewValue: VoteClient = VoteClient(
         fetchDateVote: { _ in previewDateVote },
-        fetchPlaceVote: { _ in previewPlaceVote }
+        fetchPlaceVote: { _ in previewPlaceVote },
+        submitDateVote: { _, _ in },
+        confirmDateVote: { _, _ in }
     )
 }
 
