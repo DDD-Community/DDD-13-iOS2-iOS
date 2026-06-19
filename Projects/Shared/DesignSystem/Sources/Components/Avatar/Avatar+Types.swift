@@ -7,7 +7,7 @@ import SwiftUI
 
 extension Avatar {
     public enum AvatarType {
-        case d3
+        case d3(Asset.D3)
         case image(URL)
         case placeholder
         case localImage(Image)

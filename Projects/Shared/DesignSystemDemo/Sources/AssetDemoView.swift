@@ -92,7 +92,7 @@ private enum AssetSizeRow: CaseIterable, Identifiable {
     func makeAsset(assetType: AssetKind) -> some View {
         switch assetType {
         case .d3:
-            Asset(assetType: .d3(Image(systemName: "cube.fill")), size: size)
+            Asset(assetType: .d3(.face01), size: size)
         case .image:
             Asset(assetType: .image(Image(systemName: "person.fill")), size: size)
         }

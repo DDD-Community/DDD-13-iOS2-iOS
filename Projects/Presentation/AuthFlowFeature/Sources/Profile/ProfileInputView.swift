@@ -169,8 +169,11 @@ private struct ProfileImageContainer: View {
         case .data(let data):
             guard let uiImage = UIImage(data: data) else { return .placeholder }
             return .localImage(Image(uiImage: uiImage))
-        case .preset:
-            return .d3
+        case .preset(let index):
+            let face = Asset.D3.profileFaces.indices.contains(index)
+                ? Asset.D3.profileFaces[index]
+                : .avatarPlaceholder
+            return .d3(face)
         }
     }
 }

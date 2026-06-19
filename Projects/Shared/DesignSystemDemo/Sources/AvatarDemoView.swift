@@ -28,9 +28,9 @@ private struct AvatarTypeSection: View {
             VStack(spacing: 0) {
                 DemoRow("d3") {
                     HStack(spacing: 8) {
-                        Avatar(avatarType: .d3, size: .s32)
-                        Avatar(avatarType: .d3, size: .s40)
-                        Avatar(avatarType: .d3, size: .s56)
+                        Avatar(avatarType: .d3(.face01), size: .s32)
+                        Avatar(avatarType: .d3(.face02), size: .s40)
+                        Avatar(avatarType: .d3(.face03), size: .s56)
                     }
                 }
                 RowDivider()

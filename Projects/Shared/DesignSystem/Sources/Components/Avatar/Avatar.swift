@@ -28,79 +28,62 @@ public struct Avatar: View {
 
     public var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            avatarContent
+            AvatarContent(avatarType: avatarType, size: size)
             if let iconType {
                 IconArea(iconType: iconType, size: size)
             }
         }
         .frame(width: size.length, height: size.length)
     }
-
-    // MARK: - Avatar Content
-
-    @ViewBuilder
-    private var avatarContent: some View {
-        switch avatarType {
-        case .d3:
-            CircleBackground(size: size) {
-                Image.Asset.imgAvatar3d
-                    .resizable()
-                    .scaledToFit()
-            }
-
-        case .image(let url):
-            AsyncImage(url: url) { phase in
-                switch phase {
-                case .success(let image):
-                    image
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: size.length, height: size.length)
-                        .clipShape(Circle())
-                default:
-                    Circle()
-                        .fill(Colors.gray200)
-                        .frame(width: size.length, height: size.length)
-                }
-            }
-
-        case .placeholder:
-            CircleBackground(size: size) {
-                Image.Asset.imgAvatarPlaceholder
-                    .resizable()
-                    .scaledToFit()
-            }
-
-        case .localImage(let image):
-            image
-                .resizable()
-                .scaledToFill()
-                .frame(width: size.length, height: size.length)
-                .clipShape(Circle())
-        }
-    }
 }
 
-// MARK: - CircleBackground
+// MARK: - AvatarContent
 
-// .d3 · .placeholder 전용 — 네트워크/로컬 이미지는 직접 Circle clip을 사용하므로 불필요
-private struct CircleBackground<Content: View>: View {
+private struct AvatarContent: View {
+    let avatarType: Avatar.AvatarType
     let size: Avatar.Size
-    let content: () -> Content
-
-    init(size: Avatar.Size, @ViewBuilder content: @escaping () -> Content) {
-        self.size = size
-        self.content = content
-    }
 
     var body: some View {
-        Circle()
-            .fill(Colors.gray200)
-            .frame(width: size.length, height: size.length)
-            .overlay {
-                content()
-                    .padding(size.backgroundPadding)
+        Group {
+            switch avatarType {
+            case .d3(let asset):
+                asset.image
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: size.length, height: size.length)
+                    .background(Colors.gray200)
+
+            case .image(let url):
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFill()
+                    default:
+                        Circle()
+                            .fill(Colors.gray200)
+                    }
+                }
+
+            case .placeholder:
+                Circle()
+                    .fill(Colors.gray200)
+                    .overlay {
+                        Image.Asset.imgAvatarPlaceholder
+                            .resizable()
+                            .scaledToFit()
+                            .padding(size.backgroundPadding)
+                    }
+
+            case .localImage(let image):
+                image
+                    .resizable()
+                    .scaledToFill()
             }
+        }
+        .frame(width: size.length, height: size.length)
+        .clipShape(Circle())
     }
 }
 
@@ -148,7 +131,7 @@ private struct IconArea: View {
             BangawoText("3D Avatar", textStyle: .titleLarge)
             HStack(spacing: 12) {
                 ForEach(Avatar.Size.allCases, id: \.length) { size in
-                    Avatar(avatarType: .d3, size: size)
+                    Avatar(avatarType: .d3(.face01), size: size)
                 }
             }
 

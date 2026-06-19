@@ -40,33 +40,20 @@ private struct ProfileTileGrid: View {
     var body: some View {
         let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 5)
         LazyVGrid(columns: columns, spacing: Spacing.spacing400) {
-            ForEach(0..<ProfileImagePickerFeature.presetCount, id: \.self) { index in
+            ForEach(Array(Asset.D3.profileFaces.enumerated()), id: \.offset) { index, face in
                 Button {
                     onPresetTapped(index)
                 } label: {
-                    Asset(assetType: .d3(Image.Asset.imgAvatar3d), size: .s48)
-                        .background(Circle().fill(Colors.grayAlpha200))
-                        .overlay {
-                            if selectedIndex == index {
-                                ProfileTileSelectedOverlay()
-                            }
-                        }
+                    Asset(
+                        assetType: .d3(face),
+                        size: .s48,
+                        isSelected: selectedIndex == index
+                    )
+                    .background(Circle().fill(Colors.gray300))
                 }
                 .buttonStyle(.plain)
             }
         }
-    }
-}
-
-private struct ProfileTileSelectedOverlay: View {
-    var body: some View {
-        Circle()
-            .fill(Colors.grayAlpha500)
-            .overlay {
-                // TODO: 이미지 에셋으로 대체 예정
-                Image(systemName: "checkmark")
-                    .foregroundStyle(Colors.gray00)
-            }
     }
 }
 
@@ -81,20 +68,29 @@ private struct ProfileImageDisplay: View {
         Group {
             switch image {
             case .none:
-                Asset(assetType: .d3(Image.Asset.imgAvatarPlaceholder), size: .s104)
+                Asset(assetType: .d3(.avatarPlaceholder), size: .s104)
 
             case let .data(data):
                 if let uiImage = UIImage(data: data) {
                     Asset(assetType: .image(Image(uiImage: uiImage)), size: .s104)
                 } else {
-                    Asset(assetType: .d3(Image.Asset.imgAvatarPlaceholder), size: .s104)
+                    Asset(assetType: .d3(.avatarPlaceholder), size: .s104)
                 }
 
-            case .preset:
-                Asset(assetType: .d3(Image.Asset.imgAvatar3d), size: .s104)
+            case let .preset(index):
+                let face = Asset.D3.profileFaces.indices.contains(index)
+                    ? Asset.D3.profileFaces[index]
+                    : .avatarPlaceholder
+                Asset(assetType: .d3(face), size: .s104)
             }
         }
-        .background(Circle().fill(Colors.grayAlpha200))
+        .background(Circle().fill(backgroundColor))
+    }
+
+    private var backgroundColor: Color {
+        if case .preset = image { return Colors.gray300 }
+
+        return Colors.gray200
     }
 }
 
