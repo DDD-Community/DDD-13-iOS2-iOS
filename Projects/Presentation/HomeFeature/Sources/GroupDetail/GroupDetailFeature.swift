@@ -18,7 +18,7 @@ public struct GroupDetailFeature {
         case confirmedPlace  // (.completed, .confirmed)
         case `default`
     }
-    
+
     @Dependency(\.groupClient) private var groupClient
     @Dependency(\.voteClient) private var voteClient
 
