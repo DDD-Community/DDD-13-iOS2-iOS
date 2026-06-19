@@ -10,6 +10,7 @@ import ComposableArchitecture
 
 import DesignSystem
 import Entity
+import Utill
 
 // MARK: - 케이스 3: 장소 투표 (completed / voting)
 
@@ -247,25 +248,18 @@ private struct LocationVoteConfirmArea: View {
 // MARK: - Place Vote Formatter
 
 private enum PlaceVoteFormatter {
-    static let inputFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX"
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.timeZone = TimeZone(identifier: "UTC")
-        return formatter
-    }()
-
-    static let displayFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy. MM. dd HH:mm"
-        formatter.locale = Locale(identifier: "ko_KR")
-        return formatter
-    }()
-
     static func deadlineLabel(_ raw: String?) -> String {
-        guard let raw, let date = inputFormatter.date(from: raw) else { return "" }
+        guard
+            let raw,
+            let date = DateFormatterStore.date(
+                from: raw,
+                format: "yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX",
+                locale: "en_US_POSIX",
+                timeZone: "UTC"
+            )
+        else { return "" }
 
-        return "\(displayFormatter.string(from: date))까지 투표할 수 있어요"
+        return "\(DateFormatterStore.string(from: date, format: "yyyy. MM. dd HH:mm"))까지 투표할 수 있어요"
     }
 }
 

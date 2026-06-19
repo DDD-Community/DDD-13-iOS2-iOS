@@ -10,6 +10,7 @@ import ComposableArchitecture
 
 import DesignSystem
 import Entity
+import Utill
 
 // MARK: - 케이스 1: 날짜 투표 (inProgress / before)
 
@@ -316,37 +317,16 @@ private struct DateVoteRowIndicator: View {
 // MARK: - Date Vote Formatter
 
 private enum DateVoteFormatter {
-    static let inputFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        formatter.locale = Locale(identifier: "ko_KR")
-        return formatter
-    }()
-
-    static let dateDisplayFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy. MM. dd (E)"
-        formatter.locale = Locale(identifier: "ko_KR")
-        return formatter
-    }()
-
-    static let deadlineDisplayFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy. MM. dd"
-        formatter.locale = Locale(identifier: "ko_KR")
-        return formatter
-    }()
-
     static func dateLabel(_ raw: String) -> String {
-        guard let date = inputFormatter.date(from: raw) else { return raw }
+        guard let date = DateFormatterStore.date(from: raw, format: "yyyy-MM-dd") else { return raw }
 
-        return dateDisplayFormatter.string(from: date)
+        return DateFormatterStore.string(from: date, format: "yyyy. MM. dd (E)")
     }
 
     static func deadlineLabel(_ raw: String?) -> String {
-        guard let raw, let date = inputFormatter.date(from: raw) else { return "" }
+        guard let raw, let date = DateFormatterStore.date(from: raw, format: "yyyy-MM-dd") else { return "" }
 
-        return "\(deadlineDisplayFormatter.string(from: date))까지 투표할 수 있어요"
+        return "\(DateFormatterStore.string(from: date, format: "yyyy. MM. dd"))까지 투표할 수 있어요"
     }
 }
 
