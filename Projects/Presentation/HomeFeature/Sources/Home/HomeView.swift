@@ -235,9 +235,9 @@ private struct GroupInfoArea: View {
         )
     }
 
-    private var isSelectionInProgress: Bool {
-        group.locationStatus == .before
-            || group.dateVoteStatus == .before
+    private var showsInProgressBadge: Bool {
+        group.listStatus == .inProgress
+            && group.memberCount >= 2
     }
 
     var body: some View {
@@ -255,7 +255,7 @@ private struct GroupInfoArea: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                if isSelectionInProgress {
+                if showsInProgressBadge {
                     Badge(
                         "진행 중",
                         leadingIcon: Image.Asset.icStatus16,
