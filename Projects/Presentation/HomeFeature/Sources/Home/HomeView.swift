@@ -238,6 +238,7 @@ private struct GroupInfoArea: View {
     private var showsInProgressBadge: Bool {
         group.listStatus == .inProgress
             && group.memberCount >= 2
+            && (group.locationStatus == .voting || group.dateVoteStatus == .inProgress)
     }
 
     var body: some View {
