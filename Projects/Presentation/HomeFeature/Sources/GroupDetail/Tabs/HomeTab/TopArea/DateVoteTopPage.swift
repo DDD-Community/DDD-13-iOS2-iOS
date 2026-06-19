@@ -17,41 +17,29 @@ import Utill
 struct DateVoteTopPage: View {
     let store: StoreOf<GroupDetailFeature>
 
-    // 투표/다시투표 토글은 로컬 인터랙션. 서버의 isMyVote 결과로 초기 동기화한다.
-    @State private var hasVoted = false
-    @State private var selectedIndices: Set<Int> = []
+    // 다시 투표하기로 진입한 재선택 모드. 서버 투표 여부와 무관한 로컬 인터랙션.
+    @State private var isRevoting = false
+    @State private var selectedOptionIds: Set<Int> = []
 
     private var options: [DateVoteOption] {
         store.dateVote?.options ?? []
     }
 
+    // 서버 투표 여부(hasVotedDate)와 로컬 재투표 상태를 조합한 투표 완료 화면 표시 여부.
+    private var hasVoted: Bool {
+        store.hasVotedDate && !isRevoting
+    }
+
     private var isAllSelected: Bool {
-        !options.isEmpty && selectedIndices.count == options.count
-    }
-
-    private var isHostAndMe: Bool {
-        store.groupDetail?.members.first(where: { $0.isMe })?.isHost ?? false
-    }
-
-    /// 후보 날짜에 표를 던진 고유 참여자 수.
-    private var participantCount: Int {
-        Set(options.flatMap { $0.voters.map(\.id) }).count
-    }
-
-    private var totalMemberCount: Int {
-        store.groupDetail?.members.count ?? 0
-    }
-
-    private var participationRatio: Double {
-        totalMemberCount > 0 ? Double(participantCount) / Double(totalMemberCount) : 0
+        !options.isEmpty && selectedOptionIds.count == options.count
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             DateVoteTopArea(
                 deadlineLabel: DateVoteFormatter.deadlineLabel(store.dateVote?.deadline),
-                participantCount: participantCount,
-                participationRatio: participationRatio
+                participantCount: store.dateVoteParticipantCount,
+                participationRatio: store.dateVoteParticipationRatio
             )
 
             DateVoteSelectAllButton(isAllSelected: isAllSelected, onSelectAll: toggleSelectAll)
@@ -59,16 +47,16 @@ struct DateVoteTopPage: View {
             DateVoteList(
                 options: options,
                 hasVoted: hasVoted,
-                selectedIndices: selectedIndices,
+                selectedOptionIds: selectedOptionIds,
                 onSelect: toggleSelection
             )
 
             DateVoteConfirmArea(
                 hasVoted: hasVoted,
-                canVote: !selectedIndices.isEmpty,
-                isHostAndMe: isHostAndMe,
+                canVote: !selectedOptionIds.isEmpty,
+                isHostAndMe: store.isMeHost,
                 onVote: submitVote,
-                onRevote: { hasVoted = false },
+                onRevote: startRevote,
                 onConfirm: { store.send(.dateVoteConfirmTapped) }
             )
         }
@@ -81,50 +69,46 @@ struct DateVoteTopPage: View {
         .padding(.horizontal, Spacing.spacing400)
         .padding(.top, Spacing.spacing400)
         .padding(.bottom, Spacing.spacing500)
-        .onChange(of: store.dateVote, initial: true) { _, newValue in
-            syncVoteState(from: newValue)
-        }
     }
 
     // MARK: Actions
 
-    /// 선택한 후보 인덱스를 옵션 id로 매핑해 투표 참여를 요청한다.
-    /// 성공 시 Feature가 dateVote를 재조회하고, `syncVoteState`가 서버의 `isMyVote` 기준으로 `hasVoted`를 동기화한다.
+    /// 선택한 후보 옵션 id로 투표 참여를 요청한다.
+    /// 재투표 모드를 종료하면, 성공 시 Feature가 dateVote를 재조회해 `hasVotedDate`가 true로 유지되어 완료 화면으로 복귀한다.
     private func submitVote() {
-        let optionIds = selectedIndices
-            .filter { options.indices.contains($0) }
-            .map { options[$0].id }
-        guard !optionIds.isEmpty else { return }
+        guard !selectedOptionIds.isEmpty else { return }
 
-        store.send(.dateVoteSubmitTapped(optionIds: optionIds))
+        // 재투표인데 선택이 이전 투표와 동일하면 API 호출 없이 완료 화면으로 복귀한다.
+        if isRevoting && selectedOptionIds == store.myVotedDateOptionIds {
+            isRevoting = false
+            return
+        }
+
+        isRevoting = false
+        store.send(.dateVoteSubmitTapped(optionIds: Array(selectedOptionIds)))
     }
 
-    private func toggleSelection(at index: Int) {
+    /// 다시 투표하기 진입 시 기존 투표를 선택 상태로 pre-fill하고 재선택 모드로 전환한다.
+    private func startRevote() {
+        selectedOptionIds = store.myVotedDateOptionIds
+        isRevoting = true
+    }
+
+    private func toggleSelection(optionId: Int) {
         guard !hasVoted else { return }
 
-        if selectedIndices.contains(index) {
-            selectedIndices.remove(index)
+        if selectedOptionIds.contains(optionId) {
+            selectedOptionIds.remove(optionId)
         } else {
-            selectedIndices.insert(index)
+            selectedOptionIds.insert(optionId)
         }
     }
 
     private func toggleSelectAll() {
         guard !hasVoted else { return }
 
-        let allIndices = Set(options.indices)
-        selectedIndices = selectedIndices == allIndices ? [] : allIndices
-    }
-
-    /// 서버가 내려준 `isMyVote`로 투표 완료 여부와 선택 상태를 초기화한다.
-    private func syncVoteState(from dateVote: DateVote?) {
-        guard let dateVote else { return }
-
-        let votedIndices = dateVote.options.enumerated()
-            .filter { $0.element.isMyVote }
-            .map(\.offset)
-        hasVoted = !votedIndices.isEmpty
-        selectedIndices = Set(votedIndices)
+        let allOptionIds = Set(options.map(\.id))
+        selectedOptionIds = selectedOptionIds == allOptionIds ? [] : allOptionIds
     }
 }
 
@@ -188,17 +172,17 @@ private struct DateVoteSelectAllButton: View {
 private struct DateVoteList: View {
     let options: [DateVoteOption]
     let hasVoted: Bool
-    let selectedIndices: Set<Int>
+    let selectedOptionIds: Set<Int>
     let onSelect: (Int) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ForEach(Array(options.enumerated()), id: \.element.id) { index, option in
+            ForEach(options) { option in
                 DateVoteRow(
                     option: option,
                     hasVoted: hasVoted,
-                    isSelected: selectedIndices.contains(index),
-                    onSelect: { onSelect(index) }
+                    isSelected: hasVoted ? option.isMyVote : selectedOptionIds.contains(option.id),
+                    onSelect: { onSelect(option.id) }
                 )
             }
         }
@@ -347,7 +331,7 @@ private enum DateVoteFormatter {
 // MARK: - Constants
 
 private enum Metric {
-    static let progressBarHeight: CGFloat = 15
+    static let progressBarHeight: CGFloat = 10
     static let checkIconLength: CGFloat = 18
     static let voteLabelFontSize: CGFloat = 12
 }

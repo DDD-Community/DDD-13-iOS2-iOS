@@ -47,6 +47,38 @@ public struct GroupDetailFeature {
             !group.members.isEmpty
         }
 
+        /// 날짜 후보에 표를 던진 고유 참여자 수.
+        public var dateVoteParticipantCount: Int {
+            guard let options = dateVote?.options else { return 0 }
+
+            return Set(options.flatMap { $0.voters.map(\.id) }).count
+        }
+
+        /// 전체 멤버 수 대비 날짜 투표 참여 비율(0...1).
+        public var dateVoteParticipationRatio: Double {
+            let total = groupDetail?.members.count ?? 0
+            guard total > 0 else { return 0 }
+
+            return Double(dateVoteParticipantCount) / Double(total)
+        }
+
+        /// 현재 사용자가 모임 호스트인지 여부.
+        public var isMeHost: Bool {
+            groupDetail?.members.first(where: { $0.isMe })?.isHost ?? false
+        }
+
+        /// 서버 `isMyVote` 기준, 내가 투표한 날짜 후보 옵션 id 집합.
+        public var myVotedDateOptionIds: Set<Int> {
+            guard let options = dateVote?.options else { return [] }
+
+            return Set(options.filter(\.isMyVote).map(\.id))
+        }
+
+        /// 서버 `isMyVote` 기준, 내가 날짜 후보 중 하나라도 투표했는지 여부.
+        public var hasVotedDate: Bool {
+            dateVote?.options.contains(where: \.isMyVote) ?? false
+        }
+
         /// 모임 진행 단계(`dateVoteStatus` × `locationStatus`)에 따른 상단 영역 종류.
         /// 투표 확정 등으로 상태가 갱신되면 `groupDetail`을 우선 반영하고, 로드 전에는 `group`으로 폴백한다.
         public var homeTopAreaKind: HomeTopAreaKind {
