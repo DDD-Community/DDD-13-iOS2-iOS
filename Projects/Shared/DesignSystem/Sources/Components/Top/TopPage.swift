@@ -63,9 +63,9 @@ public struct TopPage: View {
                 buttonAction: buttonAction
             )
 
-            LowerArea(label: badgeLabel, leadingIcon: badgeLeadingIcon)
-                .opacity(showLowerArea ? 1 : 0)
-                .accessibilityHidden(!showLowerArea)
+            if showLowerArea {
+                LowerArea(label: badgeLabel, leadingIcon: badgeLeadingIcon)
+            }
         }
         .padding(.horizontal, Spacing.spacing400)
         .padding(.top, Spacing.spacing400)
