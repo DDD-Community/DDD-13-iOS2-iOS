@@ -68,7 +68,7 @@ private struct ButtonVariantSection: View {
         VStack(alignment: .leading, spacing: 8) {
             SectionHeader(title)
             TopPage(
-                asset: Image(systemName: "star.fill"),
+                d3Asset: .avatarPlaceholder,
                 title: "모임 정보를\n확인해 보세요",
                 description: "참여 중인 모임의 상세 정보예요",
                 buttonTitle: "수정",
