@@ -32,7 +32,7 @@ public struct GroupDetailView: View {
             )
 
             Tab(
-                labels: store.tabs.map(\.label),
+                labels: GroupDetailTab.allCases.map(\.label),
                 selectedIndex: tabBinding,
                 variant: .fixed,
                 size: .small
@@ -67,9 +67,6 @@ private struct TabContent: View {
         switch store.selectedTab {
         case .home:
             HomeTab(store: store)
-
-        case .vote:
-            VoteTab()
 
         case .myPlace:
             MyPlaceTab(store: store)

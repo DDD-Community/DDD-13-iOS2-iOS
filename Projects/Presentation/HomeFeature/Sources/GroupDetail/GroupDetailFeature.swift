@@ -19,22 +19,14 @@ public struct GroupDetailFeature {
         public var groupDetail: GroupDetail?
         public var nearbyPlaceList: NearbyPlaceListSheetFeature.State = .init()
         public var selectedTabIndex = 0
-        // TODO: 투표 탭 노출 조건이 확정되면 실제 값으로 대체
-        public var isVoteTabAvailable = false
 
         public init(group: Group) {
             self.group = group
         }
 
-        /// 노출 순서대로 구성한 탭 목록. `isVoteTabAvailable` 에 따라 "투표" 탭이 포함된다.
-        public var tabs: [GroupDetailTab] {
-            isVoteTabAvailable
-                ? [.home, .vote, .myPlace]
-                : [.home, .myPlace]
-        }
-
         public var selectedTab: GroupDetailTab {
-            tabs[min(selectedTabIndex, tabs.count - 1)]
+            let tabs = GroupDetailTab.allCases
+            return tabs[min(selectedTabIndex, tabs.count - 1)]
         }
 
         public var hasMembers: Bool {
