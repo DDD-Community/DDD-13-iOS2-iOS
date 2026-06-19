@@ -25,7 +25,6 @@ struct HomeTab: View {
                     .padding(.horizontal, Spacing.spacing400)
             }
         }
-        .background(Colors.gray200)
     }
 }
 

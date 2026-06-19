@@ -41,6 +41,7 @@ public struct GroupDetailView: View {
             TabContent(store: store)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .background(Colors.gray200)
         .toolbar(.hidden, for: .navigationBar)
         .task { store.send(.onAppear) }
         .fullScreenCover(
