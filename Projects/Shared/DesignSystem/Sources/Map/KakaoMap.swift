@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 
 public struct KakaoMap: View {
@@ -45,6 +46,22 @@ public struct KakaoMap: View {
     }
 
     public var body: some View {
+        #if DEBUG
+        if Self.isRunningForPreviews {
+            KakaoMapPreviewPlaceholder(
+                pins: pins,
+                initialCenter: initialCenter,
+                onPinTapped: onPinTapped
+            )
+        } else {
+            liveMap
+        }
+        #else
+        liveMap
+        #endif
+    }
+
+    private var liveMap: some View {
         KakaoMapRepresentable(
             isVisible: $isVisible,
             routes: routes,
@@ -63,7 +80,134 @@ public struct KakaoMap: View {
             self.isVisible = false
         }
     }
+
+    #if DEBUG
+    private static var isRunningForPreviews: Bool {
+        ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
+    }
+    #endif
 }
+
+// MARK: - Preview Placeholder
+
+#if DEBUG
+private struct KakaoMapPreviewPlaceholder: View {
+    let pins: [MapPin]
+    let initialCenter: MapCoordinate
+    var onPinTapped: ((MapPin) -> Void)?
+
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                Color.gray.opacity(Metric.mapBackgroundOpacity)
+
+                previewGrid
+
+                ForEach(pins) { pin in
+                    previewPin(pin)
+                        .position(position(for: pin.coordinate, in: geometry.size))
+                        .onTapGesture {
+                            onPinTapped?(pin)
+                        }
+                }
+
+                VStack(spacing: Metric.captionSpacing) {
+                    Text("KakaoMap Preview")
+                        .font(.caption.weight(.semibold))
+
+                    Text("실제 지도는 앱 실행에서 렌더링됩니다")
+                        .font(.caption2)
+                }
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, Metric.captionHorizontalPadding)
+                .padding(.vertical, Metric.captionVerticalPadding)
+                .background(.thinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: Metric.captionCornerRadius))
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .padding(.top, Metric.captionTopPadding)
+            }
+        }
+    }
+
+    private var previewGrid: some View {
+        ZStack {
+            ForEach(0..<Metric.gridLineCount, id: \.self) { index in
+                Rectangle()
+                    .fill(Color.white.opacity(Metric.gridLineOpacity))
+                    .frame(height: Metric.gridLineWidth)
+                    .offset(y: CGFloat(index - Metric.gridCenterIndex) * Metric.gridSpacing)
+
+                Rectangle()
+                    .fill(Color.white.opacity(Metric.gridLineOpacity))
+                    .frame(width: Metric.gridLineWidth)
+                    .offset(x: CGFloat(index - Metric.gridCenterIndex) * Metric.gridSpacing)
+            }
+        }
+    }
+
+    private func previewPin(_ pin: MapPin) -> some View {
+        VStack(spacing: Metric.pinTitleSpacing) {
+            Circle()
+                .fill(Color.red)
+                .frame(width: Metric.pinSize, height: Metric.pinSize)
+                .overlay {
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: Metric.pinInnerSize, height: Metric.pinInnerSize)
+                }
+                .shadow(radius: Metric.pinShadowRadius, y: Metric.pinShadowYOffset)
+
+            if !pin.title.isEmpty {
+                Text(pin.title)
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                    .padding(.horizontal, Metric.pinTitleHorizontalPadding)
+                    .padding(.vertical, Metric.pinTitleVerticalPadding)
+                    .background(.regularMaterial)
+                    .clipShape(RoundedRectangle(cornerRadius: Metric.pinTitleCornerRadius))
+            }
+        }
+    }
+
+    private func position(for coordinate: MapCoordinate, in size: CGSize) -> CGPoint {
+        let xOffset = (coordinate.longitude - initialCenter.longitude) * Metric.coordinateScale
+        let yOffset = (initialCenter.latitude - coordinate.latitude) * Metric.coordinateScale
+
+        return CGPoint(
+            x: size.width / 2 + xOffset,
+            y: size.height / 2 + yOffset
+        )
+    }
+}
+
+private enum Metric {
+    static let mapBackgroundOpacity = 0.18
+
+    static let captionSpacing: CGFloat = 2
+    static let captionHorizontalPadding: CGFloat = 10
+    static let captionVerticalPadding: CGFloat = 6
+    static let captionCornerRadius: CGFloat = 8
+    static let captionTopPadding: CGFloat = 12
+
+    static let gridLineCount = 9
+    static let gridCenterIndex = 4
+    static let gridSpacing: CGFloat = 44
+    static let gridLineWidth: CGFloat = 1
+    static let gridLineOpacity = 0.55
+
+    static let pinSize: CGFloat = 18
+    static let pinInnerSize: CGFloat = 7
+    static let pinShadowRadius: CGFloat = 3
+    static let pinShadowYOffset: CGFloat = 2
+    static let pinTitleSpacing: CGFloat = 4
+    static let pinTitleHorizontalPadding: CGFloat = 6
+    static let pinTitleVerticalPadding: CGFloat = 3
+    static let pinTitleCornerRadius: CGFloat = 6
+
+    static let coordinateScale: Double = 5_500
+}
+#endif
 
 #Preview {
     let seoulCenter = MapCoordinate(latitude: 37.5665, longitude: 126.9780)
