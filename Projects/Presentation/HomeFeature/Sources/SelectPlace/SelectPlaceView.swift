@@ -35,7 +35,6 @@ struct SelectPlaceView: View {
             TabContent(store: store)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .background(Colors.gray200)
         .toolbar(.hidden, for: .navigationBar)
     }
 
