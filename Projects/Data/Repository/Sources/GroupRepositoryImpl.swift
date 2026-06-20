@@ -22,4 +22,11 @@ public final class GroupRepositoryImpl: GroupRepositoryProtocol {
         let response: CreateGroupResponseDTO = try await NetworkManager.shared.request(GroupEndpoint.createGroup(requestDTO))
         return response.toEntity()
     }
+
+    public func hostPickMeetingDate(meetingId: Int64, date: String) async throws {
+        let requestDTO = HostPickMeetingDateRequestDTO(date: date)
+        try await NetworkManager.shared.requestVoid(
+            GroupEndpoint.hostPickMeetingDate(meetingId: meetingId, requestDTO)
+        )
+    }
 }

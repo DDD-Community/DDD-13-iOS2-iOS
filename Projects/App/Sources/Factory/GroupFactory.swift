@@ -12,6 +12,11 @@ enum GroupFactory {
         let repository = GroupRepositoryImpl()
         let fetchUseCase = FetchGroupsUseCaseImpl(repository: repository)
         let createUseCase = CreateGroupUseCaseImpl(repository: repository)
-        return .live(fetchUseCase: fetchUseCase, createUseCase: createUseCase)
+        let hostPickMeetingDateUseCase = HostPickMeetingDateUseCaseImpl(repository: repository)
+        return .live(
+            fetchUseCase: fetchUseCase,
+            createUseCase: createUseCase,
+            hostPickMeetingDateUseCase: hostPickMeetingDateUseCase
+        )
     }
 }

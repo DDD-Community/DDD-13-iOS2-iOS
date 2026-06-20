@@ -96,13 +96,13 @@ public enum GroupLocationStatus: Equatable, Sendable {
 
 public enum GroupDateVoteStatus: Equatable, Sendable {
     case before
-    case confirmed
+    case completed
     case unknown(String)
 
     public init(rawValue: String) {
         switch rawValue {
         case "BEFORE": self = .before
-        case "CONFIRMED": self = .confirmed
+        case "COMPLETED": self = .completed
         default: self = .unknown(rawValue)
         }
     }

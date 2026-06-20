@@ -21,7 +21,7 @@ struct HomeTab: View {
                     d3Asset: .groupDetail,
                     title: store.group.name,
                     description: store.group.themeTagDisplay,
-                    buttonTitle: "약속 정하기",
+                    buttonTitle: buttonTitle,
                     buttonVariant: .solid,
                     buttonSize: .small,
                     showLowerArea: false,
@@ -31,6 +31,16 @@ struct HomeTab: View {
                 MemberList(store: store)
                     .padding(.horizontal, Spacing.spacing400)
             }
+        }
+    }
+
+    private var buttonTitle: String {
+        switch store.group.dateVoteStatus {
+        case .before, .unknown:
+            return "약속 정하기"
+
+        case .completed:
+            return "장소 고르기"
         }
     }
 }

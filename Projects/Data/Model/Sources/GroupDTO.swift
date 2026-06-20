@@ -43,6 +43,14 @@ public struct CreateGroupResponseDTO: Decodable, Sendable {
     public let themeTagCode: String
 }
 
+public struct HostPickMeetingDateRequestDTO: Encodable, Sendable {
+    public let date: String
+
+    public init(date: String) {
+        self.date = date
+    }
+}
+
 // MARK: - toEntity
 
 public extension GroupListItemResponseDTO {

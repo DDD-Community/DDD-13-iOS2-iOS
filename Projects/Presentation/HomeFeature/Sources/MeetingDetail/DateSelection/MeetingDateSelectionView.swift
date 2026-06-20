@@ -214,7 +214,7 @@ private extension DateSelectionSegmentedPicker {
 
 #Preview {
     BangawoPreview {
-        MeetingDateSelectionView(store: Store(initialState: MeetingDateSelectionFeature.State()) {
+        MeetingDateSelectionView(store: Store(initialState: MeetingDateSelectionFeature.State(meetingId: 1)) {
             MeetingDateSelectionFeature()
         })
     }

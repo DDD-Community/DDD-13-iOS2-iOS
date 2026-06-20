@@ -11,7 +11,7 @@ import Utill
 public struct GroupDetailFeature {
     @ObservableState
     public struct State: Equatable {
-        public let group: Group
+        public var group: Group
         public var nearbyPlaceList: NearbyPlaceListSheetFeature.State = .init()
         public var selectedTabIndex = 0
         // TODO: 투표 탭 노출 조건이 확정되면 실제 값으로 대체
@@ -45,7 +45,7 @@ public struct GroupDetailFeature {
         case delegate(Delegate)
 
         public enum Delegate: Equatable {
-            case meetingDateSelectionRequested
+            case meetingDateSelectionRequested(meetingId: Int64)
         }
     }
 
@@ -63,8 +63,15 @@ public struct GroupDetailFeature {
                 return .none
 
             case .decideMeetingTapped:
-                Log.debug("약속정하기 클릭")
-                return .send(.delegate(.meetingDateSelectionRequested))
+                switch state.group.dateVoteStatus {
+                case .before, .unknown:
+                    Log.debug("약속정하기 클릭")
+                    return .send(.delegate(.meetingDateSelectionRequested(meetingId: state.group.meetingId)))
+
+                case .completed:
+                    Log.debug("장소 고르기 클릭")
+                    return .none
+                }
 
             case .inviteFriendTapped:
                 return .none

@@ -18,6 +18,7 @@ public struct HomeFeature {
     public enum Path {
         case detail(GroupDetailFeature)
         case dateSelection(MeetingDateSelectionFeature)
+        case datePicker(MeetingDatePickerFeature)
     }
 
     public enum InviteCardDesign: Equatable, CaseIterable, Sendable {
@@ -124,8 +125,22 @@ public struct HomeFeature {
             case .creationView:
                 return .none
 
-            case .path(.element(id: _, action: .detail(.delegate(.meetingDateSelectionRequested)))):
-                state.path.append(.dateSelection(MeetingDateSelectionFeature.State()))
+            case let .path(.element(id: _, action: .detail(.delegate(.meetingDateSelectionRequested(meetingId))))):
+                state.path.append(.dateSelection(MeetingDateSelectionFeature.State(meetingId: meetingId)))
+                return .none
+
+            case let .path(.element(id: _, action: .dateSelection(.delegate(.datePickerRequested(mode, meetingId))))):
+                state.path.append(.datePicker(MeetingDatePickerFeature.State(meetingId: meetingId, mode: mode)))
+                return .none
+
+            case let .path(.element(id: _, action: .dateSelection(.delegate(.dateSelectionCompleted(meetingId))))):
+                updateDateVoteStatus(state: &state, meetingId: meetingId)
+                state.path.removeLast()
+                return .none
+
+            case let .path(.element(id: _, action: .datePicker(.delegate(.selectionCompleted(mode, text, requestDate))))):
+                updateDateSelectionText(state: &state, mode: mode, text: text, requestDate: requestDate)
+                state.path.removeLast()
                 return .none
 
             case .path:
@@ -145,5 +160,74 @@ public struct HomeFeature {
                 Result { try await client.fetchGroups() }
             ))
         }
+    }
+
+    private func updateDateSelectionText(
+        state: inout State,
+        mode: MeetingDatePickerMode,
+        text: String,
+        requestDate: String?
+    ) {
+        guard let dateSelectionID = state.path.ids.last(where: { id in
+            if case .dateSelection = state.path[id: id] { return true }
+            return false
+        }) else {
+            return
+        }
+
+        guard case var .dateSelection(dateSelectionState) = state.path[id: dateSelectionID] else {
+            return
+        }
+
+        switch mode {
+        case .single:
+            dateSelectionState.dateDesignation.selectedDateText = text
+            dateSelectionState.dateDesignation.selectedDateRequestText = requestDate
+
+        case .range:
+            dateSelectionState.periodVote.selectedDateText = text
+        }
+
+        state.path[id: dateSelectionID] = .dateSelection(dateSelectionState)
+    }
+
+    private func updateDateVoteStatus(state: inout State, meetingId: Int64) {
+        state.groups = state.groups.map { group in
+            guard group.meetingId == meetingId else { return group }
+            return group.updating(dateVoteStatus: .completed)
+        }
+
+        guard let detailID = state.path.ids.last(where: { id in
+            if case .detail = state.path[id: id] { return true }
+            return false
+        }) else {
+            return
+        }
+
+        guard case var .detail(detailState) = state.path[id: detailID] else {
+            return
+        }
+
+        guard detailState.group.meetingId == meetingId else { return }
+        detailState.group = detailState.group.updating(dateVoteStatus: .completed)
+        state.path[id: detailID] = .detail(detailState)
+    }
+}
+
+private extension Group {
+    func updating(dateVoteStatus: GroupDateVoteStatus) -> Group {
+        Group(
+            id: id,
+            meetingId: meetingId,
+            name: name,
+            themeTagCode: themeTagCode,
+            themeTagDisplay: themeTagDisplay,
+            listStatus: listStatus,
+            locationStatus: locationStatus,
+            dateVoteStatus: dateVoteStatus,
+            locationAddress: locationAddress,
+            memberCount: memberCount,
+            members: members
+        )
     }
 }

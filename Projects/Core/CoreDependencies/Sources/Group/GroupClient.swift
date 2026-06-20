@@ -13,17 +13,22 @@ import UseCase
 public struct GroupClient: Sendable {
     public var fetchGroups: @Sendable () async throws -> [Group]
     public var createGroup: @Sendable (_ name: String, _ themeTagCode: String) async throws -> CreateGroupResult
+    public var hostPickMeetingDate: @Sendable (_ meetingId: Int64, _ date: String) async throws -> Void
 }
 
 public extension GroupClient {
     static func live(
         fetchUseCase: any FetchGroupsUseCase,
-        createUseCase: any CreateGroupUseCase
+        createUseCase: any CreateGroupUseCase,
+        hostPickMeetingDateUseCase: any HostPickMeetingDateUseCase
     ) -> Self {
         Self(
             fetchGroups: { try await fetchUseCase.execute() },
             createGroup: { name, themeTagCode in
                 try await createUseCase.execute(name: name, themeTagCode: themeTagCode)
+            },
+            hostPickMeetingDate: { meetingId, date in
+                try await hostPickMeetingDateUseCase.execute(meetingId: meetingId, date: date)
             }
         )
     }
@@ -33,7 +38,8 @@ extension GroupClient: DependencyKey {
     public static var liveValue: GroupClient {
         GroupClient(
             fetchGroups: { throw GroupClientError.notImplemented },
-            createGroup: { _, _ in throw GroupClientError.notImplemented }
+            createGroup: { _, _ in throw GroupClientError.notImplemented },
+            hostPickMeetingDate: { _, _ in throw GroupClientError.notImplemented }
         )
     }
 
@@ -43,7 +49,8 @@ extension GroupClient: DependencyKey {
         fetchGroups: { previewGroups },
         createGroup: { name, themeTagCode in
             CreateGroupResult(groupId: 0, meetingId: 0, name: name, themeTagCode: themeTagCode)
-        }
+        },
+        hostPickMeetingDate: { _, _ in }
     )
 }
 
