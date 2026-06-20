@@ -5,6 +5,7 @@
 
 import ComposableArchitecture
 import Entity
+import Utill
 
 @Reducer
 public struct GroupDetailFeature {
@@ -38,9 +39,14 @@ public struct GroupDetailFeature {
 
     public enum Action {
         case tabSelected(Int)
-        case decidePlaceTapped
+        case decideMeetingTapped
         case inviteFriendTapped
         case nearbyPlaceList(NearbyPlaceListSheetFeature.Action)
+        case delegate(Delegate)
+
+        public enum Delegate: Equatable {
+            case meetingDateSelectionRequested
+        }
     }
 
     public init() {}
@@ -56,13 +62,17 @@ public struct GroupDetailFeature {
                 state.selectedTabIndex = index
                 return .none
 
-            case .decidePlaceTapped:
-                return .none
+            case .decideMeetingTapped:
+                Log.debug("약속정하기 클릭")
+                return .send(.delegate(.meetingDateSelectionRequested))
 
             case .inviteFriendTapped:
                 return .none
 
             case .nearbyPlaceList:
+                return .none
+
+            case .delegate:
                 return .none
             }
         }

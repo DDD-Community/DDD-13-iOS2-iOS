@@ -21,11 +21,11 @@ struct HomeTab: View {
                     d3Asset: .groupDetail,
                     title: store.group.name,
                     description: store.group.themeTagDisplay,
-                    buttonTitle: "장소 정하기",
+                    buttonTitle: "약속 정하기",
                     buttonVariant: .solid,
                     buttonSize: .small,
                     showLowerArea: false,
-                    buttonAction: { store.send(.decidePlaceTapped) }
+                    buttonAction: { store.send(.decideMeetingTapped) }
                 )
 
                 MemberList(store: store)

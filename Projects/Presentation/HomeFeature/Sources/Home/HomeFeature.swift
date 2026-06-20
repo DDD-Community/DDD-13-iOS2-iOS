@@ -17,6 +17,7 @@ public struct HomeFeature {
     @Reducer(state: .equatable)
     public enum Path {
         case detail(GroupDetailFeature)
+        case dateSelection(MeetingDateSelectionFeature)
     }
 
     public enum InviteCardDesign: Equatable, CaseIterable, Sendable {
@@ -121,6 +122,10 @@ public struct HomeFeature {
                 return .none
 
             case .creationView:
+                return .none
+
+            case .path(.element(id: _, action: .detail(.delegate(.meetingDateSelectionRequested)))):
+                state.path.append(.dateSelection(MeetingDateSelectionFeature.State()))
                 return .none
 
             case .path:
