@@ -6,8 +6,8 @@
 import Entity
 
 public struct GroupListItemResponseDTO: Decodable, Sendable {
-    public let groupId: Int64
-    public let meetingId: Int64
+    public let groupId: Int
+    public let meetingId: Int
     public let name: String
     public let themeTagCode: String
     public let themeTagDisplay: String
@@ -20,8 +20,9 @@ public struct GroupListItemResponseDTO: Decodable, Sendable {
 }
 
 public struct GroupMemberResponseDTO: Decodable, Sendable {
-    public let memberId: Int64
-    public let nickname: String
+    public let memberId: Int
+    // TODO: 가입 미완료 테스트 계정으로 인한 임시 옵셔널 처리. 테스트 계정 정리 후 non-optional(String)로 복구
+    public let nickname: String?
     public let profileImageUrl: String?
     public let attendanceStatus: String
 }
@@ -37,8 +38,8 @@ public struct CreateGroupRequestDTO: Encodable, Sendable {
 }
 
 public struct CreateGroupResponseDTO: Decodable, Sendable {
-    public let groupId: Int64
-    public let meetingId: Int64
+    public let groupId: Int
+    public let meetingId: Int
     public let name: String
     public let themeTagCode: String
 }
@@ -67,7 +68,7 @@ public extension GroupMemberResponseDTO {
     func toEntity() -> GroupMember {
         GroupMember(
             id: memberId,
-            nickname: nickname,
+            nickname: nickname ?? "테스트멤버",
             profileImageUrl: profileImageUrl,
             attendanceStatus: GroupAttendanceStatus(rawValue: attendanceStatus)
         )

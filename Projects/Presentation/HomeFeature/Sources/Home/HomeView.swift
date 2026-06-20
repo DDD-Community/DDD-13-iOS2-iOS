@@ -235,9 +235,10 @@ private struct GroupInfoArea: View {
         )
     }
 
-    private var isSelectionInProgress: Bool {
-        group.locationStatus == .before
-            || group.dateVoteStatus == .before
+    private var showsInProgressBadge: Bool {
+        group.listStatus == .inProgress
+            && group.memberCount >= 2
+            && (group.locationStatus == .voting || group.dateVoteStatus == .inProgress)
     }
 
     var body: some View {
@@ -255,7 +256,7 @@ private struct GroupInfoArea: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                if isSelectionInProgress {
+                if showsInProgressBadge {
                     Badge(
                         "진행 중",
                         leadingIcon: Image.Asset.icStatus16,
@@ -380,12 +381,12 @@ private struct MemberAvatarStack: View {
 
 #if DEBUG
 private enum HomePreview {
-    static func member(_ id: Int64) -> GroupMember {
+    static func member(_ id: Int) -> GroupMember {
         GroupMember(id: id, nickname: "멤버\(id)", profileImageUrl: nil, attendanceStatus: .join)
     }
 
     static func group(
-        id: Int64,
+        id: Int,
         name: String,
         locationStatus: GroupLocationStatus,
         dateVoteStatus: GroupDateVoteStatus,
@@ -402,7 +403,7 @@ private enum HomePreview {
             dateVoteStatus: dateVoteStatus,
             locationAddress: nil,
             memberCount: memberCount,
-            members: (1...memberCount).map { member(Int64($0)) }
+            members: (1...memberCount).map { member($0) }
         )
     }
 
@@ -459,7 +460,7 @@ private enum HomePreview {
                 id: 3,
                 name: "선정 완료 모임",
                 locationStatus: .confirmed,
-                dateVoteStatus: .confirmed,
+                dateVoteStatus: .completed,
                 memberCount: 4
             )
         ])

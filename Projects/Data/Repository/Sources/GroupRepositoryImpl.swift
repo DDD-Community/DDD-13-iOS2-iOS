@@ -22,4 +22,18 @@ public final class GroupRepositoryImpl: GroupRepositoryProtocol {
         let response: CreateGroupResponseDTO = try await NetworkManager.shared.request(GroupEndpoint.createGroup(requestDTO))
         return response.toEntity()
     }
+
+    public func fetchGroupDetail(meetingId: Int) async throws -> GroupDetail {
+        let response: GroupDetailResponseDTO = try await NetworkManager.shared.request(
+            GroupEndpoint.fetchGroupDetail(meetingId: meetingId)
+        )
+        return response.toEntity()
+    }
+
+    public func updateAttendance(groupId: Int, attendanceStatus: AttendanceStatus) async throws {
+        let requestDTO = UpdateAttendanceRequestDTO(attendanceStatus: attendanceStatus.rawValue)
+        try await NetworkManager.shared.requestVoid(
+            GroupEndpoint.updateAttendance(groupId: groupId, requestDTO)
+        )
+    }
 }

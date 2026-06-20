@@ -17,6 +17,8 @@ public struct Badge: View {
     private let trailingIcon: Image?
     private let showLeadingIcon: Bool
     private let showTrailingIcon: Bool
+    private let leadingIconColor: Color?
+    private let trailingIconColor: Color?
     private let variant: BadgeVariant
     private let size: BadgeSize
 
@@ -28,6 +30,8 @@ public struct Badge: View {
     ///   - trailingIcon: 라벨 오른쪽에 표시할 아이콘. `showTrailingIcon`이 `true`일 때만 노출됩니다.
     ///   - showLeadingIcon: 왼쪽 아이콘 노출 여부.
     ///   - showTrailingIcon: 오른쪽 아이콘 노출 여부.
+    ///   - leadingIconColor: 왼쪽 아이콘 색상. `nil`이면 에셋 원본 색을 유지합니다(기본값 `gray500`).
+    ///   - trailingIconColor: 오른쪽 아이콘 색상. `nil`이면 에셋 원본 색을 유지합니다(기본값 `gray500`).
     ///   - variant: 배경/테두리 스타일(`solid` / `outline`).
     ///   - size: 뱃지 사이즈(`small` / `medium` / `large`).
     public init(
@@ -36,6 +40,8 @@ public struct Badge: View {
         trailingIcon: Image? = nil,
         showLeadingIcon: Bool = false,
         showTrailingIcon: Bool = false,
+        leadingIconColor: Color? = Colors.gray500,
+        trailingIconColor: Color? = Colors.gray500,
         variant: BadgeVariant,
         size: BadgeSize
     ) {
@@ -44,6 +50,8 @@ public struct Badge: View {
         self.trailingIcon = trailingIcon
         self.showLeadingIcon = showLeadingIcon
         self.showTrailingIcon = showTrailingIcon
+        self.leadingIconColor = leadingIconColor
+        self.trailingIconColor = trailingIconColor
         self.variant = variant
         self.size = size
     }
@@ -53,7 +61,7 @@ public struct Badge: View {
     public var body: some View {
         HStack(spacing: 0) {
             if showLeadingIcon, let leadingIcon {
-                IconView(image: leadingIcon, length: size.iconLength)
+                IconView(image: leadingIcon, length: size.iconLength, color: leadingIconColor)
             }
 
             BangawoText(label, textStyle: size.labelTextStyle)
@@ -61,7 +69,7 @@ public struct Badge: View {
                 .padding(.horizontal, size.labelHorizontalPadding)
 
             if showTrailingIcon, let trailingIcon {
-                IconView(image: trailingIcon, length: size.iconLength)
+                IconView(image: trailingIcon, length: size.iconLength, color: trailingIconColor)
             }
         }
         .padding(.vertical, size.verticalPadding)
@@ -81,14 +89,15 @@ private extension Badge {
     struct IconView: View {
         let image: Image
         let length: CGFloat
+        let color: Color?
 
         var body: some View {
             image
-                .renderingMode(.template)
+                .renderingMode(color == nil ? .original : .template)
                 .resizable()
                 .scaledToFit()
                 .frame(width: length, height: length)
-                .foregroundStyle(Colors.gray500)
+                .foregroundStyle(color ?? Colors.gray500)
         }
     }
 }

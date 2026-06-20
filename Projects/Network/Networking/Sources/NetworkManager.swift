@@ -45,7 +45,7 @@ public final class NetworkManager: Sendable {
         
         do {
             let decodedData = try JSONDecoder().decode(T.self, from: data)
-            Log.debug("✅ [Decode Success] \(decodedData)")
+            Log.debug("✅ [Decode Success]\n\(prettyPrinted(data))")
             return decodedData
         } catch {
             if let raw = String(data: data, encoding: .utf8) {
@@ -84,6 +84,21 @@ public final class NetworkManager: Sendable {
         }
     }
     
+    private func prettyPrinted(_ data: Foundation.Data) -> String {
+        guard
+            let object = try? JSONSerialization.jsonObject(with: data),
+            let prettyData = try? JSONSerialization.data(
+                withJSONObject: object,
+                options: [.prettyPrinted, .withoutEscapingSlashes]
+            ),
+            let prettyString = String(data: prettyData, encoding: .utf8)
+        else {
+            return String(data: data, encoding: .utf8) ?? "\(data.count) bytes"
+        }
+
+        return prettyString
+    }
+
     private func makeDataRequest(_ endPoint: EndPoint) -> DataRequest {
         switch endPoint.task {
         case .requestPlain:

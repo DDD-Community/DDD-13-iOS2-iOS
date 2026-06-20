@@ -6,8 +6,8 @@
 import Foundation
 
 public struct Group: Identifiable, Equatable, Sendable {
-    public let id: Int64
-    public let meetingId: Int64
+    public let id: Int
+    public let meetingId: Int
     public let name: String
     public let themeTagCode: String
     public let themeTagDisplay: String
@@ -19,8 +19,8 @@ public struct Group: Identifiable, Equatable, Sendable {
     public let members: [GroupMember]
 
     public init(
-        id: Int64,
-        meetingId: Int64,
+        id: Int,
+        meetingId: Int,
         name: String,
         themeTagCode: String,
         themeTagDisplay: String,
@@ -46,13 +46,13 @@ public struct Group: Identifiable, Equatable, Sendable {
 }
 
 public struct GroupMember: Identifiable, Equatable, Sendable {
-    public let id: Int64
+    public let id: Int
     public let nickname: String
     public let profileImageUrl: String?
     public let attendanceStatus: GroupAttendanceStatus
 
     public init(
-        id: Int64,
+        id: Int,
         nickname: String,
         profileImageUrl: String?,
         attendanceStatus: GroupAttendanceStatus
@@ -82,12 +82,16 @@ public enum GroupListStatus: Equatable, Sendable {
 
 public enum GroupLocationStatus: Equatable, Sendable {
     case before
+    case recommended
+    case voting
     case confirmed
     case unknown(String)
 
     public init(rawValue: String) {
         switch rawValue {
         case "BEFORE": self = .before
+        case "RECOMMENDED": self = .recommended
+        case "VOTING": self = .voting
         case "CONFIRMED": self = .confirmed
         default: self = .unknown(rawValue)
         }
@@ -96,13 +100,15 @@ public enum GroupLocationStatus: Equatable, Sendable {
 
 public enum GroupDateVoteStatus: Equatable, Sendable {
     case before
-    case confirmed
+    case inProgress
+    case completed
     case unknown(String)
 
     public init(rawValue: String) {
         switch rawValue {
         case "BEFORE": self = .before
-        case "CONFIRMED": self = .confirmed
+        case "IN_PROGRESS": self = .inProgress
+        case "COMPLETED": self = .completed
         default: self = .unknown(rawValue)
         }
     }

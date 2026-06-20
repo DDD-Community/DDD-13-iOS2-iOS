@@ -5,14 +5,12 @@
 
 public enum GroupDetailTab: Equatable, Sendable {
     case home
-    case vote
-    case myPlace
+    case myPlace(isPlaceVoting: Bool)
 
     public var label: String {
         switch self {
         case .home: return "홈"
-        case .vote: return "투표"
-        case .myPlace: return "내 장소보기"
+        case let .myPlace(isPlaceVoting): return isPlaceVoting ? "장소보기" : "내 장소보기"
         }
     }
 }

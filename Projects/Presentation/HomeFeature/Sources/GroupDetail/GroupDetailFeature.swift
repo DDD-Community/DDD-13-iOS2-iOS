@@ -4,50 +4,48 @@
 //
 
 import ComposableArchitecture
+
 import Entity
 
 @Reducer
 public struct GroupDetailFeature {
     @ObservableState
     public struct State: Equatable {
-        public let group: Group
-        public var nearbyPlaceList: NearbyPlaceListSheetFeature.State = .init()
         public var selectedTabIndex = 0
-        // TODO: 투표 탭 노출 조건이 확정되면 실제 값으로 대체
-        public var isVoteTabAvailable = false
+        public var home: HomeTabFeature.State
+        public var myPlace = MyPlaceTabFeature.State()
 
         public init(group: Group) {
-            self.group = group
+            self.home = HomeTabFeature.State(group: group)
         }
 
-        /// 노출 순서대로 구성한 탭 목록. `isVoteTabAvailable` 에 따라 "투표" 탭이 포함된다.
         public var tabs: [GroupDetailTab] {
-            isVoteTabAvailable
-                ? [.home, .vote, .myPlace]
-                : [.home, .myPlace]
+            [
+                .home,
+                .myPlace(isPlaceVoting: home.homeTopAreaKind == .locationVote)
+            ]
         }
 
         public var selectedTab: GroupDetailTab {
-            tabs[min(selectedTabIndex, tabs.count - 1)]
-        }
-
-        public var hasMembers: Bool {
-            !group.members.isEmpty
+            tabs[max(0, min(selectedTabIndex, tabs.count - 1))]
         }
     }
 
     public enum Action {
         case tabSelected(Int)
-        case decidePlaceTapped
-        case inviteFriendTapped
-        case nearbyPlaceList(NearbyPlaceListSheetFeature.Action)
+        case home(HomeTabFeature.Action)
+        case myPlace(MyPlaceTabFeature.Action)
     }
 
     public init() {}
 
     public var body: some ReducerOf<Self> {
-        Scope(state: \.nearbyPlaceList, action: \.nearbyPlaceList) {
-            NearbyPlaceListSheetFeature()
+        Scope(state: \.home, action: \.home) {
+            HomeTabFeature()
+        }
+
+        Scope(state: \.myPlace, action: \.myPlace) {
+            MyPlaceTabFeature()
         }
 
         Reduce { state, action in
@@ -56,13 +54,11 @@ public struct GroupDetailFeature {
                 state.selectedTabIndex = index
                 return .none
 
-            case .decidePlaceTapped:
+            case .home(.delegate(.selectMyPlaceTab)):
+                state.selectedTabIndex = 1
                 return .none
 
-            case .inviteFriendTapped:
-                return .none
-
-            case .nearbyPlaceList:
+            case .home, .myPlace:
                 return .none
             }
         }

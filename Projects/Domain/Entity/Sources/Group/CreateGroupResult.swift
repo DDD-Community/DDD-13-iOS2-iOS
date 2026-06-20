@@ -4,14 +4,14 @@
 //
 
 public struct CreateGroupResult: Equatable, Sendable {
-    public let groupId: Int64
-    public let meetingId: Int64
+    public let groupId: Int
+    public let meetingId: Int
     public let name: String
     public let themeTagCode: String
 
     public init(
-        groupId: Int64,
-        meetingId: Int64,
+        groupId: Int,
+        meetingId: Int,
         name: String,
         themeTagCode: String
     ) {
