@@ -27,6 +27,29 @@ public struct PlaceTravelBurdenResponseDTO: Decodable, Sendable {
     public let isLongest: Bool
 }
 
+public struct SubmitPlaceVoteRequestDTO: Encodable, Sendable {
+    public let placeIds: [Int]
+
+    public init(placeIds: [Int]) {
+        self.placeIds = placeIds
+    }
+}
+
+public struct ConfirmedPlaceResultResponseDTO: Decodable, Sendable {
+    public let placeId: Int
+    public let placeName: String
+    public let address: String
+    public let confirmedAt: String
+    public let candidates: [ConfirmedPlaceCandidateResponseDTO]
+}
+
+public struct ConfirmedPlaceCandidateResponseDTO: Decodable, Sendable {
+    public let placeId: Int
+    public let voteCount: Int
+    public let totalSeconds: Int
+    public let totalTransfers: Int
+}
+
 // MARK: - toEntity
 
 public extension PlaceVoteResponseDTO {
@@ -59,6 +82,29 @@ public extension PlaceTravelBurdenResponseDTO {
             seconds: seconds,
             transfers: transfers,
             isLongest: isLongest
+        )
+    }
+}
+
+public extension ConfirmedPlaceResultResponseDTO {
+    func toEntity() -> ConfirmedPlaceResult {
+        ConfirmedPlaceResult(
+            placeId: placeId,
+            placeName: placeName,
+            address: address,
+            confirmedAt: confirmedAt,
+            candidates: candidates.map { $0.toEntity() }
+        )
+    }
+}
+
+public extension ConfirmedPlaceCandidateResponseDTO {
+    func toEntity() -> ConfirmedPlaceCandidate {
+        ConfirmedPlaceCandidate(
+            placeId: placeId,
+            voteCount: voteCount,
+            totalSeconds: totalSeconds,
+            totalTransfers: totalTransfers
         )
     }
 }

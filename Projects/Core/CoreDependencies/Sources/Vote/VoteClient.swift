@@ -13,16 +13,20 @@ import UseCase
 public struct VoteClient: Sendable {
     public var fetchDateVote: @Sendable (_ meetingId: Int) async throws -> DateVote
     public var fetchPlaceVote: @Sendable (_ meetingId: Int) async throws -> PlaceVote
+    public var fetchConfirmedPlaceResult: @Sendable (_ meetingId: Int) async throws -> ConfirmedPlaceResult
     public var submitDateVote: @Sendable (_ meetingId: Int, _ optionIds: [Int]) async throws -> Void
     public var confirmDateVote: @Sendable (_ meetingId: Int, _ optionId: Int) async throws -> Void
+    public var submitPlaceVote: @Sendable (_ meetingId: Int, _ placeIds: [Int]) async throws -> Void
 }
 
 public extension VoteClient {
     static func live(
         fetchDateVoteUseCase: any FetchDateVoteUseCase,
         fetchPlaceVoteUseCase: any FetchPlaceVoteUseCase,
+        fetchConfirmedPlaceResultUseCase: any FetchConfirmedPlaceResultUseCase,
         submitDateVoteUseCase: any SubmitDateVoteUseCase,
-        confirmDateVoteUseCase: any ConfirmDateVoteUseCase
+        confirmDateVoteUseCase: any ConfirmDateVoteUseCase,
+        submitPlaceVoteUseCase: any SubmitPlaceVoteUseCase
     ) -> Self {
         Self(
             fetchDateVote: { meetingId in
@@ -31,11 +35,17 @@ public extension VoteClient {
             fetchPlaceVote: { meetingId in
                 try await fetchPlaceVoteUseCase.execute(meetingId: meetingId)
             },
+            fetchConfirmedPlaceResult: { meetingId in
+                try await fetchConfirmedPlaceResultUseCase.execute(meetingId: meetingId)
+            },
             submitDateVote: { meetingId, optionIds in
                 try await submitDateVoteUseCase.execute(meetingId: meetingId, optionIds: optionIds)
             },
             confirmDateVote: { meetingId, optionId in
                 try await confirmDateVoteUseCase.execute(meetingId: meetingId, optionId: optionId)
+            },
+            submitPlaceVote: { meetingId, placeIds in
+                try await submitPlaceVoteUseCase.execute(meetingId: meetingId, placeIds: placeIds)
             }
         )
     }
@@ -46,8 +56,10 @@ extension VoteClient: DependencyKey {
         VoteClient(
             fetchDateVote: { _ in throw VoteClientError.notImplemented },
             fetchPlaceVote: { _ in throw VoteClientError.notImplemented },
+            fetchConfirmedPlaceResult: { _ in throw VoteClientError.notImplemented },
             submitDateVote: { _, _ in throw VoteClientError.notImplemented },
-            confirmDateVote: { _, _ in throw VoteClientError.notImplemented }
+            confirmDateVote: { _, _ in throw VoteClientError.notImplemented },
+            submitPlaceVote: { _, _ in throw VoteClientError.notImplemented }
         )
     }
 
@@ -56,8 +68,10 @@ extension VoteClient: DependencyKey {
     public static let previewValue: VoteClient = VoteClient(
         fetchDateVote: { _ in previewDateVote },
         fetchPlaceVote: { _ in previewPlaceVote },
+        fetchConfirmedPlaceResult: { _ in previewConfirmedPlaceResult },
         submitDateVote: { _, _ in },
-        confirmDateVote: { _, _ in }
+        confirmDateVote: { _, _ in },
+        submitPlaceVote: { _, _ in }
     )
 }
 
@@ -107,6 +121,22 @@ public extension VoteClient {
                     PlaceTravelBurden(id: 1, seconds: 1800, transfers: 1, isLongest: false),
                     PlaceTravelBurden(id: 2, seconds: 3600, transfers: 2, isLongest: true)
                 ]
+            )
+        ]
+    )
+
+    /// 프리뷰/디자인 확인용 샘플 확정 장소 결과.
+    static let previewConfirmedPlaceResult: ConfirmedPlaceResult = ConfirmedPlaceResult(
+        placeId: 1,
+        placeName: "감성카페",
+        address: "서울 강남구 테헤란로 1",
+        confirmedAt: "2026-06-25T15:00:00.000Z",
+        candidates: [
+            ConfirmedPlaceCandidate(
+                placeId: 1,
+                voteCount: 2,
+                totalSeconds: 5400,
+                totalTransfers: 3
             )
         ]
     )
