@@ -16,7 +16,7 @@ private struct GroupNameSheetModifier: ViewModifier {
     @Bindable var store: StoreOf<GroupCreationFeature>
 
     func body(content: Content) -> some View {
-        content.bottomSheet(
+        content.bottomSheetNative(
             isPresented: $store.isGroupNameSheetPresented,
             header: .init(
                 title: "모임 만들기",

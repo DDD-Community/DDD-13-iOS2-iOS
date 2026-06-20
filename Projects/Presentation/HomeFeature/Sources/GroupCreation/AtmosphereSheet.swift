@@ -17,7 +17,7 @@ private struct AtmosphereSheetModifier: ViewModifier {
     @Bindable var store: StoreOf<GroupCreationFeature>
 
     func body(content: Content) -> some View {
-        content.bottomSheet(
+        content.bottomSheetNative(
             isPresented: $store.isAtmosphereSheetPresented,
             header: .init(
                 title: "장소 분위기",

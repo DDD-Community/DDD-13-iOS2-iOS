@@ -8,8 +8,8 @@ import SwiftUI
 public extension View {
     /// `ZStack` 오버레이와 `ViewModifier`로 직접 구현한 BottomSheet modifier입니다.
     /// 드래그 제스처와 snap 로직을 수동으로 관리하며, 두 단계 detent(0.5 / 0.9)를 지원합니다.
-    /// - TODO: 스크롤 뷰와 드래그 제스처 충돌, dismiss 시 sheetDetent 초기화 타이밍 등 상호작용 개선 예정
-    func customBottomSheet<Content: View>(
+    /// 리사이즈·dismiss 드래그는 핸들/헤더(chrome) 영역에만 부착되어 ScrollView 스크롤과 충돌하지 않습니다.
+    func bottomSheet<Content: View>(
         isPresented: Binding<Bool>,
         header: BottomSheet<Content>.HeaderConfig? = nil,
         primaryButton: BottomSheet<Content>.ButtonConfig? = nil,
@@ -64,7 +64,7 @@ private struct BottomSheetOverlayModifier<SheetContent: View>: ViewModifier {
     }
 
     func body(content parentContent: Content) -> some View {
-        ZStack {
+        ZStack(alignment: .bottom) {
             parentContent
 
             if isPresented {
@@ -80,26 +80,26 @@ private struct BottomSheetOverlayModifier<SheetContent: View>: ViewModifier {
                         primaryButton: primaryButton,
                         secondaryButton: secondaryButton,
                         canExpand: $canExpand,
-                        content: content
-                    )
-                    .frame(height: sheetHeight)
-                    .offset(y: sheetSlideOffset)
-                    .padding(.bottom, keyboardHeight)
-                    .simultaneousGesture(
-                        DragGesture()
-                            .onChanged { value in
+                        dragHandlers: BottomSheetDragHandlers(
+                            onChanged: { value in
                                 let translation = value.translation.height
                                 guard canExpand || translation > 0 else { return }
                                 dragOffset = translation
-                            }
-                            .onEnded { value in
+                            },
+                            onEnded: { value in
                                 if value.translation.height > 0 {
                                     handleDownDragEnded()
                                 } else if value.translation.height < 0 {
                                     handleUpDragEnded()
                                 }
                             }
+                        ),
+                        isDragging: dragOffset != 0,
+                        content: content
                     )
+                    .frame(height: sheetHeight)
+                    .offset(y: sheetSlideOffset)
+                    .padding(.bottom, keyboardHeight)
                 }
                 .transition(.move(edge: .bottom))
             }
@@ -182,7 +182,7 @@ private struct BottomSheetOverlayModifier<SheetContent: View>: ViewModifier {
 
         var body: some View {
             Button("시트 열기") { isPresented = true }
-                .customBottomSheet(
+                .bottomSheet(
                     isPresented: $isPresented,
                     header: .init(
                         title: "제목입니다",
@@ -205,7 +205,7 @@ private struct BottomSheetOverlayModifier<SheetContent: View>: ViewModifier {
 
         var body: some View {
             Button("시트 열기") { isPresented = true }
-                .customBottomSheet(
+                .bottomSheet(
                     isPresented: $isPresented,
                     header: .init(
                         title: "제목입니다",
@@ -229,7 +229,7 @@ private struct BottomSheetOverlayModifier<SheetContent: View>: ViewModifier {
 
         var body: some View {
             Button("시트 열기") { isPresented = true }
-                .customBottomSheet(
+                .bottomSheet(
                     isPresented: $isPresented
                 ) {
                     Text("컨텐츠만 있는 시트")
@@ -246,13 +246,13 @@ private struct BottomSheetOverlayModifier<SheetContent: View>: ViewModifier {
 
         var body: some View {
             Button("시트 열기") { isPresented = true }
-                .customBottomSheet(
+                .bottomSheet(
                     isPresented: $isPresented,
                     header: .init(title: "스크롤 + 확장 테스트", onClose: { isPresented = false }),
                     primaryButton: .init(title: "확인") { isPresented = false }
                 ) {
                     VStack(spacing: Spacing.spacing200) {
-                        ForEach(0..<10, id: \.self) { i in
+                        ForEach(0 ..< 10, id: \.self) { i in
                             Text("항목 \(i + 1)")
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
@@ -270,7 +270,7 @@ private struct BottomSheetOverlayModifier<SheetContent: View>: ViewModifier {
 
         var body: some View {
             Button("시트 열기") { isPresented = true }
-                .customBottomSheet(
+                .bottomSheet(
                     isPresented: $isPresented,
                     header: .init(title: "키보드 테스트", onClose: { isPresented = false }),
                     primaryButton: .init(title: "확인") { isPresented = false }

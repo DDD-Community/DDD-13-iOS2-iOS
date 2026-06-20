@@ -12,27 +12,12 @@ import Utill
 
 @main
 struct BangawoApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     private let store = Store(initialState: RootFeature.State()) {
         RootFeature()
     }
 
-    init() {
-        let appKey = AppEnvironment.kakaoAppKey
-        SDKInitializer.InitSDK(appKey: appKey, phase: .real)
-        KakaoSDK.initSDK(appKey: appKey)
-
-        prepareDependencies {
-            $0.searchStationsClient = SearchStationsFactory.makeClient()
-            $0.socialAuthClient = AuthFactory.makeSocialAuthClient()
-            $0.signupTermsClient = AuthFactory.makeSignupTermsClient()
-            $0.nicknameClient = AuthFactory.makeNicknameClient()
-            $0.registerMemberClient = AuthFactory.makeRegisterMemberClient()
-            $0.groupClient = GroupFactory.makeClient()
-            $0.themeTagClient = ThemeTagFactory.makeClient()
-        }
-
-        initializeNaverLoginSDK()
-    }
+    init() {}
 
     var body: some Scene {
         WindowGroup {
@@ -47,25 +32,4 @@ struct BangawoApp: App {
         }
     }
 
-    private func initializeNaverLoginSDK() {
-        let displayName = (Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String) ?? ""
-        let bundleName = (Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String) ?? ""
-        let appName = displayName.isEmpty ? bundleName : displayName
-
-        let naverClientID = Bundle.main.infoDictionary?["NAVER_CLIENT_ID"] as? String ?? ""
-        let naverClientSecret = Bundle.main.infoDictionary?["NAVER_CLIENT_SECRET"] as? String ?? ""
-        let naverURLScheme = Bundle.main.infoDictionary?["NAVER_URL_SCHEME"] as? String ?? ""
-
-        guard !appName.isEmpty, !naverClientID.isEmpty, !naverClientSecret.isEmpty, !naverURLScheme.isEmpty else {
-                    Log.debug("⚠️ [Naver] Error: Info.plist에서 네이버 로그인 설정값을 찾을 수 없습니다.")
-                    return
-                }
-                NidOAuth.shared.initialize(
-                    appName: appName,
-                    clientId: naverClientID,
-                    clientSecret: naverClientSecret,
-                    urlScheme: naverURLScheme
-                )
-                Log.debug("👤 [Naver] Login SDK 초기화 완료")
-        }
 }

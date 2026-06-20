@@ -6,7 +6,7 @@
 import SwiftUI
 
 public extension View {
-    func bottomSheet<Content: View>(
+    func bottomSheetNative<Content: View>(
         isPresented: Binding<Bool>,
         header: BottomSheet<Content>.HeaderConfig? = nil,
         primaryButton: BottomSheet<Content>.ButtonConfig? = nil,
@@ -194,7 +194,7 @@ private extension NativeSheetContent {
 
         var body: some View {
             Button("시트 열기") { isPresented = true }
-                .bottomSheet(
+                .bottomSheetNative(
                     isPresented: $isPresented,
                     header: .init(
                         title: "제목입니다",
@@ -217,7 +217,7 @@ private extension NativeSheetContent {
 
         var body: some View {
             Button("시트 열기") { isPresented = true }
-                .bottomSheet(
+                .bottomSheetNative(
                     isPresented: $isPresented,
                     header: .init(
                         title: "제목입니다",
@@ -242,7 +242,7 @@ private extension NativeSheetContent {
 
         var body: some View {
             Button("시트 열기") { isPresented = true }
-                .bottomSheet(
+                .bottomSheetNative(
                     isPresented: $isPresented,
                     header: .init(title: "키보드 테스트", onClose: { isPresented = false }),
                     primaryButton: .init(title: "확인") { isPresented = false }
