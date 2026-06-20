@@ -62,3 +62,45 @@ private struct TabContent: View {
         }
     }
 }
+
+// MARK: - Preview
+
+#if DEBUG
+private struct SelectPlaceViewPreview: View {
+    private let store: StoreOf<SelectPlaceFeature>
+
+    init(
+        selectedSubTabIndex: Int = 0,
+        pickedPlaces: [PickedPlace] = PickedPlace.mock,
+        isHost: Bool = false
+    ) {
+        var state = SelectPlaceFeature.State(pickedPlaces: pickedPlaces, isHost: isHost)
+        state.selectedSubTabIndex = selectedSubTabIndex
+        self.store = Store(initialState: state) {
+            SelectPlaceFeature()
+        }
+    }
+
+    var body: some View {
+        SelectPlaceView(store: store)
+    }
+}
+
+#Preview("장소보기 탭") {
+    BangawoPreview {
+        SelectPlaceViewPreview()
+    }
+}
+
+#Preview("담은 장소 탭 - 호스트") {
+    BangawoPreview {
+        SelectPlaceViewPreview(selectedSubTabIndex: 1, isHost: true)
+    }
+}
+
+#Preview("담은 장소 탭 - 빈 상태") {
+    BangawoPreview {
+        SelectPlaceViewPreview(selectedSubTabIndex: 1, pickedPlaces: [])
+    }
+}
+#endif
