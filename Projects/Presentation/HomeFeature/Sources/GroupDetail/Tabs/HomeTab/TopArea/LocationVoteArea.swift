@@ -15,17 +15,20 @@ import Utill
 // MARK: - 케이스 3: 장소 투표 (completed / voting)
 
 struct LocationVoteArea: View {
-    let store: StoreOf<GroupDetailFeature>
+    let store: StoreOf<HomeTabFeature>
 
-    // 투표/다시투표 토글은 로컬 인터랙션. 서버의 isMyVote 결과로 초기 동기화한다.
-    @State private var hasVoted = false
-    @State private var selectedIndex: Int?
+    // 다시 투표하기로 진입한 재선택 모드 등 서버 투표 여부와 무관한 로컬 인터랙션 상태.
+    @State private var selection = LocationVoteSelection()
 
     private var candidates: [PlaceVoteCandidate] {
         store.placeVote?.candidates ?? []
     }
 
     private var maxVoteCount: Int { candidates.map(\.voteCount).max() ?? 0 }
+
+    private var hasVoted: Bool {
+        store.hasVotedPlace && !selection.isRevoting
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -39,20 +42,17 @@ struct LocationVoteArea: View {
             LocationVoteList(
                 candidates: candidates,
                 hasVoted: hasVoted,
-                selectedIndex: selectedIndex,
+                selectedPlaceIds: selection.placeIds,
                 maxVoteCount: maxVoteCount,
-                onSelect: { selectedIndex = $0 },
+                onSelect: { selection.toggle($0) },
                 onDetail: { store.send(.placeDetailTapped) }
             )
 
             LocationVoteConfirmArea(
                 hasVoted: hasVoted,
-                canVote: selectedIndex != nil,
-                onVote: {
-                    hasVoted = true
-                    store.send(.voteForLocationTapped)
-                },
-                onRevote: { hasVoted = false }
+                canVote: selection.hasSelection,
+                onVote: submitVote,
+                onRevote: { selection.startRevote(myVotedIds: store.myVotedPlaceIds) }
             )
         }
         .padding(.vertical, Spacing.spacing300)
@@ -65,17 +65,20 @@ struct LocationVoteArea: View {
         .padding(.top, Spacing.spacing400)
         .padding(.bottom, Spacing.spacing500)
         .onChange(of: store.placeVote, initial: true) { _, newValue in
-            syncVoteState(from: newValue)
+            guard let newValue else { return }
+
+            selection.sync(myVotedIds: Set(newValue.candidates.filter(\.isMyVote).map(\.id)))
         }
     }
 
-    /// 서버가 내려준 `isMyVote`로 투표 완료 여부와 선택 상태를 초기화한다.
-    private func syncVoteState(from placeVote: PlaceVote?) {
-        guard let placeVote else { return }
+    private func submitVote() {
+        switch selection.resolveSubmit(myVotedIds: store.myVotedPlaceIds) {
+        case .skip:
+            return
 
-        let votedIndex = placeVote.candidates.firstIndex(where: { $0.isMyVote })
-        hasVoted = votedIndex != nil
-        selectedIndex = votedIndex
+        case let .submit(placeIds):
+            store.send(.placeVoteSubmitTapped(placeIds: placeIds))
+        }
     }
 }
 
@@ -112,20 +115,20 @@ private struct LocationVoteTopArea: View {
 private struct LocationVoteList: View {
     let candidates: [PlaceVoteCandidate]
     let hasVoted: Bool
-    let selectedIndex: Int?
+    let selectedPlaceIds: Set<Int>
     let maxVoteCount: Int
     let onSelect: (Int) -> Void
     let onDetail: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ForEach(Array(candidates.enumerated()), id: \.element.id) { index, candidate in
+            ForEach(candidates) { candidate in
                 LocationVoteRow(
                     candidate: candidate,
                     hasVoted: hasVoted,
-                    isSelected: selectedIndex == index,
+                    isSelected: selectedPlaceIds.contains(candidate.id),
                     isFirstPlace: maxVoteCount > 0 && candidate.voteCount == maxVoteCount,
-                    onSelect: { onSelect(index) },
+                    onSelect: { onSelect(candidate.id) },
                     onDetail: onDetail
                 )
             }
@@ -169,9 +172,7 @@ private struct LocationVoteUnvotedRow: View {
         HStack(spacing: Spacing.spacing250) {
             Button(action: onSelect) {
                 HStack(spacing: Spacing.spacing250) {
-                    (isSelected ? Image.Asset.icRadioButtonSelected : Image.Asset.icRadioButtonUnselected)
-                        .resizable()
-                        .frame(width: Sizing.sizing200, height: Sizing.sizing200)
+                    Checkbox(variant: .circle, state: isSelected ? .enabled : .disabled, size: .small)
 
                     LocationVotePlaceInfo(candidate: candidate)
                 }

@@ -15,7 +15,7 @@ import Entity
 
 /// 모임 진행 단계(`dateVoteStatus` × `locationStatus`)에 따라 상단 영역을 분기한다.
 struct HomeTopArea: View {
-    let store: StoreOf<GroupDetailFeature>
+    let store: StoreOf<HomeTabFeature>
 
     var body: some View {
         switch store.homeTopAreaKind {
@@ -40,7 +40,7 @@ struct HomeTopArea: View {
 // MARK: - Default Top Page (before / before)
 
 private struct DefaultTopPage: View {
-    let store: StoreOf<GroupDetailFeature>
+    let store: StoreOf<HomeTabFeature>
 
     var body: some View {
         TopPage(

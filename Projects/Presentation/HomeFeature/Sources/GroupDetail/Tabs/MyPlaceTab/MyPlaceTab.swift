@@ -13,7 +13,7 @@ import Utill
 /// 모임 상세 "내 장소보기" 탭.
 /// 카카오 지도 위에 `MapBottomSheet`를 ZStack으로 올린다.
 struct MyPlaceTab: View {
-    let store: StoreOf<GroupDetailFeature>
+    let store: StoreOf<MyPlaceTabFeature>
 
     // TODO: 디버깅용 임시 핀. 실제 장소 데이터 연동 시 제거한다.
     @State private var pins: [MapPin] = []

@@ -15,23 +15,22 @@ import Utill
 // MARK: - 케이스 1: 날짜 투표 (inProgress / before)
 
 struct DateVoteTopPage: View {
-    let store: StoreOf<GroupDetailFeature>
+    let store: StoreOf<HomeTabFeature>
 
-    // 다시 투표하기로 진입한 재선택 모드. 서버 투표 여부와 무관한 로컬 인터랙션.
-    @State private var isRevoting = false
-    @State private var selectedOptionIds: Set<Int> = []
+    // 다시 투표하기로 진입한 재선택 모드 등 서버 투표 여부와 무관한 로컬 인터랙션 상태.
+    @State private var selection = DateVoteSelection()
 
     private var options: [DateVoteOption] {
         store.dateVote?.options ?? []
     }
 
-    // 서버 투표 여부(hasVotedDate)와 로컬 재투표 상태를 조합한 투표 완료 화면 표시 여부.
-    private var hasVoted: Bool {
-        store.hasVotedDate && !isRevoting
+    private var allOptionIds: Set<Int> {
+        Set(options.map(\.id))
     }
 
-    private var isAllSelected: Bool {
-        !options.isEmpty && selectedOptionIds.count == options.count
+    // 서버 투표 여부(hasVotedDate)와 로컬 재투표 상태를 조합한 투표 완료 화면 표시 여부.
+    private var hasVoted: Bool {
+        store.hasVotedDate && !selection.isRevoting
     }
 
     var body: some View {
@@ -42,21 +41,24 @@ struct DateVoteTopPage: View {
                 participationRatio: store.dateVoteParticipationRatio
             )
 
-            DateVoteSelectAllButton(isAllSelected: isAllSelected, onSelectAll: toggleSelectAll)
+            DateVoteSelectAllButton(
+                isAllSelected: selection.isAllSelected(of: allOptionIds),
+                onSelectAll: toggleSelectAll
+            )
 
             DateVoteList(
                 options: options,
                 hasVoted: hasVoted,
-                selectedOptionIds: selectedOptionIds,
-                onSelect: toggleSelection
+                selectedOptionIds: selection.optionIds,
+                onSelect: { selection.toggle($0) }
             )
 
             DateVoteConfirmArea(
                 hasVoted: hasVoted,
-                canVote: !selectedOptionIds.isEmpty,
+                canVote: selection.hasSelection,
                 isHostAndMe: store.isMeHost,
                 onVote: submitVote,
-                onRevote: startRevote,
+                onRevote: { selection.startRevote(myVotedIds: store.myVotedDateOptionIds) },
                 onConfirm: { store.send(.dateVoteConfirmTapped) }
             )
         }
@@ -76,39 +78,19 @@ struct DateVoteTopPage: View {
     /// 선택한 후보 옵션 id로 투표 참여를 요청한다.
     /// 재투표 모드를 종료하면, 성공 시 Feature가 dateVote를 재조회해 `hasVotedDate`가 true로 유지되어 완료 화면으로 복귀한다.
     private func submitVote() {
-        guard !selectedOptionIds.isEmpty else { return }
-
-        // 재투표인데 선택이 이전 투표와 동일하면 API 호출 없이 완료 화면으로 복귀한다.
-        if isRevoting && selectedOptionIds == store.myVotedDateOptionIds {
-            isRevoting = false
+        switch selection.resolveSubmit(myVotedIds: store.myVotedDateOptionIds) {
+        case .skip:
             return
-        }
 
-        isRevoting = false
-        store.send(.dateVoteSubmitTapped(optionIds: Array(selectedOptionIds)))
-    }
-
-    /// 다시 투표하기 진입 시 기존 투표를 선택 상태로 pre-fill하고 재선택 모드로 전환한다.
-    private func startRevote() {
-        selectedOptionIds = store.myVotedDateOptionIds
-        isRevoting = true
-    }
-
-    private func toggleSelection(optionId: Int) {
-        guard !hasVoted else { return }
-
-        if selectedOptionIds.contains(optionId) {
-            selectedOptionIds.remove(optionId)
-        } else {
-            selectedOptionIds.insert(optionId)
+        case let .submit(optionIds):
+            store.send(.dateVoteSubmitTapped(optionIds: optionIds))
         }
     }
 
     private func toggleSelectAll() {
         guard !hasVoted else { return }
 
-        let allOptionIds = Set(options.map(\.id))
-        selectedOptionIds = selectedOptionIds == allOptionIds ? [] : allOptionIds
+        selection.toggleSelectAll(allIds: allOptionIds)
     }
 }
 

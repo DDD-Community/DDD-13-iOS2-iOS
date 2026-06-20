@@ -32,7 +32,7 @@ public struct GroupDetailView: View {
             )
 
             Tab(
-                labels: GroupDetailTab.allCases.map(\.label),
+                labels: store.tabs.map(\.label),
                 selectedIndex: tabBinding,
                 variant: .fixed,
                 size: .small
@@ -43,12 +43,6 @@ public struct GroupDetailView: View {
         }
         .background(Colors.gray200)
         .toolbar(.hidden, for: .navigationBar)
-        .task { store.send(.onAppear) }
-        .fullScreenCover(
-            item: $store.scope(state: \.destination?.dateVote, action: \.destination.dateVote)
-        ) { dateVoteStore in
-            DateVoteView(store: dateVoteStore)
-        }
     }
 
     private var tabBinding: Binding<Int> {
@@ -67,10 +61,10 @@ private struct TabContent: View {
     var body: some View {
         switch store.selectedTab {
         case .home:
-            HomeTab(store: store)
+            HomeTab(store: store.scope(state: \.home, action: \.home))
 
         case .myPlace:
-            MyPlaceTab(store: store)
+            MyPlaceTab(store: store.scope(state: \.myPlace, action: \.myPlace))
         }
     }
 }

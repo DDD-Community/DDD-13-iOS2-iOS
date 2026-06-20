@@ -15,7 +15,7 @@ import Utill
 // MARK: - 케이스 2: 약속 날짜 확정 (completed / recommended)
 
 struct ConfirmedDateArea: View {
-    let store: StoreOf<GroupDetailFeature>
+    let store: StoreOf<HomeTabFeature>
 
     // TODO: GroupDetail.confirmedDate 모델 연동 시 임시 Date 교체 + 서버 포맷 파싱
     private var confirmedDate: Date { Constant.tempConfirmedDate }

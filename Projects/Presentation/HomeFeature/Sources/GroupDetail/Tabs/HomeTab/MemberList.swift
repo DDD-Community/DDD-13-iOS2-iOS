@@ -15,7 +15,7 @@ import Entity
 /// 홈 탭의 멤버 리스트 영역.
 /// 멤버가 있으면 "나" 영역과 팀원 리스트를, 없으면 친구 초대 버튼을 노출한다.
 struct MemberList: View {
-    let store: StoreOf<GroupDetailFeature>
+    let store: StoreOf<HomeTabFeature>
 
     var body: some View {
         // 상세 로드 전에는 멤버 영역을 비워 두고, 로드 후 멤버 유무에 따라 분기한다.

@@ -14,7 +14,17 @@ import Entity
 // MARK: - 케이스 4: 확정 장소 (completed / confirmed)
 
 struct ConfirmedPlaceArea: View {
-    let store: StoreOf<GroupDetailFeature>
+    let store: StoreOf<HomeTabFeature>
+
+    private var placeName: String {
+        store.confirmedPlaceResult?.placeName ?? Constant.tempPlaceName
+    }
+
+    private var placeAddress: String {
+        store.confirmedPlaceResult?.address
+            ?? store.group.locationAddress
+            ?? Constant.tempPlaceAddress
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.spacing250) {
@@ -30,16 +40,12 @@ struct ConfirmedPlaceArea: View {
                         .clipShape(Circle())
 
                     VStack(alignment: .leading, spacing: Spacing.spacing50) {
-                        // TODO: 장소명 모델 연동 시 임시값 교체
-                        BangawoText(Constant.tempPlaceName, textStyle: .bodyLargeEmphasized)
+                        BangawoText(placeName, textStyle: .bodyLargeEmphasized)
                             .foregroundStyle(Colors.gray800)
 
                         HStack(spacing: Spacing.spacing50) {
-                            BangawoText(
-                                store.group.locationAddress ?? Constant.tempPlaceAddress,
-                                textStyle: .bodySmall
-                            )
-                            .foregroundStyle(Colors.gray700)
+                            BangawoText(placeAddress, textStyle: .bodySmall)
+                                .foregroundStyle(Colors.gray700)
 
                             Image.Asset.icArrowSmallDown16
                                 .renderingMode(.template)

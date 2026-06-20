@@ -14,7 +14,7 @@ import Entity
 /// 모임 상세 "홈" 탭.
 /// 상단 영역(`HomeTopArea`)부터 멤버 리스트(`MemberList`)까지 전체가 세로 스크롤된다.
 struct HomeTab: View {
-    let store: StoreOf<GroupDetailFeature>
+    @Bindable var store: StoreOf<HomeTabFeature>
 
     var body: some View {
         ScrollView {
@@ -24,6 +24,12 @@ struct HomeTab: View {
                 MemberList(store: store)
                     .padding(.horizontal, Spacing.spacing400)
             }
+        }
+        .task { store.send(.onAppear) }
+        .fullScreenCover(
+            item: $store.scope(state: \.destination?.dateVote, action: \.destination.dateVote)
+        ) { dateVoteStore in
+            DateVoteView(store: dateVoteStore)
         }
     }
 }
@@ -57,20 +63,18 @@ private extension Entity.Group {
 }
 
 private struct HomeTabStatePreview: View {
-    private let store: StoreOf<GroupDetailFeature>
+    private let store: StoreOf<HomeTabFeature>
 
     init(group: Entity.Group) {
-        self.store = Store(initialState: GroupDetailFeature.State(group: group)) {
-            GroupDetailFeature()
+        self.store = Store(initialState: HomeTabFeature.State(group: group)) {
+            HomeTabFeature()
         } withDependencies: {
             $0.groupClient = .previewValue
         }
     }
 
     var body: some View {
-        // 멤버 영역은 GroupDetailView 의 onAppear 로 fetch 되므로, 단독 프리뷰에서는 직접 트리거한다.
         HomeTab(store: store)
-            .task { store.send(.onAppear) }
     }
 }
 
