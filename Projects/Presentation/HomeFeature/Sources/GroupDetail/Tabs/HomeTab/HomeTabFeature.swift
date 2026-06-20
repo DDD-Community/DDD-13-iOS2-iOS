@@ -132,6 +132,8 @@ public struct HomeTabFeature {
     public enum Delegate: Equatable {
         case selectMyPlaceTab
         case meetingDateSelectionRequested(meetingId: Int)
+        /// 장소 추천 시작 성공 → 장소 투표 후보 담기 화면으로 진입.
+        case startSelectPlace(isHost: Bool)
     }
 
     public init() {}
@@ -243,7 +245,8 @@ public struct HomeTabFeature {
                 }
 
             case .placeRecommendationStartResponse(.success):
-                return .send(.delegate(.selectMyPlaceTab))
+                let isHost = state.isMeHost
+                return .send(.delegate(.startSelectPlace(isHost: isHost)))
 
             case .placeRecommendationStartResponse(.failure):
                 return .none

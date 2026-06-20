@@ -1,5 +1,5 @@
 //
-//  NearbyPlaceRow.swift
+//  PlaceRow.swift
 //  HomeFeature
 //
 
@@ -8,22 +8,30 @@ import Entity
 import SwiftUI
 import UIKit
 
-/// 역 근처 장소 리스트에 들어가는 단일 장소 row입니다.
+/// 장소 리스트에 들어가는 범용 단일 장소 row입니다.
 ///
-/// 현재는 서버 모델이 연결되기 전 단계라 장소명, 주소, 태그, 이미지가 더미 값으로 구성되어 있습니다.
+/// 장소명/거리/주소/태그/썸네일 본문은 공통이고, 우측(trailing) 요소는 사용처에 따라 주입합니다.
+/// 예: 장소보기 탭의 "담기" 버튼, 담은 장소 탭의 "N명" 담은 인원 라벨.
+///
+/// 현재는 서버 장소 모델이 확정되기 전 단계라 본문 값이 더미로 구성되어 있습니다.
 /// 주소 영역을 누르면 도로명/지번 주소를 보여주는 툴팁이 열리고, 툴팁은 row 위계보다 높은 레이어에 표시됩니다.
-struct NearbyPlaceRow: View {
+struct PlaceRow<Trailing: View>: View {
     // TODO: 서버 장소 모델이 확정되면 더미 값 대신 실제 place 데이터를 주입받도록 변경합니다.
     @State private var isTooltipPresented = false
     @State private var isTooltipLayerElevated = false
 
     private let displayAddress = "서울 강남구 역삼동"
     private let tooltipAnimationDuration = 0.2
+    private let trailing: Trailing
+
+    init(@ViewBuilder trailing: () -> Trailing = { EmptyView() }) {
+        self.trailing = trailing()
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             HStack(alignment: .center, spacing: Spacing.spacing300) {
-                NearbyPlaceThumbnail()
+                PlaceThumbnail()
 
                 VStack(alignment: .leading, spacing: Spacing.spacing200) {
                     Text("이름")
@@ -63,11 +71,14 @@ struct NearbyPlaceRow: View {
                     }
                     .zIndex(0)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .zIndex(1)
+
+                trailing
             }
             .overlay(alignment: .bottomLeading) {
                 if isTooltipPresented {
-                    NearbyPlaceAddressTooltip()
+                    PlaceAddressTooltip()
                         .offset(y: Spacing.spacing600)
                         .transition(.opacity.combined(with: .scale(scale: 0.96, anchor: .top)))
                 }
@@ -82,7 +93,7 @@ struct NearbyPlaceRow: View {
 
 // MARK: - Tooltip State
 
-private extension NearbyPlaceRow {
+private extension PlaceRow {
     /// 주소 툴팁을 열고 닫습니다.
     ///
     /// 닫힐 때 바로 zIndex를 내리면 사라지는 애니메이션이 아래 row 뒤로 묻힐 수 있습니다.
@@ -110,7 +121,7 @@ private extension NearbyPlaceRow {
 
 // MARK: - Address Tooltip
 
-private struct NearbyPlaceAddressTooltip: View {
+private struct PlaceAddressTooltip: View {
     /// 화면 좌우에서 각각 20pt 떨어진 폭으로 툴팁을 맞춥니다.
     private let horizontalMargin: CGFloat = 20
     private let roadAddress = "서울 강남구 테헤란로 123"
@@ -137,7 +148,7 @@ private struct NearbyPlaceAddressTooltip: View {
     }
 }
 
-private extension NearbyPlaceAddressTooltip {
+private extension PlaceAddressTooltip {
     /// `UIScreen.main`은 iOS 26에서 deprecated이므로 현재 연결된 window scene의 screen을 사용합니다.
     var tooltipWidth: CGFloat {
         let screenWidth = UIApplication.shared.connectedScenes
@@ -146,13 +157,11 @@ private extension NearbyPlaceAddressTooltip {
 
         return max(screenWidth - (horizontalMargin * 2), 0)
     }
-
 }
-
 
 // MARK: - Thumbnail
 
-private struct NearbyPlaceThumbnail: View {
+private struct PlaceThumbnail: View {
     var body: some View {
         // TODO: API 명세보고 카테고리별 이미지 수정해야 할 듯.
         Image.Asset.icMapPinRestaurant
@@ -215,5 +224,17 @@ private extension PlaceTagChip {
 }
 
 #Preview {
-    NearbyPlaceRow()
+    VStack(spacing: 0) {
+        PlaceRow()
+
+        PlaceRow {
+            BangawoButton("담기", variant: .weak, size: .xsmall) {}
+        }
+
+        PlaceRow {
+            Text("3명")
+                .pretendardCustomFont(textStyle: .labelSmallEmphasized)
+                .foregroundStyle(Colors.gray700)
+        }
+    }
 }

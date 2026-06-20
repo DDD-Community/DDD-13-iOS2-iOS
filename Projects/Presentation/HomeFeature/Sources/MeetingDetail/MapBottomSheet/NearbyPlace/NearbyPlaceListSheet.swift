@@ -7,21 +7,27 @@ import ComposableArchitecture
 import DesignSystem
 import SwiftUI
 
+/// 시트의 사용 용도.
+/// - `default`: 모임 상세 "내 장소보기" 등 기존 역 근처 장소 보기.
+/// - `selectPlace`: 장소 투표 후보 담기. 지하철역 segmented control과 row "담기" 버튼을 노출한다.
+enum NearbyPlaceListSheetMode: Equatable {
+    case `default`
+    case selectPlace
+}
+
 /// 역근처 정보 리스트 보여줄 시트
 struct NearbyPlaceListSheet: View {
     private let store: StoreOf<NearbyPlaceListSheetFeature>
+    private let mode: NearbyPlaceListSheetMode
 
-    init(store: StoreOf<NearbyPlaceListSheetFeature>) {
+    init(store: StoreOf<NearbyPlaceListSheetFeature>, mode: NearbyPlaceListSheetMode = .default) {
         self.store = store
+        self.mode = mode
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("신사역")
-                .pretendardCustomFont(textStyle: .titleLarge)
-                .foregroundStyle(Colors.gray900)
-                .padding(.horizontal, Spacing.spacing400)
-                .padding(.bottom, Spacing.spacing250)
+            header
 
             NearbyPlaceCategoryFilter(
                 selectedCategory: store.selectedCategory,
@@ -38,15 +44,109 @@ struct NearbyPlaceListSheet: View {
             )
             .padding(.horizontal, Spacing.spacing400)
             .padding(.bottom, Spacing.spacing250)
-            
-            Group {
-                NearbyPlaceRow()
-                NearbyPlaceRow()
-                NearbyPlaceRow()
-                NearbyPlaceRow()
-                NearbyPlaceRow()
+
+            placeList
+        }
+    }
+
+    @ViewBuilder
+    private var header: some View {
+        switch mode {
+        case .default:
+            Text("신사역")
+                .pretendardCustomFont(textStyle: .titleLarge)
+                .foregroundStyle(Colors.gray900)
+                .padding(.horizontal, Spacing.spacing400)
+                .padding(.bottom, Spacing.spacing250)
+
+        case .selectPlace:
+            StationSegmentedControl(
+                stations: store.stations,
+                selectedIndex: store.selectedStationIndex,
+                onSelect: { store.send(.stationSelected($0)) }
+            )
+            .padding(.horizontal, Spacing.spacing400)
+            .padding(.bottom, Spacing.spacing250)
+        }
+    }
+
+    @ViewBuilder
+    private var placeList: some View {
+        switch mode {
+        case .default:
+            ForEach(0..<store.placeCount, id: \.self) { _ in
+                PlaceRow()
+            }
+
+        case .selectPlace:
+            ForEach(0..<store.placeCount, id: \.self) { index in
+                PlaceRow {
+                    PlaceAddButton(
+                        isPicked: store.pickedPlaceIndices.contains(index),
+                        onTap: { store.send(.placeAddTapped(index)) }
+                    )
+                }
             }
         }
+    }
+}
+
+// MARK: - 지하철역 Segmented Control
+
+private struct StationSegmentedControl: View {
+    let stations: [String]
+    let selectedIndex: Int
+    let onSelect: (Int) -> Void
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: Spacing.spacing200) {
+                ForEach(Array(stations.enumerated()), id: \.offset) { index, station in
+                    StationSegment(
+                        title: station,
+                        isSelected: selectedIndex == index,
+                        onTap: { onSelect(index) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+private struct StationSegment: View {
+    let title: String
+    let isSelected: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            Text(title)
+                .pretendardCustomFont(textStyle: .labelMedium)
+                .foregroundStyle(isSelected ? Colors.gray00 : Colors.gray800)
+                .padding(.horizontal, Spacing.spacing300)
+                .padding(.vertical, Spacing.spacing200)
+                .background(
+                    RoundedRectangle(cornerRadius: BorderRadius.borderRadiusFull)
+                        .fill(isSelected ? Colors.gray900 : Colors.gray100)
+                )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - 담기 버튼
+
+private struct PlaceAddButton: View {
+    let isPicked: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        BangawoButton(
+            isPicked ? "담음" : "담기",
+            variant: isPicked ? .solid : .weak,
+            size: .xsmall,
+            action: onTap
+        )
     }
 }
 

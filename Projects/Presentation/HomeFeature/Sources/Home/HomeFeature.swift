@@ -18,6 +18,7 @@ public struct HomeFeature {
     public enum Path {
         case detail(GroupDetailFeature)
         case dateSelection(MeetingDateSelectionFeature)
+        case selectPlace(SelectPlaceFeature)
     }
 
     public enum InviteCardDesign: Equatable, CaseIterable, Sendable {
@@ -137,6 +138,10 @@ public struct HomeFeature {
 
                 guard let detailID else { return .none }
                 return .send(.path(.element(id: detailID, action: .detail(.home(.onAppear)))))
+
+            case let .path(.element(id: _, action: .detail(.delegate(.startSelectPlace(isHost))))):
+                state.path.append(.selectPlace(SelectPlaceFeature.State(isHost: isHost)))
+                return .none
 
             case .path:
                 return .none
