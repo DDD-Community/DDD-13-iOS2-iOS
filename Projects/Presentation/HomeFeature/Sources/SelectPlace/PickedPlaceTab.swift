@@ -140,8 +140,10 @@ private struct PickedPlaceList: View {
         LazyVStack(spacing: 0) {
             ForEach(places) { place in
                 PlaceRow {
-                    BangawoText("\(place.pickedCount)명", textStyle: .labelSmallEmphasized)
-                        .foregroundStyle(Colors.gray700)
+                    if place.pickedCount > 1 {
+                        BangawoText("\(place.pickedCount)명 선택", textStyle: .labelSmallEmphasized)
+                            .foregroundStyle(Colors.gray700)
+                    }
                 }
             }
         }
