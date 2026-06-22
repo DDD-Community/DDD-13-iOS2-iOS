@@ -36,6 +36,7 @@ struct SelectPlaceView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .toolbar(.hidden, for: .navigationBar)
+        .task { store.send(.onAppear) }
     }
 
     private var subTabBinding: Binding<Int> {

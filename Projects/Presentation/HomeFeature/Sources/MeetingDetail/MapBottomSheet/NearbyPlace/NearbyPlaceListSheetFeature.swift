@@ -4,6 +4,7 @@
 //
 
 import ComposableArchitecture
+import Entity
 import Utill
 
 public enum NearbyPlaceCategory: String, CaseIterable, Equatable, Sendable {
@@ -31,18 +32,28 @@ public struct NearbyPlaceListSheetFeature {
         public var selectedPlaceDetail: SelectedPlaceDetailSheetFeature.State = .mock
 
         // MARK: - 장소보기(selectPlace) 용도 전용 상태
-        // TODO: 추천 장소 API 연동(#77) 시 mock 역 목록/장소 인덱스를 실제 데이터로 교체한다.
-        /// 추천 장소를 역별로 나눠 보기 위한 지하철역 segmented control 목록.
-        public var stations: [String] = ["신사역", "강남역", "역삼역"]
+        /// 역별 추천 장소 그룹 목록. `SelectPlaceFeature.onAppear`에서 API 응답으로 채워진다.
+        public var stationGroups: [StationRecommendation] = []
         /// 선택된 지하철역 인덱스.
         public var selectedStationIndex: Int = 0
-        /// 후보로 담은 장소 인덱스 집합(mock). 담기 버튼 토글 상태를 표현한다.
+        /// 후보로 담은 장소 인덱스 집합. 담기 버튼 토글 상태를 표현한다.
         public var pickedPlaceIndices: Set<Int> = []
+
+        // MARK: - default 모드 전용
+        /// default(모임 상세) 모드에서 리스트에 표시할 mock 장소 개수.
+        public var placeCount: Int = 5
 
         public init() {}
 
-        /// selectPlace 모드에서 리스트에 표시할 mock 장소 개수.
-        public var placeCount: Int { 5 }
+        /// selectPlace 모드에서 segmented control에 표시할 역 목록.
+        public var stations: [MidpointStation] { stationGroups.map(\.station) }
+
+        /// 현재 선택된 역의 추천 장소 목록.
+        public var selectedStationPlaces: [RecommendedPlace] {
+            stationGroups.indices.contains(selectedStationIndex)
+                ? stationGroups[selectedStationIndex].places
+                : []
+        }
     }
 
     public enum Action: Equatable {
@@ -80,7 +91,10 @@ public struct NearbyPlaceListSheetFeature {
 
             case let .stationSelected(index):
                 state.selectedStationIndex = index
-                let stationName = state.stations.indices.contains(index) ? state.stations[index] : "-"
+                // 역마다 추천 장소 목록이 달라지므로, 인덱스 기반 담기 상태는 역 전환 시 초기화한다.
+                // TODO: 담기 API 연동(#77) 시 placeId 기반 상태로 교체하면 이 초기화는 불필요해진다.
+                state.pickedPlaceIndices.removeAll()
+                let stationName = state.stations.indices.contains(index) ? state.stations[index].stationName : "-"
                 Log.debug("지하철역 선택: \(stationName)")
                 return .none
 

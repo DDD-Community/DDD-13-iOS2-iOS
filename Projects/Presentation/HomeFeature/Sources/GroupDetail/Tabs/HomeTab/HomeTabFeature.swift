@@ -133,7 +133,7 @@ public struct HomeTabFeature {
         case selectMyPlaceTab
         case meetingDateSelectionRequested(meetingId: Int)
         /// 장소 추천 시작 성공 → 장소 투표 후보 담기 화면으로 진입.
-        case startSelectPlace(isHost: Bool)
+        case startSelectPlace(isHost: Bool, meetingId: Int)
     }
 
     public init() {}
@@ -234,7 +234,7 @@ public struct HomeTabFeature {
                 // 이미 장소 추천이 시작된(recommended) 상태면 API 호출 없이 화면 전환만 한다.
                 let locationStatus = state.groupDetail?.locationStatus ?? state.group.locationStatus
                 guard locationStatus != .recommended else {
-                    return .send(.delegate(.startSelectPlace(isHost: state.isMeHost)))
+                    return .send(.delegate(.startSelectPlace(isHost: state.isMeHost, meetingId: state.group.meetingId)))
                 }
 
                 let client = placeRecommendationClient
@@ -252,7 +252,8 @@ public struct HomeTabFeature {
 
             case .placeRecommendationStartResponse(.success):
                 let isHost = state.isMeHost
-                return .send(.delegate(.startSelectPlace(isHost: isHost)))
+                let meetingId = state.group.meetingId
+                return .send(.delegate(.startSelectPlace(isHost: isHost, meetingId: meetingId)))
 
             case .placeRecommendationStartResponse(.failure):
                 return .none

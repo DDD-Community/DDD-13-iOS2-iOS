@@ -16,15 +16,28 @@ import UIKit
 /// 현재는 서버 장소 모델이 확정되기 전 단계라 본문 값이 더미로 구성되어 있습니다.
 /// 주소 영역을 누르면 도로명/지번 주소를 보여주는 툴팁이 열리고, 툴팁은 row 위계보다 높은 레이어에 표시됩니다.
 struct PlaceRow<Trailing: View>: View {
-    // TODO: 서버 장소 모델이 확정되면 더미 값 대신 실제 place 데이터를 주입받도록 변경합니다.
     @State private var isTooltipPresented = false
     @State private var isTooltipLayerElevated = false
 
-    private let displayAddress = "서울 강남구 역삼동"
+    private let placeName: String
+    private let categoryLabel: String?
+    private let displayAddress: String
     private let tooltipAnimationDuration = 0.2
     private let trailing: Trailing
 
+    /// 더미 데이터를 사용하는 기본 init. 서버 모델 확정 전 mock 용도.
     init(@ViewBuilder trailing: () -> Trailing = { EmptyView() }) {
+        self.placeName = "이름"
+        self.categoryLabel = nil
+        self.displayAddress = "서울 강남구 역삼동"
+        self.trailing = trailing()
+    }
+
+    /// `RecommendedPlace` 실데이터를 표시하는 init.
+    init(place: RecommendedPlace, @ViewBuilder trailing: () -> Trailing = { EmptyView() }) {
+        self.placeName = place.name
+        self.categoryLabel = place.categoryLabel
+        self.displayAddress = place.address
         self.trailing = trailing()
     }
 
@@ -34,7 +47,7 @@ struct PlaceRow<Trailing: View>: View {
                 PlaceThumbnail()
 
                 VStack(alignment: .leading, spacing: Spacing.spacing200) {
-                    Text("이름")
+                    Text(placeName)
                         .pretendardCustomFont(textStyle: .bodyLargeEmphasized)
                         .foregroundStyle(Color.gray800)
 

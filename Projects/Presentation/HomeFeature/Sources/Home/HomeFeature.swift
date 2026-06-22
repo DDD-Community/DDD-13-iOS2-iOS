@@ -139,8 +139,8 @@ public struct HomeFeature {
                 guard let detailID else { return .none }
                 return .send(.path(.element(id: detailID, action: .detail(.home(.onAppear)))))
 
-            case let .path(.element(id: _, action: .detail(.delegate(.startSelectPlace(isHost))))):
-                state.path.append(.selectPlace(SelectPlaceFeature.State(isHost: isHost)))
+            case let .path(.element(id: _, action: .detail(.delegate(.startSelectPlace(isHost, meetingId))))):
+                state.path.append(.selectPlace(SelectPlaceFeature.State(isHost: isHost, meetingId: meetingId)))
                 return .none
 
             case .path:

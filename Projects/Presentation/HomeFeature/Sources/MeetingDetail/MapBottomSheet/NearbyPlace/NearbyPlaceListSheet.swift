@@ -5,6 +5,7 @@
 
 import ComposableArchitecture
 import DesignSystem
+import Entity
 import SwiftUI
 
 /// 시트의 사용 용도.
@@ -91,12 +92,20 @@ private struct NearbyPlaceList: View {
             }
 
         case .selectPlace:
-            ForEach(0..<store.placeCount, id: \.self) { index in
-                PlaceRow {
-                    PlaceAddButton(
-                        isPicked: store.pickedPlaceIndices.contains(index),
-                        onTap: { store.send(.placeAddTapped(index)) }
-                    )
+            if store.selectedStationPlaces.isEmpty {
+                Text("추천 장소가 없어요")
+                    .pretendardCustomFont(textStyle: .bodyMedium)
+                    .foregroundStyle(Colors.gray500)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, Spacing.spacing600)
+            } else {
+                ForEach(Array(store.selectedStationPlaces.enumerated()), id: \.element.id) { index, place in
+                    PlaceRow(place: place) {
+                        PlaceAddButton(
+                            isPicked: store.pickedPlaceIndices.contains(index),
+                            onTap: { store.send(.placeAddTapped(index)) }
+                        )
+                    }
                 }
             }
         }
@@ -106,16 +115,16 @@ private struct NearbyPlaceList: View {
 // MARK: - 지하철역 Segmented Control
 
 private struct StationSegmentedControl: View {
-    let stations: [String]
+    let stations: [MidpointStation]
     let selectedIndex: Int
     let onSelect: (Int) -> Void
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: Spacing.spacing200) {
-                ForEach(Array(stations.enumerated()), id: \.offset) { index, station in
+                ForEach(Array(stations.enumerated()), id: \.element.id) { index, station in
                     StationSegment(
-                        title: station,
+                        station: station,
                         isSelected: selectedIndex == index,
                         onTap: { onSelect(index) }
                     )
@@ -126,23 +135,45 @@ private struct StationSegmentedControl: View {
 }
 
 private struct StationSegment: View {
-    let title: String
+    let station: MidpointStation
     let isSelected: Bool
     let onTap: () -> Void
 
     var body: some View {
         Button(action: onTap) {
-            Text(title)
-                .pretendardCustomFont(textStyle: .labelMedium)
-                .foregroundStyle(isSelected ? Colors.gray00 : Colors.gray800)
-                .padding(.horizontal, Spacing.spacing300)
-                .padding(.vertical, Spacing.spacing200)
-                .background(
-                    RoundedRectangle(cornerRadius: BorderRadius.borderRadiusFull)
-                        .fill(isSelected ? Colors.gray900 : Colors.gray100)
-                )
+            HStack(spacing: Spacing.spacing150) {
+                Text(station.stationName)
+                    .pretendardCustomFont(textStyle: .labelMedium)
+                    .foregroundStyle(isSelected ? Colors.gray00 : Colors.gray800)
+
+                if station.rank == 1 {
+                    MiddleBadge(isSelected: isSelected)
+                }
+            }
+            .padding(.horizontal, Spacing.spacing300)
+            .padding(.vertical, Spacing.spacing200)
+            .background(
+                RoundedRectangle(cornerRadius: BorderRadius.borderRadiusFull)
+                    .fill(isSelected ? Colors.gray900 : Colors.gray100)
+            )
         }
         .buttonStyle(.plain)
+    }
+}
+
+private struct MiddleBadge: View {
+    let isSelected: Bool
+
+    var body: some View {
+        Text("중간")
+            .pretendardCustomFont(textStyle: .labelXSmall)
+            .foregroundStyle(isSelected ? Colors.gray900 : Colors.gray00)
+            .padding(.horizontal, Spacing.spacing150)
+            .padding(.vertical, Spacing.spacing50)
+            .background(
+                RoundedRectangle(cornerRadius: BorderRadius.borderRadius150)
+                    .fill(isSelected ? Colors.gray00 : Colors.gray600)
+            )
     }
 }
 
