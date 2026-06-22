@@ -13,7 +13,7 @@ public final class HostPickMeetingDateUseCaseImpl: HostPickMeetingDateUseCase {
         self.repository = repository
     }
 
-    public func execute(meetingId: Int64, date: String) async throws {
+    public func execute(meetingId: Int, date: String) async throws {
         try await repository.hostPickMeetingDate(meetingId: meetingId, date: date)
     }
 }

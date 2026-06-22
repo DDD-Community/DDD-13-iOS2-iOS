@@ -17,6 +17,7 @@ public struct TopPage: View {
     private let buttonTitle: String
     private let buttonVariant: BangawoButton.Variant
     private let buttonSize: BangawoButton.Size
+    private let showButton: Bool
     private let showLowerArea: Bool
     private let badgeLabel: String
     private let badgeLeadingIcon: Image?
@@ -31,6 +32,7 @@ public struct TopPage: View {
         buttonTitle: String,
         buttonVariant: BangawoButton.Variant = .weak,
         buttonSize: BangawoButton.Size = .small,
+        showButton: Bool = true,
         showLowerArea: Bool = true,
         badgeLabel: String = "",
         badgeLeadingIcon: Image? = nil,
@@ -42,6 +44,7 @@ public struct TopPage: View {
         self.buttonTitle = buttonTitle
         self.buttonVariant = buttonVariant
         self.buttonSize = buttonSize
+        self.showButton = showButton
         self.showLowerArea = showLowerArea
         self.badgeLabel = badgeLabel
         self.badgeLeadingIcon = badgeLeadingIcon
@@ -60,6 +63,7 @@ public struct TopPage: View {
                 buttonTitle: buttonTitle,
                 buttonVariant: buttonVariant,
                 buttonSize: buttonSize,
+                showButton: showButton,
                 buttonAction: buttonAction
             )
 
@@ -101,6 +105,7 @@ private extension TopPage {
         let buttonTitle: String
         let buttonVariant: BangawoButton.Variant
         let buttonSize: BangawoButton.Size
+        let showButton: Bool
         let buttonAction: () -> Void
 
         var body: some View {
@@ -118,12 +123,14 @@ private extension TopPage {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                BangawoButton(
-                    buttonTitle,
-                    variant: buttonVariant,
-                    size: buttonSize,
-                    action: buttonAction
-                )
+                if showButton {
+                    BangawoButton(
+                        buttonTitle,
+                        variant: buttonVariant,
+                        size: buttonSize,
+                        action: buttonAction
+                    )
+                }
             }
         }
     }
@@ -176,6 +183,17 @@ private extension TopPage {
                     buttonSize: .medium,
                     badgeLabel: "강남역 인근",
                     badgeLeadingIcon: Image.Asset.icStar24,
+                    buttonAction: {}
+                )
+
+                Divider()
+
+                TopPage(
+                    d3Asset: .avatarPlaceholder,
+                    title: "모임 정보를\n확인해 보세요",
+                    description: "참여 중인 모임의 상세 정보예요",
+                    buttonTitle: "수정",
+                    showLowerArea: false,
                     buttonAction: {}
                 )
             }

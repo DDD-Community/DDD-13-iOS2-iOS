@@ -4,5 +4,5 @@
 //
 
 public protocol HostPickMeetingDateUseCase: Sendable {
-    func execute(meetingId: Int64, date: String) async throws
+    func execute(meetingId: Int, date: String) async throws
 }

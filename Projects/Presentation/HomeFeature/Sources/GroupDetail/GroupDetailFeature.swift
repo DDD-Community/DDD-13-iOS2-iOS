@@ -4,6 +4,7 @@
 //
 
 import ComposableArchitecture
+
 import Entity
 import Utill
 
@@ -11,49 +12,46 @@ import Utill
 public struct GroupDetailFeature {
     @ObservableState
     public struct State: Equatable {
-        public var group: Group
-        public var nearbyPlaceList: NearbyPlaceListSheetFeature.State = .init()
         public var selectedTabIndex = 0
-        // TODO: 투표 탭 노출 조건이 확정되면 실제 값으로 대체
-        public var isVoteTabAvailable = false
+        public var home: HomeTabFeature.State
+        public var myPlace = MyPlaceTabFeature.State()
 
         public init(group: Group) {
-            self.group = group
+            self.home = HomeTabFeature.State(group: group)
         }
 
-        /// 노출 순서대로 구성한 탭 목록. `isVoteTabAvailable` 에 따라 "투표" 탭이 포함된다.
         public var tabs: [GroupDetailTab] {
-            isVoteTabAvailable
-                ? [.home, .vote, .myPlace]
-                : [.home, .myPlace]
+            [
+                .home,
+                .myPlace(isPlaceVoting: home.homeTopAreaKind == .locationVote)
+            ]
         }
 
         public var selectedTab: GroupDetailTab {
-            tabs[min(selectedTabIndex, tabs.count - 1)]
-        }
-
-        public var hasMembers: Bool {
-            !group.members.isEmpty
+            tabs[max(0, min(selectedTabIndex, tabs.count - 1))]
         }
     }
 
     public enum Action {
         case tabSelected(Int)
-        case decideMeetingTapped
-        case inviteFriendTapped
-        case nearbyPlaceList(NearbyPlaceListSheetFeature.Action)
+        case home(HomeTabFeature.Action)
+        case myPlace(MyPlaceTabFeature.Action)
         case delegate(Delegate)
 
         public enum Delegate: Equatable {
-            case meetingDateSelectionRequested(meetingId: Int64)
+            case meetingDateSelectionRequested(meetingId: Int)
         }
     }
 
     public init() {}
 
     public var body: some ReducerOf<Self> {
-        Scope(state: \.nearbyPlaceList, action: \.nearbyPlaceList) {
-            NearbyPlaceListSheetFeature()
+        Scope(state: \.home, action: \.home) {
+            HomeTabFeature()
+        }
+
+        Scope(state: \.myPlace, action: \.myPlace) {
+            MyPlaceTabFeature()
         }
 
         Reduce { state, action in
@@ -62,21 +60,15 @@ public struct GroupDetailFeature {
                 state.selectedTabIndex = index
                 return .none
 
-            case .decideMeetingTapped:
-                switch state.group.dateVoteStatus {
-                case .before, .unknown:
-                    Log.debug("약속정하기 클릭")
-                    return .send(.delegate(.meetingDateSelectionRequested(meetingId: state.group.meetingId)))
-
-                case .completed:
-                    Log.debug("장소 고르기 클릭")
-                    return .none
-                }
-
-            case .inviteFriendTapped:
+            case .home(.delegate(.selectMyPlaceTab)):
+                state.selectedTabIndex = 1
                 return .none
 
-            case .nearbyPlaceList:
+            case let .home(.delegate(.meetingDateSelectionRequested(meetingId))):
+                Log.debug("약속정하기 클릭")
+                return .send(.delegate(.meetingDateSelectionRequested(meetingId: meetingId)))
+
+            case .home, .myPlace:
                 return .none
 
             case .delegate:

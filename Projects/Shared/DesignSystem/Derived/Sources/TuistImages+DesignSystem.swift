@@ -108,6 +108,8 @@ public extension Image {
     public static let icPurposeFamily: Image = Image("ic_purpose_family", bundle: Bundle.module)
     public static let icPurposeSocial: Image = Image("ic_purpose_social", bundle: Bundle.module)
     public static let icPurposeWedding: Image = Image("ic_purpose_wedding", bundle: Bundle.module)
+    public static let icRadioButtonSelected: Image = Image("ic_radio_button_selected", bundle: Bundle.module)
+    public static let icRadioButtonUnselected: Image = Image("ic_radio_button_unselected", bundle: Bundle.module)
     public static let icSearch16: Image = Image("ic_search_16", bundle: Bundle.module)
     public static let icSearch24: Image = Image("ic_search_24", bundle: Bundle.module)
     public static let icShare16: Image = Image("ic_share_16", bundle: Bundle.module)

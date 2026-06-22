@@ -4,6 +4,8 @@
 //
 
 import ComposableArchitecture
+
+import DomainInterface
 import Entity
 import UseCase
 
@@ -21,7 +23,12 @@ public extension SignupTermsClient {
 }
 
 extension SignupTermsClient: DependencyKey {
-    public static let liveValue = SignupTermsClient()
+    public static var liveValue: SignupTermsClient {
+        SignupTermsClient(
+            fetchSignupTerms: { throw SignupTermsClientError.notImplemented }
+        )
+    }
+
     public static let testValue = SignupTermsClient(
             fetchSignupTerms: {
                 [

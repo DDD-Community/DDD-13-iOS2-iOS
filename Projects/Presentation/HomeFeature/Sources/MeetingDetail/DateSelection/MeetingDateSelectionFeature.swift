@@ -15,7 +15,7 @@ public struct MeetingDateSelectionFeature {
 
     @ObservableState
     public struct State: Equatable {
-        let meetingId: Int64
+        let meetingId: Int
         var selectedTab: MeetingDateSelectionTab = .date
         var dateDesignation = DateDesignationFeature.State()
         var periodVote = PeriodVoteFeature.State()
@@ -32,7 +32,7 @@ public struct MeetingDateSelectionFeature {
             }
         }
 
-        public init(meetingId: Int64) {
+        public init(meetingId: Int) {
             self.meetingId = meetingId
         }
     }
@@ -46,8 +46,8 @@ public struct MeetingDateSelectionFeature {
         case hostPickMeetingDateResponse(Result<Void, Error>)
 
         public enum Delegate: Equatable {
-            case datePickerRequested(MeetingDatePickerMode, meetingId: Int64)
-            case dateSelectionCompleted(meetingId: Int64)
+            case datePickerRequested(MeetingDatePickerMode, meetingId: Int)
+            case dateSelectionCompleted(meetingId: Int)
         }
     }
 
@@ -228,7 +228,7 @@ public enum MeetingDatePickerMode: Equatable {
 public struct MeetingDatePickerFeature {
     @ObservableState
     public struct State: Equatable {
-        let meetingId: Int64
+        let meetingId: Int
         let mode: MeetingDatePickerMode
         var displayedMonth: Date
         var selectedDate: Date?
@@ -289,7 +289,7 @@ public struct MeetingDatePickerFeature {
         }
 
         public init(
-            meetingId: Int64,
+            meetingId: Int,
             mode: MeetingDatePickerMode,
             displayedMonth: Date = Date(),
             selectedDate: Date? = nil,

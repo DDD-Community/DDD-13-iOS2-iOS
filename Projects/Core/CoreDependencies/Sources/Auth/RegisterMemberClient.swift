@@ -4,6 +4,8 @@
 //
 
 import ComposableArchitecture
+
+import DomainInterface
 import Entity
 import UseCase
 
@@ -23,7 +25,12 @@ public extension RegisterMemberClient {
 }
 
 extension RegisterMemberClient: DependencyKey {
-    public static let liveValue = RegisterMemberClient()
+    public static var liveValue: RegisterMemberClient {
+        RegisterMemberClient(
+            register: { _ in throw RegisterMemberClientError.notImplemented }
+        )
+    }
+
     public static let testValue = RegisterMemberClient(
         register: { _ in
             RegisterMemberResult(

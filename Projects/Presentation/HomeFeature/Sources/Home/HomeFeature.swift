@@ -191,7 +191,7 @@ public struct HomeFeature {
         state.path[id: dateSelectionID] = .dateSelection(dateSelectionState)
     }
 
-    private func updateDateVoteStatus(state: inout State, meetingId: Int64) {
+    private func updateDateVoteStatus(state: inout State, meetingId: Int) {
         state.groups = state.groups.map { group in
             guard group.meetingId == meetingId else { return group }
             return group.updating(dateVoteStatus: .completed)
@@ -208,8 +208,8 @@ public struct HomeFeature {
             return
         }
 
-        guard detailState.group.meetingId == meetingId else { return }
-        detailState.group = detailState.group.updating(dateVoteStatus: .completed)
+        guard detailState.home.group.meetingId == meetingId else { return }
+        detailState.home.group = detailState.home.group.updating(dateVoteStatus: .completed)
         state.path[id: detailID] = .detail(detailState)
     }
 }
