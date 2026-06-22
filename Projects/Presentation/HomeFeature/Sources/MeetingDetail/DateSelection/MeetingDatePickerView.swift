@@ -25,15 +25,33 @@ struct MeetingDatePickerView: View {
             )
 
             ScrollView {
-                VStack(spacing: Spacing.spacing600) {
-                    CalendarSelectionSection(store: store)
-                    TimeSelectionSection(store: store)
-                }
-                .padding(.horizontal, Spacing.spacing400)
-                .padding(.top, Spacing.spacing400)
-                .padding(.bottom, Spacing.spacing600)
-            }
+                VStack(spacing: 0) {
+                    SelectedDateTimeSection(store: store)
+                        .padding(.horizontal, Spacing.spacing400)
+                        .padding(.bottom, Spacing.spacing600)
+                    Divider()
+                        .frame(maxWidth: .infinity)
 
+                    CalendarSelectionSection(store: store)
+                        .padding(.bottom, Spacing.spacing300)
+                        .padding(.horizontal, Spacing.spacing400)
+
+                    if store.mode == .single {
+                        Divider()
+                            .frame(maxWidth: .infinity)
+                            .padding(.bottom, Spacing.spacing400)
+
+                        TimeSelectionSection(store: store)
+                            .padding(.horizontal, Spacing.spacing400)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.top, Spacing.spacing400)
+                .padding(.bottom, Metric.scrollBottomPadding)
+            }
+        }
+        .background(.white)
+        .overlay(alignment: .bottom) {
             ActionButton(
                 buttonLayout: .single(
                     title: "다음",
@@ -41,9 +59,45 @@ struct MeetingDatePickerView: View {
                     action: { store.send(.nextButtonTapped) }
                 )
             )
+            .padding(.bottom, Spacing.spacing400)
         }
-        .background(.white)
         .toolbar(.hidden, for: .navigationBar)
+    }
+}
+
+private extension MeetingDatePickerView {
+    enum Metric {
+        static let scrollBottomPadding: CGFloat = 112
+    }
+}
+
+// MARK: - SelectedDateTimeSection
+
+private struct SelectedDateTimeSection: View {
+    let store: StoreOf<MeetingDatePickerFeature>
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Spacing.spacing100) {
+            BangawoText(store.selectedDateTimeText ?? placeholderText, textStyle: .headingMedium)
+                .foregroundStyle(Colors.gray900)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            if store.mode == .range {
+                BangawoText("팀원들이 기간에 맞춰 날짜를 투표해요", textStyle: .bodyMedium)
+                    .foregroundStyle(Colors.gray700)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+    }
+
+    private var placeholderText: String {
+        switch store.mode {
+        case .single:
+            return "날짜와 시간을 선택해 주세요"
+
+        case .range:
+            return "날짜를 선택해 주세요"
+        }
     }
 }
 
@@ -56,30 +110,49 @@ private struct CalendarSelectionSection: View {
     private let weekdays = ["월", "화", "수", "목", "금", "토", "일"]
 
     var body: some View {
-        VStack(spacing: Spacing.spacing300) {
+        VStack(spacing: 0) {
             MonthHeader(store: store)
+                .padding(.top, Spacing.spacing400)
+                .padding(.bottom, Spacing.spacing200)
 
-            LazyVGrid(columns: columns, spacing: Spacing.spacing150) {
-                ForEach(weekdays, id: \.self) { weekday in
-                    BangawoText(weekday, textStyle: .bodyMedium)
+            LazyVGrid(columns: columns, spacing: Spacing.spacing300) {
+                ForEach(weekdays.indices, id: \.self) { index in
+                    BangawoText(weekdays[index], textStyle: .bodyMedium)
                         .foregroundStyle(Colors.gray700)
-                        .frame(height: Metric.weekdayHeight)
+                        .frame(width: Metric.dateButtonLength, height: Metric.weekdayHeight)
+                        .frame(maxWidth: .infinity, alignment: alignment(forColumn: index))
+                        .padding(.vertical, Spacing.spacing250)
                 }
 
                 ForEach(calendarDates.indices, id: \.self) { index in
                     if let date = calendarDates[index] {
                         CalendarDateButton(
                             day: Calendar.current.component(.day, from: date),
-                            selectionState: selectionState(for: date)
+                            selectionState: selectionState(for: date),
+                            alignment: alignment(forColumn: index % 7)
                         ) {
                             store.send(.dateTapped(date), animation: .easeInOut(duration: 0.15))
                         }
                     } else {
                         Color.clear
-                            .frame(height: Metric.dateButtonLength)
+                            .frame(width: Metric.dateButtonLength, height: Metric.dateButtonLength)
+                            .frame(maxWidth: .infinity, alignment: alignment(forColumn: index % 7))
                     }
                 }
             }
+        }
+    }
+
+    private func alignment(forColumn column: Int) -> Alignment {
+        switch column {
+        case 0:
+            return .leading
+
+        case 6:
+            return .trailing
+
+        default:
+            return .center
         }
     }
 
@@ -149,7 +222,7 @@ private struct MonthHeader: View {
     let store: StoreOf<MeetingDatePickerFeature>
 
     var body: some View {
-        HStack(spacing: 0) {
+        HStack(spacing: Spacing.spacing200) {
             Button {
                 store.send(.previousMonthTapped, animation: .easeInOut(duration: 0.2))
             } label: {
@@ -162,7 +235,6 @@ private struct MonthHeader: View {
 
             BangawoText(monthTitle, textStyle: .titleMedium)
                 .foregroundStyle(Colors.gray900)
-                .frame(maxWidth: .infinity)
 
             Button {
                 store.send(.nextMonthTapped, animation: .easeInOut(duration: 0.2))
@@ -174,6 +246,7 @@ private struct MonthHeader: View {
             }
             .buttonStyle(.plain)
         }
+        .frame(maxWidth: .infinity)
     }
 
     private var monthTitle: String {
@@ -190,7 +263,7 @@ private struct MonthHeader: View {
 
 private extension MonthHeader {
     enum Metric {
-        static let buttonLength: CGFloat = 40
+        static let buttonLength: CGFloat = 24
     }
 }
 
@@ -207,6 +280,7 @@ private struct CalendarDateButton: View {
 
     let day: Int
     let selectionState: SelectionState
+    let alignment: Alignment
     let action: () -> Void
 
     var body: some View {
@@ -214,16 +288,19 @@ private struct CalendarDateButton: View {
             ZStack {
                 rangeBackground
 
-                if selectionState.isCircleSelected {
-                    Circle()
-                        .fill(Colors.gray800)
-                        .frame(width: Metric.length, height: Metric.length)
-                }
+                ZStack {
+                    if selectionState.isCircleSelected {
+                        Circle()
+                            .fill(Colors.gray800)
+                            .frame(width: Metric.length, height: Metric.length)
+                    }
 
-                BangawoText("\(day)", textStyle: .bodyLarge)
-                    .foregroundStyle(textColor)
+                    BangawoText("\(day)", textStyle: .bodyLarge)
+                        .foregroundStyle(textColor)
+                }
+                .frame(width: Metric.length, height: Metric.length)
+                .frame(maxWidth: .infinity, alignment: alignment)
             }
-            .frame(maxWidth: .infinity)
             .frame(height: Metric.length)
         }
         .buttonStyle(.plain)

@@ -46,7 +46,7 @@ struct MeetingDateSelectionView: View {
 
             ActionButton(
                 buttonLayout: .single(
-                    title: "다음",
+                    title: "날짜 확정하기",
                     isDisabled: !store.isNextEnabled,
                     action: { store.send(.nextButtonTapped) }
                 )
@@ -85,7 +85,7 @@ private struct DateDesignationView: View {
 // MARK: - PeriodVoteView
 
 private struct PeriodVoteView: View {
-    let store: StoreOf<PeriodVoteFeature>
+    @Bindable var store: StoreOf<PeriodVoteFeature>
 
     var body: some View {
         VStack(spacing: 0) {
@@ -115,6 +115,86 @@ private struct PeriodVoteView: View {
             .padding(.horizontal, Spacing.spacing400)
             .padding(.top, Spacing.spacing400)
         }
+        .bottomSheet(
+            isPresented: $store.isDeadlineSheetPresented,
+            primaryButton: .init(
+                title: "등록하기",
+                isEnabled: store.isDeadlineDraftValid,
+                action: { store.send(.deadlineConfirmed) }
+            )
+        ) {
+            VoteDeadlineSheetContent(store: store)
+        }
+        .transaction { transaction in
+            transaction.animation = nil
+        }
+    }
+}
+
+// MARK: - VoteDeadlineSheetContent
+
+private struct VoteDeadlineSheetContent: View {
+    let store: StoreOf<PeriodVoteFeature>
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: Spacing.spacing200) {
+                BangawoText("투표 마감일을 설정해주세요", textStyle: .titleLarge)
+                    .foregroundStyle(Colors.gray900)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                Button {
+                    store.send(.deadlineSheetDismissed)
+                } label: {
+                    Image.Asset.icClose24
+                        .resizable()
+                        .renderingMode(.template)
+                        .frame(width: Metric.closeButtonLength, height: Metric.closeButtonLength)
+                        .foregroundStyle(Colors.gray500)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.bottom, Spacing.spacing300)
+
+            ForEach(VoteDeadlineOption.allCases) { option in
+                VoteDeadlineOptionRow(
+                    title: option.rawValue,
+                    isSelected: store.deadlineDraft == option
+                ) {
+                    store.send(.deadlineOptionSelected(option), animation: nil)
+                }
+            }
+        }
+    }
+}
+
+private extension VoteDeadlineSheetContent {
+    enum Metric {
+        static let closeButtonLength: CGFloat = 24
+    }
+}
+
+// MARK: - VoteDeadlineOptionRow
+
+private struct VoteDeadlineOptionRow: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: Spacing.spacing200) {
+                BangawoText(title, textStyle: .bodyMedium)
+                    .foregroundStyle(Colors.gray900)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                Checkbox(variant: .ghost, state: .enabled, size: .medium)
+                    .opacity(isSelected ? 1 : 0)
+            }
+            .padding(.vertical, Spacing.spacing350)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 }
 

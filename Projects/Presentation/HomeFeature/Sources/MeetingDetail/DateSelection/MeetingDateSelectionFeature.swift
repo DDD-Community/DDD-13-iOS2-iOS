@@ -142,32 +142,72 @@ public struct DateDesignationFeature {
     }
 }
 
+public enum VoteDeadlineOption: String, CaseIterable, Equatable, Identifiable {
+    case oneDay = "하루 뒤 마감"
+    case threeDays = "3일 뒤 마감"
+    case sevenDays = "7일 뒤 마감"
+
+    public var id: String { rawValue }
+}
+
 @Reducer
 public struct PeriodVoteFeature {
     @ObservableState
     public struct State: Equatable {
         var selectedDateText = ""
         var deadlineText = ""
+        var selectedDeadlineOption: VoteDeadlineOption?
+        var deadlineDraft: VoteDeadlineOption?
+        var isDeadlineSheetPresented = false
+
+        var isDeadlineDraftValid: Bool {
+            deadlineDraft != nil
+        }
 
         public init() {}
     }
 
-    public enum Action {
+    public enum Action: BindableAction {
+        case binding(BindingAction<State>)
         case dateFieldTapped
         case deadlineFieldTapped
+        case deadlineSheetDismissed
+        case deadlineOptionSelected(VoteDeadlineOption)
+        case deadlineConfirmed
     }
 
     public init() {}
 
     public var body: some ReducerOf<Self> {
-        Reduce { _, action in
+        BindingReducer()
+
+        Reduce { state, action in
             switch action {
+            case .binding:
+                return .none
+
             case .dateFieldTapped:
-                Log.debug("기간 투표 날짜 선택하기 클릭")
                 return .none
 
             case .deadlineFieldTapped:
-                Log.debug("투표 마감 시간 선택하기 클릭")
+                state.deadlineDraft = state.selectedDeadlineOption
+                state.isDeadlineSheetPresented = true
+                return .none
+
+            case .deadlineSheetDismissed:
+                state.deadlineDraft = state.selectedDeadlineOption
+                state.isDeadlineSheetPresented = false
+                return .none
+
+            case let .deadlineOptionSelected(option):
+                state.deadlineDraft = option
+                return .none
+
+            case .deadlineConfirmed:
+                guard let deadlineDraft = state.deadlineDraft else { return .none }
+                state.selectedDeadlineOption = deadlineDraft
+                state.deadlineText = deadlineDraft.rawValue
+                state.isDeadlineSheetPresented = false
                 return .none
             }
         }
@@ -202,21 +242,36 @@ public struct MeetingDatePickerFeature {
                 return selectedDate != nil && selectedHour != nil
 
             case .range:
-                return rangeStartDate != nil && rangeEndDate != nil && selectedHour != nil
+                return rangeStartDate != nil && rangeEndDate != nil
             }
         }
 
         var selectionText: String? {
-            guard let timeText else { return nil }
-
             switch mode {
             case .single:
-                guard let selectedDate else { return nil }
+                guard let selectedDate, let timeText else { return nil }
                 return "\(Self.dateText(for: selectedDate)) \(timeText)"
 
             case .range:
                 guard let rangeStartDate, let rangeEndDate else { return nil }
-                return "\(Self.dateText(for: rangeStartDate)) - \(Self.dateText(for: rangeEndDate)) \(timeText)"
+                return "\(Self.dateText(for: rangeStartDate)) - \(Self.dateText(for: rangeEndDate))"
+            }
+        }
+
+        var selectedDateTimeText: String? {
+            switch mode {
+            case .single:
+                guard let selectedDate, let timeText else { return nil }
+                return "\(Self.dateText(for: selectedDate)) \(timeText)"
+
+            case .range:
+                guard let rangeStartDate else { return nil }
+
+                if let rangeEndDate {
+                    return "\(Self.dateText(for: rangeStartDate)) - \(Self.dateText(for: rangeEndDate))"
+                }
+
+                return Self.dateText(for: rangeStartDate)
             }
         }
 
@@ -242,13 +297,15 @@ public struct MeetingDatePickerFeature {
             rangeEndDate: Date? = nil,
             selectedHour: Int? = nil
         ) {
+            let defaultDate = Calendar.current.startOfDay(for: Date())
+
             self.meetingId = meetingId
             self.mode = mode
             self.displayedMonth = Calendar.current.startOfMonth(for: displayedMonth)
-            self.selectedDate = selectedDate
-            self.rangeStartDate = rangeStartDate
+            self.selectedDate = selectedDate ?? (mode == .single ? defaultDate : nil)
+            self.rangeStartDate = rangeStartDate ?? (mode == .range ? defaultDate : nil)
             self.rangeEndDate = rangeEndDate
-            self.selectedHour = selectedHour
+            self.selectedHour = selectedHour ?? (mode == .single ? 8 : nil)
         }
 
         private static func dateText(for date: Date) -> String {
