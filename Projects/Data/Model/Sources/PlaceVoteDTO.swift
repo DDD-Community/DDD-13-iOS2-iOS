@@ -35,6 +35,14 @@ public struct SubmitPlaceVoteRequestDTO: Encodable, Sendable {
     }
 }
 
+public struct StartPlaceVoteRequestDTO: Encodable, Sendable {
+    public let durationDays: Int
+
+    public init(durationDays: Int) {
+        self.durationDays = durationDays
+    }
+}
+
 public struct ConfirmedPlaceResultResponseDTO: Decodable, Sendable {
     public let placeId: Int
     public let placeName: String

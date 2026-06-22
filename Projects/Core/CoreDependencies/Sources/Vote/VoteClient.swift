@@ -17,6 +17,7 @@ public struct VoteClient: Sendable {
     public var startDateVote: @Sendable (_ meetingId: Int, _ candidateDates: [String], _ durationDays: Int) async throws -> Void
     public var submitDateVote: @Sendable (_ meetingId: Int, _ optionIds: [Int]) async throws -> Void
     public var confirmDateVote: @Sendable (_ meetingId: Int, _ optionId: Int) async throws -> Void
+    public var startPlaceVote: @Sendable (_ meetingId: Int, _ durationDays: Int) async throws -> Void
     public var submitPlaceVote: @Sendable (_ meetingId: Int, _ placeIds: [Int]) async throws -> Void
 }
 
@@ -28,6 +29,7 @@ public extension VoteClient {
         startDateVoteUseCase: any StartDateVoteUseCase,
         submitDateVoteUseCase: any SubmitDateVoteUseCase,
         confirmDateVoteUseCase: any ConfirmDateVoteUseCase,
+        startPlaceVoteUseCase: any StartPlaceVoteUseCase,
         submitPlaceVoteUseCase: any SubmitPlaceVoteUseCase
     ) -> Self {
         Self(
@@ -53,6 +55,9 @@ public extension VoteClient {
             confirmDateVote: { meetingId, optionId in
                 try await confirmDateVoteUseCase.execute(meetingId: meetingId, optionId: optionId)
             },
+            startPlaceVote: { meetingId, durationDays in
+                try await startPlaceVoteUseCase.execute(meetingId: meetingId, durationDays: durationDays)
+            },
             submitPlaceVote: { meetingId, placeIds in
                 try await submitPlaceVoteUseCase.execute(meetingId: meetingId, placeIds: placeIds)
             }
@@ -69,6 +74,7 @@ extension VoteClient: DependencyKey {
             startDateVote: { _, _, _ in throw VoteClientError.notImplemented },
             submitDateVote: { _, _ in throw VoteClientError.notImplemented },
             confirmDateVote: { _, _ in throw VoteClientError.notImplemented },
+            startPlaceVote: { _, _ in throw VoteClientError.notImplemented },
             submitPlaceVote: { _, _ in throw VoteClientError.notImplemented }
         )
     }
@@ -82,6 +88,7 @@ extension VoteClient: DependencyKey {
         startDateVote: { _, _, _ in },
         submitDateVote: { _, _ in },
         confirmDateVote: { _, _ in },
+        startPlaceVote: { _, _ in },
         submitPlaceVote: { _, _ in }
     )
 }

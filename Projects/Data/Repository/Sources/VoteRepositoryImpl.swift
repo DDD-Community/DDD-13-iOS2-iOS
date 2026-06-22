@@ -54,6 +54,13 @@ public final class VoteRepositoryImpl: VoteRepositoryProtocol {
         )
     }
 
+    public func startPlaceVote(meetingId: Int, durationDays: Int) async throws {
+        let requestDTO = StartPlaceVoteRequestDTO(durationDays: durationDays)
+        try await NetworkManager.shared.requestVoid(
+            VoteEndpoint.startPlaceVote(meetingId: meetingId, requestDTO)
+        )
+    }
+
     public func submitPlaceVote(meetingId: Int, placeIds: [Int]) async throws {
         let requestDTO = SubmitPlaceVoteRequestDTO(placeIds: placeIds)
         try await NetworkManager.shared.requestVoid(

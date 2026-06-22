@@ -17,6 +17,7 @@ public struct SelectPlaceFeature {
     @Dependency(\.dismiss) private var dismiss
     @Dependency(\.placePickClient) private var placePickClient
     @Dependency(\.placeRecommendationClient) private var placeRecommendationClient
+    @Dependency(\.voteClient) private var voteClient
 
     @ObservableState
     public struct State: Equatable {
@@ -58,6 +59,7 @@ public struct SelectPlaceFeature {
         case stationRecommendationsResponse(Result<[StationRecommendation], Error>)
         case placePickStatusResponse(Result<PlacePickStatus, Error>)
         case placePickToggleResponse(placeId: Int, wasPicked: Bool, Result<Void, Error>)
+        case startPlaceVoteResponse(Result<Void, Error>)
     }
 
     public init() {}
@@ -121,8 +123,26 @@ public struct SelectPlaceFeature {
                 state.selectedSubTabIndex = 0
                 return .none
 
-            // TODO: 담은 장소 기반 투표 생성 API 연동(#77). 현재는 no-op.
             case .pickedPlace(.delegate(.createVoteTapped)):
+                let meetingId = state.meetingId
+                let voteClient = voteClient
+                return .run { send in
+                    await send(.startPlaceVoteResponse(
+                        Result {
+                            try await voteClient.startPlaceVote(
+                                meetingId,
+                                Constant.defaultPlaceVoteDurationDays
+                            )
+                        }
+                    ))
+                }
+
+            case .startPlaceVoteResponse(.success):
+                let dismiss = self.dismiss
+                return .run { _ in await dismiss() }
+
+            case let .startPlaceVoteResponse(.failure(error)):
+                Log.error("장소 투표 시작 실패: \(error)")
                 return .none
 
             case .backButtonTapped:
@@ -160,6 +180,10 @@ public struct SelectPlaceFeature {
             }
         }
     }
+}
+
+private enum Constant {
+    static let defaultPlaceVoteDurationDays = 1
 }
 
 private extension SelectPlaceFeature {
