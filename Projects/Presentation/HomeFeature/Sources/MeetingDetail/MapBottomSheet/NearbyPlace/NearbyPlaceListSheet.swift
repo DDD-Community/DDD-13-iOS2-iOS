@@ -92,18 +92,18 @@ private struct NearbyPlaceList: View {
             }
 
         case .selectPlace:
-            if store.selectedStationPlaces.isEmpty {
+            if store.visibleRecommendedPlaces.isEmpty {
                 Text("추천 장소가 없어요")
                     .pretendardCustomFont(textStyle: .bodyMedium)
                     .foregroundStyle(Colors.gray500)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, Spacing.spacing600)
             } else {
-                ForEach(Array(store.selectedStationPlaces.enumerated()), id: \.element.id) { index, place in
+                ForEach(store.visibleRecommendedPlaces) { place in
                     PlaceRow(place: place) {
                         PlaceAddButton(
-                            isPicked: store.pickedPlaceIndices.contains(index),
-                            onTap: { store.send(.placeAddTapped(index)) }
+                            isPicked: store.pickedPlaceIds.contains(place.placeId),
+                            onTap: { store.send(.placeAddTapped(placeId: place.placeId)) }
                         )
                     }
                 }
@@ -142,7 +142,7 @@ private struct StationSegment: View {
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: Spacing.spacing150) {
-                Text(station.stationName)
+                Text("\(station.stationName)역")
                     .pretendardCustomFont(textStyle: .labelMedium)
                     .foregroundStyle(isSelected ? Colors.gray00 : Colors.gray800)
 

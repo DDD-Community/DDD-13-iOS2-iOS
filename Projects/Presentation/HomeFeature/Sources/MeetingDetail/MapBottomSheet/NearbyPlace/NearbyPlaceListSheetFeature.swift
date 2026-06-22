@@ -36,8 +36,8 @@ public struct NearbyPlaceListSheetFeature {
         public var stationGroups: [StationRecommendation] = []
         /// 선택된 지하철역 인덱스.
         public var selectedStationIndex: Int = 0
-        /// 후보로 담은 장소 인덱스 집합. 담기 버튼 토글 상태를 표현한다.
-        public var pickedPlaceIndices: Set<Int> = []
+        /// 후보로 담은 장소 ID 집합. 역 전환과 무관하게 담기 버튼 상태를 표현한다.
+        public var pickedPlaceIds: Set<Int> = []
 
         // MARK: - default 모드 전용
         /// default(모임 상세) 모드에서 리스트에 표시할 mock 장소 개수.
@@ -48,11 +48,13 @@ public struct NearbyPlaceListSheetFeature {
         /// selectPlace 모드에서 segmented control에 표시할 역 목록.
         public var stations: [MidpointStation] { stationGroups.map(\.station) }
 
-        /// 현재 선택된 역의 추천 장소 목록.
-        public var selectedStationPlaces: [RecommendedPlace] {
-            stationGroups.indices.contains(selectedStationIndex)
-                ? stationGroups[selectedStationIndex].places
-                : []
+        /// selectPlace 모드에서 현재 노출할 추천 장소 목록.
+        ///
+        /// TODO: 추천 장소 DTO에 stationId가 추가되면 선택된 역 기준 필터링을 복구한다.
+        public var visibleRecommendedPlaces: [RecommendedPlace] {
+            stationGroups.reduce(into: []) { result, group in
+                result.append(contentsOf: group.places)
+            }
         }
     }
 
@@ -61,7 +63,7 @@ public struct NearbyPlaceListSheetFeature {
         case parkingAvailableFilterTapped
         case reservableFilterTapped
         case stationSelected(Int)
-        case placeAddTapped(Int)
+        case placeAddTapped(placeId: Int)
         case selectedPlaceDetail(SelectedPlaceDetailSheetFeature.Action)
     }
 
@@ -91,20 +93,11 @@ public struct NearbyPlaceListSheetFeature {
 
             case let .stationSelected(index):
                 state.selectedStationIndex = index
-                // 역마다 추천 장소 목록이 달라지므로, 인덱스 기반 담기 상태는 역 전환 시 초기화한다.
-                // TODO: 담기 API 연동(#77) 시 placeId 기반 상태로 교체하면 이 초기화는 불필요해진다.
-                state.pickedPlaceIndices.removeAll()
                 let stationName = state.stations.indices.contains(index) ? state.stations[index].stationName : "-"
                 Log.debug("지하철역 선택: \(stationName)")
                 return .none
 
-            // TODO: 장소 담기/취소 API 연동(#77) 시 실제 담기 요청으로 교체한다.
-            case let .placeAddTapped(index):
-                if state.pickedPlaceIndices.contains(index) {
-                    state.pickedPlaceIndices.remove(index)
-                } else {
-                    state.pickedPlaceIndices.insert(index)
-                }
+            case .placeAddTapped:
                 return .none
 
             case .selectedPlaceDetail:

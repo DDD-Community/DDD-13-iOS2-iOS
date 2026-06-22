@@ -15,6 +15,7 @@ import Utill
 @Reducer
 public struct SelectPlaceFeature {
     @Dependency(\.dismiss) private var dismiss
+    @Dependency(\.placePickClient) private var placePickClient
     @Dependency(\.placeRecommendationClient) private var placeRecommendationClient
 
     @ObservableState
@@ -89,6 +90,8 @@ public struct SelectPlaceFeature {
         case createVoteTapped
         case backButtonTapped
         case stationRecommendationsResponse(Result<[StationRecommendation], Error>)
+        case placePickStatusResponse(Result<PlacePickStatus, Error>)
+        case placePickToggleResponse(placeId: Int, wasPicked: Bool, Result<Void, Error>)
     }
 
     public init() {}
@@ -104,13 +107,21 @@ public struct SelectPlaceFeature {
                 guard !state.hasLoadedRecommendations else { return .none }
 
                 state.hasLoadedRecommendations = true
-                let client = placeRecommendationClient
+                let placeRecommendationClient = placeRecommendationClient
+                let placePickClient = placePickClient
                 let meetingId = state.meetingId
-                return .run { send in
-                    await send(.stationRecommendationsResponse(
-                        Result { try await client.fetchStationRecommendations(meetingId) }
-                    ))
-                }
+                return .merge(
+                    .run { send in
+                        await send(.stationRecommendationsResponse(
+                            Result { try await placeRecommendationClient.fetchStationRecommendations(meetingId) }
+                        ))
+                    },
+                    .run { send in
+                        await send(.placePickStatusResponse(
+                            Result { try await placePickClient.fetchPickStatus(meetingId) }
+                        ))
+                    }
+                )
 
             case let .stationRecommendationsResponse(.success(groups)):
                 state.nearbyPlaceList.stationGroups = groups
@@ -119,6 +130,16 @@ public struct SelectPlaceFeature {
 
             case let .stationRecommendationsResponse(.failure(error)):
                 Log.error("역 추천 장소 조회 실패: \(error)")
+                return .none
+
+            case let .placePickStatusResponse(.success(status)):
+                state.members = status.members.map { SelectPlaceMember(member: $0) }
+                state.pickedPlaces = status.myPicks.map { PickedPlace(summary: $0) }
+                state.nearbyPlaceList.pickedPlaceIds = Set(status.myPicks.map(\.placeId))
+                return .none
+
+            case let .placePickStatusResponse(.failure(error)):
+                Log.error("장소 담기 현황 조회 실패: \(error)")
                 return .none
 
             case let .subTabSelected(index):
@@ -142,9 +163,61 @@ public struct SelectPlaceFeature {
                 let dismiss = self.dismiss
                 return .run { _ in await dismiss() }
 
+            case let .nearbyPlaceList(.placeAddTapped(placeId: placeId)):
+                let wasPicked = state.nearbyPlaceList.pickedPlaceIds.contains(placeId)
+                let meetingId = state.meetingId
+                let client = placePickClient
+                return .run { send in
+                    await send(.placePickToggleResponse(
+                        placeId: placeId,
+                        wasPicked: wasPicked,
+                        Result {
+                            try await client.togglePlacePick(
+                                meetingId: meetingId,
+                                placeId: placeId,
+                                isCurrentlyPicked: wasPicked
+                            )
+                        }
+                    ))
+                }
+
+            case let .placePickToggleResponse(placeId, wasPicked, .success):
+                updatePickedPlaceState(placeId: placeId, wasPicked: wasPicked, state: &state)
+                return .none
+
+            case let .placePickToggleResponse(placeId, _, .failure(error)):
+                Log.error("장소 담기 상태 변경 실패(placeId: \(placeId)): \(error)")
+                return .none
+
             case .nearbyPlaceList:
                 return .none
             }
         }
+    }
+}
+
+private extension SelectPlaceFeature {
+    func updatePickedPlaceState(placeId: Int, wasPicked: Bool, state: inout State) {
+        if wasPicked {
+            state.nearbyPlaceList.pickedPlaceIds.remove(placeId)
+            state.pickedPlaces.removeAll { $0.id == placeId }
+        } else {
+            state.nearbyPlaceList.pickedPlaceIds.insert(placeId)
+            appendPickedPlaceIfNeeded(placeId: placeId, state: &state)
+        }
+    }
+
+    func appendPickedPlaceIfNeeded(placeId: Int, state: inout State) {
+        guard !state.pickedPlaces.contains(where: { $0.id == placeId }) else { return }
+
+        let recommendedPlace = state.nearbyPlaceList.stationGroups
+            .reduce(into: [RecommendedPlace]()) { result, group in
+                result.append(contentsOf: group.places)
+            }
+            .first { $0.placeId == placeId }
+
+        guard let recommendedPlace else { return }
+
+        state.pickedPlaces.append(PickedPlace(place: recommendedPlace))
     }
 }

@@ -24,12 +24,13 @@ public final class FetchStationRecommendationsUseCaseImpl: FetchStationRecommend
         async let placesTask = recommendationRepository.fetchRecommendations(meetingId: meetingId)
         let (stations, places) = try await (stationsTask, placesTask)
 
-        return stations.sorted { $0.rank < $1.rank }.map { station in
+        let sortedPlaces = places.sorted { $0.rank < $1.rank }
+
+        return stations.sorted { $0.rank < $1.rank }.enumerated().map { index, station in
             StationRecommendation(
                 station: station,
-                places: places
-                    .filter { $0.nearestStationId == station.stationId }
-                    .sorted { $0.rank < $1.rank }
+                // TODO: midpoint-stations 응답에 stationId가 추가되면 역별 필터링으로 복구한다.
+                places: index == 0 ? sortedPlaces : []
             )
         }
     }

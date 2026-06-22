@@ -5,9 +5,10 @@
 
 import Foundation
 
+import Entity
+
 /// 담은 장소 탭 상단 멤버 가로 스크롤 리스트에 표시할 멤버.
 ///
-/// TODO: 담은 장소 현황 API 연동(#77) 시 실제 멤버/담기 여부로 교체한다.
 public struct SelectPlaceMember: Identifiable, Equatable, Sendable {
     public let id: Int
     public let nickname: String
@@ -30,7 +31,6 @@ public struct SelectPlaceMember: Identifiable, Equatable, Sendable {
 
 /// 모임원이 담은 후보 장소(중복 제거된 단위).
 ///
-/// TODO: 담은 장소 현황 API 연동(#77) 시 실제 장소 모델로 교체한다.
 public struct PickedPlace: Identifiable, Equatable, Sendable {
     public let id: Int
     public let name: String
@@ -48,6 +48,48 @@ public struct PickedPlace: Identifiable, Equatable, Sendable {
         self.name = name
         self.category = category
         self.pickedCount = pickedCount
+    }
+}
+
+public extension SelectPlaceMember {
+    init(member: PlacePickStatus.Member) {
+        self.init(
+            id: member.id,
+            nickname: member.nickname,
+            profileImageUrl: nil,
+            hasPicked: member.done
+        )
+    }
+}
+
+public extension PickedPlace {
+    init(summary: PlacePickStatus.PickedPlaceSummary) {
+        self.init(
+            id: summary.id,
+            name: summary.name,
+            category: NearbyPlaceCategory(categoryLabel: summary.categoryLabel),
+            pickedCount: 1
+        )
+    }
+
+    init(place: RecommendedPlace) {
+        self.init(
+            id: place.id,
+            name: place.name,
+            category: NearbyPlaceCategory(categoryLabel: place.categoryLabel),
+            pickedCount: 1
+        )
+    }
+}
+
+public extension NearbyPlaceCategory {
+    init(categoryLabel: String) {
+        let normalizedLabel = categoryLabel.replacingOccurrences(of: " ", with: "")
+        let matchedCategory = Self.allCases.first {
+            $0.title.replacingOccurrences(of: " ", with: "") == normalizedLabel
+        }
+
+        self = matchedCategory ?? .etc
     }
 }
 
