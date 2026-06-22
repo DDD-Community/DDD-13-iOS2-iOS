@@ -27,7 +27,7 @@ struct NearbyPlaceListSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            header
+            NearbyPlaceListHeader(store: store, mode: mode)
 
             NearbyPlaceCategoryFilter(
                 selectedCategory: store.selectedCategory,
@@ -45,12 +45,18 @@ struct NearbyPlaceListSheet: View {
             .padding(.horizontal, Spacing.spacing400)
             .padding(.bottom, Spacing.spacing250)
 
-            placeList
+            NearbyPlaceList(store: store, mode: mode)
         }
     }
+}
 
-    @ViewBuilder
-    private var header: some View {
+// MARK: - Header
+
+private struct NearbyPlaceListHeader: View {
+    let store: StoreOf<NearbyPlaceListSheetFeature>
+    let mode: NearbyPlaceListSheetMode
+
+    var body: some View {
         switch mode {
         case .default:
             Text("신사역")
@@ -69,9 +75,15 @@ struct NearbyPlaceListSheet: View {
             .padding(.bottom, Spacing.spacing250)
         }
     }
+}
 
-    @ViewBuilder
-    private var placeList: some View {
+// MARK: - Place List
+
+private struct NearbyPlaceList: View {
+    let store: StoreOf<NearbyPlaceListSheetFeature>
+    let mode: NearbyPlaceListSheetMode
+
+    var body: some View {
         switch mode {
         case .default:
             ForEach(0..<store.placeCount, id: \.self) { _ in
