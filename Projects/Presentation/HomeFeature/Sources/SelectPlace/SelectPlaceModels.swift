@@ -35,6 +35,7 @@ public struct PickedPlace: Identifiable, Equatable, Sendable {
     public let id: Int
     public let name: String
     public let category: NearbyPlaceCategory
+    public let address: String
     /// 이 장소를 담은 모임원 수.
     public let pickedCount: Int
 
@@ -42,11 +43,13 @@ public struct PickedPlace: Identifiable, Equatable, Sendable {
         id: Int,
         name: String,
         category: NearbyPlaceCategory,
+        address: String,
         pickedCount: Int
     ) {
         self.id = id
         self.name = name
         self.category = category
+        self.address = address
         self.pickedCount = pickedCount
     }
 }
@@ -68,6 +71,7 @@ public extension PickedPlace {
             id: summary.id,
             name: summary.name,
             category: NearbyPlaceCategory(categoryLabel: summary.categoryLabel),
+            address: summary.address,
             pickedCount: 1
         )
     }
@@ -77,6 +81,7 @@ public extension PickedPlace {
             id: place.id,
             name: place.name,
             category: NearbyPlaceCategory(categoryLabel: place.categoryLabel),
+            address: place.address,
             pickedCount: 1
         )
     }
@@ -107,10 +112,10 @@ public extension SelectPlaceMember {
 
 public extension PickedPlace {
     static let mock: [PickedPlace] = [
-        PickedPlace(id: 1, name: "감성카페", category: .cafe, pickedCount: 3),
-        PickedPlace(id: 2, name: "남산다이닝", category: .koreaFood, pickedCount: 2),
-        PickedPlace(id: 3, name: "경복궁디저트", category: .desert, pickedCount: 1),
-        PickedPlace(id: 4, name: "명동포차", category: .bar, pickedCount: 2),
-        PickedPlace(id: 5, name: "광화문브런치", category: .cafe, pickedCount: 1)
+        PickedPlace(id: 1, name: "감성카페", category: .cafe, address: "서울 중구 세종대로 110", pickedCount: 3),
+        PickedPlace(id: 2, name: "남산다이닝", category: .koreaFood, address: "서울 용산구 소월로 322", pickedCount: 2),
+        PickedPlace(id: 3, name: "경복궁디저트", category: .desert, address: "서울 종로구 사직로 161", pickedCount: 1),
+        PickedPlace(id: 4, name: "명동포차", category: .bar, address: "서울 중구 명동길 14", pickedCount: 2),
+        PickedPlace(id: 5, name: "광화문브런치", category: .cafe, address: "서울 종로구 종로 1", pickedCount: 1)
     ]
 }

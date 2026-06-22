@@ -139,7 +139,11 @@ private struct PickedPlaceList: View {
     var body: some View {
         LazyVStack(spacing: 0) {
             ForEach(places) { place in
-                PlaceRow {
+                PlaceRow(
+                    placeName: place.name,
+                    categoryLabel: place.category.title,
+                    displayAddress: place.address
+                ) {
                     if place.pickedCount > 1 {
                         BangawoText("\(place.pickedCount)명 선택", textStyle: .labelSmallEmphasized)
                             .foregroundStyle(Colors.gray700)
@@ -193,11 +197,16 @@ private struct PickedPlaceTabPreview: View {
     private let store: StoreOf<PickedPlaceTabFeature>
 
     init(
+        members: [SelectPlaceMember] = SelectPlaceMember.mock,
         pickedPlaces: [PickedPlace] = PickedPlace.mock,
         isHost: Bool = false
     ) {
         self.store = Store(
-            initialState: PickedPlaceTabFeature.State(pickedPlaces: pickedPlaces, isHost: isHost)
+            initialState: PickedPlaceTabFeature.State(
+                members: members,
+                pickedPlaces: pickedPlaces,
+                isHost: isHost
+            )
         ) {
             PickedPlaceTabFeature()
         }

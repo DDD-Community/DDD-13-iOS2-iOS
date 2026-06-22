@@ -27,18 +27,35 @@ struct PlaceRow<Trailing: View>: View {
 
     /// 더미 데이터를 사용하는 기본 init. 서버 모델 확정 전 mock 용도.
     init(@ViewBuilder trailing: () -> Trailing = { EmptyView() }) {
-        self.placeName = "이름"
-        self.categoryLabel = nil
-        self.displayAddress = "서울 강남구 역삼동"
+        self.init(
+            placeName: "이름",
+            categoryLabel: nil,
+            displayAddress: "서울 강남구 역삼동",
+            trailing: trailing
+        )
+    }
+
+    /// 장소 row에 필요한 표시 데이터를 직접 전달하는 init.
+    init(
+        placeName: String,
+        categoryLabel: String?,
+        displayAddress: String,
+        @ViewBuilder trailing: () -> Trailing = { EmptyView() }
+    ) {
+        self.placeName = placeName
+        self.categoryLabel = categoryLabel
+        self.displayAddress = displayAddress
         self.trailing = trailing()
     }
 
     /// `RecommendedPlace` 실데이터를 표시하는 init.
     init(place: RecommendedPlace, @ViewBuilder trailing: () -> Trailing = { EmptyView() }) {
-        self.placeName = place.name
-        self.categoryLabel = place.categoryLabel
-        self.displayAddress = place.address
-        self.trailing = trailing()
+        self.init(
+            placeName: place.name,
+            categoryLabel: place.categoryLabel,
+            displayAddress: place.address,
+            trailing: trailing
+        )
     }
 
     var body: some View {
