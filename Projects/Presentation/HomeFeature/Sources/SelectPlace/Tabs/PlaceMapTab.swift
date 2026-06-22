@@ -13,7 +13,7 @@ import Utill
 /// 장소 투표 후보 담기 화면의 "장소보기" 탭.
 /// 카카오 지도 위에 `MapBottomSheet`를 올리고, 시트는 selectPlace 용도로 노출한다.
 struct PlaceMapTab: View {
-    let store: StoreOf<SelectPlaceFeature>
+    let store: StoreOf<PlaceMapTabFeature>
 
     // TODO: 추천 장소 API 연동(#77) 시 mock 핀을 실제 장소 데이터로 교체한다.
     @State private var pins: [MapPin] = []
@@ -29,6 +29,7 @@ struct PlaceMapTab: View {
                 .ignoresSafeArea()
 
             MapBottomSheet {
+                // TODO: 추천 장소 DTO에 stationId가 추가되면 NearbyPlaceListSheet의 역별 장소 리스트 노출을 복구한다.
                 NearbyPlaceListSheet(
                     store: store.scope(state: \.nearbyPlaceList, action: \.nearbyPlaceList),
                     mode: .selectPlace

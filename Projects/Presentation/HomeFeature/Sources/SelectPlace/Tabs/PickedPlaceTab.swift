@@ -13,7 +13,7 @@ import DesignSystem
 /// 모임원 가로 리스트 → 카테고리 필터 → 담은 장소 리스트(중복 제거)를 보여주고,
 /// 호스트에게는 하단에 투표 생성 버튼을 노출한다.
 struct PickedPlaceTab: View {
-    let store: StoreOf<SelectPlaceFeature>
+    let store: StoreOf<PickedPlaceTabFeature>
 
     var body: some View {
         VStack(spacing: 0) {
@@ -91,7 +91,7 @@ private struct MemberItem: View {
 // MARK: - 카테고리 필터 칩
 
 private struct CategoryFilterStrip: View {
-    let filters: [SelectPlaceFeature.CategoryFilter]
+    let filters: [PickedPlaceTabFeature.CategoryFilter]
     let selectedCategory: NearbyPlaceCategory
     let onSelect: (NearbyPlaceCategory) -> Void
 
@@ -190,16 +190,16 @@ private struct CreateVoteButton: View {
 
 #if DEBUG
 private struct PickedPlaceTabPreview: View {
-    private let store: StoreOf<SelectPlaceFeature>
+    private let store: StoreOf<PickedPlaceTabFeature>
 
     init(
         pickedPlaces: [PickedPlace] = PickedPlace.mock,
         isHost: Bool = false
     ) {
         self.store = Store(
-            initialState: SelectPlaceFeature.State(pickedPlaces: pickedPlaces, isHost: isHost)
+            initialState: PickedPlaceTabFeature.State(pickedPlaces: pickedPlaces, isHost: isHost)
         ) {
-            SelectPlaceFeature()
+            PickedPlaceTabFeature()
         }
     }
 

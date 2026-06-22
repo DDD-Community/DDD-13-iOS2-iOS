@@ -42,7 +42,7 @@ struct SelectPlaceView: View {
     private var subTabBinding: Binding<Int> {
         Binding(
             get: { store.selectedSubTabIndex },
-            set: { store.send(.subTabSelected($0)) }
+            set: { store.send(.tabSelected($0)) }
         )
     }
 }
@@ -55,10 +55,10 @@ private struct TabContent: View {
     var body: some View {
         switch store.selectedSubTab {
         case .placeMap:
-            PlaceMapTab(store: store)
+            PlaceMapTab(store: store.scope(state: \.placeMap, action: \.placeMap))
 
         case .pickedPlace:
-            PickedPlaceTab(store: store)
+            PickedPlaceTab(store: store.scope(state: \.pickedPlace, action: \.pickedPlace))
         }
     }
 }

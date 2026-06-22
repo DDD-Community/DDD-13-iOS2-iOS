@@ -21,12 +21,8 @@ public struct SelectPlaceFeature {
     @ObservableState
     public struct State: Equatable {
         public var selectedSubTabIndex = 0
-        public var nearbyPlaceList = NearbyPlaceListSheetFeature.State()
-        public var members: [SelectPlaceMember]
-        public var pickedPlaces: [PickedPlace]
-        public var selectedFilterCategory: NearbyPlaceCategory = .all
-        /// 현재 사용자가 호스트인지 여부. 하단 "투표 생성" 버튼 노출 분기에 사용한다.
-        public let isHost: Bool
+        public var placeMap = PlaceMapTabFeature.State()
+        public var pickedPlace: PickedPlaceTabFeature.State
         /// 추천 장소 화면 진입 시 전달받는 모임 ID.
         public let meetingId: Int
         /// `onAppear` 시 역/추천 장소 API를 1회만 호출하기 위한 가드 플래그.
@@ -38,9 +34,11 @@ public struct SelectPlaceFeature {
             isHost: Bool = false,
             meetingId: Int = 0
         ) {
-            self.members = members
-            self.pickedPlaces = pickedPlaces
-            self.isHost = isHost
+            self.pickedPlace = PickedPlaceTabFeature.State(
+                members: members,
+                pickedPlaces: pickedPlaces,
+                isHost: isHost
+            )
             self.meetingId = meetingId
         }
 
@@ -49,45 +47,13 @@ public struct SelectPlaceFeature {
         public var selectedSubTab: SelectPlaceTab {
             subTabs[max(0, min(selectedSubTabIndex, subTabs.count - 1))]
         }
-
-        public var isPickedPlaceEmpty: Bool { pickedPlaces.isEmpty }
-
-        /// 선택된 카테고리 필터로 거른 담은 장소 리스트.
-        public var filteredPickedPlaces: [PickedPlace] {
-            guard selectedFilterCategory != .all else { return pickedPlaces }
-
-            return pickedPlaces.filter { $0.category == selectedFilterCategory }
-        }
-
-        /// "전체"부터 시작해, 담은 장소에 실제 등장하는 카테고리만 개수와 함께 나열한 필터 목록.
-        public var categoryFilters: [CategoryFilter] {
-            let all = CategoryFilter(category: .all, count: pickedPlaces.count)
-            let present = NearbyPlaceCategory.allCases
-                .filter { $0 != .all }
-                .compactMap { category -> CategoryFilter? in
-                    let count = pickedPlaces.filter { $0.category == category }.count
-                    return count > 0 ? CategoryFilter(category: category, count: count) : nil
-                }
-            return [all] + present
-        }
-    }
-
-    /// 담은 장소 탭 카테고리 필터 칩 한 개.
-    public struct CategoryFilter: Equatable, Identifiable, Sendable {
-        public let category: NearbyPlaceCategory
-        public let count: Int
-
-        public var id: NearbyPlaceCategory { category }
-        public var label: String { "\(category.title) \(count)" }
     }
 
     public enum Action {
         case onAppear
-        case subTabSelected(Int)
-        case nearbyPlaceList(NearbyPlaceListSheetFeature.Action)
-        case categoryFilterSelected(NearbyPlaceCategory)
-        case goPickPlaceTapped
-        case createVoteTapped
+        case tabSelected(Int)
+        case placeMap(PlaceMapTabFeature.Action)
+        case pickedPlace(PickedPlaceTabFeature.Action)
         case backButtonTapped
         case stationRecommendationsResponse(Result<[StationRecommendation], Error>)
         case placePickStatusResponse(Result<PlacePickStatus, Error>)
@@ -97,8 +63,12 @@ public struct SelectPlaceFeature {
     public init() {}
 
     public var body: some ReducerOf<Self> {
-        Scope(state: \.nearbyPlaceList, action: \.nearbyPlaceList) {
-            NearbyPlaceListSheetFeature()
+        Scope(state: \.placeMap, action: \.placeMap) {
+            PlaceMapTabFeature()
+        }
+
+        Scope(state: \.pickedPlace, action: \.pickedPlace) {
+            PickedPlaceTabFeature()
         }
 
         Reduce { state, action in
@@ -124,8 +94,8 @@ public struct SelectPlaceFeature {
                 )
 
             case let .stationRecommendationsResponse(.success(groups)):
-                state.nearbyPlaceList.stationGroups = groups
-                state.nearbyPlaceList.selectedStationIndex = 0
+                state.placeMap.nearbyPlaceList.stationGroups = groups
+                state.placeMap.nearbyPlaceList.selectedStationIndex = 0
                 return .none
 
             case let .stationRecommendationsResponse(.failure(error)):
@@ -133,38 +103,34 @@ public struct SelectPlaceFeature {
                 return .none
 
             case let .placePickStatusResponse(.success(status)):
-                state.members = status.members.map { SelectPlaceMember(member: $0) }
-                state.pickedPlaces = status.myPicks.map { PickedPlace(summary: $0) }
-                state.nearbyPlaceList.pickedPlaceIds = Set(status.myPicks.map(\.placeId))
+                state.pickedPlace.members = status.members.map { SelectPlaceMember(member: $0) }
+                state.pickedPlace.pickedPlaces = status.myPicks.map { PickedPlace(summary: $0) }
+                state.placeMap.nearbyPlaceList.pickedPlaceIds = Set(status.myPicks.map(\.placeId))
                 return .none
 
             case let .placePickStatusResponse(.failure(error)):
                 Log.error("장소 담기 현황 조회 실패: \(error)")
                 return .none
 
-            case let .subTabSelected(index):
+            case let .tabSelected(index):
                 state.selectedSubTabIndex = index
                 return .none
 
-            case let .categoryFilterSelected(category):
-                state.selectedFilterCategory = category
-                return .none
-
             // 빈 상태에서 "투표 후보 담으러가기" → 장소보기 탭으로 전환.
-            case .goPickPlaceTapped:
+            case .pickedPlace(.delegate(.goPickPlaceTapped)):
                 state.selectedSubTabIndex = 0
                 return .none
 
             // TODO: 담은 장소 기반 투표 생성 API 연동(#77). 현재는 no-op.
-            case .createVoteTapped:
+            case .pickedPlace(.delegate(.createVoteTapped)):
                 return .none
 
             case .backButtonTapped:
                 let dismiss = self.dismiss
                 return .run { _ in await dismiss() }
 
-            case let .nearbyPlaceList(.placeAddTapped(placeId: placeId)):
-                let wasPicked = state.nearbyPlaceList.pickedPlaceIds.contains(placeId)
+            case let .placeMap(.nearbyPlaceList(.placeAddTapped(placeId: placeId))):
+                let wasPicked = state.placeMap.nearbyPlaceList.pickedPlaceIds.contains(placeId)
                 let meetingId = state.meetingId
                 let client = placePickClient
                 return .run { send in
@@ -189,7 +155,7 @@ public struct SelectPlaceFeature {
                 Log.error("장소 담기 상태 변경 실패(placeId: \(placeId)): \(error)")
                 return .none
 
-            case .nearbyPlaceList:
+            case .placeMap, .pickedPlace:
                 return .none
             }
         }
@@ -199,18 +165,18 @@ public struct SelectPlaceFeature {
 private extension SelectPlaceFeature {
     func updatePickedPlaceState(placeId: Int, wasPicked: Bool, state: inout State) {
         if wasPicked {
-            state.nearbyPlaceList.pickedPlaceIds.remove(placeId)
-            state.pickedPlaces.removeAll { $0.id == placeId }
+            state.placeMap.nearbyPlaceList.pickedPlaceIds.remove(placeId)
+            state.pickedPlace.pickedPlaces.removeAll { $0.id == placeId }
         } else {
-            state.nearbyPlaceList.pickedPlaceIds.insert(placeId)
+            state.placeMap.nearbyPlaceList.pickedPlaceIds.insert(placeId)
             appendPickedPlaceIfNeeded(placeId: placeId, state: &state)
         }
     }
 
     func appendPickedPlaceIfNeeded(placeId: Int, state: inout State) {
-        guard !state.pickedPlaces.contains(where: { $0.id == placeId }) else { return }
+        guard !state.pickedPlace.pickedPlaces.contains(where: { $0.id == placeId }) else { return }
 
-        let recommendedPlace = state.nearbyPlaceList.stationGroups
+        let recommendedPlace = state.placeMap.nearbyPlaceList.stationGroups
             .reduce(into: [RecommendedPlace]()) { result, group in
                 result.append(contentsOf: group.places)
             }
@@ -218,6 +184,6 @@ private extension SelectPlaceFeature {
 
         guard let recommendedPlace else { return }
 
-        state.pickedPlaces.append(PickedPlace(place: recommendedPlace))
+        state.pickedPlace.pickedPlaces.append(PickedPlace(place: recommendedPlace))
     }
 }
