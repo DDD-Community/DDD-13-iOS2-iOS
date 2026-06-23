@@ -76,8 +76,8 @@ public struct MeetingDatePickerFeature {
         var selectedDateRequestText: String? {
             @Dependency(\.calendar) var calendar
 
-            guard let selectedDate else { return nil }
-            return Self.requestDateText(for: selectedDate, calendar: calendar)
+            guard let selectedDate, let selectedHour else { return nil }
+            return Self.requestDateTimeText(for: selectedDate, hour: selectedHour, calendar: calendar)
         }
 
         var selectedCandidateDateTexts: [String] {
@@ -132,6 +132,11 @@ public struct MeetingDatePickerFeature {
 
         private static func requestDateTimeText(for date: Date, calendar: Calendar) -> String {
             "\(requestDateText(for: date, calendar: calendar))T00:00:00.000Z"
+        }
+
+        private static func requestDateTimeText(for date: Date, hour: Int, calendar: Calendar) -> String {
+            // 날짜 지정 API도 후보 날짜와 같은 datetime 문자열을 기대하므로 선택된 시간을 함께 보낸다.
+            "\(requestDateText(for: date, calendar: calendar))T\(String(format: "%02d", hour)):00:00.000Z"
         }
 
         private static func dates(from startDate: Date, through endDate: Date, calendar: Calendar) -> [Date] {
