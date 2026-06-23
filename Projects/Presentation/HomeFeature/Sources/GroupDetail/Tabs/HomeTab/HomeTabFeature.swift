@@ -124,6 +124,7 @@ public struct HomeTabFeature {
         case placeRecommendationStartResponse(Result<Void, Error>)
         case placeVoteSubmitTapped(placeIds: [Int])
         case placeVoteSubmitResponse(Result<Void, Error>)
+        case placeVoteParticipationTapped
         case placeDetailTapped
         case delegate(Delegate)
         case destination(PresentationAction<Destination.Action>)
@@ -273,6 +274,10 @@ public struct HomeTabFeature {
             case .placeVoteSubmitResponse(.failure):
                 return .none
 
+            case .placeVoteParticipationTapped:
+                state.destination = .placeVoteParticipation(PlaceVoteParticipationFeature.State())
+                return .none
+
             case .placeDetailTapped:
                 return .none
 
@@ -343,5 +348,6 @@ extension HomeTabFeature {
     @Reducer(state: .equatable)
     public enum Destination {
         case dateVote(DateVoteFeature)
+        case placeVoteParticipation(PlaceVoteParticipationFeature)
     }
 }

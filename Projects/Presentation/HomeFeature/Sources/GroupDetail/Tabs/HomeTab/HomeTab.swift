@@ -31,6 +31,14 @@ struct HomeTab: View {
         ) { dateVoteStore in
             DateVoteView(store: dateVoteStore)
         }
+        .fullScreenCover(
+            item: $store.scope(
+                state: \.destination?.placeVoteParticipation,
+                action: \.destination.placeVoteParticipation
+            )
+        ) { participationStore in
+            PlaceVoteParticipationView(store: participationStore)
+        }
     }
 }
 
