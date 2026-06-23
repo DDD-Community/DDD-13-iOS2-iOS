@@ -274,12 +274,12 @@ private enum PlaceVoteFormatter {
             let raw,
             let date = DateFormatterStore.date(
                 from: raw,
-                format: "yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX",
+                format: "yyyy-MM-dd'T'HH:mm:ss",
                 locale: "en_US_POSIX",
                 timeZone: "UTC"
             )
         else { return "" }
 
-        return "\(DateFormatterStore.string(from: date, format: "yyyy. MM. dd HH:mm"))까지 투표할 수 있어요"
+        return "\(DateFormatterStore.string(from: date, format: "yyyy. MM. dd HH:mm", timeZone: "UTC"))까지 투표할 수 있어요"
     }
 }
