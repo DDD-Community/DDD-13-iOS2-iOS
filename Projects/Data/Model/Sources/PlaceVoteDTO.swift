@@ -25,6 +25,8 @@ public struct PlaceVotePlaceResponseDTO: Decodable, Sendable {
     public let name: String
     public let categoryLabel: String
     public let address: String
+    public let latitude: Double?
+    public let longitude: Double?
 }
 
 public struct PlaceTravelBurdenResponseDTO: Decodable, Sendable {
@@ -86,6 +88,8 @@ public extension PlaceVoteCandidateResponseDTO {
             name: place.name,
             categoryLabel: place.categoryLabel,
             address: place.address,
+            latitude: place.latitude,
+            longitude: place.longitude,
             voteCount: voteCount,
             isMyVote: isMyVote,
             travelBurdens: travelBurdens.map { $0.toEntity() }

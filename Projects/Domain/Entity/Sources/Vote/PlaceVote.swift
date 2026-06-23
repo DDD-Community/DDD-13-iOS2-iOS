@@ -33,6 +33,8 @@ public struct PlaceVoteCandidate: Identifiable, Equatable, Sendable {
     public let name: String
     public let categoryLabel: String
     public let address: String
+    public let latitude: Double?
+    public let longitude: Double?
     public let voteCount: Int
     public let isMyVote: Bool
     public let travelBurdens: [PlaceTravelBurden]
@@ -44,6 +46,8 @@ public struct PlaceVoteCandidate: Identifiable, Equatable, Sendable {
         name: String,
         categoryLabel: String,
         address: String,
+        latitude: Double?,
+        longitude: Double?,
         voteCount: Int,
         isMyVote: Bool,
         travelBurdens: [PlaceTravelBurden]
@@ -52,6 +56,8 @@ public struct PlaceVoteCandidate: Identifiable, Equatable, Sendable {
         self.name = name
         self.categoryLabel = categoryLabel
         self.address = address
+        self.latitude = latitude
+        self.longitude = longitude
         self.voteCount = voteCount
         self.isMyVote = isMyVote
         self.travelBurdens = travelBurdens

@@ -136,12 +136,38 @@ public extension VoteClient {
                 name: "감성카페",
                 categoryLabel: "카페",
                 address: "서울 강남구 테헤란로 1",
+                latitude: 37.4979,
+                longitude: 127.0276,
                 voteCount: 2,
                 isMyVote: true,
                 travelBurdens: [
                     PlaceTravelBurden(id: 1, seconds: 1800, transfers: 1, isLongest: false),
                     PlaceTravelBurden(id: 2, seconds: 3600, transfers: 2, isLongest: true)
                 ]
+            ),
+            PlaceVoteCandidate(
+                id: 2,
+                name: "강남역 맛집",
+                categoryLabel: "음식점",
+                address: "서울 강남구 강남대로 396",
+                latitude: 37.4980,
+                longitude: 127.0276,
+                voteCount: 1,
+                isMyVote: false,
+                travelBurdens: [
+                    PlaceTravelBurden(id: 1, seconds: 1500, transfers: 0, isLongest: false)
+                ]
+            ),
+            PlaceVoteCandidate(
+                id: 3,
+                name: "역삼 브런치",
+                categoryLabel: "카페",
+                address: "서울 강남구 역삼로 120",
+                latitude: 37.5006,
+                longitude: 127.0364,
+                voteCount: 0,
+                isMyVote: false,
+                travelBurdens: []
             )
         ]
     )
