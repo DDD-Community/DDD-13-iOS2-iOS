@@ -50,7 +50,7 @@ struct PlaceMapTab: View {
             }
             .ignoresSafeArea()
 
-            MapBottomSheet {
+            MapBottomSheet(detents: [.medium, .full], initialDetent: .medium) {
                 NearbyPlaceListSheet(
                     store: store.scope(state: \.nearbyPlaceList, action: \.nearbyPlaceList),
                     mode: .selectPlace
