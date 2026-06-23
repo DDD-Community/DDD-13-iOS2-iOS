@@ -12,6 +12,7 @@ public enum VoteEndpoint: EndPoint {
     case fetchDateVote(meetingId: Int)
     case fetchPlaceVote(meetingId: Int)
     case fetchConfirmedPlaceResult(meetingId: Int)
+    case startDateVote(meetingId: Int, StartDateVoteRequestDTO)
     case submitDateVote(meetingId: Int, SubmitDateVoteRequestDTO)
     case confirmDateVote(meetingId: Int, ConfirmDateVoteRequestDTO)
     case submitPlaceVote(meetingId: Int, SubmitPlaceVoteRequestDTO)
@@ -23,6 +24,7 @@ public enum VoteEndpoint: EndPoint {
         case .fetchDateVote(let meetingId): return "/api/v1/meetings/\(meetingId)/date-vote"
         case .fetchPlaceVote(let meetingId): return "/api/v1/meetings/\(meetingId)/place-vote"
         case .fetchConfirmedPlaceResult(let meetingId): return "/api/v1/meetings/\(meetingId)/place-result"
+        case .startDateVote(let meetingId, _): return "/api/v1/meetings/\(meetingId)/date-vote"
         case .submitDateVote(let meetingId, _): return "/api/v1/meetings/\(meetingId)/date-vote/submit"
         case .confirmDateVote(let meetingId, _): return "/api/v1/meetings/\(meetingId)/date-vote/confirm"
         case .submitPlaceVote(let meetingId, _): return "/api/v1/meetings/\(meetingId)/place-vote/submit"
@@ -34,6 +36,7 @@ public enum VoteEndpoint: EndPoint {
         case .fetchDateVote: return .get
         case .fetchPlaceVote: return .get
         case .fetchConfirmedPlaceResult: return .get
+        case .startDateVote: return .post
         case .submitDateVote: return .post
         case .confirmDateVote: return .patch
         case .submitPlaceVote: return .post
@@ -45,6 +48,7 @@ public enum VoteEndpoint: EndPoint {
         case .fetchDateVote: return .requestPlain
         case .fetchPlaceVote: return .requestPlain
         case .fetchConfirmedPlaceResult: return .requestPlain
+        case .startDateVote(_, let dto): return .requestJSONEncodable(body: dto)
         case .submitDateVote(_, let dto): return .requestJSONEncodable(body: dto)
         case .confirmDateVote(_, let dto): return .requestJSONEncodable(body: dto)
         case .submitPlaceVote(_, let dto): return .requestJSONEncodable(body: dto)

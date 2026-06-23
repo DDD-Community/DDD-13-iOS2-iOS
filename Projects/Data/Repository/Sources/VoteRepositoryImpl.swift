@@ -33,6 +33,13 @@ public final class VoteRepositoryImpl: VoteRepositoryProtocol {
         return response.toEntity()
     }
 
+    public func startDateVote(meetingId: Int, candidateDates: [String], durationDays: Int) async throws {
+        let requestDTO = StartDateVoteRequestDTO(candidateDates: candidateDates, durationDays: durationDays)
+        try await NetworkManager.shared.requestVoid(
+            VoteEndpoint.startDateVote(meetingId: meetingId, requestDTO)
+        )
+    }
+
     public func submitDateVote(meetingId: Int, optionIds: [Int]) async throws {
         let requestDTO = SubmitDateVoteRequestDTO(optionIds: optionIds)
         try await NetworkManager.shared.requestVoid(

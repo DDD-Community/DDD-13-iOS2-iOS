@@ -14,6 +14,7 @@ public struct VoteClient: Sendable {
     public var fetchDateVote: @Sendable (_ meetingId: Int) async throws -> DateVote
     public var fetchPlaceVote: @Sendable (_ meetingId: Int) async throws -> PlaceVote
     public var fetchConfirmedPlaceResult: @Sendable (_ meetingId: Int) async throws -> ConfirmedPlaceResult
+    public var startDateVote: @Sendable (_ meetingId: Int, _ candidateDates: [String], _ durationDays: Int) async throws -> Void
     public var submitDateVote: @Sendable (_ meetingId: Int, _ optionIds: [Int]) async throws -> Void
     public var confirmDateVote: @Sendable (_ meetingId: Int, _ optionId: Int) async throws -> Void
     public var submitPlaceVote: @Sendable (_ meetingId: Int, _ placeIds: [Int]) async throws -> Void
@@ -24,6 +25,7 @@ public extension VoteClient {
         fetchDateVoteUseCase: any FetchDateVoteUseCase,
         fetchPlaceVoteUseCase: any FetchPlaceVoteUseCase,
         fetchConfirmedPlaceResultUseCase: any FetchConfirmedPlaceResultUseCase,
+        startDateVoteUseCase: any StartDateVoteUseCase,
         submitDateVoteUseCase: any SubmitDateVoteUseCase,
         confirmDateVoteUseCase: any ConfirmDateVoteUseCase,
         submitPlaceVoteUseCase: any SubmitPlaceVoteUseCase
@@ -37,6 +39,13 @@ public extension VoteClient {
             },
             fetchConfirmedPlaceResult: { meetingId in
                 try await fetchConfirmedPlaceResultUseCase.execute(meetingId: meetingId)
+            },
+            startDateVote: { meetingId, candidateDates, durationDays in
+                try await startDateVoteUseCase.execute(
+                    meetingId: meetingId,
+                    candidateDates: candidateDates,
+                    durationDays: durationDays
+                )
             },
             submitDateVote: { meetingId, optionIds in
                 try await submitDateVoteUseCase.execute(meetingId: meetingId, optionIds: optionIds)
@@ -57,6 +66,7 @@ extension VoteClient: DependencyKey {
             fetchDateVote: { _ in throw VoteClientError.notImplemented },
             fetchPlaceVote: { _ in throw VoteClientError.notImplemented },
             fetchConfirmedPlaceResult: { _ in throw VoteClientError.notImplemented },
+            startDateVote: { _, _, _ in throw VoteClientError.notImplemented },
             submitDateVote: { _, _ in throw VoteClientError.notImplemented },
             confirmDateVote: { _, _ in throw VoteClientError.notImplemented },
             submitPlaceVote: { _, _ in throw VoteClientError.notImplemented }
@@ -69,6 +79,7 @@ extension VoteClient: DependencyKey {
         fetchDateVote: { _ in previewDateVote },
         fetchPlaceVote: { _ in previewPlaceVote },
         fetchConfirmedPlaceResult: { _ in previewConfirmedPlaceResult },
+        startDateVote: { _, _, _ in },
         submitDateVote: { _, _ in },
         confirmDateVote: { _, _ in },
         submitPlaceVote: { _, _ in }

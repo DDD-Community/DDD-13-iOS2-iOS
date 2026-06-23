@@ -91,9 +91,6 @@ public struct HomeView: View {
 
             case let .dateSelection(dateSelectionStore):
                 MeetingDateSelectionView(store: dateSelectionStore)
-
-            case let .datePicker(datePickerStore):
-                MeetingDatePickerView(store: datePickerStore)
             }
         }
     }

@@ -72,6 +72,18 @@ public struct MeetingDatePickerFeature {
             return Self.requestDateText(for: selectedDate)
         }
 
+        var selectedCandidateDateTexts: [String] {
+            switch mode {
+            case .single:
+                return []
+
+            case .range:
+                guard let rangeStartDate, let rangeEndDate else { return [] }
+                return Self.dates(from: rangeStartDate, through: rangeEndDate)
+                    .map { Self.requestDateTimeText(for: $0) }
+            }
+        }
+
         public init(
             meetingId: Int,
             mode: MeetingDatePickerMode,
@@ -107,6 +119,25 @@ public struct MeetingDatePickerFeature {
             let day = calendar.component(.day, from: date)
             return "\(year)-\(String(format: "%02d", month))-\(String(format: "%02d", day))"
         }
+
+        private static func requestDateTimeText(for date: Date) -> String {
+            "\(requestDateText(for: date))T00:00:00.000Z"
+        }
+
+        private static func dates(from startDate: Date, through endDate: Date) -> [Date] {
+            let calendar = Calendar.current
+            var dates: [Date] = []
+            var currentDate = calendar.startOfDay(for: startDate)
+            let endDate = calendar.startOfDay(for: endDate)
+
+            while currentDate <= endDate {
+                dates.append(currentDate)
+                guard let nextDate = calendar.date(byAdding: .day, value: 1, to: currentDate) else { break }
+                currentDate = nextDate
+            }
+
+            return dates
+        }
     }
 
     public enum Action {
@@ -118,7 +149,12 @@ public struct MeetingDatePickerFeature {
         case delegate(Delegate)
 
         public enum Delegate: Equatable {
-            case selectionCompleted(MeetingDatePickerMode, text: String, requestDate: String?)
+            case selectionCompleted(
+                MeetingDatePickerMode,
+                text: String,
+                requestDate: String?,
+                candidateDates: [String]
+            )
         }
     }
 
@@ -155,12 +191,13 @@ public struct MeetingDatePickerFeature {
                 state.selectedHour = hour
                 return .none
 
-            case .nextButtonTapped:
+            case .nextButtonTapped: // 달력에서 날짜 선택 후 다음 버튼 클릭 시
                 guard let selectionText = state.selectionText else { return .none }
                 return .send(.delegate(.selectionCompleted(
                     state.mode,
                     text: selectionText,
-                    requestDate: state.selectedDateRequestText
+                    requestDate: state.selectedDateRequestText,
+                    candidateDates: state.selectedCandidateDateTexts
                 )))
 
             case .delegate:

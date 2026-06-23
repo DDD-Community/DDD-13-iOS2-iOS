@@ -9,7 +9,7 @@ import ComposableArchitecture
 import DesignSystem
 
 struct MeetingDateSelectionView: View {
-    let store: StoreOf<MeetingDateSelectionFeature>
+    @Bindable var store: StoreOf<MeetingDateSelectionFeature>
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -54,6 +54,11 @@ struct MeetingDateSelectionView: View {
         }
         .background(.white)
         .toolbar(.hidden, for: .navigationBar)
+        .navigationDestination(
+            item: $store.scope(state: \.destination?.datePicker, action: \.destination.datePicker)
+        ) { datePickerStore in
+            MeetingDatePickerView(store: datePickerStore)
+        }
     }
 }
 

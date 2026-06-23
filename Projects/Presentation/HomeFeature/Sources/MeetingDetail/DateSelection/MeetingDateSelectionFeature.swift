@@ -7,11 +7,13 @@ import Foundation
 
 import ComposableArchitecture
 import CoreDependencies
+import Entity
 import Utill
 
 @Reducer
 public struct MeetingDateSelectionFeature {
     @Dependency(\.groupClient) private var groupClient
+    @Dependency(\.voteClient) private var voteClient
 
     @ObservableState
     public struct State: Equatable {
@@ -20,6 +22,7 @@ public struct MeetingDateSelectionFeature {
         var dateDesignation = DateDesignationFeature.State()
         var periodVote = PeriodVoteFeature.State()
         var isSubmitting = false
+        @Presents var destination: Destination.State?
 
         var isNextEnabled: Bool {
             guard !isSubmitting else { return false }
@@ -28,7 +31,9 @@ public struct MeetingDateSelectionFeature {
             case .date:
                 return dateDesignation.selectedDateRequestText != nil
             case .periodVote:
-                return periodVote.selectedDateText.isEmpty == false && periodVote.deadlineText.isEmpty == false
+                return periodVote.selectedDateText.isEmpty == false
+                    && periodVote.candidateDates.isEmpty == false
+                    && periodVote.selectedDeadlineOption?.durationDays != nil
             }
         }
 
@@ -42,12 +47,13 @@ public struct MeetingDateSelectionFeature {
         case dateDesignation(DateDesignationFeature.Action)
         case periodVote(PeriodVoteFeature.Action)
         case delegate(Delegate)
+        case destination(PresentationAction<Destination.Action>)
         case nextButtonTapped
         case hostPickMeetingDateResponse(Result<Void, Error>)
+        case startDateVoteResponse(Result<Void, Error>)
 
         public enum Delegate: Equatable {
-            case datePickerRequested(MeetingDatePickerMode, meetingId: Int)
-            case dateSelectionCompleted(meetingId: Int)
+            case dateSelectionCompleted(meetingId: Int, dateVoteStatus: GroupDateVoteStatus)
         }
     }
 
@@ -87,26 +93,84 @@ public struct MeetingDateSelectionFeature {
                     }
 
                 case .periodVote:
-                    Log.debug("기간 투표 날짜: \(state.periodVote.selectedDateText)")
-                    Log.debug("기간 투표 마감 시간: \(state.periodVote.deadlineText)")
-                    return .none
+                    guard let durationDays = state.periodVote.selectedDeadlineOption?.durationDays else {
+                        Log.debug("사용자 설정 마감 시간은 아직 지원하지 않습니다.")
+                        return .none
+                    }
+                    guard state.periodVote.candidateDates.isEmpty == false else { return .none }
+
+                    let meetingId = state.meetingId
+                    let candidateDates = state.periodVote.candidateDates
+                    let voteClient = voteClient
+                    state.isSubmitting = true
+
+                    return .run { send in
+                        do {
+                            try await voteClient.startDateVote(meetingId, candidateDates, durationDays)
+                            await send(.startDateVoteResponse(.success(())))
+                        } catch {
+                            await send(.startDateVoteResponse(.failure(error)))
+                        }
+                    }
                 }
 
             case .hostPickMeetingDateResponse(.success):
                 state.isSubmitting = false
                 Log.debug("날짜 지정 API 성공")
-                return .send(.delegate(.dateSelectionCompleted(meetingId: state.meetingId)))
+                return .send(.delegate(.dateSelectionCompleted(
+                    meetingId: state.meetingId,
+                    dateVoteStatus: .completed
+                )))
 
-            case let .hostPickMeetingDateResponse(.failure(error)):
+            case .hostPickMeetingDateResponse(.failure(let error)):
                 state.isSubmitting = false
                 Log.error("날짜 지정 API 실패: \(error.localizedDescription)")
                 return .none
 
-            case .dateDesignation(.dateFieldTapped):
-                return .send(.delegate(.datePickerRequested(.single, meetingId: state.meetingId)))
+            case .startDateVoteResponse(.success):
+                state.isSubmitting = false
+                Log.debug("날짜 투표 시작 API 성공")
+                return .send(.delegate(.dateSelectionCompleted(
+                    meetingId: state.meetingId,
+                    dateVoteStatus: .inProgress
+                )))
 
+            case .startDateVoteResponse(.failure(let error)):
+                state.isSubmitting = false
+                Log.error("날짜 투표 시작 API 실패: \(error.localizedDescription)")
+                return .none
+            // 날짜지정 탭에서 날짜 선택 버튼 클릭 했을 경우
+            case .dateDesignation(.dateFieldTapped):
+                state.destination = .datePicker(MeetingDatePickerFeature.State(
+                    meetingId: state.meetingId,
+                    mode: .single
+                ))
+                return .none
+            // 기간 투표 탭에서 날짜 선택 버튼 클릭 했을 경우
             case .periodVote(.dateFieldTapped):
-                return .send(.delegate(.datePickerRequested(.range, meetingId: state.meetingId)))
+                state.destination = .datePicker(MeetingDatePickerFeature.State(
+                    meetingId: state.meetingId,
+                    mode: .range
+                ))
+                return .none
+
+            case let .destination(.presented(.datePicker(.delegate(.selectionCompleted(
+                mode,
+                text,
+                requestDate,
+                candidateDates
+            ))))):
+                switch mode {
+                case .single:
+                    state.dateDesignation.selectedDateText = text
+                    state.dateDesignation.selectedDateRequestText = requestDate
+
+                case .range:
+                    state.periodVote.selectedDateText = text
+                    state.periodVote.candidateDates = candidateDates
+                }
+                state.destination = nil
+                return .none
 
             case .dateDesignation:
                 return .none
@@ -114,10 +178,21 @@ public struct MeetingDateSelectionFeature {
             case .periodVote:
                 return .none
 
+            case .destination:
+                return .none
+
             case .delegate:
                 return .none
             }
         }
+        .ifLet(\.$destination, action: \.destination)
+    }
+}
+
+extension MeetingDateSelectionFeature {
+    @Reducer(state: .equatable)
+    public enum Destination {
+        case datePicker(MeetingDatePickerFeature)
     }
 }
 
@@ -148,79 +223,6 @@ public struct DateDesignationFeature {
     }
 }
 
-public enum VoteDeadlineOption: String, CaseIterable, Equatable, Identifiable {
-    case oneDay = "하루 뒤 마감"
-    case threeDays = "3일 뒤 마감"
-    case sevenDays = "7일 뒤 마감"
-    case custom = "사용자 설정"
-
-    public var id: String { rawValue }
-}
-
-@Reducer
-public struct PeriodVoteFeature {
-    @ObservableState
-    public struct State: Equatable {
-        var selectedDateText = ""
-        var deadlineText = ""
-        var selectedDeadlineOption: VoteDeadlineOption?
-        var deadlineDraft: VoteDeadlineOption?
-        var isDeadlineSheetPresented = false
-
-        var isDeadlineDraftValid: Bool {
-            deadlineDraft != nil
-        }
-
-        public init() {}
-    }
-
-    public enum Action: BindableAction {
-        case binding(BindingAction<State>)
-        case dateFieldTapped
-        case deadlineFieldTapped
-        case deadlineSheetDismissed
-        case deadlineOptionSelected(VoteDeadlineOption)
-        case deadlineConfirmed
-    }
-
-    public init() {}
-
-    public var body: some ReducerOf<Self> {
-        BindingReducer()
-
-        Reduce { state, action in
-            switch action {
-            case .binding:
-                return .none
-
-            case .dateFieldTapped:
-                return .none
-
-            case .deadlineFieldTapped:
-                state.deadlineDraft = state.selectedDeadlineOption
-                state.isDeadlineSheetPresented = true
-                return .none
-
-            case .deadlineSheetDismissed:
-                state.deadlineDraft = state.selectedDeadlineOption
-                state.isDeadlineSheetPresented = false
-                return .none
-
-            case let .deadlineOptionSelected(option):
-                state.deadlineDraft = option
-                return .none
-
-            case .deadlineConfirmed:
-                guard let deadlineDraft = state.deadlineDraft else { return .none }
-                state.selectedDeadlineOption = deadlineDraft
-                state.deadlineText = deadlineDraft.rawValue
-                state.isDeadlineSheetPresented = false
-                return .none
-            }
-        }
-    }
-}
-
 public enum MeetingDateSelectionTab: String, CaseIterable {
     case date = "날짜 지정"
     case periodVote = "기간 투표"
@@ -230,4 +232,3 @@ public enum MeetingDatePickerMode: Equatable {
     case single
     case range
 }
-
