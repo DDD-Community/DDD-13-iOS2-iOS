@@ -30,7 +30,7 @@ public enum Typography {
     public static let typographySize1000: CGFloat = 86
 
     // MARK: - Line Height
-    public static let typographyLineHeight50: CGFloat = 15
+    public static let typographyLineHeight50: CGFloat = 16
     public static let typographyLineHeight100: CGFloat = 18
     public static let typographyLineHeight200: CGFloat = 22
     public static let typographyLineHeight300: CGFloat = 24
