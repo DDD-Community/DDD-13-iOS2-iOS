@@ -28,7 +28,7 @@ struct ConfirmedPlaceArea: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.spacing250) {
-            BangawoText("약속 장소 확정", textStyle: .titleMedium)
+            BangawoText("약속 장소가 확정되었어요", textStyle: .titleMedium)
                 .foregroundStyle(Colors.gray900)
 
             VStack(alignment: .trailing, spacing: Spacing.spacing300) {
