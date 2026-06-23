@@ -177,6 +177,8 @@ public extension VoteClient {
         placeId: 1,
         placeName: "감성카페",
         address: "서울 강남구 테헤란로 1",
+        latitude: 37.5012,
+        longitude: 127.0396,
         confirmedAt: "2026-06-25T15:00:00.000Z",
         candidates: [
             ConfirmedPlaceCandidate(

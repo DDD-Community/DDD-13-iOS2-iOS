@@ -56,6 +56,9 @@ public struct ConfirmedPlaceResultResponseDTO: Decodable, Sendable {
     public let placeId: Int
     public let placeName: String
     public let address: String
+    // TODO: 서버에 확정 장소 좌표 응답이 추가되면 non-optional로 전환
+    public let latitude: Double?
+    public let longitude: Double?
     public let confirmedAt: String
     public let candidates: [ConfirmedPlaceCandidateResponseDTO]
 }
@@ -114,6 +117,8 @@ public extension ConfirmedPlaceResultResponseDTO {
             placeId: placeId,
             placeName: placeName,
             address: address,
+            latitude: latitude,
+            longitude: longitude,
             confirmedAt: confirmedAt,
             candidates: candidates.map { $0.toEntity() }
         )
