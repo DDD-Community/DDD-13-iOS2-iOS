@@ -48,13 +48,11 @@ public struct NearbyPlaceListSheetFeature {
         /// selectPlace 모드에서 segmented control에 표시할 역 목록.
         public var stations: [MidpointStation] { stationGroups.map(\.station) }
 
-        /// selectPlace 모드에서 현재 노출할 추천 장소 목록.
-        ///
-        /// TODO: 추천 장소 DTO에 stationId가 추가되면 선택된 역 기준 필터링을 복구한다.
+        /// selectPlace 모드에서 현재 노출할 추천 장소 목록(선택된 역 기준).
         public var visibleRecommendedPlaces: [RecommendedPlace] {
-            stationGroups.reduce(into: []) { result, group in
-                result.append(contentsOf: group.places)
-            }
+            guard stationGroups.indices.contains(selectedStationIndex) else { return [] }
+
+            return stationGroups[selectedStationIndex].places
         }
     }
 

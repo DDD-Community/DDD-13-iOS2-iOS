@@ -26,11 +26,10 @@ public final class FetchStationRecommendationsUseCaseImpl: FetchStationRecommend
 
         let sortedPlaces = places.sorted { $0.rank < $1.rank }
 
-        return stations.sorted { $0.rank < $1.rank }.enumerated().map { index, station in
+        return stations.sorted { $0.rank < $1.rank }.map { station in
             StationRecommendation(
                 station: station,
-                // TODO: midpoint-stations 응답에 stationId가 추가되면 역별 필터링으로 복구한다.
-                places: index == 0 ? sortedPlaces : []
+                places: sortedPlaces.filter { $0.nearestStationId == station.stationId }
             )
         }
     }

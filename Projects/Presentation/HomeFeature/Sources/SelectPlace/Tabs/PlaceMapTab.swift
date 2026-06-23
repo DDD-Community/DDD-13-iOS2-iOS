@@ -8,6 +8,7 @@ import SwiftUI
 import ComposableArchitecture
 
 import DesignSystem
+import Entity
 import Utill
 
 /// 장소 투표 후보 담기 화면의 "장소보기" 탭.
@@ -15,21 +16,41 @@ import Utill
 struct PlaceMapTab: View {
     let store: StoreOf<PlaceMapTabFeature>
 
-    // TODO: 추천 장소 API 연동(#77) 시 mock 핀을 실제 장소 데이터로 교체한다.
+    /// 중간지점 역 핀. `selectedStationIndex`로 핀 탭 시 역 선택과 연동한다.
     @State private var pins: [MapPin] = []
     /// 바텀시트가 화면 하단을 덮는 높이. detent에 따라 핀 포커싱 중심을 위로 보정하는 데 쓴다.
     @State private var sheetCoveredHeight: CGFloat = 0
 
+    /// 지도에 표시할 중간지점 역 목록.
+    private var stations: [MidpointStation] {
+        store.nearbyPlaceList.stations
+    }
+
+    /// 현재 선택된 역의 좌표. 세그먼트 선택 시 지도 카메라를 이 좌표로 포커싱한다.
+    private var selectedStationCoordinate: MapCoordinate? {
+        let index = store.nearbyPlaceList.selectedStationIndex
+        guard stations.indices.contains(index) else { return nil }
+
+        let station = stations[index]
+        return MapCoordinate(latitude: station.latitude, longitude: station.longitude)
+    }
+
     var body: some View {
         ZStack(alignment: .bottom) {
-            KakaoMap(pins: pins, initialCenter: Constant.defaultCenter, focusBottomInset: sheetCoveredHeight)
-                .onPinTapped { pin in
-                    Log.debug("핀 선택: id=\(pin.id), title=\(pin.title)")
-                }
-                .ignoresSafeArea()
+            KakaoMap(
+                pins: pins,
+                initialCenter: Constant.defaultCenter,
+                focusedCoordinate: selectedStationCoordinate,
+                focusBottomInset: sheetCoveredHeight
+            )
+            .onPinTapped { pin in
+                guard let index = Int(pin.id) else { return }
+
+                store.send(.nearbyPlaceList(.stationSelected(index)))
+            }
+            .ignoresSafeArea()
 
             MapBottomSheet {
-                // TODO: 추천 장소 DTO에 stationId가 추가되면 NearbyPlaceListSheet의 역별 장소 리스트 노출을 복구한다.
                 NearbyPlaceListSheet(
                     store: store.scope(state: \.nearbyPlaceList, action: \.nearbyPlaceList),
                     mode: .selectPlace
@@ -37,28 +58,23 @@ struct PlaceMapTab: View {
             }
             .onVisibleHeightChanged { sheetCoveredHeight = $0 }
         }
-        .task {
-            buildSamplePins()
+        .task(id: stations.map(\.stationId)) {
+            buildStationPins()
         }
     }
 
-    // MARK: - 디버깅용 임시 Pin 구성
+    // MARK: - 역 Pin 구성
 
     @MainActor
-    private func buildSamplePins() {
-        pins = Constant.samplePlaces.map { place in
-            MapPinLabel(assetName: place.iconAsset, title: place.name)
-                .makePin(id: place.name, coordinate: place.coordinate)
+    private func buildStationPins() {
+        pins = stations.enumerated().map { index, station in
+            MapPinLabel(assetName: Constant.stationPinAsset, title: "\(station.stationName)역")
+                .makePin(
+                    id: String(index),
+                    coordinate: MapCoordinate(latitude: station.latitude, longitude: station.longitude)
+                )
         }
     }
-}
-
-// MARK: - SamplePlace
-
-private struct SamplePlace {
-    let name: String
-    let coordinate: MapCoordinate
-    let iconAsset: String
 }
 
 // MARK: - Constants
@@ -67,12 +83,6 @@ private enum Constant {
     /// 좌표 정보가 없을 때 사용하는 기본 지도 중심(서울 시청).
     static let defaultCenter = MapCoordinate(latitude: 37.5665, longitude: 126.9780)
 
-    /// 디버깅용 임시 샘플 장소. 실제 데이터 연동 시 제거한다.
-    static let samplePlaces: [SamplePlace] = [
-        SamplePlace(name: "감성카페", coordinate: MapCoordinate(latitude: 37.5665, longitude: 126.9780), iconAsset: "ic_map_pin_cafe"),
-        SamplePlace(name: "남산다이닝", coordinate: MapCoordinate(latitude: 37.5512, longitude: 126.9882), iconAsset: "ic_map_pin_buffet"),
-        SamplePlace(name: "경복궁디저트", coordinate: MapCoordinate(latitude: 37.5796, longitude: 126.9770), iconAsset: "ic_map_pin_dessert"),
-        SamplePlace(name: "명동포차", coordinate: MapCoordinate(latitude: 37.5637, longitude: 126.9850), iconAsset: "ic_map_pin_pub"),
-        SamplePlace(name: "광화문식당", coordinate: MapCoordinate(latitude: 37.5759, longitude: 126.9769), iconAsset: "ic_map_pin_restaurant"),
-    ]
+    /// 중간지점 역 핀에 사용하는 아이콘 에셋.
+    static let stationPinAsset = "ic_pin_24"
 }
