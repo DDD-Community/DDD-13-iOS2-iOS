@@ -4,7 +4,9 @@
 //
 
 import Foundation
+import SwiftUI
 
+import DesignSystem
 import Entity
 
 /// 담은 장소 탭 상단 멤버 가로 스크롤 리스트에 표시할 멤버.
@@ -95,6 +97,16 @@ public extension NearbyPlaceCategory {
         }
 
         self = matchedCategory ?? .etc
+    }
+
+    var pinIcon: Image {
+        switch self {
+        case .cafe: return Image.Asset.icMapPinCafe
+        case .desert: return Image.Asset.icMapPinDessert
+        case .buffet: return Image.Asset.icMapPinBuffet
+        case .bar: return Image.Asset.icMapPinPub
+        default: return Image.Asset.icMapPinRestaurant
+        }
     }
 }
 

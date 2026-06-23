@@ -14,10 +14,17 @@ public struct PlaceVoteResponseDTO: Decodable, Sendable {
 }
 
 public struct PlaceVoteCandidateResponseDTO: Decodable, Sendable {
-    public let placeId: Int
+    public let place: PlaceVotePlaceResponseDTO
     public let voteCount: Int
     public let isMyVote: Bool
     public let travelBurdens: [PlaceTravelBurdenResponseDTO]
+}
+
+public struct PlaceVotePlaceResponseDTO: Decodable, Sendable {
+    public let placeId: Int
+    public let name: String
+    public let categoryLabel: String
+    public let address: String
 }
 
 public struct PlaceTravelBurdenResponseDTO: Decodable, Sendable {
@@ -75,7 +82,10 @@ public extension PlaceVoteResponseDTO {
 public extension PlaceVoteCandidateResponseDTO {
     func toEntity() -> PlaceVoteCandidate {
         PlaceVoteCandidate(
-            id: placeId,
+            id: place.placeId,
+            name: place.name,
+            categoryLabel: place.categoryLabel,
+            address: place.address,
             voteCount: voteCount,
             isMyVote: isMyVote,
             travelBurdens: travelBurdens.map { $0.toEntity() }

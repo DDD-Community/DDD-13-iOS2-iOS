@@ -30,6 +30,9 @@ public struct PlaceVote: Equatable, Sendable {
 
 public struct PlaceVoteCandidate: Identifiable, Equatable, Sendable {
     public let id: Int
+    public let name: String
+    public let categoryLabel: String
+    public let address: String
     public let voteCount: Int
     public let isMyVote: Bool
     public let travelBurdens: [PlaceTravelBurden]
@@ -38,11 +41,17 @@ public struct PlaceVoteCandidate: Identifiable, Equatable, Sendable {
 
     public init(
         id: Int,
+        name: String,
+        categoryLabel: String,
+        address: String,
         voteCount: Int,
         isMyVote: Bool,
         travelBurdens: [PlaceTravelBurden]
     ) {
         self.id = id
+        self.name = name
+        self.categoryLabel = categoryLabel
+        self.address = address
         self.voteCount = voteCount
         self.isMyVote = isMyVote
         self.travelBurdens = travelBurdens

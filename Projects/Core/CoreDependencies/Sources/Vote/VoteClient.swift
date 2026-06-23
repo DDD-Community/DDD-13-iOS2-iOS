@@ -133,6 +133,9 @@ public extension VoteClient {
         candidates: [
             PlaceVoteCandidate(
                 id: 1,
+                name: "감성카페",
+                categoryLabel: "카페",
+                address: "서울 강남구 테헤란로 1",
                 voteCount: 2,
                 isMyVote: true,
                 travelBurdens: [

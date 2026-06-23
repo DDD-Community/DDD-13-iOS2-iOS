@@ -221,17 +221,16 @@ private struct LocationVotePlaceInfo: View {
 
     var body: some View {
         HStack(spacing: Spacing.spacing250) {
-            // TODO: 장소 상세(이름/주소/카테고리) API 연동 시 placeId 노출·임시 아이콘 교체
-            Constant.placeholderIcon
+            NearbyPlaceCategory(categoryLabel: candidate.categoryLabel).pinIcon
                 .resizable()
                 .frame(width: Sizing.sizing300, height: Sizing.sizing300)
                 .clipShape(Circle())
 
             VStack(alignment: .leading, spacing: Spacing.spacing50) {
-                BangawoText("\(candidate.placeId)", textStyle: .bodyMediumEmphasized)
+                BangawoText(candidate.name, textStyle: .bodyMediumEmphasized)
                     .foregroundStyle(Colors.gray800)
 
-                BangawoText("\(candidate.placeId)", textStyle: .bodySmall)
+                BangawoText(candidate.address, textStyle: .bodySmall)
                     .foregroundStyle(Colors.gray700)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -283,11 +282,4 @@ private enum PlaceVoteFormatter {
 
         return "\(DateFormatterStore.string(from: date, format: "yyyy. MM. dd HH:mm"))까지 투표할 수 있어요"
     }
-}
-
-// MARK: - Constants
-
-private enum Constant {
-    // TODO: 장소 카테고리 API 연동 시 카테고리별 아이콘으로 교체
-    static let placeholderIcon = Image.Asset.icMapPinRestaurant
 }
