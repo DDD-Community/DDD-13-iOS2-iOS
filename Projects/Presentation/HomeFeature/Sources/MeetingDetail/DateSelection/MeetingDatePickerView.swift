@@ -133,6 +133,7 @@ private struct CalendarSelectionSection: View {
                         ) {
                             store.send(.dateTapped(date), animation: .easeInOut(duration: 0.15))
                         }
+                        .disabled(isPastDate(date))
                     } else {
                         Color.clear
                             .frame(width: Metric.dateButtonLength, height: Metric.dateButtonLength)
@@ -156,6 +157,11 @@ private struct CalendarSelectionSection: View {
         }
     }
 
+    private func isPastDate(_ date: Date) -> Bool {
+        let calendar = Calendar.current
+        return calendar.startOfDay(for: date) < calendar.startOfDay(for: Date())
+    }
+
     private var calendarDates: [Date?] {
         let calendar = Calendar.current
         guard
@@ -174,6 +180,10 @@ private struct CalendarSelectionSection: View {
     }
 
     private func selectionState(for date: Date) -> CalendarDateButton.SelectionState {
+        if isPastDate(date) {
+            return .disabled
+        }
+
         let calendar = Calendar.current
 
         switch store.mode {
@@ -272,6 +282,7 @@ private extension MonthHeader {
 private struct CalendarDateButton: View {
     enum SelectionState {
         case normal
+        case disabled
         case inRange
         case selected
         case rangeStart
@@ -309,7 +320,7 @@ private struct CalendarDateButton: View {
     @ViewBuilder
     private var rangeBackground: some View {
         switch selectionState {
-        case .normal, .selected:
+        case .normal, .disabled, .selected:
             Color.clear
 
         case .inRange:
@@ -337,6 +348,9 @@ private struct CalendarDateButton: View {
         case .normal:
             return Colors.gray900
 
+        case .disabled:
+            return Colors.gray400
+
         case .inRange:
             return Colors.gray900
 
@@ -352,7 +366,7 @@ private extension CalendarDateButton.SelectionState {
         case .selected, .rangeStart, .rangeEnd:
             return true
 
-        case .normal, .inRange:
+        case .normal, .disabled, .inRange:
             return false
         }
     }
