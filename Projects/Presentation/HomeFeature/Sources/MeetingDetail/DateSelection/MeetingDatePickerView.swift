@@ -105,6 +105,7 @@ private struct SelectedDateTimeSection: View {
 
 private struct CalendarSelectionSection: View {
     let store: StoreOf<MeetingDatePickerFeature>
+    @Dependency(\.calendar) private var calendar
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 7)
     private let weekdays = ["월", "화", "수", "목", "금", "토", "일"]
@@ -127,7 +128,7 @@ private struct CalendarSelectionSection: View {
                 ForEach(calendarDates.indices, id: \.self) { index in
                     if let date = calendarDates[index] {
                         CalendarDateButton(
-                            day: Calendar.current.component(.day, from: date),
+                            day: calendar.component(.day, from: date),
                             selectionState: selectionState(for: date),
                             alignment: alignment(forColumn: index % 7)
                         ) {
@@ -158,12 +159,10 @@ private struct CalendarSelectionSection: View {
     }
 
     private func isPastDate(_ date: Date) -> Bool {
-        let calendar = Calendar.current
         return calendar.startOfDay(for: date) < calendar.startOfDay(for: Date())
     }
 
     private var calendarDates: [Date?] {
-        let calendar = Calendar.current
         guard
             let range = calendar.range(of: .day, in: .month, for: store.displayedMonth),
             let firstDate = calendar.date(from: calendar.dateComponents([.year, .month], from: store.displayedMonth))
@@ -183,8 +182,6 @@ private struct CalendarSelectionSection: View {
         if isPastDate(date) {
             return .disabled
         }
-
-        let calendar = Calendar.current
 
         switch store.mode {
         case .single:

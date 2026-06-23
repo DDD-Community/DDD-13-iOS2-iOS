@@ -16,9 +16,10 @@ import Utill
 
 struct ConfirmedDateArea: View {
     let store: StoreOf<HomeTabFeature>
+    @Dependency(\.calendar) private var calendar
 
     // TODO: GroupDetail.confirmedDate 모델 연동 시 임시 Date 교체 + 서버 포맷 파싱
-    private var confirmedDate: Date { Constant.tempConfirmedDate }
+    private var confirmedDate: Date { Constant.tempConfirmedDate(calendar: calendar) }
 
     private var dayNumber: String { DateFormatterStore.day.string(from: confirmedDate) }
     private var weekdayEnglish: String { DateFormatterStore.weekdayEnglish.string(from: confirmedDate).uppercased() }
@@ -86,13 +87,13 @@ private enum Metric {
 }
 
 private enum Constant {
-    static let tempConfirmedDate: Date = {
+    static func tempConfirmedDate(calendar: Calendar) -> Date {
         var components = DateComponents()
         components.year = 2026
         components.month = 6
         components.day = 28
         components.hour = 18
         components.minute = 30
-        return Calendar.current.date(from: components) ?? Date()
-    }()
+        return calendar.date(from: components) ?? Date()
+    }
 }

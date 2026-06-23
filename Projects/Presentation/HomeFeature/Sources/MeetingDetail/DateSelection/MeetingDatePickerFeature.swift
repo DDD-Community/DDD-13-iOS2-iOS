@@ -10,6 +10,8 @@ import Utill
 
 @Reducer
 public struct MeetingDatePickerFeature {
+    @Dependency(\.calendar) private var calendar
+
     @ObservableState
     public struct State: Equatable {
         let meetingId: Int
@@ -31,31 +33,35 @@ public struct MeetingDatePickerFeature {
         }
 
         var selectionText: String? {
+            @Dependency(\.calendar) var calendar
+
             switch mode {
             case .single:
                 guard let selectedDate, let timeText else { return nil }
-                return "\(Self.dateText(for: selectedDate)) \(timeText)"
+                return "\(Self.dateText(for: selectedDate, calendar: calendar)) \(timeText)"
 
             case .range:
                 guard let rangeStartDate, let rangeEndDate else { return nil }
-                return "\(Self.dateText(for: rangeStartDate)) - \(Self.dateText(for: rangeEndDate))"
+                return "\(Self.dateText(for: rangeStartDate, calendar: calendar)) - \(Self.dateText(for: rangeEndDate, calendar: calendar))"
             }
         }
 
         var selectedDateTimeText: String? {
+            @Dependency(\.calendar) var calendar
+
             switch mode {
             case .single:
                 guard let selectedDate, let timeText else { return nil }
-                return "\(Self.dateText(for: selectedDate)) \(timeText)"
+                return "\(Self.dateText(for: selectedDate, calendar: calendar)) \(timeText)"
 
             case .range:
                 guard let rangeStartDate else { return nil }
 
                 if let rangeEndDate {
-                    return "\(Self.dateText(for: rangeStartDate)) - \(Self.dateText(for: rangeEndDate))"
+                    return "\(Self.dateText(for: rangeStartDate, calendar: calendar)) - \(Self.dateText(for: rangeEndDate, calendar: calendar))"
                 }
 
-                return Self.dateText(for: rangeStartDate)
+                return Self.dateText(for: rangeStartDate, calendar: calendar)
             }
         }
 
@@ -68,19 +74,23 @@ public struct MeetingDatePickerFeature {
         }
 
         var selectedDateRequestText: String? {
+            @Dependency(\.calendar) var calendar
+
             guard let selectedDate else { return nil }
-            return Self.requestDateText(for: selectedDate)
+            return Self.requestDateText(for: selectedDate, calendar: calendar)
         }
 
         var selectedCandidateDateTexts: [String] {
+            @Dependency(\.calendar) var calendar
+
             switch mode {
             case .single:
                 return []
 
             case .range:
                 guard let rangeStartDate, let rangeEndDate else { return [] }
-                return Self.dates(from: rangeStartDate, through: rangeEndDate)
-                    .map { Self.requestDateTimeText(for: $0) }
+                return Self.dates(from: rangeStartDate, through: rangeEndDate, calendar: calendar)
+                    .map { Self.requestDateTimeText(for: $0, calendar: calendar) }
             }
         }
 
@@ -93,39 +103,38 @@ public struct MeetingDatePickerFeature {
             rangeEndDate: Date? = nil,
             selectedHour: Int? = nil
         ) {
-            let defaultDate = Calendar.current.startOfDay(for: Date())
+            @Dependency(\.calendar) var calendar
+
+            let defaultDate = calendar.startOfDay(for: Date())
 
             self.meetingId = meetingId
             self.mode = mode
-            self.displayedMonth = Calendar.current.startOfMonth(for: displayedMonth)
+            self.displayedMonth = calendar.startOfMonth(for: displayedMonth)
             self.selectedDate = selectedDate ?? (mode == .single ? defaultDate : nil)
             self.rangeStartDate = rangeStartDate ?? (mode == .range ? defaultDate : nil)
             self.rangeEndDate = rangeEndDate
             self.selectedHour = selectedHour ?? (mode == .single ? 8 : nil)
         }
 
-        private static func dateText(for date: Date) -> String {
-            let calendar = Calendar.current
+        private static func dateText(for date: Date, calendar: Calendar) -> String {
             let month = calendar.component(.month, from: date)
             let day = calendar.component(.day, from: date)
             let weekday = KoreanWeekday.symbol(for: calendar.component(.weekday, from: date))
             return "\(month)월 \(day)일 (\(weekday))"
         }
 
-        private static func requestDateText(for date: Date) -> String {
-            let calendar = Calendar.current
+        private static func requestDateText(for date: Date, calendar: Calendar) -> String {
             let year = calendar.component(.year, from: date)
             let month = calendar.component(.month, from: date)
             let day = calendar.component(.day, from: date)
             return "\(year)-\(String(format: "%02d", month))-\(String(format: "%02d", day))"
         }
 
-        private static func requestDateTimeText(for date: Date) -> String {
-            "\(requestDateText(for: date))T00:00:00.000Z"
+        private static func requestDateTimeText(for date: Date, calendar: Calendar) -> String {
+            "\(requestDateText(for: date, calendar: calendar))T00:00:00.000Z"
         }
 
-        private static func dates(from startDate: Date, through endDate: Date) -> [Date] {
-            let calendar = Calendar.current
+        private static func dates(from startDate: Date, through endDate: Date, calendar: Calendar) -> [Date] {
             var dates: [Date] = []
             var currentDate = calendar.startOfDay(for: startDate)
             let endDate = calendar.startOfDay(for: endDate)
@@ -164,17 +173,16 @@ public struct MeetingDatePickerFeature {
         Reduce { state, action in
             switch action {
             case .previousMonthTapped:
-                state.displayedMonth = Calendar.current.date(byAdding: .month, value: -1, to: state.displayedMonth)
+                state.displayedMonth = calendar.date(byAdding: .month, value: -1, to: state.displayedMonth)
                     ?? state.displayedMonth
                 return .none
 
             case .nextMonthTapped:
-                state.displayedMonth = Calendar.current.date(byAdding: .month, value: 1, to: state.displayedMonth)
+                state.displayedMonth = calendar.date(byAdding: .month, value: 1, to: state.displayedMonth)
                     ?? state.displayedMonth
                 return .none
 
             case let .dateTapped(date):
-                let calendar = Calendar.current
                 let normalizedDate = calendar.startOfDay(for: date)
                 guard normalizedDate >= calendar.startOfDay(for: Date()) else { return .none }
 
