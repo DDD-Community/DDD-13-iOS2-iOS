@@ -183,7 +183,7 @@ public struct SelectPlaceFeature {
 }
 
 private enum Constant {
-    static let defaultPlaceVoteDurationDays = 1
+    static let defaultPlaceVoteDurationDays = 3
 }
 
 private extension SelectPlaceFeature {
