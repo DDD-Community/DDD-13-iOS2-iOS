@@ -115,7 +115,7 @@ public extension NearbyPlaceCategory {
         case .desert: return "ic_map_pin_dessert"
         case .buffet: return "ic_map_pin_buffet"
         case .bar: return "ic_map_pin_pub"
-        case .koreaFood, .japaneseFood, .snackBar, .asianFood: return "ic_map_pin_restaurant"
+        case .koreaFood, .japaneseFood, .snackBar, .asianFood, .westernFood: return "ic_map_pin_restaurant"
         case .all, .etc: return "ic_map_pin_restaurant"
         }
     }
