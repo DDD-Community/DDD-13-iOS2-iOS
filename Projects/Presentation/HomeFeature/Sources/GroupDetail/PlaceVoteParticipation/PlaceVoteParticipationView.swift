@@ -183,6 +183,7 @@ private struct PlaceVoteButtonArea: View {
                     hasGradientBackground: true
                 )
                 .padding(.bottom, Spacing.spacing200)
+                .ignoresSafeArea(edges: .bottom)
             }
 
         case .voted:
@@ -200,6 +201,7 @@ private struct PlaceVoteButtonArea: View {
                 hasGradientBackground: true
             )
             .padding(.bottom, Spacing.spacing200)
+            .ignoresSafeArea(edges: .bottom)
         }
     }
 }
