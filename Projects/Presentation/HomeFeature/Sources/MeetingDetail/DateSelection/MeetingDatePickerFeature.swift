@@ -10,12 +10,11 @@ import Utill
 
 @Reducer
 public struct MeetingDatePickerFeature {
-    @Dependency(\.calendar) private var calendar
-
     @ObservableState
     public struct State: Equatable {
         let meetingId: Int
         let mode: MeetingDatePickerMode
+        let calendar: Calendar
         var displayedMonth: Date
         var selectedDate: Date?
         var rangeStartDate: Date?
@@ -33,8 +32,6 @@ public struct MeetingDatePickerFeature {
         }
 
         var selectionText: String? {
-            @Dependency(\.calendar) var calendar
-
             switch mode {
             case .single:
                 guard let selectedDate, let timeText else { return nil }
@@ -47,8 +44,6 @@ public struct MeetingDatePickerFeature {
         }
 
         var selectedDateTimeText: String? {
-            @Dependency(\.calendar) var calendar
-
             switch mode {
             case .single:
                 guard let selectedDate, let timeText else { return nil }
@@ -74,15 +69,11 @@ public struct MeetingDatePickerFeature {
         }
 
         var selectedDateRequestText: String? {
-            @Dependency(\.calendar) var calendar
-
             guard let selectedDate, let selectedHour else { return nil }
             return Self.requestDateTimeText(for: selectedDate, hour: selectedHour, calendar: calendar)
         }
 
         var selectedCandidateDateTexts: [String] {
-            @Dependency(\.calendar) var calendar
-
             switch mode {
             case .single:
                 return []
@@ -101,14 +92,15 @@ public struct MeetingDatePickerFeature {
             selectedDate: Date? = nil,
             rangeStartDate: Date? = nil,
             rangeEndDate: Date? = nil,
-            selectedHour: Int? = nil
+            selectedHour: Int? = nil,
+            calendar: Calendar,
+            now: Date = Date()
         ) {
-            @Dependency(\.calendar) var calendar
-
-            let defaultDate = calendar.startOfDay(for: Date())
+            let defaultDate = calendar.startOfDay(for: now)
 
             self.meetingId = meetingId
             self.mode = mode
+            self.calendar = calendar
             self.displayedMonth = calendar.startOfMonth(for: displayedMonth)
             self.selectedDate = selectedDate ?? (mode == .single ? defaultDate : nil)
             self.rangeStartDate = rangeStartDate ?? (mode == .range ? defaultDate : nil)
@@ -178,18 +170,18 @@ public struct MeetingDatePickerFeature {
         Reduce { state, action in
             switch action {
             case .previousMonthTapped:
-                state.displayedMonth = calendar.date(byAdding: .month, value: -1, to: state.displayedMonth)
+                state.displayedMonth = state.calendar.date(byAdding: .month, value: -1, to: state.displayedMonth)
                     ?? state.displayedMonth
                 return .none
 
             case .nextMonthTapped:
-                state.displayedMonth = calendar.date(byAdding: .month, value: 1, to: state.displayedMonth)
+                state.displayedMonth = state.calendar.date(byAdding: .month, value: 1, to: state.displayedMonth)
                     ?? state.displayedMonth
                 return .none
 
             case let .dateTapped(date):
-                let normalizedDate = calendar.startOfDay(for: date)
-                guard normalizedDate >= calendar.startOfDay(for: Date()) else { return .none }
+                let normalizedDate = state.calendar.startOfDay(for: date)
+                guard normalizedDate >= state.calendar.startOfDay(for: Date()) else { return .none }
 
                 switch state.mode {
                 case .single:

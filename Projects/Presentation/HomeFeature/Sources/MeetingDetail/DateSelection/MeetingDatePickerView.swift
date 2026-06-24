@@ -473,7 +473,11 @@ private extension TimeChipButton {
 
 #Preview("단일 날짜 선택") {
     BangawoPreview {
-        MeetingDatePickerView(store: Store(initialState: MeetingDatePickerFeature.State(meetingId: 1, mode: .single)) {
+        MeetingDatePickerView(store: Store(initialState: MeetingDatePickerFeature.State(
+            meetingId: 1,
+            mode: .single,
+            calendar: .current
+        )) {
             MeetingDatePickerFeature()
         })
     }
@@ -481,7 +485,11 @@ private extension TimeChipButton {
 
 #Preview("기간 선택") {
     BangawoPreview {
-        MeetingDatePickerView(store: Store(initialState: MeetingDatePickerFeature.State(meetingId: 1, mode: .range)) {
+        MeetingDatePickerView(store: Store(initialState: MeetingDatePickerFeature.State(
+            meetingId: 1,
+            mode: .range,
+            calendar: .current
+        )) {
             MeetingDatePickerFeature()
         })
     }

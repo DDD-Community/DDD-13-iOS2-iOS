@@ -14,6 +14,7 @@ import Utill
 public struct MeetingDateSelectionFeature {
     @Dependency(\.groupClient) private var groupClient
     @Dependency(\.voteClient) private var voteClient
+    @Dependency(\.calendar) private var calendar
 
     @ObservableState
     public struct State: Equatable {
@@ -143,14 +144,16 @@ public struct MeetingDateSelectionFeature {
             case .dateDesignation(.dateFieldTapped):
                 state.destination = .datePicker(MeetingDatePickerFeature.State(
                     meetingId: state.meetingId,
-                    mode: .single
+                    mode: .single,
+                    calendar: calendar
                 ))
                 return .none
             // 기간 투표 탭에서 날짜 선택 버튼 클릭 했을 경우
             case .periodVote(.dateFieldTapped):
                 state.destination = .datePicker(MeetingDatePickerFeature.State(
                     meetingId: state.meetingId,
-                    mode: .range
+                    mode: .range,
+                    calendar: calendar
                 ))
                 return .none
 
