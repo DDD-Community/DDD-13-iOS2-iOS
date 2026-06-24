@@ -61,7 +61,10 @@ struct PlaceVoteParticipationView: View {
                 let longitude = candidate.longitude
             else { return nil }
 
-            return MapPinLabel(assetName: Constant.placePinAsset, title: candidate.name)
+            let assetName = NearbyPlaceCategory(categoryLabel: candidate.categoryLabel)?.pinAssetName
+                ?? Constant.placePinAsset
+
+            return MapPinLabel(assetName: assetName, title: candidate.name)
                 .makePin(
                     id: String(candidate.id),
                     coordinate: MapCoordinate(latitude: latitude, longitude: longitude)

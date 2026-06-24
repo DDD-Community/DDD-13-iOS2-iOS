@@ -108,15 +108,20 @@ public extension NearbyPlaceCategory {
         self = matchedCategory
     }
 
-    var pinIcon: Image {
+    /// 지도 핀 등 `assetName` 기반 API에 넘기는 카테고리별 에셋명.
+    var pinAssetName: String {
         switch self {
-        case .cafe: return Image.Asset.icMapPinCafe
-        case .desert: return Image.Asset.icMapPinDessert
-        case .buffet: return Image.Asset.icMapPinBuffet
-        case .bar: return Image.Asset.icMapPinPub
-        case .koreaFood, .japaneseFood, .snackBar, .asianFood: return Image.Asset.icMapPinRestaurant
-        case .all, .etc: return Image.Asset.icMapPinRestaurant
+        case .cafe: return "ic_map_pin_cafe"
+        case .desert: return "ic_map_pin_dessert"
+        case .buffet: return "ic_map_pin_buffet"
+        case .bar: return "ic_map_pin_pub"
+        case .koreaFood, .japaneseFood, .snackBar, .asianFood: return "ic_map_pin_restaurant"
+        case .all, .etc: return "ic_map_pin_restaurant"
         }
+    }
+
+    var pinIcon: Image {
+        Image(assetName: pinAssetName)
     }
 }
 
