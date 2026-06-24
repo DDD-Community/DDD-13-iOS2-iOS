@@ -12,6 +12,7 @@ public struct ActionButton: View {
     private let upperContent: UpperContent?
     private let isUpperContentVisible: Binding<Bool>?
     private let lowerContent: LowerContent?
+    private let hasGradientBackground: Bool
 
     // MARK: - Init
 
@@ -19,12 +20,14 @@ public struct ActionButton: View {
         buttonLayout: ButtonLayout,
         upperContent: UpperContent? = nil,
         isUpperContentVisible: Binding<Bool>? = nil,
-        lowerContent: LowerContent? = nil
+        lowerContent: LowerContent? = nil,
+        hasGradientBackground: Bool = false
     ) {
         self.buttonLayout = buttonLayout
         self.upperContent = upperContent
         self.isUpperContentVisible = isUpperContentVisible
         self.lowerContent = lowerContent
+        self.hasGradientBackground = hasGradientBackground
     }
 
     // MARK: - Body
@@ -42,6 +45,15 @@ public struct ActionButton: View {
             }
         }
         .frame(maxWidth: .infinity)
+        .background {
+            if hasGradientBackground {
+                LinearGradient(
+                    colors: [Colors.gray00.opacity(0), Colors.gray00],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            }
+        }
     }
 }
 

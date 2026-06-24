@@ -182,7 +182,8 @@ private struct PlaceVoteButtonArea: View {
                         title: "투표하기",
                         isDisabled: store.isSubmitting,
                         action: { store.send(.voteButtonTapped) }
-                    )
+                    ),
+                    hasGradientBackground: true
                 )
                 .padding(.bottom, Spacing.spacing200)
             }
@@ -198,7 +199,8 @@ private struct PlaceVoteButtonArea: View {
                     secondaryTitle: "다시 투표하기",
                     secondaryAction: { store.send(.revoteButtonTapped) },
                     arrangement: .horizontal
-                )
+                ),
+                hasGradientBackground: true
             )
             .padding(.bottom, Spacing.spacing200)
         }
