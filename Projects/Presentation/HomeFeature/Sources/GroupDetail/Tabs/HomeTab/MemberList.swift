@@ -27,9 +27,15 @@ struct MemberList: View {
             } else {
                 VStack(spacing: Spacing.spacing250) {
                     if let me = members.first(where: { $0.isMe }) {
-                        MeArea(member: me) {
-                            store.send(.myAttendanceBadgeTapped)
-                        }
+                        MeArea(
+                            member: me,
+                            onCardTap: {
+                                store.send(.myMemberCardTapped)
+                            },
+                            onAttendanceTap: {
+                                store.send(.myAttendanceBadgeTapped)
+                            }
+                        )
                     }
 
                     let others = members.filter { !$0.isMe }
@@ -47,12 +53,18 @@ struct MemberList: View {
 /// "나" 영역. 공통 멤버 행에 좌우 패딩과 카드 배경을 더한다.
 private struct MeArea: View {
     let member: GroupDetailMember
+    let onCardTap: () -> Void
     let onAttendanceTap: () -> Void
 
     var body: some View {
-        MemberRow(member: member, isMe: true, onAttendanceTap: onAttendanceTap)
-            .padding(.horizontal, Spacing.spacing300)
-            .memberCardBackground()
+        MemberRow(
+            member: member,
+            isMe: true,
+            onCardTap: onCardTap,
+            onAttendanceTap: onAttendanceTap
+        )
+        .padding(.horizontal, Spacing.spacing300)
+        .memberCardBackground()
     }
 }
 
@@ -70,7 +82,7 @@ private struct MembersListArea: View {
                 .padding(.horizontal, Spacing.spacing100)
 
             ForEach(members) { member in
-                MemberRow(member: member, isMe: false, onAttendanceTap: {})
+                MemberRow(member: member, isMe: false, onCardTap: {}, onAttendanceTap: {})
             }
         }
         .padding(Spacing.spacing300)
@@ -84,28 +96,12 @@ private struct MembersListArea: View {
 private struct MemberRow: View {
     let member: GroupDetailMember
     let isMe: Bool
+    let onCardTap: () -> Void
     let onAttendanceTap: () -> Void
 
     var body: some View {
         HStack(spacing: Spacing.spacing200) {
-            HStack(spacing: Spacing.spacing250) {
-                Asset(assetType: .image(profileImage), size: .s40, isSelected: false)
-
-                VStack(alignment: .leading, spacing: Spacing.spacing100) {
-                    HStack(spacing: Spacing.spacing100) {
-                        BangawoText(member.nickname, textStyle: .titleMedium)
-                            .foregroundStyle(Colors.gray900)
-
-                        if isMe {
-                            MeChip()
-                        }
-                    }
-
-                    BangawoText(departureLabel, textStyle: .bodyMedium)
-                        .foregroundStyle(Colors.gray700)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
+            cardContent
 
             AttendanceBadge(
                 status: member.attendanceStatus,
@@ -113,8 +109,46 @@ private struct MemberRow: View {
                 isInteractive: isMe,
                 onTap: onAttendanceTap
             )
+            .padding(.vertical, Spacing.spacing300)
         }
-        .padding(.vertical, Spacing.spacing300)
+    }
+
+    @ViewBuilder
+    private var cardContent: some View {
+        if isMe {
+            Button(action: onCardTap) {
+                memberInfo
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, Spacing.spacing300)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        } else {
+            memberInfo
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.vertical, Spacing.spacing300)
+        }
+    }
+
+    private var memberInfo: some View {
+        HStack(spacing: Spacing.spacing250) {
+            Asset(assetType: .image(profileImage), size: .s40, isSelected: false)
+
+            VStack(alignment: .leading, spacing: Spacing.spacing100) {
+                HStack(spacing: Spacing.spacing100) {
+                    BangawoText(member.nickname, textStyle: .titleMedium)
+                        .foregroundStyle(Colors.gray900)
+
+                    if isMe {
+                        MeChip()
+                    }
+                }
+
+                BangawoText(departureLabel, textStyle: .bodyMedium)
+                    .foregroundStyle(Colors.gray700)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 
     /// 기본 출발지(없으면 첫 출발지)의 장소명. 출발지가 없으면 안내 문구를 노출한다.

@@ -7,6 +7,7 @@ import ComposableArchitecture
 
 import CoreDependencies
 import Entity
+import Utill
 
 @Reducer
 public struct HomeTabFeature {
@@ -34,6 +35,7 @@ public struct HomeTabFeature {
         public var placeVote: PlaceVote?
         /// 장소 확정 후(`completed`/`confirmed`)일 때 `fetchConfirmedPlaceResult`로 로드하는 확정 장소 결과.
         public var confirmedPlaceResult: ConfirmedPlaceResult?
+        public var isMyDeparturePlaceEditSheetPresented = false // 출발지 수정 바텀시트 여부
 
         public init(group: Group) {
             self.group = group
@@ -113,6 +115,8 @@ public struct HomeTabFeature {
         case placeVoteResponse(Result<PlaceVote, Error>)
         case confirmedPlaceResultResponse(Result<ConfirmedPlaceResult, Error>)
         case myAttendanceBadgeTapped
+        case myMemberCardTapped // 나 카드 영역 터치 시(참석여부 버튼 제외)
+        case myDeparturePlaceEditSheetDismissed // 출발지 수정 닫혔을 때 액션
         case decidePlaceTapped
         case inviteFriendTapped
         case dateVoteTapped
@@ -175,6 +179,18 @@ public struct HomeTabFeature {
 
             // TODO: 나 영역 참여 상태 변경 시트/플로우 연동
             case .myAttendanceBadgeTapped:
+                return .none
+
+            case .myMemberCardTapped:
+                Log.debug("내 멤버 카드 클릭")
+                state.isMyDeparturePlaceEditSheetPresented = true
+                return .none
+
+            case .myDeparturePlaceEditSheetDismissed:
+                guard state.isMyDeparturePlaceEditSheetPresented else { return .none }
+
+                Log.debug("바텀시트 닫힘")
+                state.isMyDeparturePlaceEditSheetPresented = false
                 return .none
 
             case .decidePlaceTapped:
