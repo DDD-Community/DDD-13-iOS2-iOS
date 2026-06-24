@@ -31,7 +31,7 @@ public struct PlaceVote: Equatable, Sendable {
 public struct PlaceVoteCandidate: Identifiable, Equatable, Sendable {
     public let id: Int
     public let name: String
-    public let categoryLabel: String
+    public let categoryLabel: PlaceCategory
     public let address: String
     public let latitude: Double?
     public let longitude: Double?
@@ -44,7 +44,7 @@ public struct PlaceVoteCandidate: Identifiable, Equatable, Sendable {
     public init(
         id: Int,
         name: String,
-        categoryLabel: String,
+        categoryLabel: PlaceCategory,
         address: String,
         latitude: Double?,
         longitude: Double?,

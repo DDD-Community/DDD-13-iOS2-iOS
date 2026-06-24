@@ -34,12 +34,12 @@ public struct PlacePickStatus: Equatable, Sendable {
     public struct PickedPlaceSummary: Equatable, Sendable, Identifiable {
         public let placeId: Int
         public let name: String
-        public let categoryLabel: String
+        public let categoryLabel: PlaceCategory
         public let address: String
 
         public var id: Int { placeId }
 
-        public init(placeId: Int, name: String, categoryLabel: String, address: String) {
+        public init(placeId: Int, name: String, categoryLabel: PlaceCategory, address: String) {
             self.placeId = placeId
             self.name = name
             self.categoryLabel = categoryLabel

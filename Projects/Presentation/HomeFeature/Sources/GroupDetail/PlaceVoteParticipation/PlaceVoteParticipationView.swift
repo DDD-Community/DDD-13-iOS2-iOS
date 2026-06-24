@@ -64,10 +64,7 @@ struct PlaceVoteParticipationView: View {
                 let longitude = candidate.longitude
             else { return nil }
 
-            let assetName = NearbyPlaceCategory(categoryLabel: candidate.categoryLabel)?.pinAssetName
-                ?? Constant.placePinAsset
-
-            return MapPinLabel(assetName: assetName, title: candidate.name)
+            return MapPinLabel(image: candidate.categoryLabel.pinIcon, title: candidate.name)
                 .makePin(
                     id: String(candidate.id),
                     coordinate: MapCoordinate(latitude: latitude, longitude: longitude)
@@ -226,7 +223,7 @@ private struct PlaceVoteRow: View {
                 )
             }
 
-            PlaceCategoryIcon(categoryLabel: candidate.categoryLabel)
+            PlaceCategoryIcon(category: candidate.categoryLabel)
                 .frame(width: Metric.categoryIconLength, height: Metric.categoryIconLength)
 
             VStack(alignment: .leading, spacing: Spacing.spacing50) {
@@ -288,17 +285,13 @@ private struct PlaceVoteRow: View {
 // MARK: - Category Icon
 
 private struct PlaceCategoryIcon: View {
-    let categoryLabel: String
+    let category: PlaceCategory
 
     var body: some View {
-        image
+        category.pinIcon
             .resizable()
             .scaledToFit()
             .clipShape(Circle())
-    }
-
-    private var image: Image {
-        NearbyPlaceCategory(categoryLabel: categoryLabel)?.pinIcon ?? Image.Asset.icPin24
     }
 }
 
@@ -375,8 +368,6 @@ private enum Metric {
 }
 
 private enum Constant {
-    /// 후보 장소 핀에 사용하는 아이콘 에셋.
-    static let placePinAsset = "ic_pin_24"
     /// 후보 좌표가 없을 때 사용하는 기본 지도 중심(서울 시청).
     static let defaultCenter = MapCoordinate(latitude: 37.5665, longitude: 126.9780)
     /// 후보가 1개일 때 사용하는 기본 줌 레벨.

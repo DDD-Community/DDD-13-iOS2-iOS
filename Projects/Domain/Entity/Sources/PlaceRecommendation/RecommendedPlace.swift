@@ -9,7 +9,7 @@ public struct RecommendedPlace: Equatable, Sendable, Identifiable {
     public let rank: Int
     public let placeId: Int
     public let name: String
-    public let categoryLabel: String
+    public let categoryLabel: PlaceCategory
     public let address: String
     public let score: Double
     public let nearestStationId: Int
@@ -20,7 +20,7 @@ public struct RecommendedPlace: Equatable, Sendable, Identifiable {
         rank: Int,
         placeId: Int,
         name: String,
-        categoryLabel: String,
+        categoryLabel: PlaceCategory,
         address: String,
         score: Double,
         nearestStationId: Int

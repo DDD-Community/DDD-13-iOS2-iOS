@@ -33,7 +33,7 @@ public extension PlacePickStatusResponseDTO {
                 PlacePickStatus.PickedPlaceSummary(
                     placeId: $0.placeId,
                     name: $0.name,
-                    categoryLabel: $0.categoryLabel,
+                    categoryLabel: PlaceCategory(categoryLabel: $0.categoryLabel),
                     address: $0.address
                 )
             }

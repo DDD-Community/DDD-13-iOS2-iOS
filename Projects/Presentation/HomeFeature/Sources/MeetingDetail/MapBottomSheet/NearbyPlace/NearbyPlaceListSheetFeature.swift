@@ -7,27 +7,11 @@ import ComposableArchitecture
 import Entity
 import Utill
 
-public enum NearbyPlaceCategory: String, CaseIterable, Equatable, Sendable {
-    case all = "전체"
-    case cafe = "카페"
-    case desert = "디저트"
-    case koreaFood = "한식"
-    case japaneseFood = "일식"
-    case snackBar = "분식"
-    case asianFood = "아시아음식"
-    case westernFood = "양식"
-    case buffet = "뷔페"
-    case bar = "주점"
-    case etc = "기타"
-
-    var title: String { rawValue }
-}
-
 @Reducer
 public struct NearbyPlaceListSheetFeature {
     @ObservableState
     public struct State: Equatable {
-        public var selectedCategory: NearbyPlaceCategory = .all // 카테고리
+        public var selectedCategory: PlaceCategory = .all // 카테고리
         public var isParkingAvailableSelected = false // 주차 가능 여부
         public var isReservableSelected = false // 예약 가능여부
         public var selectedPlaceDetail: SelectedPlaceDetailSheetFeature.State = .mock
@@ -58,7 +42,7 @@ public struct NearbyPlaceListSheetFeature {
     }
 
     public enum Action: Equatable {
-        case categoryTapped(NearbyPlaceCategory)
+        case categoryTapped(PlaceCategory)
         case parkingAvailableFilterTapped
         case reservableFilterTapped
         case stationSelected(Int)

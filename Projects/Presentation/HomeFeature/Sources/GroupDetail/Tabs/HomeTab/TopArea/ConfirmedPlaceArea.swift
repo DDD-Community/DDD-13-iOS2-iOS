@@ -63,7 +63,7 @@ struct ConfirmedPlaceArea: View {
         VStack(spacing: Spacing.spacing400) {
             PlaceRow(
                 placeName: placeName,
-                categoryLabel: nil,
+                category: nil,
                 displayAddress: placeAddress
             )
 

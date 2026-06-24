@@ -8,6 +8,7 @@ import SwiftUI
 import ComposableArchitecture
 
 import DesignSystem
+import Entity
 
 /// 장소 투표 후보 담기 화면의 "담은 장소" 탭.
 /// 모임원 가로 리스트 → 카테고리 필터 → 담은 장소 리스트(중복 제거)를 보여주고,
@@ -92,8 +93,8 @@ private struct MemberItem: View {
 
 private struct CategoryFilterStrip: View {
     let filters: [PickedPlaceTabFeature.CategoryFilter]
-    let selectedCategory: NearbyPlaceCategory
-    let onSelect: (NearbyPlaceCategory) -> Void
+    let selectedCategory: PlaceCategory
+    let onSelect: (PlaceCategory) -> Void
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -141,7 +142,7 @@ private struct PickedPlaceList: View {
             ForEach(places) { place in
                 PlaceRow(
                     placeName: place.name,
-                    categoryLabel: place.categoryLabel,
+                    category: place.category,
                     displayAddress: place.address
                 ) {
                     if place.pickedCount > 1 {

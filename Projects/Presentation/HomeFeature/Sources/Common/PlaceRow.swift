@@ -20,7 +20,7 @@ struct PlaceRow<Trailing: View>: View {
     @State private var isTooltipLayerElevated = false
 
     private let placeName: String
-    private let categoryLabel: String?
+    private let category: PlaceCategory?
     private let displayAddress: String
     private let tooltipAnimationDuration = 0.2
     private let trailing: Trailing
@@ -29,7 +29,7 @@ struct PlaceRow<Trailing: View>: View {
     init(@ViewBuilder trailing: () -> Trailing = { EmptyView() }) {
         self.init(
             placeName: "이름",
-            categoryLabel: nil,
+            category: nil,
             displayAddress: "서울 강남구 역삼동",
             trailing: trailing
         )
@@ -38,12 +38,12 @@ struct PlaceRow<Trailing: View>: View {
     /// 장소 row에 필요한 표시 데이터를 직접 전달하는 init.
     init(
         placeName: String,
-        categoryLabel: String?,
+        category: PlaceCategory?,
         displayAddress: String,
         @ViewBuilder trailing: () -> Trailing = { EmptyView() }
     ) {
         self.placeName = placeName
-        self.categoryLabel = categoryLabel
+        self.category = category
         self.displayAddress = displayAddress
         self.trailing = trailing()
     }
@@ -52,7 +52,7 @@ struct PlaceRow<Trailing: View>: View {
     init(place: RecommendedPlace, @ViewBuilder trailing: () -> Trailing = { EmptyView() }) {
         self.init(
             placeName: place.name,
-            categoryLabel: place.categoryLabel,
+            category: place.categoryLabel,
             displayAddress: place.address,
             trailing: trailing
         )
@@ -61,7 +61,7 @@ struct PlaceRow<Trailing: View>: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(alignment: .center, spacing: Spacing.spacing300) {
-                PlaceThumbnail(categoryLabel: categoryLabel)
+                PlaceThumbnail(category: category)
 
                 VStack(alignment: .leading, spacing: Spacing.spacing200) {
                     Text(placeName)
@@ -192,7 +192,7 @@ private extension PlaceAddressTooltip {
 // MARK: - Thumbnail
 
 private struct PlaceThumbnail: View {
-    let categoryLabel: String?
+    let category: PlaceCategory?
 
     var body: some View {
         icon
@@ -203,12 +203,7 @@ private struct PlaceThumbnail: View {
     }
 
     private var icon: Image {
-        guard
-            let categoryLabel,
-            let category = NearbyPlaceCategory(categoryLabel: categoryLabel)
-        else { return Image.Asset.icPin24 }
-
-        return category.pinIcon
+        category?.pinIcon ?? Image.Asset.icPin24
     }
 }
 

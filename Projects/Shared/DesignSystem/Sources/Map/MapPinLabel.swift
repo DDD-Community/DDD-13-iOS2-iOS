@@ -6,17 +6,21 @@ import SwiftUI
 /// 스냅샷 이미지를 심볼로 갖는 `MapPin`으로 변환해 `KakaoMap`에 전달한다.
 /// 리스트 등 일반 UI에서는 뷰 자체로도 사용할 수 있다.
 public struct MapPinLabel: View {
-    private let assetName: String
+    private let image: Image
     private let title: String
 
-    public init(assetName: String, title: String) {
-        self.assetName = assetName
+    public init(image: Image, title: String) {
+        self.image = image
         self.title = title
+    }
+
+    public init(assetName: String, title: String) {
+        self.init(image: Image(assetName: assetName), title: title)
     }
 
     public var body: some View {
         VStack(alignment: .center, spacing: 2) {
-            Image(assetName: assetName)
+            image
                 .resizable()
                 .frame(width: Metric.iconLength, height: Metric.iconLength)
                 .clipShape(Circle())

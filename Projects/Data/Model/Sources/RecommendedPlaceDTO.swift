@@ -25,7 +25,7 @@ public extension RecommendedPlaceResponseDTO {
             rank: rank,
             placeId: place.placeId,
             name: place.name,
-            categoryLabel: place.categoryLabel,
+            categoryLabel: PlaceCategory(categoryLabel: place.categoryLabel),
             address: place.address,
             score: score,
             nearestStationId: nearestStationId

@@ -134,7 +134,7 @@ public extension VoteClient {
             PlaceVoteCandidate(
                 id: 1,
                 name: "감성카페",
-                categoryLabel: "카페",
+                categoryLabel: .cafe,
                 address: "서울 강남구 테헤란로 1",
                 latitude: 37.4979,
                 longitude: 127.0276,
@@ -148,7 +148,7 @@ public extension VoteClient {
             PlaceVoteCandidate(
                 id: 2,
                 name: "강남역 맛집",
-                categoryLabel: "음식점",
+                categoryLabel: .unknown("음식점"),
                 address: "서울 강남구 강남대로 396",
                 latitude: 37.4980,
                 longitude: 127.0276,
@@ -161,7 +161,7 @@ public extension VoteClient {
             PlaceVoteCandidate(
                 id: 3,
                 name: "역삼 브런치",
-                categoryLabel: "카페",
+                categoryLabel: .cafe,
                 address: "서울 강남구 역삼로 120",
                 latitude: 37.5006,
                 longitude: 127.0364,

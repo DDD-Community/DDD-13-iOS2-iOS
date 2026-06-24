@@ -89,7 +89,7 @@ public extension PlaceVoteCandidateResponseDTO {
         PlaceVoteCandidate(
             id: place.placeId,
             name: place.name,
-            categoryLabel: place.categoryLabel,
+            categoryLabel: PlaceCategory(categoryLabel: place.categoryLabel),
             address: place.address,
             latitude: place.latitude,
             longitude: place.longitude,

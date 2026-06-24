@@ -194,14 +194,14 @@ private struct PlaceAddButton: View {
 }
 
 private struct NearbyPlaceCategoryFilter: View {
-    let selectedCategory: NearbyPlaceCategory
-    let onCategoryTapped: (NearbyPlaceCategory) -> Void
+    let selectedCategory: PlaceCategory
+    let onCategoryTapped: (PlaceCategory) -> Void
 
     var body: some View {
         VStack(spacing: 0) {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: Spacing.spacing200) {
-                    ForEach(NearbyPlaceCategory.allCases, id: \.self) { category in
+                    ForEach(PlaceCategory.allCases, id: \.self) { category in
                         NearbyPlaceCategoryChip(
                             title: category.title,
                             isSelected: selectedCategory == category

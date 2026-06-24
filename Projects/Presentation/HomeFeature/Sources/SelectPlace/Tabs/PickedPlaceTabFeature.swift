@@ -5,13 +5,15 @@
 
 import ComposableArchitecture
 
+import Entity
+
 @Reducer
 public struct PickedPlaceTabFeature {
     @ObservableState
     public struct State: Equatable {
         public var members: [SelectPlaceMember]
         public var pickedPlaces: [PickedPlace]
-        public var selectedFilterCategory: NearbyPlaceCategory = .all
+        public var selectedFilterCategory: PlaceCategory = .all
         /// 현재 사용자가 호스트인지 여부. 하단 "투표 생성" 버튼 노출 분기에 사용한다.
         public let isHost: Bool
 
@@ -37,7 +39,7 @@ public struct PickedPlaceTabFeature {
         /// "전체"부터 시작해, 담은 장소에 실제 등장하는 카테고리만 개수와 함께 나열한 필터 목록.
         public var categoryFilters: [CategoryFilter] {
             let all = CategoryFilter(category: .all, count: pickedPlaces.count)
-            let present = NearbyPlaceCategory.allCases
+            let present = PlaceCategory.allCases
                 .filter { $0 != .all }
                 .compactMap { category -> CategoryFilter? in
                     let count = pickedPlaces.filter { $0.category == category }.count
@@ -49,15 +51,15 @@ public struct PickedPlaceTabFeature {
 
     /// 담은 장소 탭 카테고리 필터 칩 한 개.
     public struct CategoryFilter: Equatable, Identifiable, Sendable {
-        public let category: NearbyPlaceCategory
+        public let category: PlaceCategory
         public let count: Int
 
-        public var id: NearbyPlaceCategory { category }
+        public var id: PlaceCategory { category }
         public var label: String { "\(category.title) \(count)" }
     }
 
     public enum Action {
-        case categoryFilterSelected(NearbyPlaceCategory)
+        case categoryFilterSelected(PlaceCategory)
         case goPickPlaceTapped
         case createVoteTapped
         case delegate(Delegate)
