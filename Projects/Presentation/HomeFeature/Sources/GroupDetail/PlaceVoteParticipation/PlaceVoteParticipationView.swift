@@ -32,17 +32,20 @@ struct PlaceVoteParticipationView: View {
             )
             .ignoresSafeArea()
 
-            MapBottomSheet(detents: [.medium, .large], initialDetent: .medium) {
-                PlaceVoteSheetContent(store: store, onComplete: dismissCover)
-                    .padding(.horizontal, Spacing.spacing400)
-            }
-
             NavigationPage(
                 background: .clear,
                 trailingIcons: [
                     NavigationIconItem(icon: .close24) { dismissCover() }
                 ]
             )
+
+            MapBottomSheet(detents: [.medium, .large], initialDetent: .medium) {
+                PlaceVoteSheetContent(store: store)
+                    .padding(.horizontal, Spacing.spacing400)
+            }
+
+            PlaceVoteButtonArea(store: store, onComplete: dismissCover)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
         }
         .task(id: store.candidates.map(\.id)) {
             buildPins()
@@ -120,11 +123,10 @@ struct PlaceVoteParticipationView: View {
 
 private struct PlaceVoteSheetContent: View {
     let store: StoreOf<PlaceVoteParticipationFeature>
-    let onComplete: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.spacing300) {
-            header
+            PlaceVoteHeader(store: store)
 
             VStack(spacing: Spacing.spacing200) {
                 ForEach(store.candidates) { candidate in
@@ -137,13 +139,17 @@ private struct PlaceVoteSheetContent: View {
                     )
                 }
             }
-
-            buttonArea
         }
         .padding(.top, Spacing.spacing100)
     }
+}
 
-    private var header: some View {
+// MARK: - Sheet Header
+
+private struct PlaceVoteHeader: View {
+    let store: StoreOf<PlaceVoteParticipationFeature>
+
+    var body: some View {
         VStack(alignment: .leading, spacing: Spacing.spacing150) {
             BangawoText("약속 장소 투표하기", textStyle: .titleLarge)
                 .foregroundStyle(Colors.gray800)
@@ -159,9 +165,15 @@ private struct PlaceVoteSheetContent: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
+}
 
-    @ViewBuilder
-    private var buttonArea: some View {
+// MARK: - Button Area
+
+private struct PlaceVoteButtonArea: View {
+    let store: StoreOf<PlaceVoteParticipationFeature>
+    let onComplete: () -> Void
+
+    var body: some View {
         switch store.mode {
         case .voting:
             if store.selectedPlaceId != nil {
@@ -172,7 +184,7 @@ private struct PlaceVoteSheetContent: View {
                         action: { store.send(.voteButtonTapped) }
                     )
                 )
-                .padding(.top, Spacing.spacing200)
+                .padding(.bottom, Spacing.spacing200)
             }
 
         case .voted:
@@ -188,7 +200,7 @@ private struct PlaceVoteSheetContent: View {
                     arrangement: .horizontal
                 )
             )
-            .padding(.top, Spacing.spacing200)
+            .padding(.bottom, Spacing.spacing200)
         }
     }
 }

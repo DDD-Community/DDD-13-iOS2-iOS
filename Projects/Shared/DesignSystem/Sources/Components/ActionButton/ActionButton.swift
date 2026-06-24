@@ -138,7 +138,7 @@ private extension ActionButton {
                     isDisabled: isDisabled,
                     action: action
                 )
-                    .padding(.horizontal, Spacing.spacing450)
+                .padding(.horizontal, Spacing.spacing450)
 
             case let .dual(primaryTitle, primaryAction, secondaryTitle, secondaryAction, arrangement):
                 DualButtonArea(
