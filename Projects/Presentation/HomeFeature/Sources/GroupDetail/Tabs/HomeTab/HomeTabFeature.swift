@@ -275,7 +275,14 @@ public struct HomeTabFeature {
                 return .none
 
             case .placeVoteParticipationTapped:
-                state.destination = .placeVoteParticipation(PlaceVoteParticipationFeature.State())
+                guard let placeVote = state.placeVote else { return .none }
+
+                state.destination = .placeVoteParticipation(
+                    PlaceVoteParticipationFeature.State(
+                        meetingId: state.group.meetingId,
+                        placeVote: placeVote
+                    )
+                )
                 return .none
 
             case .placeDetailTapped:
