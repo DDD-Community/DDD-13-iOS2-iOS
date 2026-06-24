@@ -280,6 +280,7 @@ private struct PlaceCategoryIcon: View {
         image
             .resizable()
             .scaledToFit()
+            .clipShape(Circle())
     }
 
     private var image: Image {
