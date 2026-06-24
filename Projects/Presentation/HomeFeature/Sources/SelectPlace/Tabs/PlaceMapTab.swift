@@ -16,8 +16,6 @@ import Utill
 struct PlaceMapTab: View {
     let store: StoreOf<PlaceMapTabFeature>
 
-    /// 중간지점 역 핀. `selectedStationIndex`로 핀 탭 시 역 선택과 연동한다.
-    @State private var pins: [MapPin] = []
     /// 바텀시트가 화면 하단을 덮는 높이. detent에 따라 핀 포커싱 중심을 위로 보정하는 데 쓴다.
     @State private var sheetCoveredHeight: CGFloat = 0
 
@@ -38,16 +36,10 @@ struct PlaceMapTab: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             KakaoMap(
-                pins: pins,
                 initialCenter: Constant.defaultCenter,
                 focusedCoordinate: selectedStationCoordinate,
                 focusBottomInset: sheetCoveredHeight
             )
-            .onPinTapped { pin in
-                guard let index = Int(pin.id) else { return }
-
-                store.send(.nearbyPlaceList(.stationSelected(index)))
-            }
             .ignoresSafeArea()
 
             MapBottomSheet(detents: [.medium, .full], initialDetent: .medium) {
@@ -58,22 +50,6 @@ struct PlaceMapTab: View {
             }
             .onVisibleHeightChanged { sheetCoveredHeight = $0 }
         }
-        .task(id: stations.map(\.stationId)) {
-            buildStationPins()
-        }
-    }
-
-    // MARK: - 역 Pin 구성
-
-    @MainActor
-    private func buildStationPins() {
-        pins = stations.enumerated().map { index, station in
-            MapPinLabel(assetName: Constant.stationPinAsset, title: "\(station.stationName)역")
-                .makePin(
-                    id: String(index),
-                    coordinate: MapCoordinate(latitude: station.latitude, longitude: station.longitude)
-                )
-        }
     }
 }
 
@@ -82,7 +58,4 @@ struct PlaceMapTab: View {
 private enum Constant {
     /// 좌표 정보가 없을 때 사용하는 기본 지도 중심(서울 시청).
     static let defaultCenter = MapCoordinate(latitude: 37.5665, longitude: 126.9780)
-
-    /// 중간지점 역 핀에 사용하는 아이콘 에셋.
-    static let stationPinAsset = "ic_pin_24"
 }
