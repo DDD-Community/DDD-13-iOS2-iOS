@@ -141,7 +141,7 @@ private struct PickedPlaceList: View {
             ForEach(places) { place in
                 PlaceRow(
                     placeName: place.name,
-                    categoryLabel: place.category.title,
+                    categoryLabel: place.categoryLabel,
                     displayAddress: place.address
                 ) {
                     if place.pickedCount > 1 {

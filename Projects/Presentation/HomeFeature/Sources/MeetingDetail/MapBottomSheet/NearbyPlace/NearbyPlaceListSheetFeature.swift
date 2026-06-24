@@ -14,7 +14,7 @@ public enum NearbyPlaceCategory: String, CaseIterable, Equatable, Sendable {
     case koreaFood = "한식"
     case japaneseFood = "일식"
     case snackBar = "분식"
-    case asianFood = "아시아 음식"
+    case asianFood = "아시아음식"
     case buffet = "뷔페"
     case bar = "주점"
     case etc = "기타"

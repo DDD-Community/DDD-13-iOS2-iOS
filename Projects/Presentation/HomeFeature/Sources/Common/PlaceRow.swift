@@ -61,7 +61,7 @@ struct PlaceRow<Trailing: View>: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(alignment: .center, spacing: Spacing.spacing300) {
-                PlaceThumbnail()
+                PlaceThumbnail(categoryLabel: categoryLabel)
 
                 VStack(alignment: .leading, spacing: Spacing.spacing200) {
                     Text(placeName)
@@ -192,13 +192,23 @@ private extension PlaceAddressTooltip {
 // MARK: - Thumbnail
 
 private struct PlaceThumbnail: View {
+    let categoryLabel: String?
+
     var body: some View {
-        // TODO: API 명세보고 카테고리별 이미지 수정해야 할 듯.
-        Image.Asset.icMapPinRestaurant
+        icon
             .resizable()
             .scaledToFill()
             .frame(width: 32, height: 32)
             .clipShape(Circle())
+    }
+
+    private var icon: Image {
+        guard
+            let categoryLabel,
+            let category = NearbyPlaceCategory(categoryLabel: categoryLabel)
+        else { return Image.Asset.icPin24 }
+
+        return category.pinIcon
     }
 }
 

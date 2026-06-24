@@ -274,18 +274,13 @@ private struct PlaceCategoryIcon: View {
     let categoryLabel: String
 
     var body: some View {
-        // TODO: 전용 카테고리 아이콘 에셋 확보 시 매핑 교체
         image
             .resizable()
             .scaledToFit()
     }
 
     private var image: Image {
-        switch categoryLabel {
-        case "카페": return Image.Asset.icMapPinCafe
-        case "음식점", "맛집": return Image.Asset.icMapPinRestaurant
-        default: return Image.Asset.icPin24
-        }
+        NearbyPlaceCategory(categoryLabel: categoryLabel)?.pinIcon ?? Image.Asset.icPin24
     }
 }
 
