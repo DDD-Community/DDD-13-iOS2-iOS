@@ -25,7 +25,7 @@ public struct DateVote: Equatable, Sendable {
     }
 }
 
-/// 날짜 후보. 
+/// 날짜 후보.
 public struct DateVoteOption: Identifiable, Equatable, Sendable {
     public let id: Int
     public let candidateDate: String

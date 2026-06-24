@@ -29,6 +29,16 @@ public struct DateVoteVoterResponseDTO: Decodable, Sendable {
 
 // MARK: - Request DTO
 
+public struct StartDateVoteRequestDTO: Encodable, Sendable {
+    public let candidateDates: [String]
+    public let durationDays: Int
+
+    public init(candidateDates: [String], durationDays: Int) {
+        self.candidateDates = candidateDates
+        self.durationDays = durationDays
+    }
+}
+
 public struct SubmitDateVoteRequestDTO: Encodable, Sendable {
     public let optionIds: [Int]
 

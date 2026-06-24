@@ -88,6 +88,9 @@ public struct HomeView: View {
             switch pathStore.case {
             case let .detail(detailStore):
                 GroupDetailView(store: detailStore)
+
+            case let .dateSelection(dateSelectionStore):
+                MeetingDateSelectionView(store: dateSelectionStore)
             }
         }
     }

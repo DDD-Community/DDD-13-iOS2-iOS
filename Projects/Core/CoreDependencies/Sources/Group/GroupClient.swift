@@ -13,6 +13,7 @@ import UseCase
 public struct GroupClient: Sendable {
     public var fetchGroups: @Sendable () async throws -> [Group]
     public var createGroup: @Sendable (_ name: String, _ themeTagCode: String) async throws -> CreateGroupResult
+    public var hostPickMeetingDate: @Sendable (_ meetingId: Int, _ date: String) async throws -> Void
     public var fetchGroupDetail: @Sendable (_ meetingId: Int) async throws -> GroupDetail
     public var updateAttendance: @Sendable (_ groupId: Int, _ attendanceStatus: AttendanceStatus) async throws -> Void
 }
@@ -21,6 +22,7 @@ public extension GroupClient {
     static func live(
         fetchUseCase: any FetchGroupsUseCase,
         createUseCase: any CreateGroupUseCase,
+        hostPickMeetingDateUseCase: any HostPickMeetingDateUseCase,
         fetchDetailUseCase: any FetchGroupDetailUseCase,
         updateAttendanceUseCase: any UpdateAttendanceUseCase
     ) -> Self {
@@ -28,6 +30,9 @@ public extension GroupClient {
             fetchGroups: { try await fetchUseCase.execute() },
             createGroup: { name, themeTagCode in
                 try await createUseCase.execute(name: name, themeTagCode: themeTagCode)
+            },
+            hostPickMeetingDate: { meetingId, date in
+                try await hostPickMeetingDateUseCase.execute(meetingId: meetingId, date: date)
             },
             fetchGroupDetail: { meetingId in
                 try await fetchDetailUseCase.execute(meetingId: meetingId)
@@ -44,6 +49,7 @@ extension GroupClient: DependencyKey {
         GroupClient(
             fetchGroups: { throw GroupClientError.notImplemented },
             createGroup: { _, _ in throw GroupClientError.notImplemented },
+            hostPickMeetingDate: { _, _ in throw GroupClientError.notImplemented },
             fetchGroupDetail: { _ in throw GroupClientError.notImplemented },
             updateAttendance: { _, _ in throw GroupClientError.notImplemented }
         )
@@ -56,6 +62,7 @@ extension GroupClient: DependencyKey {
         createGroup: { name, themeTagCode in
             CreateGroupResult(groupId: 0, meetingId: 0, name: name, themeTagCode: themeTagCode)
         },
+        hostPickMeetingDate: { _, _ in },
         fetchGroupDetail: { _ in previewGroupDetail },
         updateAttendance: { _, _ in }
     )

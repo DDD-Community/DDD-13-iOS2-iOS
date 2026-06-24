@@ -6,6 +6,7 @@
 import ComposableArchitecture
 
 import Entity
+import Utill
 
 @Reducer
 public struct GroupDetailFeature {
@@ -35,6 +36,11 @@ public struct GroupDetailFeature {
         case tabSelected(Int)
         case home(HomeTabFeature.Action)
         case myPlace(MyPlaceTabFeature.Action)
+        case delegate(Delegate)
+
+        public enum Delegate: Equatable {
+            case meetingDateSelectionRequested(meetingId: Int)
+        }
     }
 
     public init() {}
@@ -58,7 +64,14 @@ public struct GroupDetailFeature {
                 state.selectedTabIndex = 1
                 return .none
 
+            case let .home(.delegate(.meetingDateSelectionRequested(meetingId))):
+                Log.debug("약속정하기 클릭")
+                return .send(.delegate(.meetingDateSelectionRequested(meetingId: meetingId)))
+
             case .home, .myPlace:
+                return .none
+
+            case .delegate:
                 return .none
             }
         }

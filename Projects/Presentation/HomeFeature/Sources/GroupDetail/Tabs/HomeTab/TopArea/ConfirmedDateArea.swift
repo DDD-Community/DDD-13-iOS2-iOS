@@ -17,12 +17,23 @@ import Utill
 struct ConfirmedDateArea: View {
     let store: StoreOf<HomeTabFeature>
 
-    // TODO: GroupDetail.confirmedDate 모델 연동 시 임시 Date 교체 + 서버 포맷 파싱
-    private var confirmedDate: Date { Constant.tempConfirmedDate }
+    private var confirmedDate: Date? {
+        guard let confirmedDate = store.groupDetail?.confirmedDate else { return nil }
+        return ConfirmedDateFormatter.date(from: confirmedDate)
+    }
 
-    private var dayNumber: String { DateFormatterStore.day.string(from: confirmedDate) }
-    private var weekdayEnglish: String { DateFormatterStore.weekdayEnglish.string(from: confirmedDate).uppercased() }
-    private var fullDateLabel: String { DateFormatterStore.full.string(from: confirmedDate) }
+    private var dayNumber: String {
+        confirmedDate.map { DateFormatterStore.day.string(from: $0) } ?? "-"
+    }
+
+    private var weekdayEnglish: String {
+        confirmedDate.map { DateFormatterStore.weekdayEnglish.string(from: $0).uppercased() } ?? ""
+    }
+
+    private var fullDateLabel: String {
+        guard let confirmedDate else { return "약속 날짜를 불러오는 중이에요" }
+        return DateFormatterStore.string(from: confirmedDate, format: "M월 d일(E) a h시 mm분")
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.spacing250) {
@@ -85,14 +96,24 @@ private enum Metric {
     static let cardGradientRadius: CGFloat = 300
 }
 
-private enum Constant {
-    static let tempConfirmedDate: Date = {
-        var components = DateComponents()
-        components.year = 2026
-        components.month = 6
-        components.day = 28
-        components.hour = 18
-        components.minute = 30
-        return Calendar.current.date(from: components) ?? Date()
-    }()
+private enum ConfirmedDateFormatter {
+    static func date(from raw: String) -> Date? {
+        // 서버 confirmedDate는 타임존 없는 로컬 날짜 문자열로 내려온다. 예: 2026-06-25T10:00:00
+        if let date = DateFormatterStore.date(from: raw, format: "yyyy-MM-dd'T'HH:mm:ss") {
+            return date
+        }
+
+        if let date = DateFormatterStore.date(from: raw, format: "yyyy-MM-dd'T'HH:mm:ss.SSS") {
+            return date
+        }
+
+        let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = isoFormatter.date(from: raw) {
+            return date
+        }
+
+        isoFormatter.formatOptions = [.withInternetDateTime]
+        return isoFormatter.date(from: raw)
+    }
 }

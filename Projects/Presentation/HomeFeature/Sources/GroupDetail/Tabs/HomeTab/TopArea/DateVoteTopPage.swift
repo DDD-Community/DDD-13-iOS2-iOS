@@ -101,6 +101,7 @@ private struct DateVoteTopArea: View {
     let participantCount: Int
     let participationRatio: Double
 
+    @Dependency(\.calendar) private var calendar
     @State private var now = Date()
 
     private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
@@ -110,7 +111,7 @@ private struct DateVoteTopArea: View {
             BangawoText("날짜 투표하기", textStyle: .titleMediumEmphasized)
                 .foregroundStyle(Colors.gray900)
 
-            BangawoText(DateVoteFormatter.deadlineLabel(deadline, now: now), textStyle: .bodyXSmall)
+            BangawoText(DateVoteFormatter.deadlineLabel(deadline, now: now, calendar: calendar), textStyle: .bodyXSmall)
                 .foregroundStyle(Colors.gray600)
 
             HStack(spacing: Spacing.spacing100) {
@@ -308,12 +309,12 @@ private enum DateVoteFormatter {
         return DateFormatterStore.string(from: date, format: "yyyy. MM. dd (E)")
     }
 
-    static func deadlineLabel(_ raw: String?, now: Date) -> String {
+    static func deadlineLabel(_ raw: String?, now: Date, calendar: Calendar) -> String {
         guard
             let raw,
             let date = DateFormatterStore.date(from: raw, format: "yyyy-MM-dd"),
             // 임시: deadline에 시각이 없어 해당 날짜의 23:59:59를 마감 시각으로 사용
-            let deadline = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: date)
+            let deadline = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: date)
         else { return "" }
 
         let remaining = max(0, Int(deadline.timeIntervalSince(now)))

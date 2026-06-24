@@ -47,7 +47,7 @@ private struct DefaultTopPage: View {
             d3Asset: .groupDetail,
             title: store.group.name,
             description: store.group.themeTagDisplay,
-            buttonTitle: "장소 정하기",
+            buttonTitle: "약속 정하기",
             buttonVariant: .solid,
             buttonSize: .small,
             showButton: store.isMeHost,

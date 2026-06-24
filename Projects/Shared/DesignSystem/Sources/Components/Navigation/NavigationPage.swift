@@ -50,7 +50,7 @@ public struct NavigationPage: View {
                 }
             }
             if let title {
-                BangawoText(title, textStyle: .titleLarge)
+                BangawoText(title, textStyle: .titleMedium)
                     .foregroundStyle(Colors.gray900)
                     .lineLimit(1)
                     .frame(maxWidth: .infinity, alignment: .center)

@@ -64,6 +64,13 @@ Projects/
 ### TCA
 상세 컨벤션: `docs/tca-convention.md`
 
+#### TCA Navigation Ownership
+- 여러 하위 Feature가 공유하는 화면 전환은 부모 Feature가 `@Presents destination`으로 관리한다
+- 특정 하위 Feature에서만 사용하는 sheet/modal/bottomSheet는 해당 하위 Feature의 State에서 관리한다
+- Presented 화면의 결과가 여러 sibling State를 갱신하거나 부모 라우팅 판단이 필요하면 부모 Feature가 소유한다
+- 열기/닫기 상태와 결과 반영이 한 Feature 내부에서 끝나면 해당 Feature 내부에 둔다
+- 화면 전환이 도메인/UI State에 영향을 주는 경우 SwiftUI local `@State`로 navigation 상태를 관리하지 않는다
+
 ## Resource Naming
 상세 규칙: `docs/resource-naming.md`
 

@@ -13,6 +13,7 @@ enum VoteFactory {
         let fetchDateVoteUseCase = FetchDateVoteUseCaseImpl(repository: repository)
         let fetchPlaceVoteUseCase = FetchPlaceVoteUseCaseImpl(repository: repository)
         let fetchConfirmedPlaceResultUseCase = FetchConfirmedPlaceResultUseCaseImpl(repository: repository)
+        let startDateVoteUseCase = StartDateVoteUseCaseImpl(repository: repository)
         let submitDateVoteUseCase = SubmitDateVoteUseCaseImpl(repository: repository)
         let confirmDateVoteUseCase = ConfirmDateVoteUseCaseImpl(repository: repository)
         let submitPlaceVoteUseCase = SubmitPlaceVoteUseCaseImpl(repository: repository)
@@ -20,6 +21,7 @@ enum VoteFactory {
             fetchDateVoteUseCase: fetchDateVoteUseCase,
             fetchPlaceVoteUseCase: fetchPlaceVoteUseCase,
             fetchConfirmedPlaceResultUseCase: fetchConfirmedPlaceResultUseCase,
+            startDateVoteUseCase: startDateVoteUseCase,
             submitDateVoteUseCase: submitDateVoteUseCase,
             confirmDateVoteUseCase: confirmDateVoteUseCase,
             submitPlaceVoteUseCase: submitPlaceVoteUseCase

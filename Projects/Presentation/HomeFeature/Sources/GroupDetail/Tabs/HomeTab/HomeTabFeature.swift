@@ -25,7 +25,7 @@ public struct HomeTabFeature {
 
     @ObservableState
     public struct State: Equatable {
-        public let group: Group
+        public var group: Group
         /// `onAppear`에서 `fetchGroupDetail`로 로드하는 모임 상세. 멤버 리스트의 출발지/본인 여부/참여 상태를 제공한다.
         public var groupDetail: GroupDetail?
         /// 날짜 투표 중(`inProgress`/`before`)일 때 `fetchDateVote`로 로드하는 날짜 투표 현황.
@@ -131,6 +131,7 @@ public struct HomeTabFeature {
 
     public enum Delegate: Equatable {
         case selectMyPlaceTab
+        case meetingDateSelectionRequested(meetingId: Int)
     }
 
     public init() {}
@@ -177,7 +178,8 @@ public struct HomeTabFeature {
                 return .none
 
             case .decidePlaceTapped:
-                return .none
+                guard state.homeTopAreaKind == .default, state.isMeHost else { return .none }
+                return .send(.delegate(.meetingDateSelectionRequested(meetingId: state.group.meetingId)))
 
             case .inviteFriendTapped:
                 return .none
