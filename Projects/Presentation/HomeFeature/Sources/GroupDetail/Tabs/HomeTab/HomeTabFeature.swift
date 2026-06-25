@@ -187,6 +187,7 @@ public struct HomeTabFeature {
                 return .none
 
             case .myDeparturePlaceEditSheetDismissed:
+                // 바텀시트 닫힐 때 이벤트 중복 발생 방지
                 guard state.isMyDeparturePlaceEditSheetPresented else { return .none }
 
                 Log.debug("바텀시트 닫힘")
