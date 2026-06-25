@@ -128,7 +128,8 @@ private struct MapArea: View {
         KakaoMap(
             pins: pins,
             initialCenter: mapCenter,
-            initialZoomLevel: mapZoomLevel
+            initialZoomLevel: Constant.pinZoomLevelLimit,
+            fitsToPins: true
         )
         .allowsHitTesting(false)
         .clipShape(RoundedRectangle(cornerRadius: BorderRadius.borderRadius400))
@@ -162,29 +163,6 @@ private struct MapArea: View {
         let centerLongitude = ((longitudes.min() ?? 0) + (longitudes.max() ?? 0)) / 2
 
         return MapCoordinate(latitude: centerLatitude, longitude: centerLongitude)
-    }
-
-    /// 모든 후보 핀이 보이도록 bounding box span으로 근사 계산한 줌 레벨.
-    /// KakaoMap에 fit-bounds API가 없어 span→level 휴리스틱으로 산출한다.
-    private var mapZoomLevel: Int {
-        guard coordinates.count > 1 else { return Constant.singlePinZoomLevel }
-
-        let latitudes = coordinates.map(\.latitude)
-        let longitudes = coordinates.map(\.longitude)
-        let latitudeSpan = (latitudes.max() ?? 0) - (latitudes.min() ?? 0)
-        let longitudeSpan = (longitudes.max() ?? 0) - (longitudes.min() ?? 0)
-
-        return zoomLevel(forSpan: max(latitudeSpan, longitudeSpan))
-    }
-
-    private func zoomLevel(forSpan span: Double) -> Int {
-        if span < 0.005 { return 16 }
-        if span < 0.01 { return 15 }
-        if span < 0.02 { return 14 }
-        if span < 0.04 { return 13 }
-        if span < 0.08 { return 12 }
-
-        return 11
     }
 }
 
@@ -283,6 +261,6 @@ private enum Constant {
     static let placePinAsset = "ic_pin_24"
     /// 후보 좌표가 없을 때 사용하는 기본 지도 중심(서울 시청).
     static let defaultCenter = MapCoordinate(latitude: 37.5665, longitude: 126.9780)
-    /// 후보가 1개일 때 사용하는 기본 줌 레벨.
-    static let singlePinZoomLevel = 16
+    /// 핀 fit 시 카메라 최대 확대 레벨(levelLimit). 핀이 1개이거나 밀집한 경우 과도한 확대를 막는다.
+    static let pinZoomLevelLimit = 16
 }
