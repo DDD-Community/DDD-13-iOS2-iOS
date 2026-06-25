@@ -228,6 +228,7 @@ private struct PlaceVoteSheetContent: View {
             }
         }
         .padding(.top, Spacing.spacing100)
+        .padding(.bottom, UIScreen.safeAreaBottom + PlaceVoteButtonArea.height)
     }
 
     /// 멤버별 경로를 조회하고, 후보 좌표가 있으면 지도 포커싱을 요청한다.
@@ -274,6 +275,9 @@ private struct PlaceVoteHeader: View {
 // MARK: - Button Area
 
 private struct PlaceVoteButtonArea: View {
+    /// 버튼(large minHeight) + 하단 패딩. safeArea 는 별도로 더한다.
+    static let height: CGFloat = Spacing.spacing800 + Spacing.spacing200
+
     let store: StoreOf<PlaceVoteParticipationFeature>
     let onComplete: () -> Void
 
