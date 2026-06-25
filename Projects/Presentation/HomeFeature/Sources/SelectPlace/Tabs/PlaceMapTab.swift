@@ -42,7 +42,7 @@ struct PlaceMapTab: View {
             )
             .ignoresSafeArea()
 
-            MapBottomSheet(detents: [.medium, .full], initialDetent: .medium) {
+            MapBottomSheet(detents: [.ratio(0.4), .full], initialDetent: .ratio(0.4)) {
                 NearbyPlaceListSheet(
                     store: store.scope(state: \.nearbyPlaceList, action: \.nearbyPlaceList),
                     mode: .selectPlace

@@ -39,7 +39,10 @@ struct PlaceVoteParticipationView: View {
                 ]
             )
 
-            MapBottomSheet(detents: [.medium, .large], initialDetent: .medium) {
+            MapBottomSheet(
+                detents: [.ratio(0.5), .ratio(0.8)],
+                initialDetent: .ratio(0.5)
+            ) {
                 PlaceVoteSheetContent(store: store)
                     .padding(.horizontal, Spacing.spacing400)
             }

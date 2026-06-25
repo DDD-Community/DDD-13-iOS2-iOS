@@ -31,7 +31,10 @@ struct MyPlaceTab: View {
                 }
                 .ignoresSafeArea()
 
-            MapBottomSheet {
+            MapBottomSheet(
+                detents: [.collapsed, .ratio(0.5), .full],
+                initialDetent: .collapsed
+            ) {
                 NearbyPlaceListSheet(
                     store: store.scope(state: \.nearbyPlaceList, action: \.nearbyPlaceList)
                 )

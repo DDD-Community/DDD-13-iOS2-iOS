@@ -16,33 +16,32 @@ enum MapBottomSheetMode: Equatable {
 
 // MARK: - Detent
 
-/// 시트가 멈출 수 있는 높이 단계입니다. associated value로 노출 높이를 주입합니다.
+/// 시트가 멈출 수 있는 높이 단계입니다. 노출 높이는 컨테이너 높이 기준 비율로 계산합니다.
 enum MapBottomSheetDetent: Equatable {
-    /// 고정 높이(pt)로 노출되는 단계입니다.
-    case height(CGFloat)
+    /// 핸들 터치 영역만 노출되는 접힘 단계입니다. 기기 무관 고정 높이(pt)를 사용합니다.
+    case collapsed
+    /// 컨테이너 높이 대비 비율(0~1)로 노출되는 단계입니다.
+    case ratio(CGFloat)
     /// 화면 전체를 덮는 확장 단계입니다.
     case full
 }
 
 extension MapBottomSheetDetent {
-    /// 기존 동작과 동일한 기본 프리셋입니다.
-    static var collapsed: Self { .height(MapBottomSheetMetric.collapsedHeight) }
-    static var medium: Self { .height(MapBottomSheetMetric.mediumHeight) }
-    static var large: Self { .full }
-
     /// 컨테이너 높이 기준 실제 노출 높이입니다.
-    /// `.height`는 화면을 넘지 않게 클램프하고, `.full`은 화면 전체를 사용합니다.
+    /// `.collapsed`는 고정 높이, `.ratio`는 컨테이너 대비 비율, `.full`은 화면 전체를 사용합니다.
     func resolvedHeight(in containerHeight: CGFloat) -> CGFloat {
         switch self {
-        case let .height(value): return min(value, containerHeight)
+        case .collapsed: return min(MapBottomSheetMetric.collapsedHeight, containerHeight)
+        case let .ratio(value): return min(max(value, 0), 1) * containerHeight
         case .full: return containerHeight
         }
     }
 
-    /// collapsed < medium < large 정렬 비교용 가중치입니다. `.full`을 최댓값으로 둡니다.
+    /// collapsed < ratio < full 정렬 비교용 가중치입니다. `.full`을 최댓값으로 둡니다.
     var sortValue: CGFloat {
         switch self {
-        case let .height(value): return value
+        case .collapsed: return 0
+        case let .ratio(value): return value
         case .full: return .greatestFiniteMagnitude
         }
     }
@@ -59,11 +58,8 @@ private enum MapBottomSheetMetric {
     static let handleAreaHeight: CGFloat = 38
     /// 접힌 상태에서 화면에 보이는 시트 높이입니다.
     static let collapsedHeight: CGFloat = 76
-    /// 중간 detent는 324pt 노출합니다.
-    // TODO: 디테일 한 부분은 추후 수정 필요
-    static let mediumHeight: CGFloat = 324
-    /// 고정 모드에서는 376pt를 노출합니다.
-    static let fixedMediumHeight: CGFloat = 376
+    /// 고정 모드에서는 컨테이너 높이의 0.45(약 376pt)를 노출합니다.
+    static let fixedMediumRatio: CGFloat = 0.45
     /// 드래그 종료 시 다음/이전 detent로 넘어가기 위한 최소 이동 거리입니다.
     static let snapThreshold: CGFloat = 60
 }
@@ -89,8 +85,8 @@ struct MapBottomSheet<Content: View>: View {
 
     init(
         mode: MapBottomSheetMode = .resizable,
-        detents: [MapBottomSheetDetent] = [.collapsed, .medium, .large],
-        initialDetent: MapBottomSheetDetent = .collapsed,
+        detents: [MapBottomSheetDetent],
+        initialDetent: MapBottomSheetDetent,
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.mode = mode
@@ -103,7 +99,7 @@ struct MapBottomSheet<Content: View>: View {
         GeometryReader { proxy in
             let largeHeight = proxy.size.height
             let effectiveDetent: MapBottomSheetDetent = mode == .fixedMedium
-                ? .height(MapBottomSheetMetric.fixedMediumHeight)
+                ? .ratio(MapBottomSheetMetric.fixedMediumRatio)
                 : detent
             let currentOffset = sheetOffset(for: effectiveDetent, largeHeight: largeHeight)
             let topCornerRadius = effectiveDetent == .full ? 0 : BorderRadius.borderRadius400
@@ -168,7 +164,7 @@ struct MapBottomSheet<Content: View>: View {
 
 extension MapBottomSheet {
     /// 시트가 화면을 덮는 높이(정착 시점 기준)가 바뀔 때 호출됩니다.
-    /// `.height` 단계는 해당 노출 높이를, `.full` 은 0(지도 전체가 가려져 보정 무의미)을 전달합니다.
+    /// `.collapsed`/`.ratio` 단계는 해당 노출 높이를, `.full` 은 0(지도 전체가 가려져 보정 무의미)을 전달합니다.
     func onVisibleHeightChanged(_ handler: @escaping (CGFloat) -> Void) -> MapBottomSheet {
         var copy = self
         copy.onVisibleHeightChanged = handler
@@ -181,8 +177,8 @@ extension MapBottomSheet {
 private extension MapBottomSheet {
     /// large 높이의 시트를 아래로 밀어 현재 detent 높이만큼만 보이게 만드는 offset입니다.
     ///
-    /// 예를 들어 medium 상태라면 시트 자체의 frame은 largeHeight지만,
-    /// `largeHeight - mediumHeight`만큼 아래로 내려 mediumHeight만 화면에 노출합니다.
+    /// 예를 들어 ratio(0.4) 상태라면 시트 자체의 frame은 largeHeight지만,
+    /// `largeHeight - (largeHeight * 0.4)`만큼 아래로 내려 노출 높이만 화면에 보입니다.
     private func sheetOffset(for detent: MapBottomSheetDetent, largeHeight: CGFloat) -> CGFloat {
         let baseHeight = detent.resolvedHeight(in: largeHeight)
         let visibleHeight = min(max(baseHeight - dragOffset, MapBottomSheetMetric.collapsedHeight), largeHeight)
@@ -307,7 +303,11 @@ if store.selectedPlace == nil {
         Colors.gray200
             .ignoresSafeArea()
 
-        MapBottomSheet(mode: .fixedMedium) {
+        MapBottomSheet(
+            mode: .fixedMedium,
+            detents: [.collapsed, .ratio(0.4), .full],
+            initialDetent: .collapsed
+        ) {
             VStack(spacing: Spacing.spacing100) {
                 SelectedPlaceDetailSheet(
                     store: Store(initialState: .mock) {
