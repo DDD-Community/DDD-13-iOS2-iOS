@@ -19,6 +19,8 @@ struct LocationVoteArea: View {
 
     /// 후보 좌표로 구성한 지도 핀. `candidates` 변경 시 `.task`에서 재구성한다.
     @State private var pins: [MapPin] = []
+    /// 후보 좌표들의 bounding box 중심. `candidates` 변경 시 `.task`에서 갱신한다.
+    @State private var mapCenter: MapCoordinate = Constant.defaultCenter
 
     private var candidates: [PlaceVoteCandidate] {
         store.placeVote?.candidates ?? []
@@ -30,7 +32,7 @@ struct LocationVoteArea: View {
 
             MapArea(
                 pins: pins,
-                candidates: candidates,
+                mapCenter: mapCenter,
                 totalParticipants: store.placeVote?.totalParticipants ?? 0
             )
 
@@ -47,25 +49,48 @@ struct LocationVoteArea: View {
         .padding(.horizontal, Spacing.spacing400)
         .padding(.top, Spacing.spacing400)
         .padding(.bottom, Spacing.spacing500)
-        .task(id: candidates.map(\.id)) {
+        .task(id: candidates) {
             buildPins()
         }
     }
 
+    /// 후보 좌표로 핀·지도 중심을 한 번에 계산해 `@State`에 캐싱한다.
     @MainActor
     private func buildPins() {
+        let coordinates = candidates.compactMap { candidate -> MapCoordinate? in
+            guard
+                let latitude = candidate.latitude,
+                let longitude = candidate.longitude
+            else { return nil }
+
+            return MapCoordinate(latitude: latitude, longitude: longitude)
+        }
+
         pins = candidates.compactMap { candidate in
             guard
                 let latitude = candidate.latitude,
                 let longitude = candidate.longitude
             else { return nil }
 
-            return MapPinLabel(assetName: Constant.placePinAsset, title: candidate.name)
+            return MapPinLabel(image: candidate.categoryLabel.pinIcon, title: candidate.name)
                 .makePin(
                     id: String(candidate.id),
                     coordinate: MapCoordinate(latitude: latitude, longitude: longitude)
                 )
         }
+        mapCenter = Self.center(of: coordinates)
+    }
+
+    /// 후보 좌표들의 bounding box 중심. 좌표가 없으면 기본 중심을 반환한다.
+    private static func center(of coordinates: [MapCoordinate]) -> MapCoordinate {
+        guard !coordinates.isEmpty else { return Constant.defaultCenter }
+
+        let latitudes = coordinates.map(\.latitude)
+        let longitudes = coordinates.map(\.longitude)
+        let centerLatitude = ((latitudes.min() ?? 0) + (latitudes.max() ?? 0)) / 2
+        let centerLongitude = ((longitudes.min() ?? 0) + (longitudes.max() ?? 0)) / 2
+
+        return MapCoordinate(latitude: centerLatitude, longitude: centerLongitude)
     }
 }
 
@@ -121,7 +146,7 @@ private struct DeadlineDescription: View {
 
 private struct MapArea: View {
     let pins: [MapPin]
-    let candidates: [PlaceVoteCandidate]
+    let mapCenter: MapCoordinate
     let totalParticipants: Int
 
     var body: some View {
@@ -139,30 +164,6 @@ private struct MapArea: View {
         }
         .aspectRatio(Metric.mapAspectRatio, contentMode: .fit)
         .frame(maxWidth: .infinity)
-    }
-
-    /// 위경도가 모두 존재하는 후보의 좌표 목록.
-    private var coordinates: [MapCoordinate] {
-        candidates.compactMap { candidate in
-            guard
-                let latitude = candidate.latitude,
-                let longitude = candidate.longitude
-            else { return nil }
-
-            return MapCoordinate(latitude: latitude, longitude: longitude)
-        }
-    }
-
-    /// 후보 좌표들의 bounding box 중심. 좌표가 없으면 기본 중심을 반환한다.
-    private var mapCenter: MapCoordinate {
-        guard !coordinates.isEmpty else { return Constant.defaultCenter }
-
-        let latitudes = coordinates.map(\.latitude)
-        let longitudes = coordinates.map(\.longitude)
-        let centerLatitude = ((latitudes.min() ?? 0) + (latitudes.max() ?? 0)) / 2
-        let centerLongitude = ((longitudes.min() ?? 0) + (longitudes.max() ?? 0)) / 2
-
-        return MapCoordinate(latitude: centerLatitude, longitude: centerLongitude)
     }
 }
 
@@ -257,8 +258,6 @@ private enum Metric {
 }
 
 private enum Constant {
-    /// 후보 장소 핀에 사용하는 아이콘 에셋.
-    static let placePinAsset = "ic_pin_24"
     /// 후보 좌표가 없을 때 사용하는 기본 지도 중심(서울 시청).
     static let defaultCenter = MapCoordinate(latitude: 37.5665, longitude: 126.9780)
     /// 핀 fit 시 카메라 최대 확대 레벨(levelLimit). 핀이 1개이거나 밀집한 경우 과도한 확대를 막는다.
