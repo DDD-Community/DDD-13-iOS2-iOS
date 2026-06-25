@@ -12,7 +12,7 @@ enum Countdown {
     /// 1초 주기 공통 클럭. 구독자가 있을 때만 tick을 발행한다.
     /// `.autoconnect()` + `.share()` 조합으로 첫 구독 시 타이머가 켜지고,
     /// 마지막 구독 해제 시 멈춘다(전역 상시 구동 방지).
-    static let everySecond: AnyPublisher<Date, Never> =
+    nonisolated(unsafe) static let everySecond: AnyPublisher<Date, Never> =
         Timer.publish(every: 1, on: .main, in: .common)
             .autoconnect()
             .share()

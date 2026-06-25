@@ -68,6 +68,12 @@ public final class VoteRepositoryImpl: VoteRepositoryProtocol {
         )
     }
 
+    public func confirmPlaceVote(meetingId: Int) async throws {
+        try await NetworkManager.shared.requestVoid(
+            VoteEndpoint.confirmPlaceVote(meetingId: meetingId)
+        )
+    }
+
     public func fetchPlaceVoteTravelBurden(meetingId: Int, placeId: Int) async throws -> PlaceVoteTravelBurden {
         let response: PlaceVoteTravelBurdenResponseDTO = try await NetworkManager.shared.request(
             VoteEndpoint.fetchPlaceVoteTravelBurden(meetingId: meetingId, placeId: placeId)

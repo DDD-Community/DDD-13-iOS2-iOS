@@ -289,6 +289,22 @@ public struct HomeTabFeature {
             case .placeDetailTapped:
                 return .none
 
+            // 게스트 완료: 닫고 장소 투표 현황 재동기화
+            case .destination(.presented(.placeVoteParticipation(.delegate(.completed)))):
+                state.destination = nil
+                return .merge(
+                    fetchGroupDetailEffect(meetingId: state.group.meetingId),
+                    fetchPlaceVoteEffect(meetingId: state.group.meetingId)
+                )
+
+            // 호스트 확정: 닫고 모임 상태를 confirmedPlace로 전환 + 확정 결과 적재
+            case .destination(.presented(.placeVoteParticipation(.delegate(.placeConfirmed)))):
+                state.destination = nil
+                return .merge(
+                    fetchGroupDetailEffect(meetingId: state.group.meetingId),
+                    fetchConfirmedPlaceResultEffect(meetingId: state.group.meetingId)
+                )
+
             case .delegate, .destination:
                 return .none
             }

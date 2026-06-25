@@ -64,6 +64,11 @@ public struct PlaceVoteParticipationFeature {
         public var topPlaceId: Int? {
             candidates.max(by: { $0.voteCount < $1.voteCount })?.id
         }
+
+        /// 현재 사용자가 모임 호스트인지 여부.
+        public var isHost: Bool {
+            members.first(where: { $0.isMe })?.isHost ?? false
+        }
     }
 
     public enum Action {
@@ -75,8 +80,18 @@ public struct PlaceVoteParticipationFeature {
         case placeVoteRefreshed(PlaceVote)
         case revoteButtonTapped
         case completeButtonTapped
+        case confirmButtonTapped
+        case placeVoteConfirmed(Result<Void, Error>)
         case participantsButtonTapped
         case participants(PresentationAction<PlaceVoteParticipantsFeature.Action>)
+        case delegate(Delegate)
+    }
+
+    public enum Delegate: Equatable {
+        /// 게스트가 완료를 눌러 화면을 닫음. 부모가 장소 투표 현황을 재동기화한다.
+        case completed
+        /// 호스트가 투표를 확정함. 부모가 화면을 닫고 확정 결과를 반영한다.
+        case placeConfirmed
     }
 
     @Dependency(\.voteClient) private var voteClient
@@ -153,7 +168,26 @@ public struct PlaceVoteParticipationFeature {
                 return .none
 
             case .completeButtonTapped:
-                // TODO: 투표 완료 API 를 별도로 호출해야 하는지, 게스트/호스트에 따라 동작이 다른지 확인 필요
+                return .send(.delegate(.completed))
+
+            case .confirmButtonTapped:
+                guard state.isHost, !state.isSubmitting else { return .none }
+
+                state.isSubmitting = true
+                let client = voteClient
+                let meetingId = state.meetingId
+                return .run { send in
+                    await send(.placeVoteConfirmed(Result {
+                        try await client.confirmPlaceVote(meetingId: meetingId)
+                    }))
+                }
+
+            case .placeVoteConfirmed(.success):
+                state.isSubmitting = false
+                return .send(.delegate(.placeConfirmed))
+
+            case .placeVoteConfirmed(.failure):
+                state.isSubmitting = false
                 return .none
 
             case .participantsButtonTapped:
@@ -161,6 +195,9 @@ public struct PlaceVoteParticipationFeature {
                 return .none
 
             case .participants:
+                return .none
+
+            case .delegate:
                 return .none
             }
         }

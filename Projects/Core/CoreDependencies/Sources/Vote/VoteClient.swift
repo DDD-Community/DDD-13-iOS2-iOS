@@ -19,6 +19,7 @@ public struct VoteClient: Sendable {
     public var confirmDateVote: @Sendable (_ meetingId: Int, _ optionId: Int) async throws -> Void
     public var startPlaceVote: @Sendable (_ meetingId: Int, _ durationDays: Int) async throws -> Void
     public var submitPlaceVote: @Sendable (_ meetingId: Int, _ placeIds: [Int]) async throws -> Void
+    public var confirmPlaceVote: @Sendable (_ meetingId: Int) async throws -> Void
     public var fetchPlaceVoteTravelBurden: @Sendable (_ meetingId: Int, _ placeId: Int) async throws -> PlaceVoteTravelBurden
     public var fetchPlaceVoteParticipants: @Sendable (_ meetingId: Int) async throws -> [PlaceVoteParticipant]
 }
@@ -33,6 +34,7 @@ public extension VoteClient {
         confirmDateVoteUseCase: any ConfirmDateVoteUseCase,
         startPlaceVoteUseCase: any StartPlaceVoteUseCase,
         submitPlaceVoteUseCase: any SubmitPlaceVoteUseCase,
+        confirmPlaceVoteUseCase: any ConfirmPlaceVoteUseCase,
         fetchPlaceVoteTravelBurdenUseCase: any FetchPlaceVoteTravelBurdenUseCase,
         fetchPlaceVoteParticipantsUseCase: any FetchPlaceVoteParticipantsUseCase
     ) -> Self {
@@ -65,6 +67,9 @@ public extension VoteClient {
             submitPlaceVote: { meetingId, placeIds in
                 try await submitPlaceVoteUseCase.execute(meetingId: meetingId, placeIds: placeIds)
             },
+            confirmPlaceVote: { meetingId in
+                try await confirmPlaceVoteUseCase.execute(meetingId: meetingId)
+            },
             fetchPlaceVoteTravelBurden: { meetingId, placeId in
                 try await fetchPlaceVoteTravelBurdenUseCase.execute(meetingId: meetingId, placeId: placeId)
             },
@@ -86,6 +91,7 @@ extension VoteClient: DependencyKey {
             confirmDateVote: { _, _ in throw VoteClientError.notImplemented },
             startPlaceVote: { _, _ in throw VoteClientError.notImplemented },
             submitPlaceVote: { _, _ in throw VoteClientError.notImplemented },
+            confirmPlaceVote: { _ in throw VoteClientError.notImplemented },
             fetchPlaceVoteTravelBurden: { _, _ in throw VoteClientError.notImplemented },
             fetchPlaceVoteParticipants: { _ in throw VoteClientError.notImplemented }
         )
@@ -102,6 +108,7 @@ extension VoteClient: DependencyKey {
         confirmDateVote: { _, _ in },
         startPlaceVote: { _, _ in },
         submitPlaceVote: { _, _ in },
+        confirmPlaceVote: { _ in },
         fetchPlaceVoteTravelBurden: { _, _ in previewPlaceVoteTravelBurden },
         fetchPlaceVoteParticipants: { _ in previewPlaceVoteParticipants }
     )
