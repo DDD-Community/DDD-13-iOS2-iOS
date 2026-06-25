@@ -66,13 +66,10 @@ public struct GroupDetailFeature {
                 Log.debug("약속정하기 클릭")
                 return .send(.delegate(.meetingDateSelectionRequested(meetingId: meetingId)))
 
-                return .send(.delegate(.startSelectPlace(isHost: isHost, meetingId: meetingId)))
             case let .home(.delegate(.startSelectPlace(isHost, meetingId))):
+                return .send(.delegate(.startSelectPlace(isHost: isHost, meetingId: meetingId)))
 
             case .home, .myPlace, .delegate:
-                return .none
-
-            case .delegate:
                 return .none
             }
         }
