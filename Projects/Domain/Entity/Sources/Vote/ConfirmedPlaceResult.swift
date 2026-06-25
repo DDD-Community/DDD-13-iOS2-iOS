@@ -5,48 +5,63 @@
 
 import Foundation
 
-public struct ConfirmedPlaceResult: Equatable, Sendable {
+public struct ConfirmedPlace: Equatable, Sendable {
     public let placeId: Int
-    public let placeName: String
+    public let name: String
+    public let categoryLabel: PlaceCategory
     public let address: String
-    // TODO: 서버에 확정 장소 좌표 응답이 추가되면 non-optional로 전환
-    public let latitude: Double?
-    public let longitude: Double?
+    public let latitude: Double
+    public let longitude: Double
+
+    public init(
+        placeId: Int,
+        name: String,
+        categoryLabel: PlaceCategory,
+        address: String,
+        latitude: Double,
+        longitude: Double
+    ) {
+        self.placeId = placeId
+        self.name = name
+        self.categoryLabel = categoryLabel
+        self.address = address
+        self.latitude = latitude
+        self.longitude = longitude
+    }
+}
+
+public struct ConfirmedPlaceResult: Equatable, Sendable {
+    public let place: ConfirmedPlace
     public let confirmedAt: String
     public let candidates: [ConfirmedPlaceCandidate]
 
     public init(
-        placeId: Int,
-        placeName: String,
-        address: String,
-        latitude: Double?,
-        longitude: Double?,
+        place: ConfirmedPlace,
         confirmedAt: String,
         candidates: [ConfirmedPlaceCandidate]
     ) {
-        self.placeId = placeId
-        self.placeName = placeName
-        self.address = address
-        self.latitude = latitude
-        self.longitude = longitude
+        self.place = place
         self.confirmedAt = confirmedAt
         self.candidates = candidates
     }
 }
 
 public struct ConfirmedPlaceCandidate: Equatable, Sendable {
-    public let placeId: Int
+    public let rank: Int
+    public let place: ConfirmedPlace
     public let voteCount: Int
     public let totalSeconds: Int
     public let totalTransfers: Int
 
     public init(
-        placeId: Int,
+        rank: Int,
+        place: ConfirmedPlace,
         voteCount: Int,
         totalSeconds: Int,
         totalTransfers: Int
     ) {
-        self.placeId = placeId
+        self.rank = rank
+        self.place = place
         self.voteCount = voteCount
         self.totalSeconds = totalSeconds
         self.totalTransfers = totalTransfers

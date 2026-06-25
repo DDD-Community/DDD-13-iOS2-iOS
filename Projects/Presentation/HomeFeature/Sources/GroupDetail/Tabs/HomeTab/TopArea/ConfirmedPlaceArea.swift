@@ -17,23 +17,24 @@ struct ConfirmedPlaceArea: View {
     let store: StoreOf<HomeTabFeature>
 
     private var placeName: String {
-        store.confirmedPlaceResult?.placeName ?? Constant.tempPlaceName
+        store.confirmedPlaceResult?.place.name ?? Constant.tempPlaceName
     }
 
     private var placeAddress: String {
-        store.confirmedPlaceResult?.address
+        store.confirmedPlaceResult?.place.address
             ?? store.group.locationAddress
             ?? Constant.tempPlaceAddress
     }
 
+    private var placeCategory: PlaceCategory? {
+        store.confirmedPlaceResult?.place.categoryLabel
+    }
+
     /// 확정 장소 좌표. 좌표가 없으면 기본 중심을 사용한다.
     private var placeCoordinate: MapCoordinate {
-        guard
-            let latitude = store.confirmedPlaceResult?.latitude,
-            let longitude = store.confirmedPlaceResult?.longitude
-        else { return Constant.defaultCenter }
+        guard let place = store.confirmedPlaceResult?.place else { return Constant.defaultCenter }
 
-        return MapCoordinate(latitude: latitude, longitude: longitude)
+        return MapCoordinate(latitude: place.latitude, longitude: place.longitude)
     }
 
     /// 지도에 확정 장소 하나만 핀으로 표시한다.
@@ -63,7 +64,7 @@ struct ConfirmedPlaceArea: View {
         VStack(spacing: Spacing.spacing400) {
             PlaceRow(
                 placeName: placeName,
-                category: nil,
+                category: placeCategory,
                 displayAddress: placeAddress
             )
 

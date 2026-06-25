@@ -51,19 +51,24 @@ public struct StartPlaceVoteRequestDTO: Encodable, Sendable {
     }
 }
 
-public struct ConfirmedPlaceResultResponseDTO: Decodable, Sendable {
+public struct ConfirmedPlaceResponseDTO: Decodable, Sendable {
     public let placeId: Int
-    public let placeName: String
+    public let name: String
+    public let categoryLabel: String
     public let address: String
-    // TODO: 서버에 확정 장소 좌표 응답이 추가되면 non-optional로 전환
-    public let latitude: Double?
-    public let longitude: Double?
+    public let latitude: Double
+    public let longitude: Double
+}
+
+public struct ConfirmedPlaceResultResponseDTO: Decodable, Sendable {
+    public let place: ConfirmedPlaceResponseDTO
     public let confirmedAt: String
     public let candidates: [ConfirmedPlaceCandidateResponseDTO]
 }
 
 public struct ConfirmedPlaceCandidateResponseDTO: Decodable, Sendable {
-    public let placeId: Int
+    public let rank: Int
+    public let place: ConfirmedPlaceResponseDTO
     public let voteCount: Int
     public let totalSeconds: Int
     public let totalTransfers: Int
@@ -144,14 +149,23 @@ public extension PlaceVoteCandidateResponseDTO {
     }
 }
 
+public extension ConfirmedPlaceResponseDTO {
+    func toEntity() -> ConfirmedPlace {
+        ConfirmedPlace(
+            placeId: placeId,
+            name: name,
+            categoryLabel: PlaceCategory(categoryLabel: categoryLabel),
+            address: address,
+            latitude: latitude,
+            longitude: longitude
+        )
+    }
+}
+
 public extension ConfirmedPlaceResultResponseDTO {
     func toEntity() -> ConfirmedPlaceResult {
         ConfirmedPlaceResult(
-            placeId: placeId,
-            placeName: placeName,
-            address: address,
-            latitude: latitude,
-            longitude: longitude,
+            place: place.toEntity(),
             confirmedAt: confirmedAt,
             candidates: candidates.map { $0.toEntity() }
         )
@@ -161,7 +175,8 @@ public extension ConfirmedPlaceResultResponseDTO {
 public extension ConfirmedPlaceCandidateResponseDTO {
     func toEntity() -> ConfirmedPlaceCandidate {
         ConfirmedPlaceCandidate(
-            placeId: placeId,
+            rank: rank,
+            place: place.toEntity(),
             voteCount: voteCount,
             totalSeconds: totalSeconds,
             totalTransfers: totalTransfers
