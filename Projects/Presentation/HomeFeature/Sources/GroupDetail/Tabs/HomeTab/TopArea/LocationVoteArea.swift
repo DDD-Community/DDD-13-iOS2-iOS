@@ -36,7 +36,7 @@ struct LocationVoteArea: View {
                 totalParticipants: store.placeVote?.totalParticipants ?? 0
             )
 
-            VoteButton {
+            VoteButton(hasVotedPlace: store.hasVotedPlace) {
                 store.send(.placeVoteParticipationTapped)
             }
         }
@@ -196,12 +196,13 @@ private struct ParticipantLabel: View {
 // MARK: - Vote Button
 
 private struct VoteButton: View {
+    let hasVotedPlace: Bool
     let onTap: () -> Void
 
     var body: some View {
         BangawoButton(
-            "약속 장소 투표하기",
-            variant: .solid,
+            hasVotedPlace ? "다시 투표하기" : "약속 장소 투표하기",
+            variant: hasVotedPlace ? .weak : .solid,
             size: .medium,
             widthType: .maxWidth,
             action: onTap
