@@ -27,8 +27,8 @@ public struct PlaceVoteParticipationFeature {
         /// 투표 참여 현황 화면에 노출할 모임 멤버 목록.
         public let members: [GroupDetailMember]
         public var mode: Mode
-        /// voting 모드에서 선택한 후보 id.
-        public var selectedPlaceId: Int?
+        /// voting 모드에서 선택한 후보 id 집합. 복수 선택을 허용한다.
+        public var selectedPlaceIds: Set<Int> = []
         /// 투표 제출 진행 여부.
         public var isSubmitting = false
         /// 투표 참여 팀원 현황 화면 노출 여부.
@@ -39,9 +39,9 @@ public struct PlaceVoteParticipationFeature {
             self.placeVote = placeVote
             self.members = members
 
-            let myVote = placeVote.candidates.first(where: \.isMyVote)
-            self.mode = myVote == nil ? .voting : .voted
-            self.selectedPlaceId = myVote?.id
+            let myVotes = placeVote.candidates.filter(\.isMyVote)
+            self.mode = myVotes.isEmpty ? .voting : .voted
+            self.selectedPlaceIds = Set(myVotes.map(\.id))
         }
 
         public var candidates: [PlaceVoteCandidate] {
@@ -83,22 +83,27 @@ public struct PlaceVoteParticipationFeature {
             case let .placeSelected(placeId):
                 guard state.mode == .voting else { return .none }
 
-                state.selectedPlaceId = placeId
+                if state.selectedPlaceIds.contains(placeId) {
+                    state.selectedPlaceIds.remove(placeId)
+                } else {
+                    state.selectedPlaceIds.insert(placeId)
+                }
                 return .none
 
             case .voteButtonTapped:
                 guard
                     state.mode == .voting,
-                    let placeId = state.selectedPlaceId,
+                    !state.selectedPlaceIds.isEmpty,
                     !state.isSubmitting
                 else { return .none }
 
                 state.isSubmitting = true
                 let client = voteClient
                 let meetingId = state.meetingId
+                let placeIds = Array(state.selectedPlaceIds)
                 return .run { send in
                     await send(.voteSubmitted(Result {
-                        try await client.submitPlaceVote(meetingId: meetingId, placeIds: [placeId])
+                        try await client.submitPlaceVote(meetingId: meetingId, placeIds: placeIds)
                     }))
                 }
 

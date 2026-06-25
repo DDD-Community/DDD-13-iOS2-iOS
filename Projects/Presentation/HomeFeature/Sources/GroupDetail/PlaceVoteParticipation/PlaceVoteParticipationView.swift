@@ -166,7 +166,7 @@ private struct PlaceVoteSheetContent: View {
                     PlaceVoteRow(
                         candidate: candidate,
                         mode: store.mode,
-                        isSelected: store.selectedPlaceId == candidate.id,
+                        isSelected: store.selectedPlaceIds.contains(candidate.id),
                         isTop: store.topPlaceId == candidate.id,
                         onTap: { focus(candidate) },
                         onSelect: { store.send(.placeSelected(candidate.id)) }
@@ -226,7 +226,7 @@ private struct PlaceVoteButtonArea: View {
         Group {
             switch store.mode {
             case .voting:
-                if store.selectedPlaceId != nil {
+                if !store.selectedPlaceIds.isEmpty {
                     ActionButton(
                         buttonLayout: .single(
                             title: "투표하기",
