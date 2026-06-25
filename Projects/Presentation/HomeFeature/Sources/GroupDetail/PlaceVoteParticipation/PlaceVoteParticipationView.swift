@@ -26,6 +26,10 @@ struct PlaceVoteParticipationView: View {
     @State private var mapCenter: MapCoordinate = Constant.defaultCenter
     /// 모든 후보 핀이 보이도록 계산한 줌 레벨. `candidates` 변경 시 `.task`에서 갱신한다.
     @State private var mapZoomLevel: Int = Constant.singlePinZoomLevel
+    /// row 탭 시 카메라를 포커싱할 후보 좌표.
+    @State private var focusedCoordinate: MapCoordinate?
+    /// 바텀시트가 화면 하단을 덮는 높이. 핀 포커싱 중심을 위로 보정하는 데 쓴다.
+    @State private var sheetCoveredHeight: CGFloat = 0
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -33,7 +37,9 @@ struct PlaceVoteParticipationView: View {
             KakaoMap(
                 pins: pins,
                 initialCenter: mapCenter,
-                initialZoomLevel: mapZoomLevel
+                initialZoomLevel: mapZoomLevel,
+                focusedCoordinate: focusedCoordinate,
+                focusBottomInset: sheetCoveredHeight
             )
             .ignoresSafeArea()
 
@@ -48,9 +54,13 @@ struct PlaceVoteParticipationView: View {
                 detents: [.ratio(0.5), .ratio(0.8)],
                 initialDetent: .ratio(0.5)
             ) {
-                PlaceVoteSheetContent(store: store)
-                    .padding(.horizontal, Spacing.spacing400)
+                PlaceVoteSheetContent(
+                    store: store,
+                    onFocusPlace: { focusedCoordinate = $0 }
+                )
+                .padding(.horizontal, Spacing.spacing400)
             }
+            .onVisibleHeightChanged { sheetCoveredHeight = $0 }
 
             PlaceVoteButtonArea(store: store, onComplete: dismissCover)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
@@ -145,6 +155,7 @@ struct PlaceVoteParticipationView: View {
 
 private struct PlaceVoteSheetContent: View {
     let store: StoreOf<PlaceVoteParticipationFeature>
+    let onFocusPlace: (MapCoordinate) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.spacing300) {
@@ -157,12 +168,23 @@ private struct PlaceVoteSheetContent: View {
                         mode: store.mode,
                         isSelected: store.selectedPlaceId == candidate.id,
                         isTop: store.topPlaceId == candidate.id,
-                        onTap: { store.send(.placeSelected(candidate.id)) }
+                        onTap: { focus(candidate) },
+                        onSelect: { store.send(.placeSelected(candidate.id)) }
                     )
                 }
             }
         }
         .padding(.top, Spacing.spacing100)
+    }
+
+    /// 후보 좌표가 있으면 지도 포커싱을 요청한다.
+    private func focus(_ candidate: PlaceVoteCandidate) {
+        guard
+            let latitude = candidate.latitude,
+            let longitude = candidate.longitude
+        else { return }
+
+        onFocusPlace(MapCoordinate(latitude: latitude, longitude: longitude))
     }
 }
 
@@ -243,7 +265,10 @@ private struct PlaceVoteRow: View {
     let mode: PlaceVoteParticipationFeature.Mode
     let isSelected: Bool
     let isTop: Bool
+    /// row 전체 탭. 해당 장소 좌표로 지도를 포커싱한다.
     let onTap: () -> Void
+    /// checkbox 탭. 후보를 투표 대상으로 선택한다.
+    let onSelect: () -> Void
 
     var body: some View {
         HStack(spacing: Spacing.spacing200) {
@@ -253,6 +278,8 @@ private struct PlaceVoteRow: View {
                     state: isSelected ? .enabled : .disabled,
                     size: .small
                 )
+                .contentShape(Rectangle())
+                .onTapGesture { onSelect() }
             }
 
             PlaceCategoryIcon(category: candidate.categoryLabel)
@@ -281,11 +308,7 @@ private struct PlaceVoteRow: View {
                 .stroke(borderColor, lineWidth: BorderWidth.borderWidth100)
         )
         .contentShape(Rectangle())
-        .onTapGesture {
-            guard mode == .voting else { return }
-
-            onTap()
-        }
+        .onTapGesture { onTap() }
     }
 
     private var voteResult: some View {
