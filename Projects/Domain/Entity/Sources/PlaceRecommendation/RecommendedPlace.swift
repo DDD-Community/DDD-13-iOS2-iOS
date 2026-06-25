@@ -13,6 +13,8 @@ public struct RecommendedPlace: Equatable, Sendable, Identifiable {
     public let address: String
     public let score: Double
     public let nearestStationId: Int
+    public let latitude: Double
+    public let longitude: Double
 
     public var id: Int { placeId }
 
@@ -23,7 +25,9 @@ public struct RecommendedPlace: Equatable, Sendable, Identifiable {
         categoryLabel: PlaceCategory,
         address: String,
         score: Double,
-        nearestStationId: Int
+        nearestStationId: Int,
+        latitude: Double,
+        longitude: Double
     ) {
         self.rank = rank
         self.placeId = placeId
@@ -32,5 +36,7 @@ public struct RecommendedPlace: Equatable, Sendable, Identifiable {
         self.address = address
         self.score = score
         self.nearestStationId = nearestStationId
+        self.latitude = latitude
+        self.longitude = longitude
     }
 }

@@ -16,6 +16,8 @@ public struct RecommendedPlaceResponseDTO: Decodable, Sendable {
         public let name: String
         public let categoryLabel: String
         public let address: String
+        public let latitude: Double
+        public let longitude: Double
     }
 }
 
@@ -28,7 +30,9 @@ public extension RecommendedPlaceResponseDTO {
             categoryLabel: PlaceCategory(categoryLabel: place.categoryLabel),
             address: place.address,
             score: score,
-            nearestStationId: nearestStationId
+            nearestStationId: nearestStationId,
+            latitude: place.latitude,
+            longitude: place.longitude
         )
     }
 }
