@@ -96,6 +96,8 @@ public struct SelectPlaceFeature {
                 )
 
             case let .stationRecommendationsResponse(.success(groups)):
+                state.placeMap.stationGroups = groups
+                state.placeMap.selectedStationIndex = 0
                 state.placeMap.nearbyPlaceList.stationGroups = groups
                 state.placeMap.nearbyPlaceList.selectedStationIndex = 0
                 return .none
