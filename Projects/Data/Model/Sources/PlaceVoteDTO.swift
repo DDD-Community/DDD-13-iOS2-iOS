@@ -10,14 +10,20 @@ public struct PlaceVoteResponseDTO: Decodable, Sendable {
     public let sessionStatus: String
     public let totalParticipants: Int
     public let votedCount: Int
+    public let memberStatuses: [PlaceVoteMemberStatusResponseDTO]
     public let candidates: [PlaceVoteCandidateResponseDTO]
+}
+
+public struct PlaceVoteMemberStatusResponseDTO: Decodable, Sendable {
+    public let memberId: Int
+    public let name: String
+    public let completed: Bool
 }
 
 public struct PlaceVoteCandidateResponseDTO: Decodable, Sendable {
     public let place: PlaceVotePlaceResponseDTO
     public let voteCount: Int
     public let isMyVote: Bool
-    public let travelBurdens: [PlaceTravelBurdenResponseDTO]
 }
 
 public struct PlaceVotePlaceResponseDTO: Decodable, Sendable {
@@ -27,13 +33,6 @@ public struct PlaceVotePlaceResponseDTO: Decodable, Sendable {
     public let address: String
     public let latitude: Double?
     public let longitude: Double?
-}
-
-public struct PlaceTravelBurdenResponseDTO: Decodable, Sendable {
-    public let memberId: Int
-    public let seconds: Int
-    public let transfers: Int
-    public let isLongest: Bool
 }
 
 public struct SubmitPlaceVoteRequestDTO: Encodable, Sendable {
@@ -79,7 +78,18 @@ public extension PlaceVoteResponseDTO {
             sessionStatus: VoteSessionStatus(rawValue: sessionStatus),
             totalParticipants: totalParticipants,
             votedCount: votedCount,
+            memberStatuses: memberStatuses.map { $0.toEntity() },
             candidates: candidates.map { $0.toEntity() }
+        )
+    }
+}
+
+public extension PlaceVoteMemberStatusResponseDTO {
+    func toEntity() -> PlaceVoteMemberStatus {
+        PlaceVoteMemberStatus(
+            id: memberId,
+            name: name,
+            completed: completed
         )
     }
 }
@@ -94,19 +104,7 @@ public extension PlaceVoteCandidateResponseDTO {
             latitude: place.latitude,
             longitude: place.longitude,
             voteCount: voteCount,
-            isMyVote: isMyVote,
-            travelBurdens: travelBurdens.map { $0.toEntity() }
-        )
-    }
-}
-
-public extension PlaceTravelBurdenResponseDTO {
-    func toEntity() -> PlaceTravelBurden {
-        PlaceTravelBurden(
-            id: memberId,
-            seconds: seconds,
-            transfers: transfers,
-            isLongest: isLongest
+            isMyVote: isMyVote
         )
     }
 }

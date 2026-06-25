@@ -130,6 +130,11 @@ public extension VoteClient {
         sessionStatus: .active,
         totalParticipants: 3,
         votedCount: 2,
+        memberStatuses: [
+            PlaceVoteMemberStatus(id: 1, name: "지혜", completed: true),
+            PlaceVoteMemberStatus(id: 2, name: "민수", completed: true),
+            PlaceVoteMemberStatus(id: 3, name: "수진", completed: false)
+        ],
         candidates: [
             PlaceVoteCandidate(
                 id: 1,
@@ -139,11 +144,7 @@ public extension VoteClient {
                 latitude: 37.4979,
                 longitude: 127.0276,
                 voteCount: 2,
-                isMyVote: true,
-                travelBurdens: [
-                    PlaceTravelBurden(id: 1, seconds: 1800, transfers: 1, isLongest: false),
-                    PlaceTravelBurden(id: 2, seconds: 3600, transfers: 2, isLongest: true)
-                ]
+                isMyVote: true
             ),
             PlaceVoteCandidate(
                 id: 2,
@@ -153,10 +154,7 @@ public extension VoteClient {
                 latitude: 37.4980,
                 longitude: 127.0276,
                 voteCount: 1,
-                isMyVote: false,
-                travelBurdens: [
-                    PlaceTravelBurden(id: 1, seconds: 1500, transfers: 0, isLongest: false)
-                ]
+                isMyVote: false
             ),
             PlaceVoteCandidate(
                 id: 3,
@@ -166,8 +164,7 @@ public extension VoteClient {
                 latitude: 37.5006,
                 longitude: 127.0364,
                 voteCount: 0,
-                isMyVote: false,
-                travelBurdens: []
+                isMyVote: false
             )
         ]
     )

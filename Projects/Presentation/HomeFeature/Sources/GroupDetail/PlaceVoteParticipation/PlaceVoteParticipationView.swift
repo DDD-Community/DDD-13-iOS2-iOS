@@ -392,6 +392,7 @@ private extension PlaceVote {
             sessionStatus: sessionStatus,
             totalParticipants: totalParticipants,
             votedCount: votedCount,
+            memberStatuses: memberStatuses,
             candidates: candidates.map { candidate in
                 PlaceVoteCandidate(
                     id: candidate.id,
@@ -401,8 +402,7 @@ private extension PlaceVote {
                     latitude: candidate.latitude,
                     longitude: candidate.longitude,
                     voteCount: candidate.voteCount,
-                    isMyVote: false,
-                    travelBurdens: candidate.travelBurdens
+                    isMyVote: false
                 )
             }
         )
