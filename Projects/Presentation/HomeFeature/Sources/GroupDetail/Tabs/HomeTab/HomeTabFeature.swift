@@ -280,7 +280,8 @@ public struct HomeTabFeature {
                 state.destination = .placeVoteParticipation(
                     PlaceVoteParticipationFeature.State(
                         meetingId: state.group.meetingId,
-                        placeVote: placeVote
+                        placeVote: placeVote,
+                        members: state.groupDetail?.members ?? []
                     )
                 )
                 return .none

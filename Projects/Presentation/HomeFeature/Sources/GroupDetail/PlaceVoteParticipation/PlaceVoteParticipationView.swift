@@ -55,6 +55,22 @@ struct PlaceVoteParticipationView: View {
         .task(id: store.candidates.map(\.id)) {
             buildPins()
         }
+        .fullScreenCover(
+            isPresented: Binding(
+                get: { store.isParticipantsPresented },
+                set: { isPresented in
+                    guard !isPresented else { return }
+
+                    store.send(.participantsDismissed)
+                }
+            )
+        ) {
+            PlaceVoteParticipantsView(
+                members: store.members,
+                isMyVoteCompleted: store.mode == .voted,
+                onClose: { store.send(.participantsDismissed) }
+            )
+        }
     }
 
     private func dismissCover() {
@@ -160,8 +176,13 @@ private struct PlaceVoteHeader: View {
                 DeadlineDescription(deadline: store.deadline)
 
                 if store.mode == .voted {
-                    BangawoText(" · 현재 \(store.votedCount)명 참여", textStyle: .bodySmall)
-                        .foregroundStyle(Colors.gray700)
+                    Button {
+                        store.send(.participantsButtonTapped)
+                    } label: {
+                        BangawoText(" · 현재 \(store.votedCount)명 참여", textStyle: .bodySmall)
+                            .foregroundStyle(Colors.gray700)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
         }
@@ -413,7 +434,11 @@ private func makePlaceVoteParticipationStore(
     placeVote: PlaceVote
 ) -> StoreOf<PlaceVoteParticipationFeature> {
     Store(
-        initialState: PlaceVoteParticipationFeature.State(meetingId: 1, placeVote: placeVote)
+        initialState: PlaceVoteParticipationFeature.State(
+            meetingId: 1,
+            placeVote: placeVote,
+            members: GroupClient.previewGroupDetail.members
+        )
     ) {
         PlaceVoteParticipationFeature()
     } withDependencies: {

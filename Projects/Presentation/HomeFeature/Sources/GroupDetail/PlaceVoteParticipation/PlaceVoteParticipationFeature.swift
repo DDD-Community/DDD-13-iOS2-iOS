@@ -24,15 +24,20 @@ public struct PlaceVoteParticipationFeature {
     public struct State: Equatable {
         public let meetingId: Int
         public var placeVote: PlaceVote
+        /// 투표 참여 현황 화면에 노출할 모임 멤버 목록.
+        public let members: [GroupDetailMember]
         public var mode: Mode
         /// voting 모드에서 선택한 후보 id.
         public var selectedPlaceId: Int?
         /// 투표 제출 진행 여부.
         public var isSubmitting = false
+        /// 투표 참여 팀원 현황 화면 노출 여부.
+        public var isParticipantsPresented = false
 
-        public init(meetingId: Int, placeVote: PlaceVote) {
+        public init(meetingId: Int, placeVote: PlaceVote, members: [GroupDetailMember]) {
             self.meetingId = meetingId
             self.placeVote = placeVote
+            self.members = members
 
             let myVote = placeVote.candidates.first(where: \.isMyVote)
             self.mode = myVote == nil ? .voting : .voted
@@ -64,6 +69,8 @@ public struct PlaceVoteParticipationFeature {
         case placeVoteRefreshed(PlaceVote)
         case revoteButtonTapped
         case completeButtonTapped
+        case participantsButtonTapped
+        case participantsDismissed
     }
 
     @Dependency(\.voteClient) private var voteClient
@@ -119,6 +126,14 @@ public struct PlaceVoteParticipationFeature {
 
             case .completeButtonTapped:
                 // TODO: 투표 완료 API 를 별도로 호출해야 하는지, 게스트/호스트에 따라 동작이 다른지 확인 필요
+                return .none
+
+            case .participantsButtonTapped:
+                state.isParticipantsPresented = true
+                return .none
+
+            case .participantsDismissed:
+                state.isParticipantsPresented = false
                 return .none
             }
         }
