@@ -119,17 +119,15 @@ private struct DeadlineDescription: View {
 
     @State private var now = Date()
 
-    private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
-
     var body: some View {
         Group {
-            if let remaining = PlaceVoteFormatter.remaining(deadline, now: now) {
+            if let remaining = remaining(now: now) {
                 if remaining.isExpired {
                     BangawoText("투표 종료", textStyle: .bodySmall)
                         .foregroundStyle(Colors.gray700)
                 } else {
                     HStack(spacing: 0) {
-                        BangawoText(remaining.timeText, textStyle: .bodySmall)
+                        BangawoText(timeText(for: remaining), textStyle: .bodySmall)
                             .foregroundStyle(Colors.orange600)
 
                         BangawoText(" 후 종료", textStyle: .bodySmall)
@@ -138,7 +136,29 @@ private struct DeadlineDescription: View {
                 }
             }
         }
-        .onReceive(timer) { now = $0 }
+        .onReceive(Countdown.everySecond) { now = $0 }
+    }
+
+    /// 마감 문자열을 UTC instant로 파싱해 잔여 시간을 계산한다. 파싱 실패 시 nil(표시 안 함).
+    private func remaining(now: Date) -> Countdown.Remaining? {
+        guard
+            let deadline,
+            let date = DateFormatterStore.date(
+                from: deadline,
+                format: "yyyy-MM-dd'T'HH:mm:ss",
+                locale: "en_US_POSIX",
+                timeZone: "UTC"
+            )
+        else { return nil }
+
+        return Countdown.remaining(until: date, now: now)
+    }
+
+    /// "{N일 }HH:MM:SS" 형식의 잔여 시간 텍스트.
+    private func timeText(for remaining: Countdown.Remaining) -> String {
+        remaining.days > 0
+            ? "\(remaining.days)일 \(remaining.clockText)"
+            : remaining.clockText
     }
 }
 
@@ -209,43 +229,6 @@ private struct VoteButton: View {
         )
         .padding(.top, Spacing.spacing300)
         .padding(.bottom, Spacing.spacing200)
-    }
-}
-
-// MARK: - Place Vote Formatter
-
-private enum PlaceVoteFormatter {
-    /// 마감까지 남은 시간 표시 값. orange 영역에 들어갈 `"{N일 }HH:MM:SS"` 텍스트와 마감 여부를 담는다.
-    struct Remaining {
-        let timeText: String
-        let isExpired: Bool
-    }
-
-    /// `now` 기준 마감까지 남은 시간 컴포넌트. 파싱 실패 시 nil(표시 안 함).
-    /// deadline은 UTC instant로 파싱되고 `now`도 절대값이므로 timeIntervalSince로 잔여 초를 직접 구한다.
-    static func remaining(_ raw: String?, now: Date) -> Remaining? {
-        guard
-            let raw,
-            let date = DateFormatterStore.date(
-                from: raw,
-                format: "yyyy-MM-dd'T'HH:mm:ss",
-                locale: "en_US_POSIX",
-                timeZone: "UTC"
-            )
-        else { return nil }
-
-        let total = max(0, Int(date.timeIntervalSince(now)))
-        guard total > 0 else { return Remaining(timeText: "", isExpired: true) }
-
-        let days = total / 86400
-        let hours = (total % 86400) / 3600
-        let minutes = (total % 3600) / 60
-        let seconds = total % 60
-
-        let time = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
-        let timeText = days > 0 ? "\(days)일 \(time)" : time
-
-        return Remaining(timeText: timeText, isExpired: false)
     }
 }
 

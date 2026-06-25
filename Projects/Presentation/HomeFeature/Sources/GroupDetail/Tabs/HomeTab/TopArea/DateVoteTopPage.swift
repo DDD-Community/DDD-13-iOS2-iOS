@@ -104,8 +104,6 @@ private struct DateVoteTopArea: View {
     @Dependency(\.calendar) private var calendar
     @State private var now = Date()
 
-    private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
-
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.spacing100) {
             BangawoText("날짜 투표하기", textStyle: .titleMediumEmphasized)
@@ -124,7 +122,7 @@ private struct DateVoteTopArea: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, Spacing.spacing200)
         .padding(.bottom, Spacing.spacing300)
-        .onReceive(timer) { now = $0 }
+        .onReceive(Countdown.everySecond) { now = $0 }
     }
 }
 
@@ -317,15 +315,9 @@ private enum DateVoteFormatter {
             let deadline = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: date)
         else { return "" }
 
-        let remaining = max(0, Int(deadline.timeIntervalSince(now)))
-        let days = remaining / 86400
-        let hours = (remaining % 86400) / 3600
-        let minutes = (remaining % 3600) / 60
-        let seconds = remaining % 60
-
-        let time = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
-        let dayPrefix = days > 0 ? "+\(days)일 " : ""
-        return "투표 시작일 기준 \(dayPrefix)\(time) 남았어요"
+        let remaining = Countdown.remaining(until: deadline, now: now)
+        let dayPrefix = remaining.days > 0 ? "+\(remaining.days)일 " : ""
+        return "투표 시작일 기준 \(dayPrefix)\(remaining.clockText) 남았어요"
     }
 }
 
