@@ -41,6 +41,22 @@ struct HomeTab: View {
         ) {
             MyDeparturePlaceEditSheetContent(store: store)
         }
+        .bottomSheet(
+            isPresented: Binding(
+                get: { store.isMyAttendanceStatusSheetPresented },
+                set: { isPresented in
+                    guard !isPresented else { return }
+                    store.send(.myAttendanceStatusSheetDismissed)
+                }
+            )
+        ) {
+            MyAttendanceStatusEditSheetContent(
+                selectedStatus: store.groupDetail?.members.first(where: { $0.isMe })?.attendanceStatus,
+                onSelect: { status in
+                    store.send(.myAttendanceStatusSelected(status))
+                }
+            )
+        }
         .fullScreenCover(
             item: $store.scope(state: \.destination?.dateVote, action: \.destination.dateVote)
         ) { dateVoteStore in

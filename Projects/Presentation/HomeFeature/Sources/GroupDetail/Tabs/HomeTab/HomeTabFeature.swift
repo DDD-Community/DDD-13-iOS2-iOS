@@ -36,6 +36,7 @@ public struct HomeTabFeature {
         /// 장소 확정 후(`completed`/`confirmed`)일 때 `fetchConfirmedPlaceResult`로 로드하는 확정 장소 결과.
         public var confirmedPlaceResult: ConfirmedPlaceResult?
         public var isMyDeparturePlaceEditSheetPresented = false // 출발지 수정 바텀시트 여부
+        public var isMyAttendanceStatusSheetPresented = false // 참여 상태 변경 바텀시트 여부
 
         public init(group: Group) {
             self.group = group
@@ -115,6 +116,8 @@ public struct HomeTabFeature {
         case placeVoteResponse(Result<PlaceVote, Error>)
         case confirmedPlaceResultResponse(Result<ConfirmedPlaceResult, Error>)
         case myAttendanceBadgeTapped
+        case myAttendanceStatusSheetDismissed
+        case myAttendanceStatusSelected(AttendanceStatus)
         case myMemberCardTapped // 나 카드 영역 터치 시(참석여부 버튼 제외)
         case myDeparturePlaceEditSheetDismissed // 출발지 수정 닫혔을 때 액션
         case decidePlaceTapped
@@ -179,6 +182,20 @@ public struct HomeTabFeature {
 
             // TODO: 나 영역 참여 상태 변경 시트/플로우 연동
             case .myAttendanceBadgeTapped:
+                state.isMyAttendanceStatusSheetPresented = true
+                return .none
+
+            case .myAttendanceStatusSheetDismissed:
+                guard state.isMyAttendanceStatusSheetPresented else { return .none }
+
+                Log.debug("참여 상태 변경 바텀시트 닫힘")
+                state.isMyAttendanceStatusSheetPresented = false
+                return .none
+
+            case let .myAttendanceStatusSelected(status):
+                Log.debug("참여 상태 선택: \(status.displayLabel)")
+                state.updateMyAttendanceStatus(status)
+                state.isMyAttendanceStatusSheetPresented = false
                 return .none
 
             case .myMemberCardTapped:
@@ -335,6 +352,37 @@ public struct HomeTabFeature {
                 Result { try await client.fetchConfirmedPlaceResult(meetingId: meetingId) }
             ))
         }
+    }
+}
+
+private extension HomeTabFeature.State {
+    mutating func updateMyAttendanceStatus(_ status: AttendanceStatus) {
+        guard let detail = groupDetail else { return }
+
+        let members = detail.members.map { member in
+            guard member.isMe else { return member }
+
+            return GroupDetailMember(
+                id: member.id,
+                nickname: member.nickname,
+                profileImageUrl: member.profileImageUrl,
+                isHost: member.isHost,
+                isMe: member.isMe,
+                attendanceStatus: status,
+                departurePlaces: member.departurePlaces
+            )
+        }
+
+        groupDetail = GroupDetail(
+            id: detail.id,
+            name: detail.name,
+            themeTagCode: detail.themeTagCode,
+            themeTagDisplay: detail.themeTagDisplay,
+            locationStatus: detail.locationStatus,
+            dateVoteStatus: detail.dateVoteStatus,
+            confirmedDate: detail.confirmedDate,
+            members: members
+        )
     }
 }
 

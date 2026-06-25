@@ -3,28 +3,32 @@
 //  HomeFeature
 //
 
-import SwiftUI
-
 import ComposableArchitecture
 import DesignSystem
+import SwiftUI
+import Utill
 
 struct MyDeparturePlaceEditSheetContent: View {
     let store: StoreOf<HomeTabFeature>
 
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: Spacing.spacing400) {
             VStack(spacing: Spacing.spacing200) {
                 ForEach(Constant.departurePlaces) { departurePlace in
                     DeparturePlaceRow(
                         stationName: departurePlace.stationName,
                         address: departurePlace.address,
-                        onEditTap: {}
+                        onEditTap: {
+                            Log.debug("수정 버튼 클릭")
+                        }
                     )
                 }
-
-                AddDeparturePlaceButton(onTap: {})
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+
+            AddDeparturePlaceButton(onTap: {
+                Log.debug("출발지 추가하기 버튼 클릭")
+            })
         }
         .padding(.horizontal, Metric.horizontalPadding)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -109,6 +113,9 @@ private struct AddDeparturePlaceButton: View {
                 RoundedRectangle(cornerRadius: BorderRadius.borderRadius300)
                     .stroke(Colors.gray300, lineWidth: BorderWidth.borderWidth100)
             )
+            .contentShape(
+                RoundedRectangle(cornerRadius: BorderRadius.borderRadius300)
+            )
         }
         .buttonStyle(.plain)
     }
@@ -141,6 +148,8 @@ private enum Constant {
         let stationName: String
         let address: String
 
-        var id: String { stationName }
+        var id: String {
+            stationName
+        }
     }
 }
