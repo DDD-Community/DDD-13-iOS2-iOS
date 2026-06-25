@@ -8,6 +8,7 @@ import SwiftUI
 
 import ComposableArchitecture
 
+import CoreDependencies
 import DesignSystem
 import Entity
 import Utill
@@ -49,6 +50,7 @@ struct PlaceVoteParticipationView: View {
 
             PlaceVoteButtonArea(store: store, onComplete: dismissCover)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                .ignoresSafeArea(edges: .bottom)
         }
         .task(id: store.candidates.map(\.id)) {
             buildPins()
@@ -174,38 +176,38 @@ private struct PlaceVoteButtonArea: View {
     let onComplete: () -> Void
 
     var body: some View {
-        switch store.mode {
-        case .voting:
-            if store.selectedPlaceId != nil {
-                ActionButton(
-                    buttonLayout: .single(
-                        title: "투표하기",
-                        isDisabled: store.isSubmitting,
-                        action: { store.send(.voteButtonTapped) }
-                    ),
-                    hasGradientBackground: true
-                )
-                .padding(.bottom, Spacing.spacing200)
-                .ignoresSafeArea(edges: .bottom)
-            }
+        Group {
+            switch store.mode {
+            case .voting:
+                if store.selectedPlaceId != nil {
+                    ActionButton(
+                        buttonLayout: .single(
+                            title: "투표하기",
+                            isDisabled: store.isSubmitting,
+                            action: { store.send(.voteButtonTapped) }
+                        )
+                    )
+                }
 
-        case .voted:
-            ActionButton(
-                buttonLayout: .dual(
-                    primaryTitle: "완료",
-                    primaryAction: {
-                        store.send(.completeButtonTapped)
-                        onComplete()
-                    },
-                    secondaryTitle: "다시 투표하기",
-                    secondaryAction: { store.send(.revoteButtonTapped) },
-                    arrangement: .horizontal
-                ),
-                hasGradientBackground: true
-            )
-            .padding(.bottom, Spacing.spacing200)
-            .ignoresSafeArea(edges: .bottom)
+            case .voted:
+                ActionButton(
+                    buttonLayout: .dual(
+                        primaryTitle: "완료",
+                        primaryAction: {
+                            store.send(.completeButtonTapped)
+                            onComplete()
+                        },
+                        secondaryTitle: "다시 투표하기",
+                        secondaryAction: { store.send(.revoteButtonTapped) },
+                        arrangement: .horizontal
+                    )
+                )
+            }
         }
+        .padding(.bottom, Spacing.spacing200)
+        .background(Colors.gray00)
+        .padding(.bottom, UIScreen.safeAreaBottom)
+        .ignoresSafeArea(edges: .bottom)
     }
 }
 
@@ -378,3 +380,60 @@ private enum Constant {
     /// 후보가 1개일 때 사용하는 기본 줌 레벨.
     static let singlePinZoomLevel = 16
 }
+
+// MARK: - Preview
+
+#if DEBUG
+private extension PlaceVote {
+    /// 모든 후보의 `isMyVote` 를 false 로 바꿔 voting 모드를 유도한 프리뷰용 변형.
+    var withoutMyVote: PlaceVote {
+        PlaceVote(
+            deadline: deadline,
+            sessionStatus: sessionStatus,
+            totalParticipants: totalParticipants,
+            votedCount: votedCount,
+            candidates: candidates.map { candidate in
+                PlaceVoteCandidate(
+                    id: candidate.id,
+                    name: candidate.name,
+                    categoryLabel: candidate.categoryLabel,
+                    address: candidate.address,
+                    latitude: candidate.latitude,
+                    longitude: candidate.longitude,
+                    voteCount: candidate.voteCount,
+                    isMyVote: false,
+                    travelBurdens: candidate.travelBurdens
+                )
+            }
+        )
+    }
+}
+
+private func makePlaceVoteParticipationStore(
+    placeVote: PlaceVote
+) -> StoreOf<PlaceVoteParticipationFeature> {
+    Store(
+        initialState: PlaceVoteParticipationFeature.State(meetingId: 1, placeVote: placeVote)
+    ) {
+        PlaceVoteParticipationFeature()
+    } withDependencies: {
+        $0.voteClient = .previewValue
+    }
+}
+
+#Preview("투표 중") {
+    BangawoPreview {
+        PlaceVoteParticipationView(
+            store: makePlaceVoteParticipationStore(placeVote: VoteClient.previewPlaceVote.withoutMyVote)
+        )
+    }
+}
+
+#Preview("투표 후") {
+    BangawoPreview {
+        PlaceVoteParticipationView(
+            store: makePlaceVoteParticipationStore(placeVote: VoteClient.previewPlaceVote)
+        )
+    }
+}
+#endif
