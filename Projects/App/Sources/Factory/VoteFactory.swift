@@ -18,6 +18,8 @@ enum VoteFactory {
         let confirmDateVoteUseCase = ConfirmDateVoteUseCaseImpl(repository: repository)
         let startPlaceVoteUseCase = StartPlaceVoteUseCaseImpl(repository: repository)
         let submitPlaceVoteUseCase = SubmitPlaceVoteUseCaseImpl(repository: repository)
+        let fetchPlaceVoteTravelBurdenUseCase = FetchPlaceVoteTravelBurdenUseCaseImpl(repository: repository)
+        let fetchPlaceVoteParticipantsUseCase = FetchPlaceVoteParticipantsUseCaseImpl(repository: repository)
         return .live(
             fetchDateVoteUseCase: fetchDateVoteUseCase,
             fetchPlaceVoteUseCase: fetchPlaceVoteUseCase,
@@ -26,7 +28,9 @@ enum VoteFactory {
             submitDateVoteUseCase: submitDateVoteUseCase,
             confirmDateVoteUseCase: confirmDateVoteUseCase,
             startPlaceVoteUseCase: startPlaceVoteUseCase,
-            submitPlaceVoteUseCase: submitPlaceVoteUseCase
+            submitPlaceVoteUseCase: submitPlaceVoteUseCase,
+            fetchPlaceVoteTravelBurdenUseCase: fetchPlaceVoteTravelBurdenUseCase,
+            fetchPlaceVoteParticipantsUseCase: fetchPlaceVoteParticipantsUseCase
         )
     }
 }

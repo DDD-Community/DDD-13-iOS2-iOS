@@ -17,6 +17,8 @@ public enum VoteEndpoint: EndPoint {
     case confirmDateVote(meetingId: Int, ConfirmDateVoteRequestDTO)
     case startPlaceVote(meetingId: Int, StartPlaceVoteRequestDTO)
     case submitPlaceVote(meetingId: Int, SubmitPlaceVoteRequestDTO)
+    case fetchPlaceVoteTravelBurden(meetingId: Int, placeId: Int)
+    case fetchPlaceVoteParticipants(meetingId: Int)
 
     public var baseURL: String { APIConfiguration.serverBaseURL }
 
@@ -30,6 +32,10 @@ public enum VoteEndpoint: EndPoint {
         case .confirmDateVote(let meetingId, _): return "/api/v1/meetings/\(meetingId)/date-vote/confirm"
         case .startPlaceVote(let meetingId, _): return "/api/v1/meetings/\(meetingId)/place-vote"
         case .submitPlaceVote(let meetingId, _): return "/api/v1/meetings/\(meetingId)/place-vote/submit"
+        case .fetchPlaceVoteTravelBurden(let meetingId, let placeId):
+            return "/api/v1/meetings/\(meetingId)/place-vote/\(placeId)/travel-burden"
+        case .fetchPlaceVoteParticipants(let meetingId):
+            return "/api/v1/meetings/\(meetingId)/place-vote/participants"
         }
     }
 
@@ -43,6 +49,8 @@ public enum VoteEndpoint: EndPoint {
         case .confirmDateVote: return .patch
         case .startPlaceVote: return .post
         case .submitPlaceVote: return .post
+        case .fetchPlaceVoteTravelBurden: return .get
+        case .fetchPlaceVoteParticipants: return .get
         }
     }
 
@@ -56,6 +64,8 @@ public enum VoteEndpoint: EndPoint {
         case .confirmDateVote(_, let dto): return .requestJSONEncodable(body: dto)
         case .startPlaceVote(_, let dto): return .requestJSONEncodable(body: dto)
         case .submitPlaceVote(_, let dto): return .requestJSONEncodable(body: dto)
+        case .fetchPlaceVoteTravelBurden: return .requestPlain
+        case .fetchPlaceVoteParticipants: return .requestPlain
         }
     }
 }

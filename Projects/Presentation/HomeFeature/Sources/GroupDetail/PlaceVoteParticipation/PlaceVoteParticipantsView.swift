@@ -3,7 +3,10 @@
 //  Presentation
 //
 
+import Foundation
 import SwiftUI
+
+import ComposableArchitecture
 
 import DesignSystem
 import Entity
@@ -11,11 +14,9 @@ import Entity
 // MARK: - Place Vote Participants
 
 /// 장소 투표에 참여 중인 팀원 현황 화면.
-/// 멤버 리스트를 노출하고, 각 멤버의 투표 참여 여부를 trailing 에 표기한다.
+/// 진입 시 참여 멤버를 조회하고, 각 멤버의 투표 참여 여부를 trailing 에 표기한다.
 struct PlaceVoteParticipantsView: View {
-    let members: [GroupDetailMember]
-    /// 내가 투표를 완료했는지 여부. (멤버별 투표 여부 데이터가 없어 "나" 만 정확히 반영)
-    let isMyVoteCompleted: Bool
+    let store: StoreOf<PlaceVoteParticipantsFeature>
     let onClose: () -> Void
 
     var body: some View {
@@ -33,7 +34,7 @@ struct PlaceVoteParticipantsView: View {
                         .foregroundStyle(Colors.gray900)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
-                    ParticipantsList(members: members, isMyVoteCompleted: isMyVoteCompleted)
+                    ParticipantsList(participants: store.participants)
                 }
                 .padding(.horizontal, Spacing.spacing400)
                 .padding(.top, Spacing.spacing200)
@@ -41,6 +42,7 @@ struct PlaceVoteParticipantsView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Colors.gray00)
+        .task { store.send(.task) }
     }
 }
 
@@ -48,22 +50,17 @@ struct PlaceVoteParticipantsView: View {
 
 /// 팀원 수 라벨과 멤버 행 리스트.
 private struct ParticipantsList: View {
-    let members: [GroupDetailMember]
-    let isMyVoteCompleted: Bool
+    let participants: [PlaceVoteParticipant]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            BangawoText("팀원 \(members.count)명", textStyle: .bodySmall)
+            BangawoText("팀원 \(participants.count)명", textStyle: .bodySmall)
                 .foregroundStyle(Colors.gray800)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, Spacing.spacing100)
 
-            ForEach(members) { member in
-                ParticipantRow(
-                    member: member,
-                    // TODO: 서버에 후보별/멤버별 voters 필드 추가 시 실제 투표 여부로 교체
-                    isVoteCompleted: member.isMe ? isMyVoteCompleted : false
-                )
+            ForEach(participants) { participant in
+                ParticipantRow(participant: participant)
             }
         }
     }
@@ -73,16 +70,15 @@ private struct ParticipantsList: View {
 
 /// 멤버 한 명을 나타내는 행. 아이콘 / 이름 / 출발지 / 투표 참여 여부로 구성된다.
 private struct ParticipantRow: View {
-    let member: GroupDetailMember
-    let isVoteCompleted: Bool
+    let participant: PlaceVoteParticipant
 
     var body: some View {
         HStack(spacing: Spacing.spacing200) {
             HStack(spacing: Spacing.spacing250) {
-                Asset(assetType: .image(profileImage), size: .s40, isSelected: false)
+                Avatar(avatarType: avatarType, size: .s40)
 
                 VStack(alignment: .leading, spacing: Spacing.spacing100) {
-                    BangawoText(member.nickname, textStyle: .titleMedium)
+                    BangawoText(participant.name, textStyle: .titleMedium)
                         .foregroundStyle(Colors.gray900)
 
                     BangawoText(departureLabel, textStyle: .bodyMedium)
@@ -91,21 +87,23 @@ private struct ParticipantRow: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
 
-            VoteParticipationLabel(isVoteCompleted: isVoteCompleted)
+            VoteParticipationLabel(isVoteCompleted: participant.voted)
         }
         .padding(.vertical, Spacing.spacing300)
     }
 
-    /// 기본 출발지(없으면 첫 출발지)의 장소명. 출발지가 없으면 안내 문구를 노출한다.
+    /// 출발지명. 없으면 안내 문구를 노출한다.
     private var departureLabel: String {
-        let place = member.departurePlaces.first(where: { $0.isDefault })
-            ?? member.departurePlaces.first
-        return place?.placeName ?? Constant.emptyDepartureLabel
+        participant.departureName ?? Constant.emptyDepartureLabel
     }
 
-    // TODO: profileImageUrl 비동기 이미지 로드 연동 시 교체
-    private var profileImage: Image {
-        Image.Asset.imgAvatarPlaceholder
+    private var avatarType: Avatar.AvatarType {
+        guard
+            let urlString = participant.profileImageUrl,
+            let url = URL(string: urlString)
+        else { return .placeholder }
+
+        return .image(url)
     }
 }
 

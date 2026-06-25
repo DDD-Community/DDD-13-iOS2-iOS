@@ -19,6 +19,8 @@ public struct VoteClient: Sendable {
     public var confirmDateVote: @Sendable (_ meetingId: Int, _ optionId: Int) async throws -> Void
     public var startPlaceVote: @Sendable (_ meetingId: Int, _ durationDays: Int) async throws -> Void
     public var submitPlaceVote: @Sendable (_ meetingId: Int, _ placeIds: [Int]) async throws -> Void
+    public var fetchPlaceVoteTravelBurden: @Sendable (_ meetingId: Int, _ placeId: Int) async throws -> PlaceVoteTravelBurden
+    public var fetchPlaceVoteParticipants: @Sendable (_ meetingId: Int) async throws -> [PlaceVoteParticipant]
 }
 
 public extension VoteClient {
@@ -30,7 +32,9 @@ public extension VoteClient {
         submitDateVoteUseCase: any SubmitDateVoteUseCase,
         confirmDateVoteUseCase: any ConfirmDateVoteUseCase,
         startPlaceVoteUseCase: any StartPlaceVoteUseCase,
-        submitPlaceVoteUseCase: any SubmitPlaceVoteUseCase
+        submitPlaceVoteUseCase: any SubmitPlaceVoteUseCase,
+        fetchPlaceVoteTravelBurdenUseCase: any FetchPlaceVoteTravelBurdenUseCase,
+        fetchPlaceVoteParticipantsUseCase: any FetchPlaceVoteParticipantsUseCase
     ) -> Self {
         Self(
             fetchDateVote: { meetingId in
@@ -60,6 +64,12 @@ public extension VoteClient {
             },
             submitPlaceVote: { meetingId, placeIds in
                 try await submitPlaceVoteUseCase.execute(meetingId: meetingId, placeIds: placeIds)
+            },
+            fetchPlaceVoteTravelBurden: { meetingId, placeId in
+                try await fetchPlaceVoteTravelBurdenUseCase.execute(meetingId: meetingId, placeId: placeId)
+            },
+            fetchPlaceVoteParticipants: { meetingId in
+                try await fetchPlaceVoteParticipantsUseCase.execute(meetingId: meetingId)
             }
         )
     }
@@ -75,7 +85,9 @@ extension VoteClient: DependencyKey {
             submitDateVote: { _, _ in throw VoteClientError.notImplemented },
             confirmDateVote: { _, _ in throw VoteClientError.notImplemented },
             startPlaceVote: { _, _ in throw VoteClientError.notImplemented },
-            submitPlaceVote: { _, _ in throw VoteClientError.notImplemented }
+            submitPlaceVote: { _, _ in throw VoteClientError.notImplemented },
+            fetchPlaceVoteTravelBurden: { _, _ in throw VoteClientError.notImplemented },
+            fetchPlaceVoteParticipants: { _ in throw VoteClientError.notImplemented }
         )
     }
 
@@ -89,7 +101,9 @@ extension VoteClient: DependencyKey {
         submitDateVote: { _, _ in },
         confirmDateVote: { _, _ in },
         startPlaceVote: { _, _ in },
-        submitPlaceVote: { _, _ in }
+        submitPlaceVote: { _, _ in },
+        fetchPlaceVoteTravelBurden: { _, _ in previewPlaceVoteTravelBurden },
+        fetchPlaceVoteParticipants: { _ in previewPlaceVoteParticipants }
     )
 }
 
@@ -186,6 +200,76 @@ public extension VoteClient {
             )
         ]
     )
+
+    /// 프리뷰/디자인 확인용 샘플 멤버별 경로 부담.
+    static let previewPlaceVoteTravelBurden: PlaceVoteTravelBurden = PlaceVoteTravelBurden(
+        place: TravelBurdenPlace(
+            placeId: 1,
+            name: "감성카페",
+            categoryLabel: .cafe,
+            address: "서울 강남구 테헤란로 1",
+            latitude: 37.4979,
+            longitude: 127.0276
+        ),
+        burdens: [
+            MemberTravelBurden(
+                memberId: 1,
+                name: "지혜",
+                departureName: "왕십리역",
+                isMe: true,
+                seconds: 2400,
+                transfers: 1,
+                isLongest: false,
+                path: [
+                    TravelPathPoint(stationId: 1, latitude: 37.5614, longitude: 127.0379),
+                    TravelPathPoint(stationId: 2, latitude: 37.5345, longitude: 127.0946),
+                    TravelPathPoint(stationId: 3, latitude: 37.4979, longitude: 127.0276)
+                ]
+            ),
+            MemberTravelBurden(
+                memberId: 2,
+                name: "민수",
+                departureName: "홍대입구역",
+                isMe: false,
+                seconds: 3600,
+                transfers: 2,
+                isLongest: true,
+                path: [
+                    TravelPathPoint(stationId: 4, latitude: 37.5572, longitude: 126.9245),
+                    TravelPathPoint(stationId: 5, latitude: 37.5045, longitude: 126.9560),
+                    TravelPathPoint(stationId: 3, latitude: 37.4979, longitude: 127.0276)
+                ]
+            )
+        ]
+    )
+
+    /// 프리뷰/디자인 확인용 샘플 장소 투표 참여 멤버.
+    static let previewPlaceVoteParticipants: [PlaceVoteParticipant] = [
+        PlaceVoteParticipant(
+            memberId: 1,
+            name: "지혜",
+            profileImageUrl: nil,
+            departureName: "왕십리역",
+            isMe: true,
+            voted: true
+        ),
+        PlaceVoteParticipant(
+            memberId: 2,
+            name: "민수",
+            profileImageUrl: nil,
+            departureName: "홍대입구역",
+            isMe: false,
+            voted: true
+        ),
+        PlaceVoteParticipant(
+            memberId: 3,
+            name: "수진",
+            profileImageUrl: nil,
+            departureName: nil,
+            isMe: false,
+            voted: false
+        )
+    ]
 }
 
 public extension DependencyValues {

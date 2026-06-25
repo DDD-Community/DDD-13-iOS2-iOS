@@ -16,12 +16,16 @@ import Utill
 /// 약속 장소 투표 참여 화면.
 /// 전체 화면 카카오맵 위에 NavigationPage 와 MapBottomSheet 가 겹쳐진 구조다.
 struct PlaceVoteParticipationView: View {
-    let store: StoreOf<PlaceVoteParticipationFeature>
+    @Bindable var store: StoreOf<PlaceVoteParticipationFeature>
 
     @Environment(\.dismiss) private var dismiss
 
     /// 후보 좌표로 구성한 지도 핀. `candidates` 변경 시 `.task`에서 재구성한다.
     @State private var pins: [MapPin] = []
+    /// travel-burden 결과로 구성한 멤버 출발지 핀. `travelBurden` 변경 시 갱신한다.
+    @State private var memberPins: [MapPin] = []
+    /// travel-burden 결과로 구성한 멤버별 경로. `travelBurden` 변경 시 갱신한다.
+    @State private var memberRoutes: [MapRoute] = []
     /// 후보 좌표들의 bounding box 중심. `candidates` 변경 시 `.task`에서 갱신한다.
     @State private var mapCenter: MapCoordinate = Constant.defaultCenter
     /// 모든 후보 핀이 보이도록 계산한 줌 레벨. `candidates` 변경 시 `.task`에서 갱신한다.
@@ -33,9 +37,9 @@ struct PlaceVoteParticipationView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            // TODO: 멤버핀, 경로 표기는 멤버 좌표/경로 데이터 확보 후 연동
             KakaoMap(
-                pins: pins,
+                routes: memberRoutes,
+                pins: pins + memberPins,
                 initialCenter: mapCenter,
                 initialZoomLevel: mapZoomLevel,
                 focusedCoordinate: focusedCoordinate,
@@ -69,20 +73,15 @@ struct PlaceVoteParticipationView: View {
         .task(id: store.candidates) {
             buildPins()
         }
+        .task(id: store.travelBurden) {
+            buildMemberRoutes()
+        }
         .fullScreenCover(
-            isPresented: Binding(
-                get: { store.isParticipantsPresented },
-                set: { isPresented in
-                    guard !isPresented else { return }
-
-                    store.send(.participantsDismissed)
-                }
-            )
-        ) {
+            item: $store.scope(state: \.participants, action: \.participants)
+        ) { participantsStore in
             PlaceVoteParticipantsView(
-                members: store.members,
-                isMyVoteCompleted: store.mode == .voted,
-                onClose: { store.send(.participantsDismissed) }
+                store: participantsStore,
+                onClose: { store.send(.participants(.dismiss)) }
             )
         }
     }
@@ -117,6 +116,60 @@ struct PlaceVoteParticipationView: View {
         }
         mapCenter = Self.center(of: coordinates)
         mapZoomLevel = Self.zoomLevel(of: coordinates)
+    }
+
+    /// travel-burden 결과로 멤버 출발지 핀과 경로를 구성한다.
+    /// 색상은 burdens 순서대로 `RouteDotColor` 를 순환 배정한다.
+    @MainActor
+    private func buildMemberRoutes() {
+        guard let travelBurden = store.travelBurden else {
+            memberPins = []
+            memberRoutes = []
+            return
+        }
+
+        let colors = RouteDotColor.allCases
+        var pins: [MapPin] = []
+        var routes: [MapRoute] = []
+
+        for (index, burden) in travelBurden.burdens.enumerated() {
+            let color = colors[index % colors.count]
+            let coordinates = burden.path.map {
+                MapCoordinate(latitude: $0.latitude, longitude: $0.longitude)
+            }
+            guard let departure = coordinates.first else { continue }
+
+            routes.append(
+                MapRoute(
+                    id: "route-\(burden.memberId)",
+                    coordinates: coordinates,
+                    dotStyle: RouteDotStyle(color: color)
+                )
+            )
+            pins.append(
+                MemberRoutePinLabel(
+                    avatarType: avatarType(for: burden.memberId),
+                    routeColor: color,
+                    transferCount: burden.transfers,
+                    durationMinutes: burden.seconds / 60
+                )
+                .makePin(id: "member-\(burden.memberId)", coordinate: departure)
+            )
+        }
+
+        memberPins = pins
+        memberRoutes = routes
+    }
+
+    /// memberId 에 해당하는 멤버의 프로필 이미지로 avatar 타입을 결정한다.
+    private func avatarType(for memberId: Int) -> Avatar.AvatarType {
+        guard
+            let member = store.members.first(where: { $0.id == memberId }),
+            let urlString = member.profileImageUrl,
+            let url = URL(string: urlString)
+        else { return .placeholder }
+
+        return .image(url)
     }
 
     /// 후보 좌표들의 bounding box 중심. 좌표가 없으면 기본 중심을 반환한다.
@@ -177,8 +230,10 @@ private struct PlaceVoteSheetContent: View {
         .padding(.top, Spacing.spacing100)
     }
 
-    /// 후보 좌표가 있으면 지도 포커싱을 요청한다.
+    /// 멤버별 경로를 조회하고, 후보 좌표가 있으면 지도 포커싱을 요청한다.
     private func focus(_ candidate: PlaceVoteCandidate) {
+        store.send(.placeRowTapped(candidate.id))
+
         guard
             let latitude = candidate.latitude,
             let longitude = candidate.longitude

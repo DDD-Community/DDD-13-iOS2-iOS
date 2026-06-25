@@ -67,4 +67,18 @@ public final class VoteRepositoryImpl: VoteRepositoryProtocol {
             VoteEndpoint.submitPlaceVote(meetingId: meetingId, requestDTO)
         )
     }
+
+    public func fetchPlaceVoteTravelBurden(meetingId: Int, placeId: Int) async throws -> PlaceVoteTravelBurden {
+        let response: PlaceVoteTravelBurdenResponseDTO = try await NetworkManager.shared.request(
+            VoteEndpoint.fetchPlaceVoteTravelBurden(meetingId: meetingId, placeId: placeId)
+        )
+        return response.toEntity()
+    }
+
+    public func fetchPlaceVoteParticipants(meetingId: Int) async throws -> [PlaceVoteParticipant] {
+        let response: PlaceVoteParticipantsResponseDTO = try await NetworkManager.shared.request(
+            VoteEndpoint.fetchPlaceVoteParticipants(meetingId: meetingId)
+        )
+        return response.toEntity()
+    }
 }

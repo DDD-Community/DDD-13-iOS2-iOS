@@ -69,6 +69,41 @@ public struct ConfirmedPlaceCandidateResponseDTO: Decodable, Sendable {
     public let totalTransfers: Int
 }
 
+public struct PlaceVoteTravelBurdenResponseDTO: Decodable, Sendable {
+    public let place: PlaceVotePlaceResponseDTO
+    public let burdens: [MemberTravelBurdenResponseDTO]
+}
+
+public struct MemberTravelBurdenResponseDTO: Decodable, Sendable {
+    public let memberId: Int
+    public let name: String
+    public let departureName: String
+    public let isMe: Bool
+    public let seconds: Int
+    public let transfers: Int
+    public let isLongest: Bool
+    public let path: [TravelPathPointResponseDTO]
+}
+
+public struct TravelPathPointResponseDTO: Decodable, Sendable {
+    public let stationId: Int
+    public let latitude: Double
+    public let longitude: Double
+}
+
+public struct PlaceVoteParticipantsResponseDTO: Decodable, Sendable {
+    public let participants: [PlaceVoteParticipantResponseDTO]
+}
+
+public struct PlaceVoteParticipantResponseDTO: Decodable, Sendable {
+    public let memberId: Int
+    public let name: String
+    public let profileImageUrl: String?
+    public let departureName: String?
+    public let isMe: Bool
+    public let voted: Bool
+}
+
 // MARK: - toEntity
 
 public extension PlaceVoteResponseDTO {
@@ -130,6 +165,66 @@ public extension ConfirmedPlaceCandidateResponseDTO {
             voteCount: voteCount,
             totalSeconds: totalSeconds,
             totalTransfers: totalTransfers
+        )
+    }
+}
+
+public extension PlaceVoteTravelBurdenResponseDTO {
+    func toEntity() -> PlaceVoteTravelBurden {
+        PlaceVoteTravelBurden(
+            place: TravelBurdenPlace(
+                placeId: place.placeId,
+                name: place.name,
+                categoryLabel: PlaceCategory(categoryLabel: place.categoryLabel),
+                address: place.address,
+                latitude: place.latitude,
+                longitude: place.longitude
+            ),
+            burdens: burdens.map { $0.toEntity() }
+        )
+    }
+}
+
+public extension MemberTravelBurdenResponseDTO {
+    func toEntity() -> MemberTravelBurden {
+        MemberTravelBurden(
+            memberId: memberId,
+            name: name,
+            departureName: departureName,
+            isMe: isMe,
+            seconds: seconds,
+            transfers: transfers,
+            isLongest: isLongest,
+            path: path.map { $0.toEntity() }
+        )
+    }
+}
+
+public extension TravelPathPointResponseDTO {
+    func toEntity() -> TravelPathPoint {
+        TravelPathPoint(
+            stationId: stationId,
+            latitude: latitude,
+            longitude: longitude
+        )
+    }
+}
+
+public extension PlaceVoteParticipantsResponseDTO {
+    func toEntity() -> [PlaceVoteParticipant] {
+        participants.map { $0.toEntity() }
+    }
+}
+
+public extension PlaceVoteParticipantResponseDTO {
+    func toEntity() -> PlaceVoteParticipant {
+        PlaceVoteParticipant(
+            memberId: memberId,
+            name: name,
+            profileImageUrl: profileImageUrl,
+            departureName: departureName,
+            isMe: isMe,
+            voted: voted
         )
     }
 }

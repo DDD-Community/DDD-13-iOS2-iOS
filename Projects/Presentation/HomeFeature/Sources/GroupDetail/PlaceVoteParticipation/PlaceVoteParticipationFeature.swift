@@ -24,15 +24,19 @@ public struct PlaceVoteParticipationFeature {
     public struct State: Equatable {
         public let meetingId: Int
         public var placeVote: PlaceVote
-        /// 투표 참여 현황 화면에 노출할 모임 멤버 목록.
+        /// 멤버 핀 avatar 매칭에 사용할 모임 멤버 목록.
         public let members: [GroupDetailMember]
         public var mode: Mode
         /// voting 모드에서 선택한 후보 id 집합. 복수 선택을 허용한다.
         public var selectedPlaceIds: Set<Int> = []
         /// 투표 제출 진행 여부.
         public var isSubmitting = false
-        /// 투표 참여 팀원 현황 화면 노출 여부.
-        public var isParticipantsPresented = false
+        /// row 탭으로 경로를 조회 중인 후보 id.
+        public var focusedPlaceId: Int?
+        /// 포커싱한 후보 장소 기준 멤버별 경로 부담.
+        public var travelBurden: PlaceVoteTravelBurden?
+        /// 투표 참여 팀원 현황 화면.
+        @Presents public var participants: PlaceVoteParticipantsFeature.State?
 
         public init(meetingId: Int, placeVote: PlaceVote, members: [GroupDetailMember]) {
             self.meetingId = meetingId
@@ -64,13 +68,15 @@ public struct PlaceVoteParticipationFeature {
 
     public enum Action {
         case placeSelected(Int)
+        case placeRowTapped(Int)
+        case travelBurdenResponse(Result<PlaceVoteTravelBurden, Error>)
         case voteButtonTapped
         case voteSubmitted(Result<Void, Error>)
         case placeVoteRefreshed(PlaceVote)
         case revoteButtonTapped
         case completeButtonTapped
         case participantsButtonTapped
-        case participantsDismissed
+        case participants(PresentationAction<PlaceVoteParticipantsFeature.Action>)
     }
 
     @Dependency(\.voteClient) private var voteClient
@@ -88,6 +94,23 @@ public struct PlaceVoteParticipationFeature {
                 } else {
                     state.selectedPlaceIds.insert(placeId)
                 }
+                return .none
+
+            case let .placeRowTapped(placeId):
+                state.focusedPlaceId = placeId
+                let client = voteClient
+                let meetingId = state.meetingId
+                return .run { send in
+                    await send(.travelBurdenResponse(Result {
+                        try await client.fetchPlaceVoteTravelBurden(meetingId: meetingId, placeId: placeId)
+                    }))
+                }
+
+            case let .travelBurdenResponse(.success(travelBurden)):
+                state.travelBurden = travelBurden
+                return .none
+
+            case .travelBurdenResponse(.failure):
                 return .none
 
             case .voteButtonTapped:
@@ -134,13 +157,15 @@ public struct PlaceVoteParticipationFeature {
                 return .none
 
             case .participantsButtonTapped:
-                state.isParticipantsPresented = true
+                state.participants = PlaceVoteParticipantsFeature.State(meetingId: state.meetingId)
                 return .none
 
-            case .participantsDismissed:
-                state.isParticipantsPresented = false
+            case .participants:
                 return .none
             }
+        }
+        .ifLet(\.$participants, action: \.participants) {
+            PlaceVoteParticipantsFeature()
         }
     }
 }
