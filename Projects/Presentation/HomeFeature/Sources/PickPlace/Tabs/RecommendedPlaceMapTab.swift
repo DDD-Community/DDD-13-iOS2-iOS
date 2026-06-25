@@ -27,6 +27,15 @@ struct RecommendedPlaceMapTab: View {
         store.recommendedMidpointStations
     }
 
+    /// rank가 1인 중간지점 역의 좌표. 지도 최초 중심으로 사용한다.
+    private var initialCenter: MapCoordinate {
+        guard let topStation = recommendedMidpointStations.first(where: { $0.rank == 1 }) else {
+            return Constant.defaultCenter
+        }
+
+        return MapCoordinate(latitude: topStation.latitude, longitude: topStation.longitude)
+    }
+
     /// 현재 선택된 중간지점 역의 좌표. 세그먼트 선택 시 지도 카메라를 이 좌표로 포커싱한다.
     private var selectedStationCoordinate: MapCoordinate? {
         let index = store.selectedStationIndex
@@ -40,7 +49,7 @@ struct RecommendedPlaceMapTab: View {
         ZStack(alignment: .bottom) {
             KakaoMap(
                 pins: recommendedPlacePins,
-                initialCenter: Constant.defaultCenter,
+                initialCenter: initialCenter,
                 focusedCoordinate: selectedStationCoordinate,
                 focusBottomInset: sheetCoveredHeight
             )
