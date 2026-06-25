@@ -67,7 +67,7 @@ struct ConfirmedDateArea: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
 
                 BangawoButton("장소고르기", variant: .solid, size: .small) {
-                    store.send(.selectPlaceTapped)
+                    store.send(.pickPlaceTapped)
                 }
             }
             .padding(Spacing.spacing300)

@@ -41,7 +41,7 @@ public struct GroupDetailFeature {
         public enum Delegate: Equatable {
             case meetingDateSelectionRequested(meetingId: Int)
         /// 장소 투표 후보 담기 화면으로 진입.
-        case startSelectPlace(isHost: Bool, meetingId: Int)
+        case startPickPlace(isHost: Bool, meetingId: Int)
         }
     }
 
@@ -66,8 +66,8 @@ public struct GroupDetailFeature {
                 Log.debug("약속정하기 클릭")
                 return .send(.delegate(.meetingDateSelectionRequested(meetingId: meetingId)))
 
-            case let .home(.delegate(.startSelectPlace(isHost, meetingId))):
-                return .send(.delegate(.startSelectPlace(isHost: isHost, meetingId: meetingId)))
+            case let .home(.delegate(.startPickPlace(isHost, meetingId))):
+                return .send(.delegate(.startPickPlace(isHost: isHost, meetingId: meetingId)))
 
             case .home, .myPlace, .delegate:
                 return .none

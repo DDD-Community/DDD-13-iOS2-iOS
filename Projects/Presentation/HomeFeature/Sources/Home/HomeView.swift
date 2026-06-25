@@ -92,8 +92,8 @@ public struct HomeView: View {
             case let .dateSelection(dateSelectionStore):
                 MeetingDateSelectionView(store: dateSelectionStore)
 
-            case let .selectPlace(selectPlaceStore):
-                SelectPlaceView(store: selectPlaceStore)
+            case let .pickPlace(pickPlaceStore):
+                PickPlaceView(store: pickPlaceStore)
             }
         }
     }

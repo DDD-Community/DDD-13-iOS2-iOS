@@ -1,5 +1,5 @@
 //
-//  SelectPlaceFeature.swift
+//  PickPlaceFeature.swift
 //  HomeFeature
 //
 
@@ -13,7 +13,7 @@ import Utill
 /// 추천받은 장소를 지도에서 담고(장소보기 탭), 모임원이 담은 후보를 모아 보며(담은 장소 탭)
 /// 호스트가 투표를 생성하는 진입 전 단계 화면이다. 현재는 mock 기반 UI 골격이다.
 @Reducer
-public struct SelectPlaceFeature {
+public struct PickPlaceFeature {
     @Dependency(\.dismiss) private var dismiss
     @Dependency(\.placePickClient) private var placePickClient
     @Dependency(\.placeRecommendationClient) private var placeRecommendationClient
@@ -22,7 +22,7 @@ public struct SelectPlaceFeature {
     @ObservableState
     public struct State: Equatable {
         public var selectedSubTabIndex = 0
-        public var placeMap = PlaceMapTabFeature.State()
+        public var recommendedPlaceMap = RecommendedPlaceMapTabFeature.State()
         public var pickedPlace: PickedPlaceTabFeature.State
         /// 추천 장소 화면 진입 시 전달받는 모임 ID.
         public let meetingId: Int
@@ -30,7 +30,7 @@ public struct SelectPlaceFeature {
         public var hasLoadedRecommendations = false
 
         public init(
-            members: [SelectPlaceMember] = SelectPlaceMember.mock,
+            members: [PickPlaceMember] = PickPlaceMember.mock,
             pickedPlaces: [PickedPlace] = PickedPlace.mock,
             isHost: Bool = false,
             meetingId: Int = 0
@@ -43,9 +43,9 @@ public struct SelectPlaceFeature {
             self.meetingId = meetingId
         }
 
-        public var subTabs: [SelectPlaceTab] { [.placeMap, .pickedPlace] }
+        public var subTabs: [PickPlaceTab] { [.recommendedPlaceMap, .pickedPlace] }
 
-        public var selectedSubTab: SelectPlaceTab {
+        public var selectedSubTab: PickPlaceTab {
             subTabs[max(0, min(selectedSubTabIndex, subTabs.count - 1))]
         }
     }
@@ -53,7 +53,7 @@ public struct SelectPlaceFeature {
     public enum Action {
         case onAppear
         case tabSelected(Int)
-        case placeMap(PlaceMapTabFeature.Action)
+        case recommendedPlaceMap(RecommendedPlaceMapTabFeature.Action)
         case pickedPlace(PickedPlaceTabFeature.Action)
         case backButtonTapped
         case stationRecommendationsResponse(Result<[StationRecommendation], Error>)
@@ -65,8 +65,8 @@ public struct SelectPlaceFeature {
     public init() {}
 
     public var body: some ReducerOf<Self> {
-        Scope(state: \.placeMap, action: \.placeMap) {
-            PlaceMapTabFeature()
+        Scope(state: \.recommendedPlaceMap, action: \.recommendedPlaceMap) {
+            RecommendedPlaceMapTabFeature()
         }
 
         Scope(state: \.pickedPlace, action: \.pickedPlace) {
@@ -96,10 +96,10 @@ public struct SelectPlaceFeature {
                 )
 
             case let .stationRecommendationsResponse(.success(groups)):
-                state.placeMap.stationGroups = groups
-                state.placeMap.selectedStationIndex = 0
-                state.placeMap.nearbyPlaceList.stationGroups = groups
-                state.placeMap.nearbyPlaceList.selectedStationIndex = 0
+                state.recommendedPlaceMap.stationRecommendations = groups
+                state.recommendedPlaceMap.selectedStationIndex = 0
+                state.recommendedPlaceMap.nearbyPlaceList.stationGroups = groups
+                state.recommendedPlaceMap.nearbyPlaceList.selectedStationIndex = 0
                 return .none
 
             case let .stationRecommendationsResponse(.failure(error)):
@@ -107,9 +107,9 @@ public struct SelectPlaceFeature {
                 return .none
 
             case let .placePickStatusResponse(.success(status)):
-                state.pickedPlace.members = status.members.map { SelectPlaceMember(member: $0) }
+                state.pickedPlace.members = status.members.map { PickPlaceMember(member: $0) }
                 state.pickedPlace.pickedPlaces = status.myPicks.map { PickedPlace(summary: $0) }
-                state.placeMap.nearbyPlaceList.pickedPlaceIds = Set(status.myPicks.map(\.placeId))
+                state.recommendedPlaceMap.nearbyPlaceList.pickedPlaceIds = Set(status.myPicks.map(\.placeId))
                 return .none
 
             case let .placePickStatusResponse(.failure(error)):
@@ -151,8 +151,8 @@ public struct SelectPlaceFeature {
                 let dismiss = self.dismiss
                 return .run { _ in await dismiss() }
 
-            case let .placeMap(.nearbyPlaceList(.placeAddTapped(placeId: placeId))):
-                let wasPicked = state.placeMap.nearbyPlaceList.pickedPlaceIds.contains(placeId)
+            case let .recommendedPlaceMap(.nearbyPlaceList(.placeAddTapped(placeId: placeId))):
+                let wasPicked = state.recommendedPlaceMap.nearbyPlaceList.pickedPlaceIds.contains(placeId)
                 let meetingId = state.meetingId
                 let client = placePickClient
                 return .run { send in
@@ -177,7 +177,7 @@ public struct SelectPlaceFeature {
                 Log.error("장소 담기 상태 변경 실패(placeId: \(placeId)): \(error)")
                 return .none
 
-            case .placeMap, .pickedPlace:
+            case .recommendedPlaceMap, .pickedPlace:
                 return .none
             }
         }
@@ -188,13 +188,13 @@ private enum Constant {
     static let defaultPlaceVoteDurationDays = 3
 }
 
-private extension SelectPlaceFeature {
+private extension PickPlaceFeature {
     func updatePickedPlaceState(placeId: Int, wasPicked: Bool, state: inout State) {
         if wasPicked {
-            state.placeMap.nearbyPlaceList.pickedPlaceIds.remove(placeId)
+            state.recommendedPlaceMap.nearbyPlaceList.pickedPlaceIds.remove(placeId)
             state.pickedPlace.pickedPlaces.removeAll { $0.id == placeId }
         } else {
-            state.placeMap.nearbyPlaceList.pickedPlaceIds.insert(placeId)
+            state.recommendedPlaceMap.nearbyPlaceList.pickedPlaceIds.insert(placeId)
             appendPickedPlaceIfNeeded(placeId: placeId, state: &state)
         }
     }
@@ -202,7 +202,7 @@ private extension SelectPlaceFeature {
     func appendPickedPlaceIfNeeded(placeId: Int, state: inout State) {
         guard !state.pickedPlace.pickedPlaces.contains(where: { $0.id == placeId }) else { return }
 
-        let recommendedPlace = state.placeMap.nearbyPlaceList.stationGroups
+        let recommendedPlace = state.recommendedPlaceMap.nearbyPlaceList.stationGroups
             .reduce(into: [RecommendedPlace]()) { result, group in
                 result.append(contentsOf: group.places)
             }

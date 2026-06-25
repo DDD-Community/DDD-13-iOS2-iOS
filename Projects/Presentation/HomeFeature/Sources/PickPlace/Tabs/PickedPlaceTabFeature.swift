@@ -11,14 +11,14 @@ import Entity
 public struct PickedPlaceTabFeature {
     @ObservableState
     public struct State: Equatable {
-        public var members: [SelectPlaceMember]
+        public var members: [PickPlaceMember]
         public var pickedPlaces: [PickedPlace]
         public var selectedFilterCategory: PlaceCategory = .all
         /// 현재 사용자가 호스트인지 여부. 하단 "투표 생성" 버튼 노출 분기에 사용한다.
         public let isHost: Bool
 
         public init(
-            members: [SelectPlaceMember] = SelectPlaceMember.mock,
+            members: [PickPlaceMember] = PickPlaceMember.mock,
             pickedPlaces: [PickedPlace] = PickedPlace.mock,
             isHost: Bool = false
         ) {

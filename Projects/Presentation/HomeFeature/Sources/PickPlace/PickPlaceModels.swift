@@ -1,5 +1,5 @@
 //
-//  SelectPlaceModels.swift
+//  PickPlaceModels.swift
 //  HomeFeature
 //
 
@@ -9,7 +9,7 @@ import Entity
 
 /// 담은 장소 탭 상단 멤버 가로 스크롤 리스트에 표시할 멤버.
 ///
-public struct SelectPlaceMember: Identifiable, Equatable, Sendable {
+public struct PickPlaceMember: Identifiable, Equatable, Sendable {
     public let id: Int
     public let nickname: String
     public let profileImageUrl: String?
@@ -55,7 +55,7 @@ public struct PickedPlace: Identifiable, Equatable, Sendable {
     }
 }
 
-public extension SelectPlaceMember {
+public extension PickPlaceMember {
     init(member: PlacePickStatus.Member) {
         self.init(
             id: member.id,
@@ -90,13 +90,13 @@ public extension PickedPlace {
 
 // MARK: - Mock
 
-public extension SelectPlaceMember {
-    static let mock: [SelectPlaceMember] = [
-        SelectPlaceMember(id: 1, nickname: "김반가", profileImageUrl: nil, hasPicked: true),
-        SelectPlaceMember(id: 2, nickname: "이워고", profileImageUrl: nil, hasPicked: true),
-        SelectPlaceMember(id: 3, nickname: "박장소", profileImageUrl: nil, hasPicked: false),
-        SelectPlaceMember(id: 4, nickname: "최투표", profileImageUrl: nil, hasPicked: true),
-        SelectPlaceMember(id: 5, nickname: "정모임", profileImageUrl: nil, hasPicked: false)
+public extension PickPlaceMember {
+    static let mock: [PickPlaceMember] = [
+        PickPlaceMember(id: 1, nickname: "김반가", profileImageUrl: nil, hasPicked: true),
+        PickPlaceMember(id: 2, nickname: "이워고", profileImageUrl: nil, hasPicked: true),
+        PickPlaceMember(id: 3, nickname: "박장소", profileImageUrl: nil, hasPicked: false),
+        PickPlaceMember(id: 4, nickname: "최투표", profileImageUrl: nil, hasPicked: true),
+        PickPlaceMember(id: 5, nickname: "정모임", profileImageUrl: nil, hasPicked: false)
     ]
 }
 

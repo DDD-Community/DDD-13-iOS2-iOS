@@ -10,10 +10,10 @@ import SwiftUI
 
 /// 시트의 사용 용도.
 /// - `default`: 모임 상세 "내 장소보기" 등 기존 역 근처 장소 보기.
-/// - `selectPlace`: 장소 투표 후보 담기. 지하철역 segmented control과 row "담기" 버튼을 노출한다.
+/// - `pickPlace`: 장소 투표 후보 담기. 지하철역 segmented control과 row "담기" 버튼을 노출한다.
 enum NearbyPlaceListSheetMode: Equatable {
     case `default`
-    case selectPlace
+    case pickPlace
 }
 
 /// 역근처 정보 리스트 보여줄 시트
@@ -66,7 +66,7 @@ private struct NearbyPlaceListHeader: View {
                 .padding(.horizontal, Spacing.spacing400)
                 .padding(.bottom, Spacing.spacing250)
 
-        case .selectPlace:
+        case .pickPlace:
             StationSegmentedControl(
                 stations: store.stations,
                 selectedIndex: store.selectedStationIndex,
@@ -91,7 +91,7 @@ private struct NearbyPlaceList: View {
                 PlaceRow()
             }
 
-        case .selectPlace:
+        case .pickPlace:
             if store.visibleRecommendedPlaces.isEmpty {
                 Text("추천 장소가 없어요")
                     .pretendardCustomFont(textStyle: .bodyMedium)

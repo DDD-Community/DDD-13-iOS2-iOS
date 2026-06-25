@@ -52,7 +52,7 @@ struct PickedPlaceTab: View {
 // MARK: - 멤버 가로 스크롤 리스트
 
 private struct MemberStrip: View {
-    let members: [SelectPlaceMember]
+    let members: [PickPlaceMember]
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -67,7 +67,7 @@ private struct MemberStrip: View {
 }
 
 private struct MemberItem: View {
-    let member: SelectPlaceMember
+    let member: PickPlaceMember
 
     private var avatarType: Avatar.AvatarType {
         guard
@@ -198,7 +198,7 @@ private struct PickedPlaceTabPreview: View {
     private let store: StoreOf<PickedPlaceTabFeature>
 
     init(
-        members: [SelectPlaceMember] = SelectPlaceMember.mock,
+        members: [PickPlaceMember] = PickPlaceMember.mock,
         pickedPlaces: [PickedPlace] = PickedPlace.mock,
         isHost: Bool = false
     ) {

@@ -16,8 +16,8 @@ public struct NearbyPlaceListSheetFeature {
         public var isReservableSelected = false // 예약 가능여부
         public var selectedPlaceDetail: SelectedPlaceDetailSheetFeature.State = .mock
 
-        // MARK: - 장소보기(selectPlace) 용도 전용 상태
-        /// 역별 추천 장소 그룹 목록. `SelectPlaceFeature.onAppear`에서 API 응답으로 채워진다.
+        // MARK: - 장소보기(pickPlace) 용도 전용 상태
+        /// 역별 추천 장소 그룹 목록. `PickPlaceFeature.onAppear`에서 API 응답으로 채워진다.
         public var stationGroups: [StationRecommendation] = []
         /// 선택된 지하철역 인덱스.
         public var selectedStationIndex: Int = 0
@@ -30,10 +30,10 @@ public struct NearbyPlaceListSheetFeature {
 
         public init() {}
 
-        /// selectPlace 모드에서 segmented control에 표시할 역 목록.
+        /// pickPlace 모드에서 segmented control에 표시할 역 목록.
         public var stations: [MidpointStation] { stationGroups.map(\.station) }
 
-        /// selectPlace 모드에서 현재 노출할 추천 장소 목록(선택된 역 기준).
+        /// pickPlace 모드에서 현재 노출할 추천 장소 목록(선택된 역 기준).
         public var visibleRecommendedPlaces: [RecommendedPlace] {
             guard stationGroups.indices.contains(selectedStationIndex) else { return [] }
 

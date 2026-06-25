@@ -1,5 +1,5 @@
 //
-//  SelectPlaceView.swift
+//  PickPlaceView.swift
 //  HomeFeature
 //
 
@@ -11,10 +11,10 @@ import DesignSystem
 
 /// 장소 투표 후보 담기 화면.
 /// GroupDetail과 동일하게 NavigationPage + Tab + TabContent로 구성한다.
-struct SelectPlaceView: View {
-    @Bindable private var store: StoreOf<SelectPlaceFeature>
+struct PickPlaceView: View {
+    @Bindable private var store: StoreOf<PickPlaceFeature>
 
-    init(store: StoreOf<SelectPlaceFeature>) {
+    init(store: StoreOf<PickPlaceFeature>) {
         self.store = store
     }
 
@@ -50,12 +50,12 @@ struct SelectPlaceView: View {
 // MARK: - Tab Content
 
 private struct TabContent: View {
-    let store: StoreOf<SelectPlaceFeature>
+    let store: StoreOf<PickPlaceFeature>
 
     var body: some View {
         switch store.selectedSubTab {
-        case .placeMap:
-            PlaceMapTab(store: store.scope(state: \.placeMap, action: \.placeMap))
+        case .recommendedPlaceMap:
+            RecommendedPlaceMapTab(store: store.scope(state: \.recommendedPlaceMap, action: \.recommendedPlaceMap))
 
         case .pickedPlace:
             PickedPlaceTab(store: store.scope(state: \.pickedPlace, action: \.pickedPlace))
@@ -66,41 +66,41 @@ private struct TabContent: View {
 // MARK: - Preview
 
 #if DEBUG
-private struct SelectPlaceViewPreview: View {
-    private let store: StoreOf<SelectPlaceFeature>
+private struct PickPlaceViewPreview: View {
+    private let store: StoreOf<PickPlaceFeature>
 
     init(
         selectedSubTabIndex: Int = 0,
         pickedPlaces: [PickedPlace] = PickedPlace.mock,
         isHost: Bool = false
     ) {
-        var state = SelectPlaceFeature.State(pickedPlaces: pickedPlaces, isHost: isHost)
+        var state = PickPlaceFeature.State(pickedPlaces: pickedPlaces, isHost: isHost)
         state.selectedSubTabIndex = selectedSubTabIndex
         self.store = Store(initialState: state) {
-            SelectPlaceFeature()
+            PickPlaceFeature()
         }
     }
 
     var body: some View {
-        SelectPlaceView(store: store)
+        PickPlaceView(store: store)
     }
 }
 
 #Preview("장소보기 탭") {
     BangawoPreview {
-        SelectPlaceViewPreview()
+        PickPlaceViewPreview()
     }
 }
 
 #Preview("담은 장소 탭 - 호스트") {
     BangawoPreview {
-        SelectPlaceViewPreview(selectedSubTabIndex: 1, isHost: true)
+        PickPlaceViewPreview(selectedSubTabIndex: 1, isHost: true)
     }
 }
 
 #Preview("담은 장소 탭 - 빈 상태") {
     BangawoPreview {
-        SelectPlaceViewPreview(selectedSubTabIndex: 1, pickedPlaces: [])
+        PickPlaceViewPreview(selectedSubTabIndex: 1, pickedPlaces: [])
     }
 }
 #endif
