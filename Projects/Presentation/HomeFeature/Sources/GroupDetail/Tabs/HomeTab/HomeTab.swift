@@ -25,6 +25,38 @@ struct HomeTab: View {
                     .padding(.horizontal, Spacing.spacing400)
             }
         }
+        .task { store.send(.onAppear) }
+        .bottomSheet(
+            isPresented: Binding(
+                get: { store.isMyDeparturePlaceEditSheetPresented },
+                set: { isPresented in
+                    guard !isPresented else { return }
+                    store.send(.myDeparturePlaceEditSheetDismissed)
+                }
+            ),
+            header: .init(
+                title: "출발지 수정",
+                onClose: { store.send(.myDeparturePlaceEditSheetDismissed) }
+            )
+        ) {
+            MyDeparturePlaceEditSheetContent(store: store)
+        }
+        .bottomSheet(
+            isPresented: Binding(
+                get: { store.isMyAttendanceStatusSheetPresented },
+                set: { isPresented in
+                    guard !isPresented else { return }
+                    store.send(.myAttendanceStatusSheetDismissed)
+                }
+            )
+        ) {
+            MyAttendanceStatusEditSheetContent(
+                selectedStatus: store.groupDetail?.members.first(where: { $0.isMe })?.attendanceStatus,
+                onSelect: { status in
+                    store.send(.myAttendanceStatusSelected(status))
+                }
+            )
+        }
         .fullScreenCover(
             item: $store.scope(state: \.destination?.dateVote, action: \.destination.dateVote)
         ) { dateVoteStore in

@@ -7,6 +7,7 @@ import ComposableArchitecture
 
 import CoreDependencies
 import Entity
+import Utill
 
 @Reducer
 public struct HomeTabFeature {
@@ -22,6 +23,7 @@ public struct HomeTabFeature {
     @Dependency(\.groupClient) private var groupClient
     @Dependency(\.voteClient) private var voteClient
     @Dependency(\.placeRecommendationClient) private var placeRecommendationClient
+    @Dependency(\.departurePlaceClient) private var departurePlaceClient
 
     @ObservableState
     public struct State: Equatable {
@@ -36,6 +38,8 @@ public struct HomeTabFeature {
         public var placeVote: PlaceVote?
         /// 장소 확정 후(`completed`/`confirmed`)일 때 `fetchConfirmedPlaceResult`로 로드하는 확정 장소 결과.
         public var confirmedPlaceResult: ConfirmedPlaceResult?
+        public var isMyDeparturePlaceEditSheetPresented = false // 출발지 수정 바텀시트 여부
+        public var isMyAttendanceStatusSheetPresented = false // 참여 상태 변경 바텀시트 여부
 
         public init(group: Group) {
             self.group = group
@@ -116,6 +120,11 @@ public struct HomeTabFeature {
         case placeVoteResponse(Result<PlaceVote, Error>)
         case confirmedPlaceResultResponse(Result<ConfirmedPlaceResult, Error>)
         case myAttendanceBadgeTapped
+        case myAttendanceStatusSheetDismissed
+        case myAttendanceStatusSelected(AttendanceStatus)
+        case myAttendanceStatusUpdateResponse(Result<AttendanceStatus, Error>)
+        case myMemberCardTapped // 나 카드 영역 터치 시(참석여부 버튼 제외)
+        case myDeparturePlaceEditSheetDismissed // 출발지 수정 닫혔을 때 액션
         case decidePlaceTapped
         case inviteFriendTapped
         case dateVoteTapped
@@ -129,6 +138,10 @@ public struct HomeTabFeature {
         case placeVoteSubmitResponse(Result<Void, Error>)
         case placeVoteParticipationTapped
         case placeDetailTapped
+        case addDeparturePlaceTapped // 바텀시트에서 출발지 추가하기 버튼 클릭 시
+        case departurePlaceCardTapped(id: Int) // 출발지 수정 바텀시트에서 출발지 요소 클릭 시(id 전달하기)
+        case setDefaultDeparturePlaceResponse(Result<DeparturePlace, Error>)
+        case editDeparturePlaceTapped(id: Int)
         case confirmedPlaceCardTapped
         case delegate(Delegate)
         case destination(PresentationAction<Destination.Action>)
@@ -137,6 +150,8 @@ public struct HomeTabFeature {
     public enum Delegate: Equatable {
         case selectMyPlaceTab(place: ConfirmedPlace)
         case meetingDateSelectionRequested(meetingId: Int)
+        case departurePlaceStationSearchRequested
+        case departurePlaceEditStationSearchRequested(id: Int)
         /// 장소 추천 시작 성공 → 장소 투표 후보 담기 화면으로 진입.
         case startPickPlace(isHost: Bool, meetingId: Int)
     }
@@ -190,6 +205,49 @@ public struct HomeTabFeature {
 
             // TODO: 나 영역 참여 상태 변경 시트/플로우 연동
             case .myAttendanceBadgeTapped:
+                state.isMyAttendanceStatusSheetPresented = true
+                return .none
+
+            case .myAttendanceStatusSheetDismissed:
+                guard state.isMyAttendanceStatusSheetPresented else { return .none }
+
+                Log.debug("참여 상태 변경 바텀시트 닫힘")
+                state.isMyAttendanceStatusSheetPresented = false
+                return .none
+
+            case let .myAttendanceStatusSelected(status):
+                let groupId = state.group.id
+                let client = groupClient
+                Log.debug("참여 상태 선택: \(status.displayLabel)")
+                state.isMyAttendanceStatusSheetPresented = false
+                return .run { send in
+                    await send(.myAttendanceStatusUpdateResponse(
+                        Result {
+                            try await client.updateAttendance(groupId, status)
+                            return status
+                        }
+                    ))
+                }
+
+            case let .myAttendanceStatusUpdateResponse(.success(status)):
+                state.updateMyAttendanceStatus(status)
+                return .none
+
+            case let .myAttendanceStatusUpdateResponse(.failure(error)):
+                Log.debug("참석 여부 변경 실패: \(error)")
+                return .none
+
+            case .myMemberCardTapped:
+                Log.debug("내 멤버 카드 클릭")
+                state.isMyDeparturePlaceEditSheetPresented = true
+                return .none
+
+            case .myDeparturePlaceEditSheetDismissed:
+                // 바텀시트 닫힐 때 이벤트 중복 발생 방지
+                guard state.isMyDeparturePlaceEditSheetPresented else { return .none }
+
+                Log.debug("바텀시트 닫힘")
+                state.isMyDeparturePlaceEditSheetPresented = false
                 return .none
 
             case .decidePlaceTapped:
@@ -301,6 +359,35 @@ public struct HomeTabFeature {
             case .placeDetailTapped:
                 return .none
 
+            case .addDeparturePlaceTapped:
+                Log.debug("출발지 추가하기 버튼 클릭")
+                state.isMyDeparturePlaceEditSheetPresented = false
+                return .send(.delegate(.departurePlaceStationSearchRequested))
+
+            case let .departurePlaceCardTapped(id):
+                Log.debug("출발지 카드 클릭: \(id)")
+                let client = departurePlaceClient
+                return .run { send in
+                    await send(.setDefaultDeparturePlaceResponse(
+                        Result { try await client.setDefaultDeparturePlace(id) }
+                    ))
+                }
+
+            case let .setDefaultDeparturePlaceResponse(.success(departurePlace)):
+                Log.debug("기본 출발지 설정 성공: \(departurePlace.id)")
+                state.updateDefaultDeparturePlace(departurePlace)
+                state.isMyDeparturePlaceEditSheetPresented = false
+                return .none
+
+            case let .setDefaultDeparturePlaceResponse(.failure(error)):
+                Log.debug("기본 출발지 설정 실패: \(error)")
+                return .none
+
+            case let .editDeparturePlaceTapped(id):
+                Log.debug("출발지 수정하기 버튼 클릭: \(id)")
+                state.isMyDeparturePlaceEditSheetPresented = false
+                return .send(.delegate(.departurePlaceEditStationSearchRequested(id: id)))
+
             case .confirmedPlaceCardTapped:
                 guard let place = state.confirmedPlaceResult?.place else { return .none }
 
@@ -374,6 +461,92 @@ public struct HomeTabFeature {
                 Result { try await client.fetchConfirmedPlaceResult(meetingId: meetingId) }
             ))
         }
+    }
+}
+
+private extension HomeTabFeature.State {
+    mutating func updateDefaultDeparturePlace(_ selectedDeparturePlace: DeparturePlace) {
+        guard let detail = groupDetail else { return }
+
+        let members = detail.members.map { member in
+            guard member.isMe else { return member }
+
+            let departurePlaces = member.departurePlaces.map { departurePlace in
+                if departurePlace.id == selectedDeparturePlace.id {
+                    return DeparturePlace(
+                        id: selectedDeparturePlace.id,
+                        label: selectedDeparturePlace.label,
+                        address: selectedDeparturePlace.address,
+                        roadAddress: selectedDeparturePlace.roadAddress,
+                        placeName: selectedDeparturePlace.placeName,
+                        latitude: selectedDeparturePlace.latitude,
+                        longitude: selectedDeparturePlace.longitude,
+                        isDefault: true
+                    )
+                }
+
+                return DeparturePlace(
+                    id: departurePlace.id,
+                    label: departurePlace.label,
+                    address: departurePlace.address,
+                    roadAddress: departurePlace.roadAddress,
+                    placeName: departurePlace.placeName,
+                    latitude: departurePlace.latitude,
+                    longitude: departurePlace.longitude,
+                    isDefault: false
+                )
+            }
+
+            return GroupDetailMember(
+                id: member.id,
+                nickname: member.nickname,
+                profileImageUrl: member.profileImageUrl,
+                isHost: member.isHost,
+                isMe: member.isMe,
+                attendanceStatus: member.attendanceStatus,
+                departurePlaces: departurePlaces
+            )
+        }
+
+        groupDetail = GroupDetail(
+            id: detail.id,
+            name: detail.name,
+            themeTagCode: detail.themeTagCode,
+            themeTagDisplay: detail.themeTagDisplay,
+            locationStatus: detail.locationStatus,
+            dateVoteStatus: detail.dateVoteStatus,
+            confirmedDate: detail.confirmedDate,
+            members: members
+        )
+    }
+
+    mutating func updateMyAttendanceStatus(_ status: AttendanceStatus) {
+        guard let detail = groupDetail else { return }
+
+        let members = detail.members.map { member in
+            guard member.isMe else { return member }
+
+            return GroupDetailMember(
+                id: member.id,
+                nickname: member.nickname,
+                profileImageUrl: member.profileImageUrl,
+                isHost: member.isHost,
+                isMe: member.isMe,
+                attendanceStatus: status,
+                departurePlaces: member.departurePlaces
+            )
+        }
+
+        groupDetail = GroupDetail(
+            id: detail.id,
+            name: detail.name,
+            themeTagCode: detail.themeTagCode,
+            themeTagDisplay: detail.themeTagDisplay,
+            locationStatus: detail.locationStatus,
+            dateVoteStatus: detail.dateVoteStatus,
+            confirmedDate: detail.confirmedDate,
+            members: members
+        )
     }
 }
 
