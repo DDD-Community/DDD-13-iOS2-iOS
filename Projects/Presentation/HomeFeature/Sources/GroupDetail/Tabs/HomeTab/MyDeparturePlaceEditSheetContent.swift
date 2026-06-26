@@ -21,6 +21,7 @@ struct MyDeparturePlaceEditSheetContent: View {
                         roadAddress: departurePlace.roadAddress,
                         onEditTap: {
                             Log.debug("출발지 수정 버튼 클릭: \(departurePlace.id)")
+                            store.send(.editDeparturePlaceTapped(id: departurePlace.id))
                         }
                     )
                 }

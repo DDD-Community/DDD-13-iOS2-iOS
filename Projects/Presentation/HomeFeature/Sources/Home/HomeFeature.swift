@@ -29,6 +29,11 @@ public struct HomeFeature {
         case design2
     }
 
+    enum DeparturePlaceSearchPurpose: Equatable {
+        case add
+        case edit(id: Int)
+    }
+
     @ObservableState
     public struct State: Equatable {
         public var groups: [Group] = []
@@ -36,6 +41,7 @@ public struct HomeFeature {
         public var hasUnreadNotifications: Bool = false
         public var inviteCardDesign: InviteCardDesign = .design1
         public var isInviteCardDismissed: Bool = false
+        var departurePlaceSearchPurpose: DeparturePlaceSearchPurpose?
         @Presents public var creationView: GroupCreationFeature.State?
         public var path: StackState<Path.State> = StackState<Path.State>()
 
@@ -60,6 +66,7 @@ public struct HomeFeature {
         case inviteCardCloseButtonTapped
         case inviteButtonTapped
         case addDeparturePlaceResponse(Result<DeparturePlace, Error>)
+        case updateDeparturePlaceResponse(Result<DeparturePlace, Error>)
         case creationView(PresentationAction<GroupCreationFeature.Action>)
         case path(StackActionOf<Path>)
     }
@@ -119,13 +126,18 @@ public struct HomeFeature {
 
             case .addDeparturePlaceResponse(.success):
                 Log.debug("출발지 추가 성공")
-                state.path.removeLast()
-
-                guard let detailID = state.currentDetailID else { return .none }
-                return .send(.path(.element(id: detailID, action: .detail(.home(.onAppear)))))
+                return finishDeparturePlaceSearch(state: &state)
 
             case let .addDeparturePlaceResponse(.failure(error)):
                 Log.debug("출발지 추가 실패: \(error)")
+                return .none
+
+            case .updateDeparturePlaceResponse(.success):
+                Log.debug("출발지 수정 성공")
+                return finishDeparturePlaceSearch(state: &state)
+
+            case let .updateDeparturePlaceResponse(.failure(error)):
+                Log.debug("출발지 수정 실패: \(error)")
                 return .none
 
             case let .creationView(.presented(.delegate(.groupCreated(group)))):
@@ -145,29 +157,59 @@ public struct HomeFeature {
                 return .none
 
             case .path(.element(id: _, action: .detail(.delegate(.departurePlaceStationSearchRequested)))):
+                state.departurePlaceSearchPurpose = .add
+                state.path.append(.stationSearch(StationSearchSheetFeature.State()))
+                return .none
+
+            case let .path(.element(id: _, action: .detail(.delegate(.departurePlaceEditStationSearchRequested(id))))):
+                state.departurePlaceSearchPurpose = .edit(id: id)
                 state.path.append(.stationSearch(StationSearchSheetFeature.State()))
                 return .none
 
             case let .path(.element(id: _, action: .stationSearch(.delegate(.stationSelected(station))))):
                 Log.debug("출발지 역 선택: \(station.name)")
                 let client = departurePlaceClient
-                return .run { send in
-                    await send(.addDeparturePlaceResponse(
-                        Result {
-                            try await client.addDeparturePlace(
-                                station.name,
-                                station.addressName,
-                                station.roadAddressName,
-                                station.name,
-                                station.y,
-                                station.x,
-                                true
-                            )
-                        }
-                    ))
+                switch state.departurePlaceSearchPurpose {
+                case .add:
+                    return .run { send in
+                        await send(.addDeparturePlaceResponse(
+                            Result {
+                                try await client.addDeparturePlace(
+                                    station.name,
+                                    station.addressName,
+                                    station.roadAddressName,
+                                    station.name,
+                                    station.y,
+                                    station.x,
+                                    true
+                                )
+                            }
+                        ))
+                    }
+
+                case let .edit(id):
+                    return .run { send in
+                        await send(.updateDeparturePlaceResponse(
+                            Result {
+                                try await client.updateDeparturePlace(
+                                    id,
+                                    station.name,
+                                    station.addressName,
+                                    station.roadAddressName,
+                                    station.name,
+                                    station.y,
+                                    station.x
+                                )
+                            }
+                        ))
+                    }
+
+                case nil:
+                    return .none
                 }
 
             case .path(.element(id: _, action: .stationSearch(.delegate(.dismissed)))):
+                state.departurePlaceSearchPurpose = nil
                 state.path.removeLast()
                 return .none
 
@@ -198,6 +240,14 @@ public struct HomeFeature {
                 Result { try await client.fetchGroups() }
             ))
         }
+    }
+
+    private func finishDeparturePlaceSearch(state: inout State) -> Effect<Action> {
+        state.departurePlaceSearchPurpose = nil
+        state.path.removeLast()
+
+        guard let detailID = state.currentDetailID else { return .none }
+        return .send(.path(.element(id: detailID, action: .detail(.home(.onAppear)))))
     }
 
     private func updateDateVoteStatus(

@@ -134,6 +134,7 @@ public struct HomeTabFeature {
         case placeVoteSubmitResponse(Result<Void, Error>)
         case placeDetailTapped
         case addDeparturePlaceTapped // 바텀시트에서 출발지 추가하기 버튼 클릭 시
+        case editDeparturePlaceTapped(id: Int)
         case delegate(Delegate)
         case destination(PresentationAction<Destination.Action>)
     }
@@ -142,6 +143,7 @@ public struct HomeTabFeature {
         case selectMyPlaceTab
         case meetingDateSelectionRequested(meetingId: Int)
         case departurePlaceStationSearchRequested
+        case departurePlaceEditStationSearchRequested(id: Int)
     }
 
     public init() {}
@@ -323,6 +325,11 @@ public struct HomeTabFeature {
                 Log.debug("출발지 추가하기 버튼 클릭")
                 state.isMyDeparturePlaceEditSheetPresented = false
                 return .send(.delegate(.departurePlaceStationSearchRequested))
+
+            case let .editDeparturePlaceTapped(id):
+                Log.debug("출발지 수정하기 버튼 클릭: \(id)")
+                state.isMyDeparturePlaceEditSheetPresented = false
+                return .send(.delegate(.departurePlaceEditStationSearchRequested(id: id)))
 
             case .delegate, .destination:
                 return .none
