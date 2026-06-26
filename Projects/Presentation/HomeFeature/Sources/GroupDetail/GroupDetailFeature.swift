@@ -69,9 +69,20 @@ public struct GroupDetailFeature {
             case let .home(.delegate(.startPickPlace(isHost, meetingId))):
                 return .send(.delegate(.startPickPlace(isHost: isHost, meetingId: meetingId)))
 
+            case let .home(.delegate(.selectMyPlaceTab(place))):
+                state.selectedTabIndex = Constant.myPlaceTabIndex
+                return .send(.myPlace(.placeFocused(place)))
+
             case .home, .myPlace, .delegate:
                 return .none
             }
         }
     }
+}
+
+// MARK: - Constants
+
+private enum Constant {
+    /// `tabs == [.home, .myPlace]` 기준 MyPlaceTab 인덱스.
+    static let myPlaceTabIndex = 1
 }

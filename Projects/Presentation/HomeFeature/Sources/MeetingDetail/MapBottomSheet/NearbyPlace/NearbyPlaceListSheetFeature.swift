@@ -14,7 +14,6 @@ public struct NearbyPlaceListSheetFeature {
         public var selectedCategory: PlaceCategory = .all // 카테고리
         public var isParkingAvailableSelected = false // 주차 가능 여부
         public var isReservableSelected = false // 예약 가능여부
-        public var selectedPlaceDetail: SelectedPlaceDetailSheetFeature.State = .mock
 
         // MARK: - 장소보기(pickPlace) 용도 전용 상태
         /// 역별 추천 장소 그룹 목록. `PickPlaceFeature.onAppear`에서 API 응답으로 채워진다.
@@ -47,16 +46,11 @@ public struct NearbyPlaceListSheetFeature {
         case reservableFilterTapped
         case stationSelected(Int)
         case placeAddTapped(placeId: Int)
-        case selectedPlaceDetail(SelectedPlaceDetailSheetFeature.Action)
     }
 
     public init() {}
 
     public var body: some ReducerOf<Self> {
-        Scope(state: \.selectedPlaceDetail, action: \.selectedPlaceDetail) {
-            SelectedPlaceDetailSheetFeature()
-        }
-
         Reduce { state, action in
             switch action {
             case .categoryTapped(let category):
@@ -81,9 +75,6 @@ public struct NearbyPlaceListSheetFeature {
                 return .none
 
             case .placeAddTapped:
-                return .none
-
-            case .selectedPlaceDetail:
                 return .none
             }
         }

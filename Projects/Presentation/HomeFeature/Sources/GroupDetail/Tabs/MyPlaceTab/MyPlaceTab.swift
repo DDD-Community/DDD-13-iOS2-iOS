@@ -8,6 +8,7 @@ import SwiftUI
 import ComposableArchitecture
 
 import DesignSystem
+import Entity
 import Utill
 
 /// 모임 상세 "내 장소보기" 탭.
@@ -20,40 +21,67 @@ struct MyPlaceTab: View {
     /// 바텀시트가 화면 하단을 덮는 높이. detent에 따라 핀 포커싱 중심을 위로 보정하는 데 쓴다.
     @State private var sheetCoveredHeight: CGFloat = 0
 
+    /// 포커싱 대상이 있으면 그 좌표, 없으면 기본 중심.
+    private var mapCenter: MapCoordinate {
+        guard let place = store.focusedPlace else { return Constant.defaultCenter }
+
+        return MapCoordinate(latitude: place.latitude, longitude: place.longitude)
+    }
+
     var body: some View {
         ZStack(alignment: .bottom) {
-            KakaoMap(pins: pins, initialCenter: Constant.defaultCenter, focusBottomInset: sheetCoveredHeight)
-                .onPinTapped { pin in
-                    Log.debug("핀 선택: id=\(pin.id), title=\(pin.title), coordinate=(\(pin.coordinate.latitude), \(pin.coordinate.longitude))")
-                }
-                .onCenterChanged { viewport in
-                    Log.debug("중심 좌표 변경: center=(\(viewport.center.latitude), \(viewport.center.longitude)), zoomLevel=\(viewport.zoomLevel)")
-                }
-                .ignoresSafeArea()
-
+            KakaoMap(
+                pins: pins,
+                initialCenter: mapCenter,
+                focusBottomInset: sheetCoveredHeight
+            )
+            .onPinTapped { pin in
+                Log.debug("핀 선택: id=\(pin.id), title=\(pin.title), coordinate=(\(pin.coordinate.latitude), \(pin.coordinate.longitude))")
+            }
+            .onCenterChanged { viewport in
+                Log.debug("중심 좌표 변경: center=(\(viewport.center.latitude), \(viewport.center.longitude)), zoomLevel=\(viewport.zoomLevel)")
+            }
+            .ignoresSafeArea()
+            
             MapBottomSheet(
                 detents: [.collapsed, .ratio(0.5), .full],
-                initialDetent: .collapsed
+                initialDetent: .ratio(0.5)
             ) {
-                NearbyPlaceListSheet(
-                    store: store.scope(state: \.nearbyPlaceList, action: \.nearbyPlaceList)
-                )
+                if store.focusedPlace != nil {
+                    SelectedPlaceDetailSheet(
+                        store: store.scope(state: \.selectedPlaceDetail, action: \.selectedPlaceDetail)
+                    )
+                } else {
+                    NearbyPlaceListSheet(
+                        store: store.scope(state: \.nearbyPlaceList, action: \.nearbyPlaceList)
+                    )
+                }
             }
             .onVisibleHeightChanged { sheetCoveredHeight = $0 }
         }
-        .task {
-            buildSamplePins()
+        .task(id: store.focusedPlace) {
+            buildPins()
         }
     }
 
-    // MARK: - 디버깅용 임시 Pin 구성
+    // MARK: - Pin 구성
 
+    /// 포커싱 장소가 있으면 그 핀 하나만, 없으면 디버깅용 샘플 핀을 구성한다.
     @MainActor
-    private func buildSamplePins() {
-        pins = Constant.samplePlaces.map { place in
-            MapPinLabel(assetName: place.iconAsset, title: place.name)
-                .makePin(id: place.name, coordinate: place.coordinate)
+    private func buildPins() {
+        guard let place = store.focusedPlace else {
+            pins = Constant.samplePlaces.map { place in
+                MapPinLabel(assetName: place.iconAsset, title: place.name)
+                    .makePin(id: place.name, coordinate: place.coordinate)
+            }
+            return
         }
+
+        let coordinate = MapCoordinate(latitude: place.latitude, longitude: place.longitude)
+        pins = [
+            MapPinLabel(image: place.categoryLabel.pinIcon, title: place.name)
+                .makePin(id: String(place.placeId), coordinate: coordinate)
+        ]
     }
 }
 

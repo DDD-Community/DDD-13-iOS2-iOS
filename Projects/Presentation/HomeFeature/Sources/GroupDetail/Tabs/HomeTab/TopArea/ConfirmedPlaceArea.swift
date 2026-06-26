@@ -79,9 +79,10 @@ private struct Card: View {
             .aspectRatio(Metric.mapAspectRatio, contentMode: .fit)
             .frame(maxWidth: .infinity)
             .clipShape(RoundedRectangle(cornerRadius: BorderRadius.borderRadius400))
+            .padding(.horizontal, Spacing.spacing300)
             .allowsHitTesting(false)
         }
-        .padding(Spacing.spacing300)
+        .padding(.vertical, Spacing.spacing300)
         .background(
             RoundedRectangle(cornerRadius: Spacing.spacing300)
                 .fill(
@@ -93,6 +94,10 @@ private struct Card: View {
                     )
                 )
         )
+        .contentShape(Rectangle())
+        .onTapGesture {
+            store.send(.confirmedPlaceCardTapped)
+        }
         .task(id: place) {
             buildPins()
         }

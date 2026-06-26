@@ -129,12 +129,13 @@ public struct HomeTabFeature {
         case placeVoteSubmitResponse(Result<Void, Error>)
         case placeVoteParticipationTapped
         case placeDetailTapped
+        case confirmedPlaceCardTapped
         case delegate(Delegate)
         case destination(PresentationAction<Destination.Action>)
     }
 
     public enum Delegate: Equatable {
-        case selectMyPlaceTab
+        case selectMyPlaceTab(place: ConfirmedPlace)
         case meetingDateSelectionRequested(meetingId: Int)
         /// 장소 추천 시작 성공 → 장소 투표 후보 담기 화면으로 진입.
         case startPickPlace(isHost: Bool, meetingId: Int)
@@ -299,6 +300,11 @@ public struct HomeTabFeature {
 
             case .placeDetailTapped:
                 return .none
+
+            case .confirmedPlaceCardTapped:
+                guard let place = state.confirmedPlaceResult?.place else { return .none }
+
+                return .send(.delegate(.selectMyPlaceTab(place: place)))
 
             // 게스트 완료: 닫고 장소 투표 현황 재동기화
             case .destination(.presented(.placeVoteParticipation(.delegate(.completed)))):

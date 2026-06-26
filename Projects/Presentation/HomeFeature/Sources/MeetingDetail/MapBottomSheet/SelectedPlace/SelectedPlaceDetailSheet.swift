@@ -20,7 +20,10 @@ struct SelectedPlaceDetailSheet: View {
             SelectedPlaceDetailHeaderView(
                 name: store.name,
                 distanceText: store.distanceText,
-                categoryName: store.categoryName
+                categoryName: store.categoryName,
+                onClose: {
+                    store.send(.closeButtonTapped)
+                }
             )
                 .padding(.bottom, Spacing.spacing350)
             SelectedPlaceBusinessHoursView(
@@ -45,6 +48,7 @@ private struct SelectedPlaceDetailHeaderView: View {
     let name: String
     let distanceText: String
     let categoryName: String
+    let onClose: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -55,11 +59,13 @@ private struct SelectedPlaceDetailHeaderView: View {
 
                 Spacer()
 
-                Image.Asset.icClose24
-                    .resizable()
-                    .renderingMode(.template)
-                    .frame(width: 24, height: 24)
-                    .foregroundStyle(Colors.gray500)
+                Button(action: onClose) {
+                    Image.Asset.icClose24
+                        .resizable()
+                        .renderingMode(.template)
+                        .frame(width: 24, height: 24)
+                        .foregroundStyle(Colors.gray500)
+                }
             }
             .padding(.bottom, 4)
 
