@@ -28,6 +28,8 @@ public struct HomeTabFeature {
     @ObservableState
     public struct State: Equatable {
         public var group: Group
+        /// 진입 시 데이터 로드 진행 여부. 첫 프레임부터 `ProgressView`를 노출하기 위해 기본값은 `true`다.
+        public var isLoading = true
         /// `onAppear`에서 `fetchGroupDetail`로 로드하는 모임 상세. 멤버 리스트의 출발지/본인 여부/참여 상태를 제공한다.
         public var groupDetail: GroupDetail?
         /// 날짜 투표 중(`inProgress`/`before`)일 때 `fetchDateVote`로 로드하는 날짜 투표 현황.
@@ -112,6 +114,7 @@ public struct HomeTabFeature {
 
     public enum Action {
         case onAppear
+        case loadCompleted
         case groupDetailResponse(Result<GroupDetail, Error>)
         case dateVoteResponse(Result<DateVote, Error>)
         case placeVoteResponse(Result<PlaceVote, Error>)
@@ -129,24 +132,28 @@ public struct HomeTabFeature {
         case dateVoteSubmitResponse(Result<Void, Error>)
         case dateVoteConfirmTapped
         case dateVoteConfirmResponse(Result<Void, Error>)
-        case selectPlaceTapped
+        case pickPlaceTapped
         case placeRecommendationStartResponse(Result<Void, Error>)
         case placeVoteSubmitTapped(placeIds: [Int])
         case placeVoteSubmitResponse(Result<Void, Error>)
+        case placeVoteParticipationTapped
         case placeDetailTapped
         case addDeparturePlaceTapped // 바텀시트에서 출발지 추가하기 버튼 클릭 시
         case departurePlaceCardTapped(id: Int) // 출발지 수정 바텀시트에서 출발지 요소 클릭 시(id 전달하기)
         case setDefaultDeparturePlaceResponse(Result<DeparturePlace, Error>)
         case editDeparturePlaceTapped(id: Int)
+        case confirmedPlaceCardTapped
         case delegate(Delegate)
         case destination(PresentationAction<Destination.Action>)
     }
 
     public enum Delegate: Equatable {
-        case selectMyPlaceTab
+        case selectMyPlaceTab(place: ConfirmedPlace)
         case meetingDateSelectionRequested(meetingId: Int)
         case departurePlaceStationSearchRequested
         case departurePlaceEditStationSearchRequested(id: Int)
+        /// 장소 추천 시작 성공 → 장소 투표 후보 담기 화면으로 진입.
+        case startPickPlace(isHost: Bool, meetingId: Int)
     }
 
     public init() {}
@@ -155,10 +162,18 @@ public struct HomeTabFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                return .merge(
-                    fetchGroupDetailEffect(meetingId: state.group.meetingId),
-                    fetchVoteEffect(meetingId: state.group.meetingId, kind: state.homeTopAreaKind)
+                state.isLoading = true
+                return .concatenate(
+                    .merge(
+                        fetchGroupDetailEffect(meetingId: state.group.meetingId),
+                        fetchVoteEffect(meetingId: state.group.meetingId, kind: state.homeTopAreaKind)
+                    ),
+                    .send(.loadCompleted)
                 )
+
+            case .loadCompleted:
+                state.isLoading = false
+                return .none
 
             case let .groupDetailResponse(.success(detail)):
                 state.groupDetail = detail
@@ -284,8 +299,14 @@ public struct HomeTabFeature {
             case .dateVoteConfirmResponse(.failure):
                 return .none
 
-            case .selectPlaceTapped:
+            case .pickPlaceTapped:
                 guard state.homeTopAreaKind == .confirmedDate else { return .none }
+
+                // 이미 장소 추천이 시작된(recommended) 상태면 API 호출 없이 화면 전환만 한다.
+                let locationStatus = state.groupDetail?.locationStatus ?? state.group.locationStatus
+                guard locationStatus != .recommended else {
+                    return .send(.delegate(.startPickPlace(isHost: state.isMeHost, meetingId: state.group.meetingId)))
+                }
 
                 let client = placeRecommendationClient
                 let meetingId = state.group.meetingId
@@ -301,7 +322,9 @@ public struct HomeTabFeature {
                 }
 
             case .placeRecommendationStartResponse(.success):
-                return .send(.delegate(.selectMyPlaceTab))
+                let isHost = state.isMeHost
+                let meetingId = state.group.meetingId
+                return .send(.delegate(.startPickPlace(isHost: isHost, meetingId: meetingId)))
 
             case .placeRecommendationStartResponse(.failure):
                 return .none
@@ -319,6 +342,18 @@ public struct HomeTabFeature {
                 return fetchPlaceVoteEffect(meetingId: state.group.meetingId)
 
             case .placeVoteSubmitResponse(.failure):
+                return .none
+
+            case .placeVoteParticipationTapped:
+                guard let placeVote = state.placeVote else { return .none }
+
+                state.destination = .placeVoteParticipation(
+                    PlaceVoteParticipationFeature.State(
+                        meetingId: state.group.meetingId,
+                        placeVote: placeVote,
+                        members: state.groupDetail?.members ?? []
+                    )
+                )
                 return .none
 
             case .placeDetailTapped:
@@ -352,6 +387,27 @@ public struct HomeTabFeature {
                 Log.debug("출발지 수정하기 버튼 클릭: \(id)")
                 state.isMyDeparturePlaceEditSheetPresented = false
                 return .send(.delegate(.departurePlaceEditStationSearchRequested(id: id)))
+
+            case .confirmedPlaceCardTapped:
+                guard let place = state.confirmedPlaceResult?.place else { return .none }
+
+                return .send(.delegate(.selectMyPlaceTab(place: place)))
+
+            // 게스트 완료: 닫고 장소 투표 현황 재동기화
+            case .destination(.presented(.placeVoteParticipation(.delegate(.completed)))):
+                state.destination = nil
+                return .merge(
+                    fetchGroupDetailEffect(meetingId: state.group.meetingId),
+                    fetchPlaceVoteEffect(meetingId: state.group.meetingId)
+                )
+
+            // 호스트 확정: 닫고 모임 상태를 confirmedPlace로 전환 + 확정 결과 적재
+            case .destination(.presented(.placeVoteParticipation(.delegate(.placeConfirmed)))):
+                state.destination = nil
+                return .merge(
+                    fetchGroupDetailEffect(meetingId: state.group.meetingId),
+                    fetchConfirmedPlaceResultEffect(meetingId: state.group.meetingId)
+                )
 
             case .delegate, .destination:
                 return .none
@@ -506,5 +562,6 @@ extension HomeTabFeature {
     @Reducer(state: .equatable)
     public enum Destination {
         case dateVote(DateVoteFeature)
+        case placeVoteParticipation(PlaceVoteParticipationFeature)
     }
 }

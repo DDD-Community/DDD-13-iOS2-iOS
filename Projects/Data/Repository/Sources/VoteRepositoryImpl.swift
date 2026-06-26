@@ -54,10 +54,37 @@ public final class VoteRepositoryImpl: VoteRepositoryProtocol {
         )
     }
 
+    public func startPlaceVote(meetingId: Int, durationDays: Int) async throws {
+        let requestDTO = StartPlaceVoteRequestDTO(durationDays: durationDays)
+        try await NetworkManager.shared.requestVoid(
+            VoteEndpoint.startPlaceVote(meetingId: meetingId, requestDTO)
+        )
+    }
+
     public func submitPlaceVote(meetingId: Int, placeIds: [Int]) async throws {
         let requestDTO = SubmitPlaceVoteRequestDTO(placeIds: placeIds)
         try await NetworkManager.shared.requestVoid(
             VoteEndpoint.submitPlaceVote(meetingId: meetingId, requestDTO)
         )
+    }
+
+    public func confirmPlaceVote(meetingId: Int) async throws {
+        try await NetworkManager.shared.requestVoid(
+            VoteEndpoint.confirmPlaceVote(meetingId: meetingId)
+        )
+    }
+
+    public func fetchPlaceVoteTravelBurden(meetingId: Int, placeId: Int) async throws -> PlaceVoteTravelBurden {
+        let response: PlaceVoteTravelBurdenResponseDTO = try await NetworkManager.shared.request(
+            VoteEndpoint.fetchPlaceVoteTravelBurden(meetingId: meetingId, placeId: placeId)
+        )
+        return response.toEntity()
+    }
+
+    public func fetchPlaceVoteParticipants(meetingId: Int) async throws -> [PlaceVoteParticipant] {
+        let response: PlaceVoteParticipantsResponseDTO = try await NetworkManager.shared.request(
+            VoteEndpoint.fetchPlaceVoteParticipants(meetingId: meetingId)
+        )
+        return response.toEntity()
     }
 }

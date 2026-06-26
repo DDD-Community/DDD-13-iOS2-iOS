@@ -11,6 +11,14 @@ enum PlaceRecommendationFactory {
     static func makeClient() -> PlaceRecommendationClient {
         let repository = PlaceRecommendationRepositoryImpl()
         let startPlaceRecommendationUseCase = StartPlaceRecommendationUseCaseImpl(repository: repository)
-        return .live(startPlaceRecommendationUseCase: startPlaceRecommendationUseCase)
+        let midpointRepository = MidpointStationRepositoryImpl()
+        let fetchUseCase = FetchStationRecommendationsUseCaseImpl(
+            midpointRepository: midpointRepository,
+            recommendationRepository: repository
+        )
+        return .live(
+            startPlaceRecommendationUseCase: startPlaceRecommendationUseCase,
+            fetchUseCase: fetchUseCase
+        )
     }
 }

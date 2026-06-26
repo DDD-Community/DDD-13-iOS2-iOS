@@ -17,43 +17,28 @@ import Utill
 struct LocationVoteArea: View {
     let store: StoreOf<HomeTabFeature>
 
-    // 다시 투표하기로 진입한 재선택 모드 등 서버 투표 여부와 무관한 로컬 인터랙션 상태.
-    @State private var selection = LocationVoteSelection()
+    /// 후보 좌표로 구성한 지도 핀. `candidates` 변경 시 `.task`에서 재구성한다.
+    @State private var pins: [MapPin] = []
+    /// 후보 좌표들의 bounding box 중심. `candidates` 변경 시 `.task`에서 갱신한다.
+    @State private var mapCenter: MapCoordinate = Constant.defaultCenter
 
     private var candidates: [PlaceVoteCandidate] {
         store.placeVote?.candidates ?? []
     }
 
-    private var maxVoteCount: Int { candidates.map(\.voteCount).max() ?? 0 }
-
-    private var hasVoted: Bool {
-        store.hasVotedPlace && !selection.isRevoting
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            LocationVoteTopArea(
-                hasVoted: hasVoted,
-                deadlineLabel: PlaceVoteFormatter.deadlineLabel(store.placeVote?.deadline),
-                totalParticipants: store.placeVote?.totalParticipants ?? 0,
-                votedCount: store.placeVote?.votedCount ?? 0
+            TitleArea(deadline: store.placeVote?.deadline)
+
+            MapArea(
+                pins: pins,
+                mapCenter: mapCenter,
+                totalParticipants: store.placeVote?.totalParticipants ?? 0
             )
 
-            LocationVoteList(
-                candidates: candidates,
-                hasVoted: hasVoted,
-                selectedPlaceIds: selection.placeIds,
-                maxVoteCount: maxVoteCount,
-                onSelect: { selection.toggle($0) },
-                onDetail: { store.send(.placeDetailTapped) }
-            )
-
-            LocationVoteConfirmArea(
-                hasVoted: hasVoted,
-                canVote: selection.hasSelection,
-                onVote: submitVote,
-                onRevote: { selection.startRevote(myVotedIds: store.myVotedPlaceIds) }
-            )
+            VoteButton(hasVotedPlace: store.hasVotedPlace) {
+                store.send(.placeVoteParticipationTapped)
+            }
         }
         .padding(.vertical, Spacing.spacing300)
         .padding(.horizontal, Spacing.spacing350)
@@ -64,230 +49,201 @@ struct LocationVoteArea: View {
         .padding(.horizontal, Spacing.spacing400)
         .padding(.top, Spacing.spacing400)
         .padding(.bottom, Spacing.spacing500)
-        .onChange(of: store.placeVote, initial: true) { _, newValue in
-            guard let newValue else { return }
-
-            selection.sync(myVotedIds: Set(newValue.candidates.filter(\.isMyVote).map(\.id)))
+        .task(id: candidates) {
+            buildPins()
         }
     }
 
-    private func submitVote() {
-        switch selection.resolveSubmit(myVotedIds: store.myVotedPlaceIds) {
-        case .skip:
-            return
+    /// 후보 좌표로 핀·지도 중심을 한 번에 계산해 `@State`에 캐싱한다.
+    @MainActor
+    private func buildPins() {
+        let coordinates = candidates.compactMap { candidate -> MapCoordinate? in
+            guard
+                let latitude = candidate.latitude,
+                let longitude = candidate.longitude
+            else { return nil }
 
-        case let .submit(placeIds):
-            store.send(.placeVoteSubmitTapped(placeIds: placeIds))
+            return MapCoordinate(latitude: latitude, longitude: longitude)
         }
+
+        pins = candidates.compactMap { candidate in
+            guard
+                let latitude = candidate.latitude,
+                let longitude = candidate.longitude
+            else { return nil }
+
+            return MapPinLabel(image: candidate.categoryLabel.pinIcon, title: candidate.name)
+                .makePin(
+                    id: String(candidate.id),
+                    coordinate: MapCoordinate(latitude: latitude, longitude: longitude)
+                )
+        }
+        mapCenter = Self.center(of: coordinates)
+    }
+
+    /// 후보 좌표들의 bounding box 중심. 좌표가 없으면 기본 중심을 반환한다.
+    private static func center(of coordinates: [MapCoordinate]) -> MapCoordinate {
+        guard !coordinates.isEmpty else { return Constant.defaultCenter }
+
+        let latitudes = coordinates.map(\.latitude)
+        let longitudes = coordinates.map(\.longitude)
+        let centerLatitude = ((latitudes.min() ?? 0) + (latitudes.max() ?? 0)) / 2
+        let centerLongitude = ((longitudes.min() ?? 0) + (longitudes.max() ?? 0)) / 2
+
+        return MapCoordinate(latitude: centerLatitude, longitude: centerLongitude)
     }
 }
 
-// MARK: - Location Vote Top Area
+// MARK: - Title Area
 
-private struct LocationVoteTopArea: View {
-    let hasVoted: Bool
-    let deadlineLabel: String
-    let totalParticipants: Int
-    let votedCount: Int
-
-    private var descriptionText: String {
-        hasVoted
-            ? "모임원 \(totalParticipants)명 / 참여 \(votedCount)명"
-            : deadlineLabel
-    }
+private struct TitleArea: View {
+    let deadline: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.spacing100) {
-            BangawoText("장소 투표하기", textStyle: .titleMediumEmphasized)
-                .foregroundStyle(Colors.gray900)
+            BangawoText("약속 장소 투표하기", textStyle: .titleMedium)
+                .foregroundStyle(Colors.gray800)
 
-            BangawoText(descriptionText, textStyle: .bodyXSmall)
-                .foregroundStyle(Colors.gray600)
+            DeadlineDescription(deadline: deadline)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.top, Spacing.spacing200)
-        .padding(.bottom, Spacing.spacing300)
+        .padding(.top, Spacing.spacing100)
+        .padding(.bottom, Spacing.spacing200)
     }
 }
 
-// MARK: - Location Vote List
+// MARK: - Deadline Description
 
-private struct LocationVoteList: View {
-    let candidates: [PlaceVoteCandidate]
-    let hasVoted: Bool
-    let selectedPlaceIds: Set<Int>
-    let maxVoteCount: Int
-    let onSelect: (Int) -> Void
-    let onDetail: () -> Void
+private struct DeadlineDescription: View {
+    let deadline: String?
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            ForEach(candidates) { candidate in
-                LocationVoteRow(
-                    candidate: candidate,
-                    hasVoted: hasVoted,
-                    isSelected: selectedPlaceIds.contains(candidate.id),
-                    isFirstPlace: maxVoteCount > 0 && candidate.voteCount == maxVoteCount,
-                    onSelect: { onSelect(candidate.id) },
-                    onDetail: onDetail
-                )
-            }
-        }
-    }
-}
-
-// MARK: - Location Vote Row
-
-private struct LocationVoteRow: View {
-    let candidate: PlaceVoteCandidate
-    let hasVoted: Bool
-    let isSelected: Bool
-    let isFirstPlace: Bool
-    let onSelect: () -> Void
-    let onDetail: () -> Void
-
-    var body: some View {
-        if hasVoted {
-            LocationVoteVotedRow(candidate: candidate, isFirstPlace: isFirstPlace)
-        } else {
-            LocationVoteUnvotedRow(
-                candidate: candidate,
-                isSelected: isSelected,
-                onSelect: onSelect,
-                onDetail: onDetail
-            )
-        }
-    }
-}
-
-// MARK: - Location Vote Unvoted Row
-
-private struct LocationVoteUnvotedRow: View {
-    let candidate: PlaceVoteCandidate
-    let isSelected: Bool
-    let onSelect: () -> Void
-    let onDetail: () -> Void
-
-    var body: some View {
-        HStack(spacing: Spacing.spacing250) {
-            Button(action: onSelect) {
-                HStack(spacing: Spacing.spacing250) {
-                    Checkbox(variant: .circle, state: isSelected ? .enabled : .disabled, size: .small)
-
-                    LocationVotePlaceInfo(candidate: candidate)
-                }
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-
-            BangawoButton("자세히", variant: .weak, size: .xsmall, action: onDetail)
-        }
-        .padding(.vertical, Spacing.spacing300)
-    }
-}
-
-// MARK: - Location Vote Voted Row
-
-private struct LocationVoteVotedRow: View {
-    let candidate: PlaceVoteCandidate
-    let isFirstPlace: Bool
-
-    private var voteStatusText: String {
-        isFirstPlace
-            ? "1위 / \(candidate.voteCount)명 투표"
-            : "\(candidate.voteCount)명 투표"
-    }
-
-    var body: some View {
-        HStack(spacing: Spacing.spacing250) {
-            LocationVotePlaceInfo(candidate: candidate)
-
-            BangawoText(voteStatusText, textStyle: .labelSmallEmphasized)
-                .foregroundStyle(isFirstPlace ? Colors.blue600 : Colors.gray700)
-        }
-        .padding(.vertical, Spacing.spacing300)
-        .padding(.horizontal, Spacing.spacing250)
-        .background(
-            RoundedRectangle(cornerRadius: BorderRadius.borderRadius250)
-                .fill(isFirstPlace ? Colors.blue100 : .clear)
-        )
-    }
-}
-
-// MARK: - Location Vote Place Info
-
-private struct LocationVotePlaceInfo: View {
-    let candidate: PlaceVoteCandidate
-
-    var body: some View {
-        HStack(spacing: Spacing.spacing250) {
-            // TODO: 장소 상세(이름/주소/카테고리) API 연동 시 placeId 노출·임시 아이콘 교체
-            Constant.placeholderIcon
-                .resizable()
-                .frame(width: Sizing.sizing300, height: Sizing.sizing300)
-                .clipShape(Circle())
-
-            VStack(alignment: .leading, spacing: Spacing.spacing50) {
-                BangawoText("\(candidate.placeId)", textStyle: .bodyMediumEmphasized)
-                    .foregroundStyle(Colors.gray800)
-
-                BangawoText("\(candidate.placeId)", textStyle: .bodySmall)
-                    .foregroundStyle(Colors.gray700)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-    }
-}
-
-// MARK: - Location Vote Confirm Area
-
-private struct LocationVoteConfirmArea: View {
-    let hasVoted: Bool
-    let canVote: Bool
-    let onVote: () -> Void
-    let onRevote: () -> Void
+    @State private var now = Date()
 
     var body: some View {
         Group {
-            if hasVoted {
-                BangawoButton("다시 투표하기", variant: .weak, size: .medium, widthType: .maxWidth, action: onRevote)
-            } else {
-                BangawoButton(
-                    "투표하기",
-                    variant: .solid,
-                    size: .medium,
-                    widthType: .maxWidth,
-                    isDisabled: !canVote,
-                    action: onVote
-                )
+            if let remaining = remaining(now: now) {
+                if remaining.isExpired {
+                    BangawoText("투표 종료", textStyle: .bodySmall)
+                        .foregroundStyle(Colors.gray700)
+                } else {
+                    HStack(spacing: 0) {
+                        BangawoText(timeText(for: remaining), textStyle: .bodySmall)
+                            .foregroundStyle(Colors.orange600)
+
+                        BangawoText(" 후 종료", textStyle: .bodySmall)
+                            .foregroundStyle(Colors.gray700)
+                    }
+                }
             }
         }
+        .onReceive(Countdown.everySecond) { now = $0 }
+    }
+
+    /// 마감 문자열을 UTC instant로 파싱해 잔여 시간을 계산한다. 파싱 실패 시 nil(표시 안 함).
+    private func remaining(now: Date) -> Countdown.Remaining? {
+        guard
+            let deadline,
+            let date = DateFormatterStore.date(
+                from: deadline,
+                format: "yyyy-MM-dd'T'HH:mm:ss",
+                locale: "en_US_POSIX",
+                timeZone: "UTC"
+            )
+        else { return nil }
+
+        return Countdown.remaining(until: date, now: now)
+    }
+
+    /// "{N일 }HH:MM:SS" 형식의 잔여 시간 텍스트.
+    private func timeText(for remaining: Countdown.Remaining) -> String {
+        remaining.days > 0
+            ? "\(remaining.days)일 \(remaining.clockText)"
+            : remaining.clockText
+    }
+}
+
+// MARK: - Map Area
+
+private struct MapArea: View {
+    let pins: [MapPin]
+    let mapCenter: MapCoordinate
+    let totalParticipants: Int
+
+    var body: some View {
+        KakaoMap(
+            pins: pins,
+            initialCenter: mapCenter,
+            initialZoomLevel: Constant.pinZoomLevelLimit,
+            fitsToPins: true
+        )
+        .allowsHitTesting(false)
+        .clipShape(RoundedRectangle(cornerRadius: BorderRadius.borderRadius400))
+        .overlay(alignment: .bottom) {
+            ParticipantLabel(totalParticipants: totalParticipants)
+                .padding(.bottom, Metric.participantLabelBottomInset)
+        }
+        .aspectRatio(Metric.mapAspectRatio, contentMode: .fit)
+        .frame(maxWidth: .infinity)
+    }
+}
+
+// MARK: - Participant Label
+
+private struct ParticipantLabel: View {
+    let totalParticipants: Int
+
+    var body: some View {
+        HStack(spacing: Spacing.spacing100) {
+            AssetPack(avatarTypes: avatarTypes)
+
+            BangawoText("현재 \(totalParticipants)명 참여 중", textStyle: .bodySmall)
+                .foregroundStyle(Colors.gray700)
+        }
+        .padding(.vertical, Spacing.spacing150)
+        .padding(.horizontal, Spacing.spacing250)
+        .background(Capsule().fill(Colors.gray00))
+        .overlay(
+            Capsule().stroke(Colors.gray100, lineWidth: BorderWidth.borderWidth100)
+        )
+        .tokenShadow(BoxShadow.boxShadow100)
+    }
+
+    private var avatarTypes: [Avatar.AvatarType] {
+        Array(repeating: .placeholder, count: min(totalParticipants, AssetPack.Metric.maxVisible))
+    }
+}
+
+// MARK: - Vote Button
+
+private struct VoteButton: View {
+    let hasVotedPlace: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        BangawoButton(
+            hasVotedPlace ? "다시 투표하기" : "약속 장소 투표하기",
+            variant: hasVotedPlace ? .weak : .solid,
+            size: .medium,
+            widthType: .maxWidth,
+            action: onTap
+        )
         .padding(.top, Spacing.spacing300)
         .padding(.bottom, Spacing.spacing200)
     }
 }
 
-// MARK: - Place Vote Formatter
-
-private enum PlaceVoteFormatter {
-    static func deadlineLabel(_ raw: String?) -> String {
-        guard
-            let raw,
-            let date = DateFormatterStore.date(
-                from: raw,
-                format: "yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX",
-                locale: "en_US_POSIX",
-                timeZone: "UTC"
-            )
-        else { return "" }
-
-        return "\(DateFormatterStore.string(from: date, format: "yyyy. MM. dd HH:mm"))까지 투표할 수 있어요"
-    }
-}
-
 // MARK: - Constants
 
+private enum Metric {
+    /// 지도 가로:세로 비율 (가로 287 / 세로 160).
+    static let mapAspectRatio: CGFloat = 287.0 / 160.0
+    /// 참여 라벨을 지도 하단에서 띄우는 여백.
+    static let participantLabelBottomInset: CGFloat = 14
+}
+
 private enum Constant {
-    // TODO: 장소 카테고리 API 연동 시 카테고리별 아이콘으로 교체
-    static let placeholderIcon = Image.Asset.icMapPinRestaurant
+    /// 후보 좌표가 없을 때 사용하는 기본 지도 중심(서울 시청).
+    static let defaultCenter = MapCoordinate(latitude: 37.5665, longitude: 126.9780)
+    /// 핀 fit 시 카메라 최대 확대 레벨(levelLimit). 핀이 1개이거나 밀집한 경우 과도한 확대를 막는다.
+    static let pinZoomLevelLimit = 16
 }

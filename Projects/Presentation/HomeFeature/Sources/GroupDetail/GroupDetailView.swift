@@ -43,6 +43,7 @@ public struct GroupDetailView: View {
         }
         .background(Colors.gray200)
         .toolbar(.hidden, for: .navigationBar)
+        .task { store.send(.home(.onAppear)) }
     }
 
     private var tabBinding: Binding<Int> {
@@ -59,12 +60,17 @@ private struct TabContent: View {
     let store: StoreOf<GroupDetailFeature>
 
     var body: some View {
-        switch store.selectedTab {
-        case .home:
-            HomeTab(store: store.scope(state: \.home, action: \.home))
+        if store.home.isLoading {
+            ProgressView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            switch store.selectedTab {
+            case .home:
+                HomeTab(store: store.scope(state: \.home, action: \.home))
 
-        case .myPlace:
-            MyPlaceTab(store: store.scope(state: \.myPlace, action: \.myPlace))
+            case .myPlace:
+                MyPlaceTab(store: store.scope(state: \.myPlace, action: \.myPlace))
+            }
         }
     }
 }

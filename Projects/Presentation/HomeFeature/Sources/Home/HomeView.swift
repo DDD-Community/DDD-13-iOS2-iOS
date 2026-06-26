@@ -95,6 +95,9 @@ public struct HomeView: View {
 
             case let .stationSearch(stationSearchStore):
                 StationSearchSheet(store: stationSearchStore)
+
+            case let .pickPlace(pickPlaceStore):
+                PickPlaceView(store: pickPlaceStore)
             }
         }
     }
@@ -328,11 +331,11 @@ private struct GroupMemberArea: View {
     var body: some View {
         HStack(spacing: Spacing.spacing200) {
             HStack(spacing: Spacing.spacing100) {
-                MemberAvatarStack(members: group.members)
+                AssetPack(avatarTypes: group.members.map(avatarType(for:)))
 
-                if group.memberCount > MemberAvatarStack.Metric.maxVisible {
+                if group.memberCount > AssetPack.Metric.maxVisible {
                     BangawoText(
-                        "외 \(group.memberCount - MemberAvatarStack.Metric.maxVisible)명",
+                        "외 \(group.memberCount - AssetPack.Metric.maxVisible)명",
                         textStyle: .bodySmall
                     )
                     .foregroundStyle(Colors.gray700)
@@ -351,26 +354,6 @@ private struct GroupMemberArea: View {
             Rectangle()
                 .fill(Colors.gray200)
                 .frame(height: BorderWidth.borderWidth100)
-        }
-    }
-}
-
-// MARK: - Member Avatar Stack
-
-private struct MemberAvatarStack: View {
-    let members: [GroupMember]
-
-    enum Metric {
-        static let maxVisible: Int = 4
-        static let overlap: CGFloat = 6
-    }
-
-    var body: some View {
-        HStack(spacing: -Metric.overlap) {
-            ForEach(Array(members.prefix(Metric.maxVisible).enumerated()), id: \.element.id) { index, member in
-                Avatar(avatarType: avatarType(for: member), size: .s24)
-                    .zIndex(Double(index))
-            }
         }
     }
 

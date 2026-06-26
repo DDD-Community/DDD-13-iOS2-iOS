@@ -11,6 +11,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
     let pins: [MapPin]
     let initialCenter: MapCoordinate
     let initialZoomLevel: Int
+    let fitsToPins: Bool
     let focusedCoordinate: MapCoordinate?
     let focusBottomInset: CGFloat
     var onPinTapped: ((MapPin) -> Void)?
@@ -64,6 +65,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             pins: pins,
             initialCenter: initialCenter,
             initialZoomLevel: initialZoomLevel,
+            fitsToPins: fitsToPins,
             focusedCoordinate: focusedCoordinate,
             focusBottomInset: focusBottomInset,
             onPinTapped: onPinTapped,
@@ -93,6 +95,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
 
         private let initialCenter: MapCoordinate
         private let initialZoomLevel: Int
+        private let fitsToPins: Bool
 
         private var currentRoutes: [MapRoute] = []
         private var currentPins: [MapPin] = []
@@ -108,6 +111,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             pins: [MapPin],
             initialCenter: MapCoordinate,
             initialZoomLevel: Int,
+            fitsToPins: Bool,
             focusedCoordinate: MapCoordinate?,
             focusBottomInset: CGFloat,
             onPinTapped: ((MapPin) -> Void)?,
@@ -119,6 +123,7 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             self.pendingFocusBottomInset = focusBottomInset
             self.initialCenter = initialCenter
             self.initialZoomLevel = initialZoomLevel
+            self.fitsToPins = fitsToPins
             self.onPinTapped = onPinTapped
             self.onCenterChanged = onCenterChanged
         }
@@ -229,7 +234,24 @@ struct KakaoMapRepresentable: UIViewRepresentable {
             if pendingPins != currentPins {
                 applyPins(pendingPins, on: mapView)
                 currentPins = pendingPins
+                applyAreaFit(on: mapView)
             }
+        }
+
+        // fitsToPins가 true면 모든 핀이 보이는 최대 레벨 위치로 카메라를 이동한다.
+        // AreaRect(points:)로 핀 좌표 bounding box를 만들고
+        // CameraUpdate.make(area:levelLimit:)로 범위가 가득 차는 위치를 구한다.
+        // levelLimit은 initialZoomLevel을 상한으로 사용해, 핀이 1개이거나 밀집한 경우
+        // 과도한 확대를 막는다.
+        private func applyAreaFit(on mapView: KakaoMapsSDK.KakaoMap) {
+            guard fitsToPins, !currentPins.isEmpty else { return }
+
+            let points = currentPins.map {
+                MapPoint(longitude: $0.coordinate.longitude, latitude: $0.coordinate.latitude)
+            }
+            let area = AreaRect(points: points)
+            let cameraUpdate = CameraUpdate.make(area: area, levelLimit: initialZoomLevel)
+            mapView.moveCamera(cameraUpdate, callback: nil)
         }
 
         // 포커스 좌표가 갱신되면 해당 위치로 카메라를 애니메이션 이동한다.

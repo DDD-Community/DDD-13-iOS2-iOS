@@ -88,3 +88,6 @@ README.md
 # Claude Code
 CLAUDE.md
 .claude/
+
+# Claude feature 오케스트레이션용 휘발성 스펙
+.claude/specs/

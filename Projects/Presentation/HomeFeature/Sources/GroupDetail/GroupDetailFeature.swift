@@ -42,6 +42,8 @@ public struct GroupDetailFeature {
             case meetingDateSelectionRequested(meetingId: Int)
             case departurePlaceStationSearchRequested
             case departurePlaceEditStationSearchRequested(id: Int)
+        /// 장소 투표 후보 담기 화면으로 진입.
+        case startPickPlace(isHost: Bool, meetingId: Int)
         }
     }
 
@@ -62,10 +64,6 @@ public struct GroupDetailFeature {
                 state.selectedTabIndex = index
                 return .none
 
-            case .home(.delegate(.selectMyPlaceTab)):
-                state.selectedTabIndex = 1
-                return .none
-
             case let .home(.delegate(.meetingDateSelectionRequested(meetingId))):
                 Log.debug("약속정하기 클릭")
                 return .send(.delegate(.meetingDateSelectionRequested(meetingId: meetingId)))
@@ -76,12 +74,23 @@ public struct GroupDetailFeature {
             case let .home(.delegate(.departurePlaceEditStationSearchRequested(id))):
                 return .send(.delegate(.departurePlaceEditStationSearchRequested(id: id)))
 
-            case .home, .myPlace:
-                return .none
+            case let .home(.delegate(.startPickPlace(isHost, meetingId))):
+                return .send(.delegate(.startPickPlace(isHost: isHost, meetingId: meetingId)))
 
-            case .delegate:
+            case let .home(.delegate(.selectMyPlaceTab(place))):
+                state.selectedTabIndex = Constant.myPlaceTabIndex
+                return .send(.myPlace(.placeFocused(place)))
+
+            case .home, .myPlace, .delegate:
                 return .none
             }
         }
     }
+}
+
+// MARK: - Constants
+
+private enum Constant {
+    /// `tabs == [.home, .myPlace]` 기준 MyPlaceTab 인덱스.
+    static let myPlaceTabIndex = 1
 }

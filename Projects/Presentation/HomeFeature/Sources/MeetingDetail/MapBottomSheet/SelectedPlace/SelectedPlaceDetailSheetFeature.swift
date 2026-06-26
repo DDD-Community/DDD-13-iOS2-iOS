@@ -4,6 +4,7 @@
 //
 
 import ComposableArchitecture
+import Entity
 import Foundation
 import UIKit
 
@@ -53,6 +54,8 @@ public struct SelectedPlaceDetailSheetFeature {
     }
 
     public enum Action: Equatable {
+        case placeFocused(ConfirmedPlace)
+        case closeButtonTapped
         case naverMapButtonTapped
     }
 
@@ -61,6 +64,21 @@ public struct SelectedPlaceDetailSheetFeature {
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
+            case let .placeFocused(place):
+                state = State(
+                    name: place.name,
+                    distanceText: Constant.placeholder,
+                    categoryName: place.categoryLabel.title,
+                    closedDayText: Constant.placeholder,
+                    businessHoursText: Constant.placeholder,
+                    roadAddress: place.address,
+                    lotAddress: Constant.placeholder
+                )
+                return .none
+
+            case .closeButtonTapped:
+                return .none
+
             case .naverMapButtonTapped:
                 let query = state.naverMapSearchQuery
                 return .run { _ in
@@ -69,6 +87,13 @@ public struct SelectedPlaceDetailSheetFeature {
             }
         }
     }
+}
+
+// MARK: - Constants
+
+private enum Constant {
+    /// `ConfirmedPlace`에 대응 정보가 없는 필드의 표시값.
+    static let placeholder = "-"
 }
 
 @MainActor

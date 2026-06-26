@@ -12,9 +12,7 @@ import Utill
 
 @main
 struct BangawoApp: App {
-    private let store = Store(initialState: RootFeature.State()) {
-        RootFeature()
-    }
+    private let store: StoreOf<RootFeature>
 
     init() {
         let appKey = AppEnvironment.kakaoAppKey
@@ -30,8 +28,13 @@ struct BangawoApp: App {
             $0.groupClient = GroupFactory.makeClient()
             $0.voteClient = VoteFactory.makeClient()
             $0.placeRecommendationClient = PlaceRecommendationFactory.makeClient()
+            $0.placePickClient = PlacePickFactory.makeClient()
             $0.themeTagClient = ThemeTagFactory.makeClient()
             $0.departurePlaceClient = DeparturePlaceFactory.makeClient()
+        }
+
+        store = Store(initialState: RootFeature.State()) {
+            RootFeature()
         }
 
         initializeNaverLoginSDK()
