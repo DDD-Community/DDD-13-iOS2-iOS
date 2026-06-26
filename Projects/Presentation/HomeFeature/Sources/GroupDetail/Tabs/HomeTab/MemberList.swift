@@ -115,19 +115,9 @@ private struct MemberRow: View {
 
     @ViewBuilder
     private var cardContent: some View {
-        if isMe {
-            Button(action: onCardTap) {
-                memberInfo
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, Spacing.spacing300)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-        } else {
-            memberInfo
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.vertical, Spacing.spacing300)
-        }
+        memberInfo
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, Spacing.spacing300)
     }
 
     private var memberInfo: some View {
@@ -144,11 +134,35 @@ private struct MemberRow: View {
                     }
                 }
 
-                BangawoText(departureLabel, textStyle: .bodyMedium)
-                    .foregroundStyle(Colors.gray700)
+                departureContent
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+    }
+
+    @ViewBuilder
+    private var departureContent: some View {
+        if isMe {
+            Button(action: onCardTap) {
+                HStack(spacing: Spacing.spacing100) {
+                    departureText
+
+                    Image.Asset.icArrowSmallRight24
+                        .resizable()
+                        .frame(width: Sizing.sizing200, height: Sizing.sizing200)
+                        .foregroundStyle(Colors.gray700)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        } else {
+            departureText
+        }
+    }
+
+    private var departureText: some View {
+        BangawoText(departureLabel, textStyle: .bodyMedium)
+            .foregroundStyle(Colors.gray700)
     }
 
     /// 기본 출발지(없으면 첫 출발지)의 장소명. 출발지가 없으면 안내 문구를 노출한다.

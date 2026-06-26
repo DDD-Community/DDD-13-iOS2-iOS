@@ -5,6 +5,7 @@
 
 import ComposableArchitecture
 import DesignSystem
+import Entity
 import SwiftUI
 import Utill
 
@@ -14,12 +15,12 @@ struct MyDeparturePlaceEditSheetContent: View {
     var body: some View {
         VStack(spacing: Spacing.spacing400) {
             VStack(spacing: Spacing.spacing200) {
-                ForEach(Constant.departurePlaces) { departurePlace in
+                ForEach(departurePlaces) { departurePlace in
                     DeparturePlaceRow(
-                        stationName: departurePlace.stationName,
-                        address: departurePlace.address,
+                        placeName: departurePlace.placeName,
+                        roadAddress: departurePlace.roadAddress,
                         onEditTap: {
-                            Log.debug("수정 버튼 클릭")
+                            Log.debug("출발지 수정 버튼 클릭: \(departurePlace.id)")
                         }
                     )
                 }
@@ -27,7 +28,7 @@ struct MyDeparturePlaceEditSheetContent: View {
             .frame(maxWidth: .infinity, alignment: .leading)
 
             AddDeparturePlaceButton(onTap: {
-                Log.debug("출발지 추가하기 버튼 클릭")
+                store.send(.addDeparturePlaceTapped)
             })
         }
         .padding(.horizontal, Metric.horizontalPadding)
@@ -37,13 +38,17 @@ struct MyDeparturePlaceEditSheetContent: View {
     private enum Metric {
         static let horizontalPadding: CGFloat = -Spacing.spacing250
     }
+
+    private var departurePlaces: [DeparturePlace] {
+        store.groupDetail?.members.first(where: \.isMe)?.departurePlaces ?? []
+    }
 }
 
 // MARK: - DeparturePlaceRow
 
 private struct DeparturePlaceRow: View {
-    let stationName: String
-    let address: String
+    let placeName: String
+    let roadAddress: String
     let onEditTap: () -> Void
 
     var body: some View {
@@ -55,11 +60,11 @@ private struct DeparturePlaceRow: View {
                 .foregroundStyle(Colors.gray600)
 
             VStack(alignment: .leading, spacing: Spacing.spacing50) {
-                BangawoText(stationName, textStyle: .bodyMedium)
+                BangawoText(placeName, textStyle: .bodyMedium)
                     .foregroundStyle(Colors.gray900)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                BangawoText(address, textStyle: .bodySmall)
+                BangawoText(roadAddress, textStyle: .bodySmall)
                     .foregroundStyle(Colors.gray700)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -123,33 +128,5 @@ private struct AddDeparturePlaceButton: View {
     private enum Metric {
         static let iconLength: CGFloat = 24
         static let allPadding: CGFloat = 16
-    }
-}
-
-// MARK: - Constant
-
-private enum Constant {
-    static let departurePlaces: [DeparturePlaceItem] = [
-        .init(
-            stationName: "강남역",
-            address: "서울 강남구 강남대로 396"
-        ),
-        .init(
-            stationName: "홍대입구역",
-            address: "서울 마포구 양화로 188"
-        ),
-        .init(
-            stationName: "성수역",
-            address: "서울 성동구 아차산로 100"
-        )
-    ]
-
-    struct DeparturePlaceItem: Identifiable {
-        let stationName: String
-        let address: String
-
-        var id: String {
-            stationName
-        }
     }
 }

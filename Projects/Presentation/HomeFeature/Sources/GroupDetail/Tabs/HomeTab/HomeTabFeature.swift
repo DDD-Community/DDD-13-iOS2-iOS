@@ -118,6 +118,7 @@ public struct HomeTabFeature {
         case myAttendanceBadgeTapped
         case myAttendanceStatusSheetDismissed
         case myAttendanceStatusSelected(AttendanceStatus)
+        case myAttendanceStatusUpdateResponse(Result<AttendanceStatus, Error>)
         case myMemberCardTapped // 나 카드 영역 터치 시(참석여부 버튼 제외)
         case myDeparturePlaceEditSheetDismissed // 출발지 수정 닫혔을 때 액션
         case decidePlaceTapped
@@ -132,6 +133,7 @@ public struct HomeTabFeature {
         case placeVoteSubmitTapped(placeIds: [Int])
         case placeVoteSubmitResponse(Result<Void, Error>)
         case placeDetailTapped
+        case addDeparturePlaceTapped // 바텀시트에서 출발지 추가하기 버튼 클릭 시
         case delegate(Delegate)
         case destination(PresentationAction<Destination.Action>)
     }
@@ -139,6 +141,7 @@ public struct HomeTabFeature {
     public enum Delegate: Equatable {
         case selectMyPlaceTab
         case meetingDateSelectionRequested(meetingId: Int)
+        case departurePlaceStationSearchRequested
     }
 
     public init() {}
@@ -193,9 +196,25 @@ public struct HomeTabFeature {
                 return .none
 
             case let .myAttendanceStatusSelected(status):
+                let groupId = state.group.id
+                let client = groupClient
                 Log.debug("참여 상태 선택: \(status.displayLabel)")
-                state.updateMyAttendanceStatus(status)
                 state.isMyAttendanceStatusSheetPresented = false
+                return .run { send in
+                    await send(.myAttendanceStatusUpdateResponse(
+                        Result {
+                            try await client.updateAttendance(groupId, status)
+                            return status
+                        }
+                    ))
+                }
+
+            case let .myAttendanceStatusUpdateResponse(.success(status)):
+                state.updateMyAttendanceStatus(status)
+                return .none
+
+            case let .myAttendanceStatusUpdateResponse(.failure(error)):
+                Log.debug("참석 여부 변경 실패: \(error)")
                 return .none
 
             case .myMemberCardTapped:
@@ -299,6 +318,11 @@ public struct HomeTabFeature {
 
             case .placeDetailTapped:
                 return .none
+
+            case .addDeparturePlaceTapped:
+                Log.debug("출발지 추가하기 버튼 클릭")
+                state.isMyDeparturePlaceEditSheetPresented = false
+                return .send(.delegate(.departurePlaceStationSearchRequested))
 
             case .delegate, .destination:
                 return .none

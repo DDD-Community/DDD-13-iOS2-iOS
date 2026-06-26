@@ -8,16 +8,20 @@ import Foundation
 import ComposableArchitecture
 import CoreDependencies
 import Entity
+import StationSearchFeature
+import Utill
 
 @Reducer
 public struct HomeFeature {
     @Dependency(\.groupClient) private var groupClient
+    @Dependency(\.departurePlaceClient) private var departurePlaceClient
     @Dependency(\.withRandomNumberGenerator) private var withRandomNumberGenerator
 
     @Reducer(state: .equatable)
     public enum Path {
         case detail(GroupDetailFeature)
         case dateSelection(MeetingDateSelectionFeature)
+        case stationSearch(StationSearchSheetFeature)
     }
 
     public enum InviteCardDesign: Equatable, CaseIterable, Sendable {
@@ -55,6 +59,7 @@ public struct HomeFeature {
         case groupCardTapped(Group)
         case inviteCardCloseButtonTapped
         case inviteButtonTapped
+        case addDeparturePlaceResponse(Result<DeparturePlace, Error>)
         case creationView(PresentationAction<GroupCreationFeature.Action>)
         case path(StackActionOf<Path>)
     }
@@ -112,6 +117,17 @@ public struct HomeFeature {
                 // TODO: 친구 초대/링크 공유 플로우 연결
                 return .none
 
+            case .addDeparturePlaceResponse(.success):
+                Log.debug("출발지 추가 성공")
+                state.path.removeLast()
+
+                guard let detailID = state.currentDetailID else { return .none }
+                return .send(.path(.element(id: detailID, action: .detail(.home(.onAppear)))))
+
+            case let .addDeparturePlaceResponse(.failure(error)):
+                Log.debug("출발지 추가 실패: \(error)")
+                return .none
+
             case let .creationView(.presented(.delegate(.groupCreated(group)))):
                 state.creationView = nil
                 state.path.append(.detail(GroupDetailFeature.State(group: group)))
@@ -126,6 +142,33 @@ public struct HomeFeature {
 
             case let .path(.element(id: _, action: .detail(.delegate(.meetingDateSelectionRequested(meetingId))))):
                 state.path.append(.dateSelection(MeetingDateSelectionFeature.State(meetingId: meetingId)))
+                return .none
+
+            case .path(.element(id: _, action: .detail(.delegate(.departurePlaceStationSearchRequested)))):
+                state.path.append(.stationSearch(StationSearchSheetFeature.State()))
+                return .none
+
+            case let .path(.element(id: _, action: .stationSearch(.delegate(.stationSelected(station))))):
+                Log.debug("출발지 역 선택: \(station.name)")
+                let client = departurePlaceClient
+                return .run { send in
+                    await send(.addDeparturePlaceResponse(
+                        Result {
+                            try await client.addDeparturePlace(
+                                station.name,
+                                station.addressName,
+                                station.roadAddressName,
+                                station.name,
+                                station.y,
+                                station.x,
+                                true
+                            )
+                        }
+                    ))
+                }
+
+            case .path(.element(id: _, action: .stationSearch(.delegate(.dismissed)))):
+                state.path.removeLast()
                 return .none
 
             case let .path(.element(id: _, action: .dateSelection(.delegate(.dateSelectionCompleted(
@@ -182,6 +225,15 @@ public struct HomeFeature {
         detailState.home.groupDetail = detailState.home.groupDetail?.updating(dateVoteStatus: dateVoteStatus)
         state.path[id: detailID] = .detail(detailState)
         return detailID
+    }
+}
+
+private extension HomeFeature.State {
+    var currentDetailID: StackElementID? {
+        path.ids.last { id in
+            if case .detail = path[id: id] { return true }
+            return false
+        }
     }
 }
 
