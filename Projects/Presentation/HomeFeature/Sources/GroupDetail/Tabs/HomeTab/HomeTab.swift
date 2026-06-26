@@ -25,7 +25,6 @@ struct HomeTab: View {
                     .padding(.horizontal, Spacing.spacing400)
             }
         }
-        .task { store.send(.onAppear) }
         .fullScreenCover(
             item: $store.scope(state: \.destination?.dateVote, action: \.destination.dateVote)
         ) { dateVoteStore in
@@ -83,6 +82,7 @@ private struct HomeTabStatePreview: View {
 
     var body: some View {
         HomeTab(store: store)
+            .task { store.send(.onAppear) }
     }
 }
 

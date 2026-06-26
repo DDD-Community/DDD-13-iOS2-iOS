@@ -26,6 +26,8 @@ public struct HomeTabFeature {
     @ObservableState
     public struct State: Equatable {
         public var group: Group
+        /// 진입 시 데이터 로드 진행 여부. 첫 프레임부터 `ProgressView`를 노출하기 위해 기본값은 `true`다.
+        public var isLoading = true
         /// `onAppear`에서 `fetchGroupDetail`로 로드하는 모임 상세. 멤버 리스트의 출발지/본인 여부/참여 상태를 제공한다.
         public var groupDetail: GroupDetail?
         /// 날짜 투표 중(`inProgress`/`before`)일 때 `fetchDateVote`로 로드하는 날짜 투표 현황.
@@ -108,6 +110,7 @@ public struct HomeTabFeature {
 
     public enum Action {
         case onAppear
+        case loadCompleted
         case groupDetailResponse(Result<GroupDetail, Error>)
         case dateVoteResponse(Result<DateVote, Error>)
         case placeVoteResponse(Result<PlaceVote, Error>)
@@ -143,10 +146,18 @@ public struct HomeTabFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                return .merge(
-                    fetchGroupDetailEffect(meetingId: state.group.meetingId),
-                    fetchVoteEffect(meetingId: state.group.meetingId, kind: state.homeTopAreaKind)
+                state.isLoading = true
+                return .concatenate(
+                    .merge(
+                        fetchGroupDetailEffect(meetingId: state.group.meetingId),
+                        fetchVoteEffect(meetingId: state.group.meetingId, kind: state.homeTopAreaKind)
+                    ),
+                    .send(.loadCompleted)
                 )
+
+            case .loadCompleted:
+                state.isLoading = false
+                return .none
 
             case let .groupDetailResponse(.success(detail)):
                 state.groupDetail = detail
