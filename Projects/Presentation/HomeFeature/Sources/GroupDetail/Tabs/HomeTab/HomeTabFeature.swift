@@ -23,6 +23,7 @@ public struct HomeTabFeature {
     @Dependency(\.groupClient) private var groupClient
     @Dependency(\.voteClient) private var voteClient
     @Dependency(\.placeRecommendationClient) private var placeRecommendationClient
+    @Dependency(\.departurePlaceClient) private var departurePlaceClient
 
     @ObservableState
     public struct State: Equatable {
@@ -134,6 +135,8 @@ public struct HomeTabFeature {
         case placeVoteSubmitResponse(Result<Void, Error>)
         case placeDetailTapped
         case addDeparturePlaceTapped // 바텀시트에서 출발지 추가하기 버튼 클릭 시
+        case departurePlaceCardTapped(id: Int) // 출발지 수정 바텀시트에서 출발지 요소 클릭 시(id 전달하기)
+        case setDefaultDeparturePlaceResponse(Result<DeparturePlace, Error>)
         case editDeparturePlaceTapped(id: Int)
         case delegate(Delegate)
         case destination(PresentationAction<Destination.Action>)
@@ -326,6 +329,25 @@ public struct HomeTabFeature {
                 state.isMyDeparturePlaceEditSheetPresented = false
                 return .send(.delegate(.departurePlaceStationSearchRequested))
 
+            case let .departurePlaceCardTapped(id):
+                Log.debug("출발지 카드 클릭: \(id)")
+                let client = departurePlaceClient
+                return .run { send in
+                    await send(.setDefaultDeparturePlaceResponse(
+                        Result { try await client.setDefaultDeparturePlace(id) }
+                    ))
+                }
+
+            case let .setDefaultDeparturePlaceResponse(.success(departurePlace)):
+                Log.debug("기본 출발지 설정 성공: \(departurePlace.id)")
+                state.updateDefaultDeparturePlace(departurePlace)
+                state.isMyDeparturePlaceEditSheetPresented = false
+                return .none
+
+            case let .setDefaultDeparturePlaceResponse(.failure(error)):
+                Log.debug("기본 출발지 설정 실패: \(error)")
+                return .none
+
             case let .editDeparturePlaceTapped(id):
                 Log.debug("출발지 수정하기 버튼 클릭: \(id)")
                 state.isMyDeparturePlaceEditSheetPresented = false
@@ -387,6 +409,61 @@ public struct HomeTabFeature {
 }
 
 private extension HomeTabFeature.State {
+    mutating func updateDefaultDeparturePlace(_ selectedDeparturePlace: DeparturePlace) {
+        guard let detail = groupDetail else { return }
+
+        let members = detail.members.map { member in
+            guard member.isMe else { return member }
+
+            let departurePlaces = member.departurePlaces.map { departurePlace in
+                if departurePlace.id == selectedDeparturePlace.id {
+                    return DeparturePlace(
+                        id: selectedDeparturePlace.id,
+                        label: selectedDeparturePlace.label,
+                        address: selectedDeparturePlace.address,
+                        roadAddress: selectedDeparturePlace.roadAddress,
+                        placeName: selectedDeparturePlace.placeName,
+                        latitude: selectedDeparturePlace.latitude,
+                        longitude: selectedDeparturePlace.longitude,
+                        isDefault: true
+                    )
+                }
+
+                return DeparturePlace(
+                    id: departurePlace.id,
+                    label: departurePlace.label,
+                    address: departurePlace.address,
+                    roadAddress: departurePlace.roadAddress,
+                    placeName: departurePlace.placeName,
+                    latitude: departurePlace.latitude,
+                    longitude: departurePlace.longitude,
+                    isDefault: false
+                )
+            }
+
+            return GroupDetailMember(
+                id: member.id,
+                nickname: member.nickname,
+                profileImageUrl: member.profileImageUrl,
+                isHost: member.isHost,
+                isMe: member.isMe,
+                attendanceStatus: member.attendanceStatus,
+                departurePlaces: departurePlaces
+            )
+        }
+
+        groupDetail = GroupDetail(
+            id: detail.id,
+            name: detail.name,
+            themeTagCode: detail.themeTagCode,
+            themeTagDisplay: detail.themeTagDisplay,
+            locationStatus: detail.locationStatus,
+            dateVoteStatus: detail.dateVoteStatus,
+            confirmedDate: detail.confirmedDate,
+            members: members
+        )
+    }
+
     mutating func updateMyAttendanceStatus(_ status: AttendanceStatus) {
         guard let detail = groupDetail else { return }
 

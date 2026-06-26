@@ -19,6 +19,10 @@ struct MyDeparturePlaceEditSheetContent: View {
                     DeparturePlaceRow(
                         placeName: departurePlace.placeName,
                         roadAddress: departurePlace.roadAddress,
+                        isSelected: departurePlace.isDefault,
+                        onTap: {
+                            store.send(.departurePlaceCardTapped(id: departurePlace.id))
+                        },
                         onEditTap: {
                             Log.debug("출발지 수정 버튼 클릭: \(departurePlace.id)")
                             store.send(.editDeparturePlaceTapped(id: departurePlace.id))
@@ -50,25 +54,35 @@ struct MyDeparturePlaceEditSheetContent: View {
 private struct DeparturePlaceRow: View {
     let placeName: String
     let roadAddress: String
+    let isSelected: Bool
+    let onTap: () -> Void
     let onEditTap: () -> Void
 
     var body: some View {
         HStack(spacing: Spacing.spacing250) {
-            Image.Asset.icLocation24
-                .resizable()
-                .renderingMode(.template)
-                .frame(width: Metric.iconLength, height: Metric.iconLength)
-                .foregroundStyle(Colors.gray600)
+            Button(action: onTap) {
+                HStack(spacing: Spacing.spacing250) {
+                    Image.Asset.icLocation24
+                        .resizable()
+                        .renderingMode(.template)
+                        .frame(width: Metric.iconLength, height: Metric.iconLength)
+                        .foregroundStyle(Colors.gray600)
 
-            VStack(alignment: .leading, spacing: Spacing.spacing50) {
-                BangawoText(placeName, textStyle: .bodyMedium)
-                    .foregroundStyle(Colors.gray900)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    VStack(alignment: .leading, spacing: Spacing.spacing50) {
+                        BangawoText(placeName, textStyle: .bodyMedium)
+                            .foregroundStyle(Colors.gray900)
+                            .frame(maxWidth: .infinity, alignment: .leading)
 
-                BangawoText(roadAddress, textStyle: .bodySmall)
-                    .foregroundStyle(Colors.gray700)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                        BangawoText(roadAddress, textStyle: .bodySmall)
+                            .foregroundStyle(Colors.gray700)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+                .contentShape(Rectangle())
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .buttonStyle(.plain)
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             Button(action: onEditTap) {
                 BangawoText("수정", textStyle: .labelSmall)
@@ -86,7 +100,7 @@ private struct DeparturePlaceRow: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: BorderRadius.borderRadius300)
-                .fill(Colors.grayAlpha100)
+                .fill(isSelected ? Colors.grayAlpha100 : Color.clear)
         )
     }
 
