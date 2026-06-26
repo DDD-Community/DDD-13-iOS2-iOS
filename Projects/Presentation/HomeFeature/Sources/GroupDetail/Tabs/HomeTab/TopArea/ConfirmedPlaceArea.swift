@@ -16,51 +16,54 @@ import Entity
 struct ConfirmedPlaceArea: View {
     let store: StoreOf<HomeTabFeature>
 
-    private var placeName: String {
-        store.confirmedPlaceResult?.place.name ?? Constant.tempPlaceName
-    }
-
-    private var placeAddress: String {
-        store.confirmedPlaceResult?.place.address
-            ?? store.group.locationAddress
-            ?? Constant.tempPlaceAddress
-    }
-
-    private var placeCategory: PlaceCategory? {
-        store.confirmedPlaceResult?.place.categoryLabel
-    }
-
-    /// 확정 장소 좌표. 좌표가 없으면 기본 중심을 사용한다.
-    private var placeCoordinate: MapCoordinate {
-        guard let place = store.confirmedPlaceResult?.place else { return Constant.defaultCenter }
-
-        return MapCoordinate(latitude: place.latitude, longitude: place.longitude)
-    }
-
-    /// 지도에 확정 장소 하나만 핀으로 표시한다.
-    private var placePins: [MapPin] {
-        [
-            MapPinLabel(assetName: Constant.placePinAsset, title: placeName)
-                .makePin(coordinate: placeCoordinate)
-        ]
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.spacing250) {
             BangawoText("약속 장소가 확정되었어요", textStyle: .titleMedium)
                 .foregroundStyle(Colors.gray900)
 
-            card
+            Card(store: store)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, Spacing.spacing400)
         .padding(.top, Spacing.spacing400)
         .padding(.bottom, Spacing.spacing500)
     }
+}
 
-    // MARK: - Card
+// MARK: - Card
 
-    private var card: some View {
+private struct Card: View {
+    let store: StoreOf<HomeTabFeature>
+
+    /// 확정 장소 핀. `place` 변경 시 `.task`에서 재구성한다.
+    @State private var pins: [MapPin] = []
+
+    private var place: ConfirmedPlace? {
+        store.confirmedPlaceResult?.place
+    }
+
+    private var placeName: String {
+        place?.name ?? Constant.tempPlaceName
+    }
+
+    private var placeAddress: String {
+        place?.address
+            ?? store.group.locationAddress
+            ?? Constant.tempPlaceAddress
+    }
+
+    private var placeCategory: PlaceCategory? {
+        place?.categoryLabel
+    }
+
+    /// 확정 장소 좌표. 좌표가 없으면 기본 중심을 사용한다.
+    private var placeCoordinate: MapCoordinate {
+        guard let place else { return Constant.defaultCenter }
+
+        return MapCoordinate(latitude: place.latitude, longitude: place.longitude)
+    }
+
+    var body: some View {
         VStack(spacing: Spacing.spacing400) {
             PlaceRow(
                 placeName: placeName,
@@ -69,7 +72,7 @@ struct ConfirmedPlaceArea: View {
             )
 
             KakaoMap(
-                pins: placePins,
+                pins: pins,
                 initialCenter: placeCoordinate,
                 initialZoomLevel: Constant.mapZoomLevel
             )
@@ -90,6 +93,19 @@ struct ConfirmedPlaceArea: View {
                     )
                 )
         )
+        .task(id: place) {
+            buildPins()
+        }
+    }
+
+    /// 확정 장소 좌표에 카테고리 아이콘 핀 하나를 구성해 `@State`에 캐싱한다.
+    @MainActor
+    private func buildPins() {
+        let icon = placeCategory?.pinIcon ?? Image.Asset.icPin24
+        pins = [
+            MapPinLabel(image: icon, title: placeName)
+                .makePin(coordinate: placeCoordinate)
+        ]
     }
 }
 
@@ -104,8 +120,6 @@ private enum Metric {
 private enum Constant {
     static let tempPlaceName = "확정된 장소"
     static let tempPlaceAddress = "주소 정보 없음"
-    /// 확정 장소 핀에 사용하는 아이콘 에셋.
-    static let placePinAsset = "ic_pin_24"
     /// 단일 핀 기준 기본 줌 레벨.
     static let mapZoomLevel = 16
     /// 확정 좌표가 없을 때 사용하는 기본 지도 중심(서울 시청).
