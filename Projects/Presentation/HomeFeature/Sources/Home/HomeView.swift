@@ -8,6 +8,7 @@ import SwiftUI
 import ComposableArchitecture
 import DesignSystem
 import Entity
+import StationSearchFeature
 
 public struct HomeView: View {
     @Bindable private var store: StoreOf<HomeFeature>
@@ -91,6 +92,9 @@ public struct HomeView: View {
 
             case let .dateSelection(dateSelectionStore):
                 MeetingDateSelectionView(store: dateSelectionStore)
+
+            case let .stationSearch(stationSearchStore):
+                StationSearchSheet(store: stationSearchStore)
             }
         }
     }

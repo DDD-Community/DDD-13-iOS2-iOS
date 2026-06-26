@@ -10,10 +10,14 @@ import ComposableArchitecture
 import DesignSystem
 import Entity
 
-struct StationSearchSheet: View {
+public struct StationSearchSheet: View {
     @Bindable var store: StoreOf<StationSearchSheetFeature>
 
-    var body: some View {
+    public init(store: StoreOf<StationSearchSheetFeature>) {
+        self.store = store
+    }
+
+    public var body: some View {
         VStack(spacing: 0) {
             NavigationPage(
                 background: .clear,

@@ -40,6 +40,8 @@ public struct GroupDetailFeature {
 
         public enum Delegate: Equatable {
             case meetingDateSelectionRequested(meetingId: Int)
+            case departurePlaceStationSearchRequested
+            case departurePlaceEditStationSearchRequested(id: Int)
         }
     }
 
@@ -67,6 +69,12 @@ public struct GroupDetailFeature {
             case let .home(.delegate(.meetingDateSelectionRequested(meetingId))):
                 Log.debug("약속정하기 클릭")
                 return .send(.delegate(.meetingDateSelectionRequested(meetingId: meetingId)))
+
+            case .home(.delegate(.departurePlaceStationSearchRequested)):
+                return .send(.delegate(.departurePlaceStationSearchRequested))
+
+            case let .home(.delegate(.departurePlaceEditStationSearchRequested(id))):
+                return .send(.delegate(.departurePlaceEditStationSearchRequested(id: id)))
 
             case .home, .myPlace:
                 return .none
