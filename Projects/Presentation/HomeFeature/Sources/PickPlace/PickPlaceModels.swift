@@ -109,3 +109,92 @@ public extension PickedPlace {
         PickedPlace(id: 5, name: "광화문브런치", category: .cafe, address: "서울 종로구 종로 1", pickedCount: 1)
     ]
 }
+
+public extension StationRecommendation {
+    /// 장소보기 탭 프리뷰용 더미 역/추천 장소 그룹. rank 1 역에 "중간" 배지가 노출된다.
+    static let mock: [StationRecommendation] = [
+        StationRecommendation(
+            station: MidpointStation(
+                stationId: 1,
+                rank: 1,
+                stationName: "신사",
+                lines: "3호선",
+                distanceKm: 0.4,
+                latitude: 37.5163,
+                longitude: 127.0204
+            ),
+            places: [
+                RecommendedPlace(
+                    rank: 1,
+                    placeId: 101,
+                    name: "감성카페",
+                    categoryLabel: .cafe,
+                    address: "서울 강남구 도산대로 1",
+                    score: 4.5,
+                    nearestStationId: 1,
+                    latitude: 37.5163,
+                    longitude: 127.0204
+                ),
+                RecommendedPlace(
+                    rank: 2,
+                    placeId: 102,
+                    name: "신사다이닝",
+                    categoryLabel: .koreaFood,
+                    address: "서울 강남구 강남대로 2",
+                    score: 4.2,
+                    nearestStationId: 1,
+                    latitude: 37.5165,
+                    longitude: 127.0206
+                )
+            ]
+        ),
+        StationRecommendation(
+            station: MidpointStation(
+                stationId: 2,
+                rank: 2,
+                stationName: "강남",
+                lines: "2호선·신분당선",
+                distanceKm: 0.7,
+                latitude: 37.4979,
+                longitude: 127.0276
+            ),
+            places: [
+                RecommendedPlace(
+                    rank: 1,
+                    placeId: 201,
+                    name: "강남브런치",
+                    categoryLabel: .cafe,
+                    address: "서울 강남구 테헤란로 1",
+                    score: 4.3,
+                    nearestStationId: 2,
+                    latitude: 37.4979,
+                    longitude: 127.0276
+                )
+            ]
+        ),
+        StationRecommendation(
+            station: MidpointStation(
+                stationId: 3,
+                rank: 3,
+                stationName: "선릉",
+                lines: "2호선·수인분당선",
+                distanceKm: 1.1,
+                latitude: 37.5045,
+                longitude: 127.0492
+            ),
+            places: [
+                RecommendedPlace(
+                    rank: 1,
+                    placeId: 301,
+                    name: "선릉포차",
+                    categoryLabel: .bar,
+                    address: "서울 강남구 선릉로 1",
+                    score: 4.0,
+                    nearestStationId: 3,
+                    latitude: 37.5045,
+                    longitude: 127.0492
+                )
+            ]
+        )
+    ]
+}

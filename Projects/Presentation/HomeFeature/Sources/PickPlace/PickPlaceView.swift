@@ -8,6 +8,7 @@ import SwiftUI
 import ComposableArchitecture
 
 import DesignSystem
+import Entity
 
 /// 장소 투표 후보 담기 화면.
 /// GroupDetail과 동일하게 NavigationPage + Tab + TabContent로 구성한다.
@@ -76,6 +77,8 @@ private struct PickPlaceViewPreview: View {
     ) {
         var state = PickPlaceFeature.State(pickedPlaces: pickedPlaces, isHost: isHost)
         state.selectedSubTabIndex = selectedSubTabIndex
+        state.recommendedPlaceMap.stationRecommendations = StationRecommendation.mock
+        state.recommendedPlaceMap.nearbyPlaceList.stationGroups = StationRecommendation.mock
         self.store = Store(initialState: state) {
             PickPlaceFeature()
         }
