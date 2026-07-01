@@ -162,7 +162,12 @@ public struct HomeTabFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                state.isLoading = true
+                // 최초 진입에만 전체 ProgressView를 노출한다.
+                // 재진입(탭 전환 복귀 등)에서는 isLoading을 건드리지 않고 조용히 갱신해
+                // ProgressView ↔ HomeTab 교체로 인한 재마운트 루프를 막는다.
+                if state.groupDetail == nil {
+                    state.isLoading = true
+                }
                 return .concatenate(
                     .merge(
                         fetchGroupDetailEffect(meetingId: state.group.meetingId),
