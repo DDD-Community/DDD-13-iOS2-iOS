@@ -43,7 +43,6 @@ public struct GroupDetailView: View {
         }
         .background(Colors.gray200)
         .toolbar(.hidden, for: .navigationBar)
-        .task { store.send(.home(.onAppear)) }
     }
 
     private var tabBinding: Binding<Int> {
@@ -60,16 +59,22 @@ private struct TabContent: View {
     let store: StoreOf<GroupDetailFeature>
 
     var body: some View {
-        if store.home.isLoading {
-            ProgressView()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else {
+        Group {
             switch store.selectedTab {
             case .home:
                 HomeTab(store: store.scope(state: \.home, action: \.home))
 
             case .myPlace:
                 MyPlaceTab(store: store.scope(state: \.myPlace, action: \.myPlace))
+            }
+        }
+        // HomeTab을 트리에서 제거하지 않고 위에 덮는다.
+        // 최초 로드에만 노출되며, HomeTab의 .task 재마운트 루프를 유발하지 않는다.
+        .overlay {
+            if store.home.isLoading {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Colors.gray200)
             }
         }
     }
