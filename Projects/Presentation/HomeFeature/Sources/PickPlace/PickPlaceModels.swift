@@ -13,6 +13,7 @@ public struct PickPlaceMember: Identifiable, Equatable, Sendable {
     public let id: Int
     public let nickname: String
     public let profileImageUrl: String?
+    public let isMe: Bool
     /// 해당 멤버가 후보 장소를 하나라도 담았는지 여부.
     public let hasPicked: Bool
 
@@ -20,11 +21,13 @@ public struct PickPlaceMember: Identifiable, Equatable, Sendable {
         id: Int,
         nickname: String,
         profileImageUrl: String?,
+        isMe: Bool = false,
         hasPicked: Bool
     ) {
         self.id = id
         self.nickname = nickname
         self.profileImageUrl = profileImageUrl
+        self.isMe = isMe
         self.hasPicked = hasPicked
     }
 }
@@ -60,7 +63,8 @@ public extension PickPlaceMember {
         self.init(
             id: member.id,
             nickname: member.nickname,
-            profileImageUrl: nil,
+            profileImageUrl: member.profileImageUrl,
+            isMe: member.isMe,
             hasPicked: member.done
         )
     }
@@ -92,7 +96,7 @@ public extension PickedPlace {
 
 public extension PickPlaceMember {
     static let mock: [PickPlaceMember] = [
-        PickPlaceMember(id: 1, nickname: "김반가", profileImageUrl: nil, hasPicked: true),
+        PickPlaceMember(id: 1, nickname: "김반가", profileImageUrl: nil, isMe: true, hasPicked: true),
         PickPlaceMember(id: 2, nickname: "이워고", profileImageUrl: nil, hasPicked: true),
         PickPlaceMember(id: 3, nickname: "박장소", profileImageUrl: nil, hasPicked: false),
         PickPlaceMember(id: 4, nickname: "최투표", profileImageUrl: nil, hasPicked: true),

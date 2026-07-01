@@ -12,6 +12,8 @@ public struct PlacePickStatusResponseDTO: Decodable, Sendable {
     public struct MemberDTO: Decodable, Sendable {
         public let memberId: Int
         public let nickname: String
+        public let profileImageUrl: String?
+        public let isMe: Bool
         public let done: Bool
     }
 
@@ -27,7 +29,13 @@ public extension PlacePickStatusResponseDTO {
     func toEntity() -> PlacePickStatus {
         PlacePickStatus(
             members: members.map {
-                PlacePickStatus.Member(memberId: $0.memberId, nickname: $0.nickname, done: $0.done)
+                PlacePickStatus.Member(
+                    memberId: $0.memberId,
+                    nickname: $0.nickname,
+                    profileImageUrl: $0.profileImageUrl,
+                    isMe: $0.isMe,
+                    done: $0.done
+                )
             },
             myPicks: myPicks.map {
                 PlacePickStatus.PickedPlaceSummary(

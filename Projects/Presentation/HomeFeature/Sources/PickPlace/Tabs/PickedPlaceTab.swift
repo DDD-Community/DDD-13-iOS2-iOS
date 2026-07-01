@@ -54,10 +54,14 @@ struct PickedPlaceTab: View {
 private struct MemberStrip: View {
     let members: [PickPlaceMember]
 
+    private var sortedMembers: [PickPlaceMember] {
+        members.filter(\.isMe) + members.filter { !$0.isMe }
+    }
+
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: Spacing.spacing300) {
-                ForEach(members) { member in
+                ForEach(sortedMembers) { member in
                     MemberItem(member: member)
                 }
             }
@@ -78,15 +82,31 @@ private struct MemberItem: View {
         return .image(url)
     }
 
+    private var label: String {
+        member.isMe ? "\(member.nickname)(나)" : member.nickname
+    }
+
     var body: some View {
-        VStack(spacing: Spacing.spacing150) {
+        VStack(spacing: Spacing.spacing350) {
             Avatar(avatarType: avatarType, size: .s56)
+                .overlay {
+                    Circle()
+                        .stroke(Color(hex: Constant.avatarBorderHex), lineWidth: Metric.avatarBorderWidth)
+                }
                 .opacity(member.hasPicked ? 1 : Opacity.opacity400)
 
-            BangawoText(member.nickname, textStyle: .bodySmall)
-                .foregroundStyle(member.hasPicked ? Colors.gray800 : Colors.gray500)
+            BangawoText(label, textStyle: .bodySmall)
+                .foregroundStyle(Colors.gray800)
         }
     }
+}
+
+private enum Metric {
+    static let avatarBorderWidth: CGFloat = 1.78
+}
+
+private enum Constant {
+    static let avatarBorderHex = "D8D8D8"
 }
 
 // MARK: - 카테고리 필터 칩
