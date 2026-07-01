@@ -220,7 +220,7 @@ private struct PlaceTagChip: View {
             .padding(.horizontal, Spacing.spacing150)
             .padding(.vertical, Spacing.spacing100)
             .background(
-                RoundedRectangle(cornerRadius: BorderRadius.borderRadius150)
+                Capsule()
                     .fill(backgroundColor)
             )
     }
