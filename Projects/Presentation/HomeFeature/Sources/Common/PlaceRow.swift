@@ -69,9 +69,9 @@ struct PlaceRow<Trailing: View>: View {
                         .foregroundStyle(Color.gray800)
 
                     HStack(spacing: Spacing.spacing225) {
-                        Text("18km")
-                            .pretendardCustomFont(textStyle: .bodyMedium)
-                            .foregroundStyle(Color.gray600)
+//                        Text("18km")
+//                            .pretendardCustomFont(textStyle: .bodyMedium)
+//                            .foregroundStyle(Color.gray600)
 
                         Button {
                             toggleTooltip()
