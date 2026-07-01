@@ -19,23 +19,18 @@ struct PlaceVoteSheetContent: View {
     let onFocusPlace: (MapCoordinate) -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.spacing300) {
+        VStack(alignment: .leading, spacing: 0) {
             PlaceVoteHeader(store: store)
 
-            VStack(spacing: Spacing.spacing200) {
-                ForEach(store.candidates) { candidate in
-                    PlaceVoteRow(
-                        candidate: candidate,
-                        mode: store.mode,
-                        isSelected: store.selectedPlaceIds.contains(candidate.id),
-                        isTop: store.topPlaceId == candidate.id,
-                        onTap: { focus(candidate) },
-                        onSelect: { store.send(.placeSelected(candidate.id)) }
-                    )
-                }
-            }
+            PlaceVoteList(
+                candidates: store.candidates,
+                mode: store.mode,
+                selectedPlaceIds: store.selectedPlaceIds,
+                topPlaceId: store.topPlaceId,
+                onTap: { focus($0) },
+                onSelect: { store.send(.placeSelected($0)) }
+            )
         }
-        .padding(.top, Spacing.spacing100)
         .padding(.bottom, UIScreen.safeAreaBottom + PlaceVoteButtonArea.height)
     }
 
@@ -62,21 +57,60 @@ private struct PlaceVoteHeader: View {
             BangawoText("약속 장소 투표하기", textStyle: .titleLarge)
                 .foregroundStyle(Colors.gray800)
 
-            HStack(spacing: 0) {
+            HStack(spacing: Spacing.spacing100) {
                 DeadlineDescription(deadline: store.deadline)
 
                 if store.mode == .voted {
                     Button {
                         store.send(.participantsButtonTapped)
                     } label: {
-                        BangawoText(" · 현재 \(store.votedCount)명 참여", textStyle: .bodySmall)
-                            .foregroundStyle(Colors.gray700)
+                        HStack(spacing: Spacing.spacing100) {
+                            BangawoText("\(store.votedCount)명 참여중", textStyle: .bodyMediumEmphasized)
+                                .foregroundStyle(Colors.gray700)
+
+                            Image.Asset.icArrowSmallRight16
+                                .renderingMode(.template)
+                                .foregroundStyle(Colors.gray700)
+                                .frame(width: 16, height: 16)
+                        }
                     }
                     .buttonStyle(.plain)
                 }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, Spacing.spacing300)
+        .padding(.bottom, Spacing.spacing200)
+        .padding(.horizontal, Spacing.spacing400)
+    }
+}
+
+// MARK: - Place Vote List
+
+private struct PlaceVoteList: View {
+    let candidates: [PlaceVoteCandidate]
+    let mode: PlaceVoteParticipationFeature.Mode
+    let selectedPlaceIds: Set<Int>
+    let topPlaceId: Int?
+    let onTap: (PlaceVoteCandidate) -> Void
+    let onSelect: (Int) -> Void
+
+    var body: some View {
+        VStack(spacing: Spacing.spacing250) {
+            ForEach(candidates) { candidate in
+                PlaceVoteRow(
+                    candidate: candidate,
+                    mode: mode,
+                    isSelected: selectedPlaceIds.contains(candidate.id),
+                    isTop: topPlaceId == candidate.id,
+                    onTap: { onTap(candidate) },
+                    onSelect: { onSelect(candidate.id) }
+                )
+            }
+        }
+        .padding(.top, Spacing.spacing300)
+        .padding(.bottom, Spacing.spacing400)
+        .padding(.horizontal, Spacing.spacing400)
     }
 }
 
@@ -135,14 +169,14 @@ private struct PlaceVoteRow: View {
 
     private var backgroundColor: Color {
         if mode == .voted, isTop { return Colors.orange100 }
-        if mode == .voting, isSelected { return Colors.gray200 }
+        if mode == .voting, isSelected { return Colors.gray50 }
 
         return Colors.gray50
     }
 
     private var borderColor: Color {
         if mode == .voted, isTop { return Colors.orange300 }
-        if mode == .voting, isSelected { return Colors.gray300 }
+        if mode == .voting, isSelected { return Colors.gray200 }
 
         return Colors.gray200
     }
@@ -155,14 +189,21 @@ private struct VoteResult: View {
     let voteCount: Int
 
     var body: some View {
-        VStack(alignment: .trailing, spacing: Spacing.spacing50) {
+        VStack(alignment: .trailing, spacing: Spacing.spacing100) {
             if isTop {
-                Badge("1위", variant: .solid, size: .small)
+                BangawoText("1위", textStyle: .labelXSmall)
+                    .foregroundStyle(Colors.gray00)
+                    .padding(.vertical, Spacing.spacing25)
+                    .padding(.horizontal, Spacing.spacing200)
+                    .background(
+                        Capsule().fill(Colors.orange500)
+                    )
             }
 
-            BangawoText("\(voteCount)명 투표", textStyle: .bodySmall)
+            BangawoText("\(voteCount)명 투표", textStyle: .bodyXSmall)
                 .foregroundStyle(Colors.gray700)
         }
+        .padding(.trailing, Spacing.spacing100)
     }
 }
 
@@ -203,6 +244,7 @@ private struct DeadlineDescription: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .onReceive(Countdown.everySecond) { now = $0 }
     }
 

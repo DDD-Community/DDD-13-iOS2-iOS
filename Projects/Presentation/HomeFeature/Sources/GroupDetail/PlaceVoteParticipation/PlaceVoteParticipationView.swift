@@ -61,7 +61,6 @@ struct PlaceVoteParticipationView: View {
                     store: store,
                     onFocusPlace: { focusedCoordinate = $0 }
                 )
-                .padding(.horizontal, Spacing.spacing400)
             }
             .onVisibleHeightChanged { sheetCoveredHeight = $0 }
 
