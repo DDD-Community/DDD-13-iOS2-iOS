@@ -77,7 +77,7 @@ public struct PlaceVoteParticipationFeature {
         case travelBurdenResponse(Result<PlaceVoteTravelBurden, Error>)
         case voteButtonTapped
         case voteSubmitted(Result<Void, Error>)
-        case placeVoteRefreshed(PlaceVote)
+        case placeVoteRefreshed(Result<PlaceVote, Error>)
         case revoteButtonTapped
         case completeButtonTapped
         case confirmButtonTapped
@@ -149,18 +149,23 @@ public struct PlaceVoteParticipationFeature {
                 let client = voteClient
                 let meetingId = state.meetingId
                 return .run { send in
-                    let placeVote = try await client.fetchPlaceVote(meetingId: meetingId)
-                    await send(.placeVoteRefreshed(placeVote))
+                    await send(.placeVoteRefreshed(
+                        Result { try await client.fetchPlaceVote(meetingId: meetingId) }
+                    ))
                 }
 
             case .voteSubmitted(.failure):
                 state.isSubmitting = false
                 return .none
 
-            case let .placeVoteRefreshed(placeVote):
+            case let .placeVoteRefreshed(.success(placeVote)):
                 state.placeVote = placeVote
                 state.isSubmitting = false
                 state.mode = .voted
+                return .none
+
+            case .placeVoteRefreshed(.failure):
+                state.isSubmitting = false
                 return .none
 
             case .revoteButtonTapped:
