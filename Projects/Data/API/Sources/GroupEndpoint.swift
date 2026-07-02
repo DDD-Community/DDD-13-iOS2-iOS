@@ -14,6 +14,7 @@ public enum GroupEndpoint: EndPoint {
     case hostPickMeetingDate(meetingId: Int, HostPickMeetingDateRequestDTO)
     case fetchGroupDetail(meetingId: Int)
     case updateAttendance(groupId: Int, UpdateAttendanceRequestDTO)
+    case issueInviteCode(groupId: Int)
 
     public var baseURL: String { APIConfiguration.serverBaseURL }
 
@@ -25,6 +26,7 @@ public enum GroupEndpoint: EndPoint {
             return "/api/v1/meetings/\(meetingId)/date-vote/host-pick"
         case .fetchGroupDetail(let meetingId): return "/api/v1/meetings/\(meetingId)"
         case .updateAttendance(let groupId, _): return "/api/v1/groups/\(groupId)/members/me/attendance"
+        case .issueInviteCode(let groupId): return "/api/v1/groups/\(groupId)/invite"
         }
     }
 
@@ -34,6 +36,7 @@ public enum GroupEndpoint: EndPoint {
         case .createGroup, .hostPickMeetingDate: return .post
         case .fetchGroupDetail: return .get
         case .updateAttendance: return .patch
+        case .issueInviteCode: return .post
         }
     }
 
@@ -44,6 +47,7 @@ public enum GroupEndpoint: EndPoint {
         case .hostPickMeetingDate(_, let dto): return .requestJSONEncodable(body: dto)
         case .fetchGroupDetail: return .requestPlain
         case .updateAttendance(_, let dto): return .requestJSONEncodable(body: dto)
+        case .issueInviteCode: return .requestPlain
         }
     }
 }

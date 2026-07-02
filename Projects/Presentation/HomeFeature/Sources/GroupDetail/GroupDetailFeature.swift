@@ -3,8 +3,11 @@
 //  Presentation
 //
 
+import UIKit
+
 import ComposableArchitecture
 
+import CoreDependencies
 import Entity
 import Utill
 
@@ -15,6 +18,9 @@ public struct GroupDetailFeature {
         public var selectedTabIndex = 0
         public var home: HomeTabFeature.State
         public var myPlace = MyPlaceTabFeature.State()
+        public var isInviteSheetPresented = false
+        /// 발급받은 초대코드. 최초 발급 후 재사용해 중복 호출을 막는다.
+        public var inviteCode: String?
 
         public init(group: Group) {
             self.home = HomeTabFeature.State(group: group)
@@ -32,8 +38,13 @@ public struct GroupDetailFeature {
         }
     }
 
-    public enum Action {
+    public enum Action: BindableAction {
+        case binding(BindingAction<State>)
         case tabSelected(Int)
+        case inviteButtonTapped
+        case inviteLinkCopyTapped
+        case kakaoShareTapped
+        case inviteCodeIssued(Result<String, Error>, InviteIntent)
         case home(HomeTabFeature.Action)
         case myPlace(MyPlaceTabFeature.Action)
         case delegate(Delegate)
@@ -47,9 +58,19 @@ public struct GroupDetailFeature {
         }
     }
 
+    /// 초대코드 발급 후 수행할 동작.
+    public enum InviteIntent: Sendable {
+        case copyLink
+        case kakaoShare
+    }
+
+    @Dependency(\.groupClient) private var groupClient
+
     public init() {}
 
     public var body: some ReducerOf<Self> {
+        BindingReducer()
+
         Scope(state: \.home, action: \.home) {
             HomeTabFeature()
         }
@@ -60,8 +81,30 @@ public struct GroupDetailFeature {
 
         Reduce { state, action in
             switch action {
+            case .binding:
+                return .none
+
             case let .tabSelected(index):
                 state.selectedTabIndex = index
+                return .none
+
+            case .inviteButtonTapped:
+                state.isInviteSheetPresented = true
+                return .none
+
+            case .inviteLinkCopyTapped:
+                state.isInviteSheetPresented = false
+                return handleInvite(state: &state, intent: .copyLink)
+
+            case .kakaoShareTapped:
+                state.isInviteSheetPresented = false
+                return handleInvite(state: &state, intent: .kakaoShare)
+
+            case let .inviteCodeIssued(.success(inviteCode), intent):
+                state.inviteCode = inviteCode
+                return perform(intent: intent, inviteCode: inviteCode)
+
+            case .inviteCodeIssued(.failure, _):
                 return .none
 
             case let .home(.delegate(.meetingDateSelectionRequested(meetingId))):
@@ -86,6 +129,41 @@ public struct GroupDetailFeature {
             }
         }
     }
+
+    /// 초대코드가 이미 있으면 재사용하고, 없으면 발급받은 뒤 동작을 이어간다.
+    private func handleInvite(state: inout State, intent: InviteIntent) -> Effect<Action> {
+        if let inviteCode = state.inviteCode {
+            return perform(intent: intent, inviteCode: inviteCode)
+        }
+
+        let groupId = state.home.group.id
+        let groupClient = groupClient
+        return .run { send in
+            do {
+                let inviteCode = try await groupClient.issueInviteCode(groupId)
+                await send(.inviteCodeIssued(.success(inviteCode), intent))
+            } catch {
+                await send(.inviteCodeIssued(.failure(error), intent))
+            }
+        }
+    }
+
+    /// 발급된 초대코드로 딥링크를 구성해 의도에 맞는 동작을 수행한다.
+    private func perform(intent: InviteIntent, inviteCode: String) -> Effect<Action> {
+        let inviteLink = Constant.inviteDeepLinkPrefix + inviteCode
+        switch intent {
+        case .copyLink:
+            return .run { _ in
+                await MainActor.run {
+                    UIPasteboard.general.string = inviteLink
+                }
+            }
+
+        case .kakaoShare:
+            // TODO: 카카오톡 공유 SDK 연동 - inviteLink 사용
+            return .none
+        }
+    }
 }
 
 // MARK: - Constants
@@ -93,4 +171,6 @@ public struct GroupDetailFeature {
 private enum Constant {
     /// `tabs == [.home, .myPlace]` 기준 MyPlaceTab 인덱스.
     static let myPlaceTabIndex = 1
+    /// 초대코드를 붙여 초대 딥링크를 구성하는 접두사.
+    static let inviteDeepLinkPrefix = "https://bangawo.onelink.me/M0TG/tu3uz1yc/"
 }

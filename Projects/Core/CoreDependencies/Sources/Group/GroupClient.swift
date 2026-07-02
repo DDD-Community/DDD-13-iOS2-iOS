@@ -16,6 +16,7 @@ public struct GroupClient: Sendable {
     public var hostPickMeetingDate: @Sendable (_ meetingId: Int, _ date: String) async throws -> Void
     public var fetchGroupDetail: @Sendable (_ meetingId: Int) async throws -> GroupDetail
     public var updateAttendance: @Sendable (_ groupId: Int, _ attendanceStatus: AttendanceStatus) async throws -> Void
+    public var issueInviteCode: @Sendable (_ groupId: Int) async throws -> String
 }
 
 public extension GroupClient {
@@ -24,7 +25,8 @@ public extension GroupClient {
         createUseCase: any CreateGroupUseCase,
         hostPickMeetingDateUseCase: any HostPickMeetingDateUseCase,
         fetchDetailUseCase: any FetchGroupDetailUseCase,
-        updateAttendanceUseCase: any UpdateAttendanceUseCase
+        updateAttendanceUseCase: any UpdateAttendanceUseCase,
+        issueInviteCodeUseCase: any IssueInviteCodeUseCase
     ) -> Self {
         Self(
             fetchGroups: { try await fetchUseCase.execute() },
@@ -39,6 +41,9 @@ public extension GroupClient {
             },
             updateAttendance: { groupId, attendanceStatus in
                 try await updateAttendanceUseCase.execute(groupId: groupId, attendanceStatus: attendanceStatus)
+            },
+            issueInviteCode: { groupId in
+                try await issueInviteCodeUseCase.execute(groupId: groupId)
             }
         )
     }
@@ -51,7 +56,8 @@ extension GroupClient: DependencyKey {
             createGroup: { _, _ in throw GroupClientError.notImplemented },
             hostPickMeetingDate: { _, _ in throw GroupClientError.notImplemented },
             fetchGroupDetail: { _ in throw GroupClientError.notImplemented },
-            updateAttendance: { _, _ in throw GroupClientError.notImplemented }
+            updateAttendance: { _, _ in throw GroupClientError.notImplemented },
+            issueInviteCode: { _ in throw GroupClientError.notImplemented }
         )
     }
 
@@ -64,7 +70,8 @@ extension GroupClient: DependencyKey {
         },
         hostPickMeetingDate: { _, _ in },
         fetchGroupDetail: { _ in previewGroupDetail },
-        updateAttendance: { _, _ in }
+        updateAttendance: { _, _ in },
+        issueInviteCode: { _ in "PREVIEW-INVITE-CODE" }
     )
 }
 

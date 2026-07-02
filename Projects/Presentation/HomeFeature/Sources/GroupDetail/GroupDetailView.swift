@@ -26,7 +26,7 @@ public struct GroupDetailView: View {
                 background: .clear,
                 leadingAction: { dismiss() },
                 trailingIcons: [
-                    NavigationIconItem(icon: .userPlus24) {},
+                    NavigationIconItem(icon: .userPlus24) { store.send(.inviteButtonTapped) },
                     NavigationIconItem(icon: .verticalMenu24) {}
                 ]
             )
@@ -43,6 +43,18 @@ public struct GroupDetailView: View {
         }
         .background(Colors.gray200)
         .toolbar(.hidden, for: .navigationBar)
+        .menuSheet(
+            isPresented: $store.isInviteSheetPresented,
+            title: "친구 초대하기",
+            items: [
+                .init(label: "카카오톡 공유하기", icon: .Asset.icShare24) {
+                    store.send(.kakaoShareTapped)
+                },
+                .init(label: "링크 복사하기", icon: .Asset.icCopy24) {
+                    store.send(.inviteLinkCopyTapped)
+                }
+            ]
+        )
     }
 
     private var tabBinding: Binding<Int> {
