@@ -22,6 +22,8 @@ let project = Project.makeAppModule(
     .SPM.kakaoSDKAuth,
     .SPM.kakaoSDKUser,
     .SPM.nidThirdPartyLogin,
+    .SPM.firebaseCore,
+    .SPM.firebaseMessaging,
     .SPM.composableArchitecture
   ],
   sources: ["Sources/**"],

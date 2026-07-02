@@ -15,7 +15,9 @@ let packageSettings = PackageSettings(
     "ConcurrencyExtras": .staticFramework,
     "Sharing": .staticFramework,
     "KakaoMapsSDK-SPM": .staticLibrary,
-    "NidThirdPartyLogin": .staticFramework
+    "NidThirdPartyLogin": .staticFramework,
+    "FirebaseCore": .staticFramework,
+    "FirebaseMessaging": .staticFramework
   ],
   targetSettings: [
     "WeaveDICore": ["SWIFT_STRICT_CONCURRENCY": "minimal"],
@@ -38,6 +40,7 @@ let package = Package(
     .package(url: "https://github.com/pointfreeco/swift-sharing", from: "1.0.0"),
     .package(url: "https://github.com/kakao-mapsSDK/KakaoMapsSDK-SPM", from: "2.12.0"),
     .package(url: "https://github.com/kakao/kakao-ios-sdk", from: "2.27.3"),
-    .package(url: "https://github.com/naver/naveridlogin-sdk-ios-swift", from: "5.1.0")
+    .package(url: "https://github.com/naver/naveridlogin-sdk-ios-swift", from: "5.1.0"),
+    .package(url: "https://github.com/firebase/firebase-ios-sdk.git", exact: "12.15.0")
   ]
 )

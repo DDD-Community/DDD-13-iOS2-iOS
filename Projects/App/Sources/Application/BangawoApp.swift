@@ -13,6 +13,7 @@ import Utill
 @main
 struct BangawoApp: App {
     private let store: StoreOf<RootFeature>
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var delegate
 
     init() {
         let appKey = AppEnvironment.kakaoAppKey
