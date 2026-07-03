@@ -18,6 +18,8 @@ let project = Project.makeModule(
     .Core(implements: .CoreDependencies),
     .Presentation(implements: .StationSearchFeature),
     .SPM.composableArchitecture,
+    .SPM.kakaoSDKShare,
+    .SPM.kakaoSDKTemplate,
   ],
   sources: ["Sources/**"]
 )
