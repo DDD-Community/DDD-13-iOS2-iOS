@@ -102,7 +102,12 @@ public struct GroupDetailFeature {
 
             case let .inviteCodeIssued(.success(inviteCode), intent):
                 state.inviteCode = inviteCode
-                return perform(intent: intent, inviteCode: inviteCode)
+                return runInviteIntent(
+                    intent,
+                    inviteCode: inviteCode,
+                    groupName: state.home.group.name,
+                    hostNickname: state.home.myNickname ?? Constant.defaultHostNickname
+                )
 
             case .inviteCodeIssued(.failure, _):
                 return .none
@@ -130,10 +135,14 @@ public struct GroupDetailFeature {
         }
     }
 
-    /// 초대코드가 이미 있으면 재사용하고, 없으면 발급받은 뒤 동작을 이어간다.
     private func handleInvite(state: inout State, intent: InviteIntent) -> Effect<Action> {
         if let inviteCode = state.inviteCode {
-            return perform(intent: intent, inviteCode: inviteCode)
+            return runInviteIntent(
+                intent,
+                inviteCode: inviteCode,
+                groupName: state.home.group.name,
+                hostNickname: state.home.myNickname ?? Constant.defaultHostNickname
+            )
         }
 
         let groupId = state.home.group.id
@@ -148,20 +157,49 @@ public struct GroupDetailFeature {
         }
     }
 
-    /// 발급된 초대코드로 딥링크를 구성해 의도에 맞는 동작을 수행한다.
-    private func perform(intent: InviteIntent, inviteCode: String) -> Effect<Action> {
+    private func runInviteIntent(
+        _ intent: InviteIntent,
+        inviteCode: String,
+        groupName: String,
+        hostNickname: String
+    ) -> Effect<Action> {
         let inviteLink = Constant.inviteDeepLinkPrefix + inviteCode
         switch intent {
         case .copyLink:
-            return .run { _ in
-                await MainActor.run {
-                    UIPasteboard.general.string = inviteLink
-                }
-            }
+            return copyInviteLink(inviteLink)
 
         case .kakaoShare:
-            // TODO: 카카오톡 공유 SDK 연동 - inviteLink 사용
-            return .none
+            return shareInviteViaKakao(
+                inviteLink: inviteLink,
+                groupName: groupName,
+                hostNickname: hostNickname
+            )
+        }
+    }
+
+    private func copyInviteLink(_ inviteLink: String) -> Effect<Action> {
+        .run { _ in
+            await MainActor.run {
+                UIPasteboard.general.string = inviteLink
+            }
+        }
+    }
+
+    private func shareInviteViaKakao(
+        inviteLink: String,
+        groupName: String,
+        hostNickname: String
+    ) -> Effect<Action> {
+        .run { _ in
+            do {
+                try await KakaoInviteMessageSender.send(
+                    inviteLink: inviteLink,
+                    groupName: groupName,
+                    hostNickname: hostNickname
+                )
+            } catch {
+                Log.debug("카카오 초대 메시지 전송 실패: \(error.localizedDescription)")
+            }
         }
     }
 }
@@ -173,4 +211,6 @@ private enum Constant {
     static let myPlaceTabIndex = 1
     /// 초대코드를 붙여 초대 딥링크를 구성하는 접두사.
     static let inviteDeepLinkPrefix = "https://bangawo.onelink.me/M0TG/tu3uz1yc/"
+    /// 본인 닉네임을 아직 로드하지 못했을 때 초대 메시지에 사용할 폴백.
+    static let defaultHostNickname = "호스트"
 }
