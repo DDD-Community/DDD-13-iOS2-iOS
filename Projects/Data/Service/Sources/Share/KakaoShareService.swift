@@ -5,10 +5,8 @@
 
 import UIKit
 
-import KakaoSDKShare
-import KakaoSDKTemplate
-
 import Entity
+import ThirdPartys
 
 /// 카카오톡 텍스트 템플릿으로 모임 초대 메시지를 전송하는 서비스입니다.
 ///

@@ -13,10 +13,7 @@ let project = Project.makeModule(
     .Domain(implements: .Entity),
     .Domain(implements: .DomainInterface),
     .Shared(implements: .Utill),
-    .SPM.kakaoSDKAuth,
-    .SPM.kakaoSDKUser,
-    .SPM.kakaoSDKShare,
-    .SPM.kakaoSDKTemplate,
+    .Network(implements: .ThirdPartys),
     .SPM.nidThirdPartyLogin
   ],
   sources: ["Sources/**"],

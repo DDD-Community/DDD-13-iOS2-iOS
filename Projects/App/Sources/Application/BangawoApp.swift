@@ -2,12 +2,11 @@ import SwiftUI
 
 import ComposableArchitecture
 @preconcurrency import KakaoMapsSDK
-import KakaoSDKAuth
-import KakaoSDKCommon
 import NidThirdPartyLogin
 
 import CoreDependencies
 import Presentation
+import ThirdPartys
 import Utill
 
 @main
