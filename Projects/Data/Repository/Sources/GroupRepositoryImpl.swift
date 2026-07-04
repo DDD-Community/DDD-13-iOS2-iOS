@@ -37,10 +37,10 @@ public final class GroupRepositoryImpl: GroupRepositoryProtocol {
         return response.toEntity()
     }
 
-    public func updateAttendance(groupId: Int, attendanceStatus: AttendanceStatus) async throws {
+    public func updateAttendance(meetingId: Int, attendanceStatus: AttendanceStatus) async throws {
         let requestDTO = UpdateAttendanceRequestDTO(attendanceStatus: attendanceStatus.rawValue)
         try await NetworkManager.shared.requestVoid(
-            GroupEndpoint.updateAttendance(groupId: groupId, requestDTO)
+            GroupEndpoint.updateAttendance(meetingId: meetingId, requestDTO)
         )
     }
 }
