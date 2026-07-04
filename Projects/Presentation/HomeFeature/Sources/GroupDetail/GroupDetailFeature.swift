@@ -178,10 +178,8 @@ public struct GroupDetailFeature {
     }
 
     private func copyInviteLink(_ inviteLink: String) -> Effect<Action> {
-        .run { _ in
-            await MainActor.run {
-                UIPasteboard.general.string = inviteLink
-            }
+        .run { @MainActor _ in
+            UIPasteboard.general.string = inviteLink
         }
     }
 
