@@ -28,6 +28,13 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         
         return true
     }
+
+    func application(
+        _ application: UIApplication,
+        didFailToRegisterForRemoteNotificationsWithError error: Error
+    ) {
+        Log.error("❌ APNS 등록 실패: \(error.localizedDescription)")
+    }
 }
 
 extension AppDelegate: @preconcurrency UNUserNotificationCenterDelegate {
