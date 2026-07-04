@@ -65,6 +65,7 @@ public struct GroupDetailFeature {
     }
 
     @Dependency(\.groupClient) private var groupClient
+    @Dependency(\.groupInvitationShareClient) private var groupInvitationShareClient
 
     public init() {}
 
@@ -188,13 +189,15 @@ public struct GroupDetailFeature {
         groupName: String,
         hostNickname: String
     ) -> Effect<Action> {
-        .run { _ in
+        let client = groupInvitationShareClient
+        let invitation = GroupInvitation(
+            inviteLink: inviteLink,
+            groupName: groupName,
+            hostNickname: hostNickname
+        )
+        return .run { _ in
             do {
-                try await KakaoInviteMessageSender.send(
-                    inviteLink: inviteLink,
-                    groupName: groupName,
-                    hostNickname: hostNickname
-                )
+                try await client.share(invitation)
             } catch {
                 Log.debug("카카오 초대 메시지 전송 실패: \(error.localizedDescription)")
             }

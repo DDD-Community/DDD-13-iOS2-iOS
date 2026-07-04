@@ -15,6 +15,8 @@ let project = Project.makeModule(
     .Shared(implements: .Utill),
     .SPM.kakaoSDKAuth,
     .SPM.kakaoSDKUser,
+    .SPM.kakaoSDKShare,
+    .SPM.kakaoSDKTemplate,
     .SPM.nidThirdPartyLogin
   ],
   sources: ["Sources/**"],
