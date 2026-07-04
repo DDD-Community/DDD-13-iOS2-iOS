@@ -26,7 +26,7 @@ public struct GroupDetailView: View {
                 background: .clear,
                 leadingAction: { dismiss() },
                 trailingIcons: [
-                    NavigationIconItem(icon: .userPlus24) {},
+                    NavigationIconItem(icon: .userPlus24) { store.send(.inviteButtonTapped) },
                     NavigationIconItem(icon: .verticalMenu24) {}
                 ]
             )
@@ -43,7 +43,18 @@ public struct GroupDetailView: View {
         }
         .background(Colors.gray200)
         .toolbar(.hidden, for: .navigationBar)
-        .task { store.send(.home(.onAppear)) }
+        .menuSheet(
+            isPresented: $store.isInviteSheetPresented,
+            title: "친구 초대하기",
+            items: [
+                .init(label: "카카오톡 공유하기", icon: .Asset.icShare24) {
+                    store.send(.kakaoShareTapped)
+                },
+                .init(label: "링크 복사하기", icon: .Asset.icCopy24) {
+                    store.send(.inviteLinkCopyTapped)
+                }
+            ]
+        )
     }
 
     private var tabBinding: Binding<Int> {
@@ -60,16 +71,22 @@ private struct TabContent: View {
     let store: StoreOf<GroupDetailFeature>
 
     var body: some View {
-        if store.home.isLoading {
-            ProgressView()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else {
+        Group {
             switch store.selectedTab {
             case .home:
                 HomeTab(store: store.scope(state: \.home, action: \.home))
 
             case .myPlace:
                 MyPlaceTab(store: store.scope(state: \.myPlace, action: \.myPlace))
+            }
+        }
+        // HomeTab을 트리에서 제거하지 않고 위에 덮는다.
+        // 최초 로드에만 노출되며, HomeTab의 .task 재마운트 루프를 유발하지 않는다.
+        .overlay {
+            if store.home.isLoading {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Colors.gray200)
             }
         }
     }

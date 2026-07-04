@@ -15,12 +15,14 @@ enum GroupFactory {
         let hostPickMeetingDateUseCase = HostPickMeetingDateUseCaseImpl(repository: repository)
         let fetchDetailUseCase = FetchGroupDetailUseCaseImpl(repository: repository)
         let updateAttendanceUseCase = UpdateAttendanceUseCaseImpl(repository: repository)
+        let issueInviteCodeUseCase = IssueInviteCodeUseCaseImpl(repository: repository)
         return .live(
             fetchUseCase: fetchUseCase,
             createUseCase: createUseCase,
             hostPickMeetingDateUseCase: hostPickMeetingDateUseCase,
             fetchDetailUseCase: fetchDetailUseCase,
-            updateAttendanceUseCase: updateAttendanceUseCase
+            updateAttendanceUseCase: updateAttendanceUseCase,
+            issueInviteCodeUseCase: issueInviteCodeUseCase
         )
     }
 }

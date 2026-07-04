@@ -72,8 +72,6 @@ private struct NearbyPlaceListHeader: View {
                 selectedIndex: store.selectedStationIndex,
                 onSelect: { store.send(.stationSelected($0)) }
             )
-            .padding(.horizontal, Spacing.spacing400)
-            .padding(.bottom, Spacing.spacing250)
         }
     }
 }
@@ -119,24 +117,36 @@ private struct StationSegmentedControl: View {
     let selectedIndex: Int
     let onSelect: (Int) -> Void
 
+    @Namespace private var namespace
+
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: Spacing.spacing200) {
-                ForEach(Array(stations.enumerated()), id: \.element.id) { index, station in
-                    StationSegment(
-                        station: station,
-                        isSelected: selectedIndex == index,
-                        onTap: { onSelect(index) }
-                    )
-                }
+        HStack(spacing: 0) {
+            ForEach(Array(stations.enumerated()), id: \.element.id) { index, station in
+                StationSegment(
+                    station: station,
+                    isSelected: selectedIndex == index,
+                    namespace: namespace,
+                    onTap: { withAnimation(.easeInOut) { onSelect(index) } }
+                )
+                .frame(maxWidth: .infinity)
             }
         }
+        .padding(Spacing.spacing100)
+        .background(
+            RoundedRectangle(cornerRadius: BorderRadius.borderRadiusFull)
+                .fill(Colors.gray200)
+        )
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, Spacing.spacing400)
+        // 9pt: 매칭 디자인 토큰 없음
+        .padding(.bottom, 9)
     }
 }
 
 private struct StationSegment: View {
     let station: MidpointStation
     let isSelected: Bool
+    let namespace: Namespace.ID
     let onTap: () -> Void
 
     var body: some View {
@@ -144,35 +154,49 @@ private struct StationSegment: View {
             HStack(spacing: Spacing.spacing150) {
                 Text("\(station.stationName)역")
                     .pretendardCustomFont(textStyle: .labelMedium)
-                    .foregroundStyle(isSelected ? Colors.gray00 : Colors.gray800)
+                    .foregroundStyle(isSelected ? Colors.gray900 : Colors.gray700)
 
                 if station.rank == 1 {
-                    MiddleBadge(isSelected: isSelected)
+                    MiddleBadge()
                 }
             }
-            .padding(.horizontal, Spacing.spacing300)
+            .padding(.horizontal, Spacing.spacing250)
             .padding(.vertical, Spacing.spacing200)
-            .background(
-                RoundedRectangle(cornerRadius: BorderRadius.borderRadiusFull)
-                    .fill(isSelected ? Colors.gray900 : Colors.gray100)
-            )
+            .frame(maxWidth: .infinity)
+            .background {
+                if isSelected {
+                    RoundedRectangle(cornerRadius: BorderRadius.borderRadiusFull)
+                        .fill(Colors.gray00)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: BorderRadius.borderRadiusFull)
+                                .stroke(Colors.gray50, lineWidth: BorderWidth.borderWidth100)
+                        )
+                        .shadow(
+                            color: BoxShadow.boxShadow100.color,
+                            radius: BoxShadow.boxShadow100.blur / 2,
+                            x: BoxShadow.boxShadow100.offsetX,
+                            y: BoxShadow.boxShadow100.offsetY
+                        )
+                        .matchedGeometryEffect(id: "selectedTab", in: namespace)
+                }
+            }
         }
         .buttonStyle(.plain)
     }
 }
 
 private struct MiddleBadge: View {
-    let isSelected: Bool
-
     var body: some View {
         Text("중간")
-            .pretendardCustomFont(textStyle: .labelXSmall)
-            .foregroundStyle(isSelected ? Colors.gray900 : Colors.gray00)
+            .pretendardFont(family: .Medium, size: 11)
+            .kerning(0.2)
+            .lineSpacing(15 - 11)
+            .foregroundStyle(Colors.gray700)
             .padding(.horizontal, Spacing.spacing150)
-            .padding(.vertical, Spacing.spacing50)
-            .background(
-                RoundedRectangle(cornerRadius: BorderRadius.borderRadius150)
-                    .fill(isSelected ? Colors.gray00 : Colors.gray600)
+            .padding(.vertical, Spacing.spacing25)
+            .overlay(
+                RoundedRectangle(cornerRadius: BorderRadius.borderRadiusFull)
+                    .stroke(Colors.gray400, lineWidth: BorderWidth.borderWidth100)
             )
     }
 }
@@ -184,12 +208,7 @@ private struct PlaceAddButton: View {
     let onTap: () -> Void
 
     var body: some View {
-        BangawoButton(
-            isPicked ? "담음" : "담기",
-            variant: isPicked ? .solid : .weak,
-            size: .xsmall,
-            action: onTap
-        )
+        ToggleButton(isSelected: isPicked, action: onTap)
     }
 }
 
@@ -286,7 +305,7 @@ private struct NearbyPlaceOptionFilterButton: View {
         Button(action: onTap) {
             HStack(spacing: Spacing.spacing100) {
                 Checkbox(
-                    variant: .ghost,
+                    variant: .circle,
                     state: isSelected ? .enabled : .disabled,
                     size: .small
                 )

@@ -2,12 +2,11 @@ import SwiftUI
 
 import ComposableArchitecture
 @preconcurrency import KakaoMapsSDK
-import KakaoSDKAuth
-import KakaoSDKCommon
 import NidThirdPartyLogin
 
 import CoreDependencies
 import Presentation
+import ThirdPartys
 import Utill
 
 @main
@@ -27,6 +26,7 @@ struct BangawoApp: App {
             $0.nicknameClient = AuthFactory.makeNicknameClient()
             $0.registerMemberClient = AuthFactory.makeRegisterMemberClient()
             $0.groupClient = GroupFactory.makeClient()
+            $0.groupInvitationShareClient = GroupInvitationShareFactory.makeClient()
             $0.voteClient = VoteFactory.makeClient()
             $0.placeRecommendationClient = PlaceRecommendationFactory.makeClient()
             $0.placePickClient = PlacePickFactory.makeClient()

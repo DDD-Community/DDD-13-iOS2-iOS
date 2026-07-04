@@ -3,11 +3,9 @@
 //  Service
 //
 
-import KakaoSDKAuth
-import KakaoSDKUser
-
 import DomainInterface
 import Entity
+import ThirdPartys
 import Utill
 
 public protocol KakaoLoginServiceInterface: Sendable {

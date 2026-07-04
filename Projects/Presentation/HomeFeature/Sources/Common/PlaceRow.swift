@@ -69,9 +69,9 @@ struct PlaceRow<Trailing: View>: View {
                         .foregroundStyle(Color.gray800)
 
                     HStack(spacing: Spacing.spacing225) {
-                        Text("18km")
-                            .pretendardCustomFont(textStyle: .bodyMedium)
-                            .foregroundStyle(Color.gray600)
+//                        Text("18km")
+//                            .pretendardCustomFont(textStyle: .bodyMedium)
+//                            .foregroundStyle(Color.gray600)
 
                         Button {
                             toggleTooltip()
@@ -220,7 +220,7 @@ private struct PlaceTagChip: View {
             .padding(.horizontal, Spacing.spacing150)
             .padding(.vertical, Spacing.spacing100)
             .background(
-                RoundedRectangle(cornerRadius: BorderRadius.borderRadius150)
+                Capsule()
                     .fill(backgroundColor)
             )
     }

@@ -19,13 +19,17 @@ public struct PlacePickStatus: Equatable, Sendable {
     public struct Member: Equatable, Sendable, Identifiable {
         public let memberId: Int
         public let nickname: String
+        public let profileImageUrl: String?
+        public let isMe: Bool
         public let done: Bool
 
         public var id: Int { memberId }
 
-        public init(memberId: Int, nickname: String, done: Bool) {
+        public init(memberId: Int, nickname: String, profileImageUrl: String? = nil, isMe: Bool = false, done: Bool) {
             self.memberId = memberId
             self.nickname = nickname
+            self.profileImageUrl = profileImageUrl
+            self.isMe = isMe
             self.done = done
         }
     }

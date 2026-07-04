@@ -43,4 +43,11 @@ public final class GroupRepositoryImpl: GroupRepositoryProtocol {
             GroupEndpoint.updateAttendance(meetingId: meetingId, requestDTO)
         )
     }
+
+    public func issueInviteCode(groupId: Int) async throws -> String {
+        let response: InviteCodeResponseDTO = try await NetworkManager.shared.request(
+            GroupEndpoint.issueInviteCode(groupId: groupId)
+        )
+        return response.inviteCode
+    }
 }

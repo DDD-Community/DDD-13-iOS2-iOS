@@ -8,6 +8,7 @@ import SwiftUI
 
 import ComposableArchitecture
 
+import CoreDependencies
 import DesignSystem
 import Entity
 
@@ -29,20 +30,29 @@ struct PlaceVoteParticipantsView: View {
             )
 
             ScrollView {
-                VStack(alignment: .leading, spacing: Spacing.spacing400) {
-                    BangawoText("현재 참여 중인 팀원", textStyle: .titleMedium)
-                        .foregroundStyle(Colors.gray900)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-
+                VStack(alignment: .leading, spacing: 0) {
+                    Header()
                     ParticipantsList(participants: store.participants)
                 }
-                .padding(.horizontal, Spacing.spacing400)
-                .padding(.top, Spacing.spacing200)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Colors.gray00)
         .task { store.send(.task) }
+    }
+}
+
+// MARK: - Header
+
+/// 장소 투표 참여 현황 타이틀.
+private struct Header: View {
+    var body: some View {
+        BangawoText("현재 참여중인 팀원", textStyle: .titleMedium)
+            .foregroundStyle(Colors.gray900)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, Spacing.spacing300)
+            .padding(.bottom, Spacing.spacing200)
+            .padding(.horizontal, Spacing.spacing400)
     }
 }
 
@@ -54,15 +64,28 @@ private struct ParticipantsList: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            BangawoText("팀원 \(participants.count)명", textStyle: .bodySmall)
-                .foregroundStyle(Colors.gray800)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, Spacing.spacing100)
+            ListHeader(count: participants.count)
 
             ForEach(participants) { participant in
                 ParticipantRow(participant: participant)
             }
         }
+        .padding(.vertical, Spacing.spacing300)
+        .padding(.horizontal, Spacing.spacing400)
+    }
+}
+
+// MARK: - List Header
+
+/// 참여 팀원 수를 표시하는 리스트 헤더.
+private struct ListHeader: View {
+    let count: Int
+
+    var body: some View {
+        BangawoText("팀원 \(count)명", textStyle: .bodySmall)
+            .foregroundStyle(Colors.gray800)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, Spacing.spacing100)
     }
 }
 
@@ -74,53 +97,121 @@ private struct ParticipantRow: View {
 
     var body: some View {
         HStack(spacing: Spacing.spacing200) {
-            HStack(spacing: Spacing.spacing250) {
-                Avatar(avatarType: avatarType, size: .s40)
+            memberInfo
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-                VStack(alignment: .leading, spacing: Spacing.spacing100) {
+            VoteParticipationBadge(isVoteCompleted: participant.voted)
+        }
+        .padding(.vertical, Spacing.spacing300)
+    }
+
+    private var memberInfo: some View {
+        HStack(spacing: Spacing.spacing250) {
+            ProfileAsset(profileImageUrl: participant.profileImageUrl)
+
+            VStack(alignment: .leading, spacing: Spacing.spacing100) {
+                HStack(spacing: Spacing.spacing100) {
                     BangawoText(participant.name, textStyle: .titleMedium)
                         .foregroundStyle(Colors.gray900)
 
-                    BangawoText(departureLabel, textStyle: .bodyMedium)
-                        .foregroundStyle(Colors.gray700)
+                    if participant.isMe {
+                        MeChip()
+                    }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
 
-            VoteParticipationLabel(isVoteCompleted: participant.voted)
+                BangawoText(departureLabel, textStyle: .bodyMedium)
+                    .foregroundStyle(Colors.gray700)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(.vertical, Spacing.spacing300)
     }
 
     /// 출발지명. 없으면 안내 문구를 노출한다.
     private var departureLabel: String {
         participant.departureName ?? Constant.emptyDepartureLabel
     }
+}
 
-    private var avatarType: Avatar.AvatarType {
-        guard
-            let urlString = participant.profileImageUrl,
-            let url = URL(string: urlString)
-        else { return .placeholder }
+// MARK: - Profile Asset
 
-        return .image(url)
+/// 프로필 이미지를 Asset 컴포넌트 사이즈에 맞춰 노출한다.
+private struct ProfileAsset: View {
+    let profileImageUrl: String?
+
+    var body: some View {
+        AsyncImage(url: profileImageUrl.flatMap(URL.init(string:))) { phase in
+            switch phase {
+            case .success(let image):
+                Asset(assetType: .image(image), size: .s40, isSelected: false)
+
+            default:
+                Asset(assetType: .image(Image.Asset.imgAvatarPlaceholder), size: .s40, isSelected: false)
+            }
+        }
     }
 }
 
-// MARK: - Vote Participation Label
+// MARK: - Me Chip
+
+/// 멤버 이름 우측에 붙는 "나" 라벨 칩.
+private struct MeChip: View {
+    var body: some View {
+        BangawoText("나", textStyle: .bodySmall)
+            .foregroundStyle(Colors.gray700)
+            .padding(.vertical, Metric.meChipVerticalPadding)
+            .padding(.horizontal, Spacing.spacing200)
+            .overlay(
+                Capsule()
+                    .stroke(Colors.gray400, lineWidth: BorderWidth.borderWidth100)
+            )
+    }
+}
+
+// MARK: - Vote Participation Badge
 
 /// 멤버의 투표 참여 여부 라벨. 완료는 강조, 미참여는 흐린 색으로 구분한다.
-private struct VoteParticipationLabel: View {
+private struct VoteParticipationBadge: View {
     let isVoteCompleted: Bool
 
     var body: some View {
-        BangawoText(isVoteCompleted ? "투표 완료" : "미참여", textStyle: .bodyMedium)
-            .foregroundStyle(isVoteCompleted ? Colors.gray800 : Colors.gray500)
+        Badge(
+            isVoteCompleted ? "투표 완료" : "미참여",
+            variant: isVoteCompleted ? .solid : .outline,
+            size: .medium
+        )
     }
 }
 
 // MARK: - Constants
 
+private enum Metric {
+    static let meChipVerticalPadding: CGFloat = 3
+}
+
 private enum Constant {
     static let emptyDepartureLabel = "출발지 미설정"
 }
+
+// MARK: - Preview
+
+#if DEBUG
+private func makePlaceVoteParticipantsStore() -> StoreOf<PlaceVoteParticipantsFeature> {
+    var state = PlaceVoteParticipantsFeature.State(meetingId: 1)
+    state.participants = VoteClient.previewPlaceVoteParticipants
+
+    return Store(initialState: state) {
+        PlaceVoteParticipantsFeature()
+    } withDependencies: {
+        $0.voteClient = .previewValue
+    }
+}
+
+#Preview("기본") {
+    BangawoPreview {
+        PlaceVoteParticipantsView(
+            store: makePlaceVoteParticipantsStore(),
+            onClose: {}
+        )
+    }
+}
+#endif

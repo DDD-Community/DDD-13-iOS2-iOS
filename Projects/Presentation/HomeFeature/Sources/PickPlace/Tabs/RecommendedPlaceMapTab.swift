@@ -87,3 +87,52 @@ private enum Constant {
     /// 좌표 정보가 없을 때 사용하는 기본 지도 중심(서울 시청).
     static let defaultCenter = MapCoordinate(latitude: 37.5665, longitude: 126.9780)
 }
+
+// MARK: - Preview
+
+#if DEBUG
+private struct RecommendedPlaceMapTabPreview: View {
+    private let store: StoreOf<RecommendedPlaceMapTabFeature>
+
+    init(stationRecommendations: [StationRecommendation]) {
+        var state = RecommendedPlaceMapTabFeature.State()
+        state.stationRecommendations = stationRecommendations
+        state.nearbyPlaceList.stationGroups = stationRecommendations
+        self.store = Store(initialState: state) {
+            RecommendedPlaceMapTabFeature()
+        }
+    }
+
+    var body: some View {
+        RecommendedPlaceMapTab(store: store)
+    }
+}
+
+private enum PreviewData {
+    private enum Constant {
+        static let stationCount = 3
+    }
+
+    static let stationRecommendations: [StationRecommendation] = {
+        let recommendations = Array(StationRecommendation.mock.prefix(Constant.stationCount))
+        assert(recommendations.count == Constant.stationCount)
+        return recommendations
+    }()
+
+    static let emptyPlaceStationRecommendations = stationRecommendations.map {
+        StationRecommendation(station: $0.station, places: [])
+    }
+}
+
+#Preview("추천 장소 있음") {
+    BangawoPreview {
+        RecommendedPlaceMapTabPreview(stationRecommendations: PreviewData.stationRecommendations)
+    }
+}
+
+#Preview("추천 장소 없음") {
+    BangawoPreview {
+        RecommendedPlaceMapTabPreview(stationRecommendations: PreviewData.emptyPlaceStationRecommendations)
+    }
+}
+#endif

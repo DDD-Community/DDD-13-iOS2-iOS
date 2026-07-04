@@ -69,6 +69,11 @@ public struct HomeTabFeature {
             groupDetail?.members.first(where: { $0.isMe })?.isHost ?? false
         }
 
+        /// 현재 사용자(본인)의 닉네임. groupDetail 로드 전에는 nil.
+        public var myNickname: String? {
+            groupDetail?.members.first(where: { $0.isMe })?.nickname
+        }
+
         /// 서버 `isMyVote` 기준, 내가 투표한 날짜 후보 옵션 id 집합.
         public var myVotedDateOptionIds: Set<Int> {
             guard let options = dateVote?.options else { return [] }
@@ -162,7 +167,12 @@ public struct HomeTabFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                state.isLoading = true
+                // 최초 진입에만 전체 ProgressView를 노출한다.
+                // 재진입(탭 전환 복귀 등)에서는 isLoading을 건드리지 않고 조용히 갱신해
+                // ProgressView ↔ HomeTab 교체로 인한 재마운트 루프를 막는다.
+                if state.groupDetail == nil {
+                    state.isLoading = true
+                }
                 return .concatenate(
                     .merge(
                         fetchGroupDetailEffect(meetingId: state.group.meetingId),
