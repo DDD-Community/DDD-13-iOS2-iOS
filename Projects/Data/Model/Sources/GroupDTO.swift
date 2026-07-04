@@ -52,6 +52,10 @@ public struct HostPickMeetingDateRequestDTO: Encodable, Sendable {
     }
 }
 
+public struct InviteCodeResponseDTO: Decodable, Sendable {
+    public let inviteCode: String
+}
+
 // MARK: - toEntity
 
 public extension GroupListItemResponseDTO {

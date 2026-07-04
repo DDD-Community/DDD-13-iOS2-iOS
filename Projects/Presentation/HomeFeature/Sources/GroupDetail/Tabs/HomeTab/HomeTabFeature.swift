@@ -69,6 +69,11 @@ public struct HomeTabFeature {
             groupDetail?.members.first(where: { $0.isMe })?.isHost ?? false
         }
 
+        /// 현재 사용자(본인)의 닉네임. groupDetail 로드 전에는 nil.
+        public var myNickname: String? {
+            groupDetail?.members.first(where: { $0.isMe })?.nickname
+        }
+
         /// 서버 `isMyVote` 기준, 내가 투표한 날짜 후보 옵션 id 집합.
         public var myVotedDateOptionIds: Set<Int> {
             guard let options = dateVote?.options else { return [] }

@@ -11,4 +11,5 @@ public protocol GroupRepositoryProtocol: Sendable {
     func hostPickMeetingDate(meetingId: Int, date: String) async throws
     func fetchGroupDetail(meetingId: Int) async throws -> GroupDetail
     func updateAttendance(groupId: Int, attendanceStatus: AttendanceStatus) async throws
+    func issueInviteCode(groupId: Int) async throws -> String
 }

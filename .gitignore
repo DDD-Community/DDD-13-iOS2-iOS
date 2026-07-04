@@ -91,3 +91,6 @@ CLAUDE.md
 
 # Claude feature 오케스트레이션용 휘발성 스펙
 .claude/specs/
+
+# AI 작업 인수인계 노트 (로컬 WIP)
+.handoff/
