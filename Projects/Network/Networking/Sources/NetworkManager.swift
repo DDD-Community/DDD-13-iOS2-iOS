@@ -126,6 +126,15 @@ public final class NetworkManager: Sendable {
                 headers: endPoint.headers,
                 interceptor: Interceptor()
             ).validate()
+        case let .requestParametersWithEncoding(parameters, encoding):
+            return AF.request(
+                "\(endPoint.baseURL)\(endPoint.path)",
+                method: endPoint.method,
+                parameters: parameters,
+                encoding: encoding,
+                headers: endPoint.headers,
+                interceptor: Interceptor()
+            ).validate()
         case let .requestWithoutInterceptor(body):
             if let body = body {
                 return AF.request(

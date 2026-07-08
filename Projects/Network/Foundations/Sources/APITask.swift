@@ -17,6 +17,8 @@ public enum APITask {
     case requestJSONEncodable(body: Encodable & Sendable)
     /// URL 쿼리 파라미터로 전달
     case requestParameters(parameters: Parameters)
+    /// URL 쿼리 파라미터를 지정한 인코딩으로 전달 (배열 인코딩 방식 커스터마이즈용)
+    case requestParametersWithEncoding(parameters: Parameters, encoding: URLEncoding)
     /// 인터셉터 없는 요청
     case requestWithoutInterceptor(body: (Encodable & Sendable)? = nil)
     /// 인터셉터 없는 쿼리 파라미터 요청 (외부 API용)
