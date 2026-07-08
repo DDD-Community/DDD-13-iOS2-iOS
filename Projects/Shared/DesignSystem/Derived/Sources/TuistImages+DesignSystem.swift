@@ -149,6 +149,7 @@ public extension Image {
     public static let imgInviteBackground1: Image = Image("img_invite_background1", bundle: Bundle.module)
     public static let imgInviteBackground2: Image = Image("img_invite_background2", bundle: Bundle.module)
     public static let imgLogin3d: Image = Image("img_login_3d", bundle: Bundle.module)
+    public static let imgSplash: Image = Image("img_splash", bundle: Bundle.module)
     public static let symApple: Image = Image("sym_apple", bundle: Bundle.module)
     public static let symKakao: Image = Image("sym_kakao", bundle: Bundle.module)
     public static let symNaver: Image = Image("sym_naver", bundle: Bundle.module)
