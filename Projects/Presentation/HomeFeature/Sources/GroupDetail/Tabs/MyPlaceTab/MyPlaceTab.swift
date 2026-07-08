@@ -16,14 +16,26 @@ import Utill
 struct MyPlaceTab: View {
     let store: StoreOf<MyPlaceTabFeature>
 
-    // TODO: 디버깅용 임시 핀. 실제 장소 데이터 연동 시 제거한다.
+    /// 지도에 표시할 핀. 포커싱 장소 또는 역 기반 근처 장소 목록으로 구성한다.
     @State private var pins: [MapPin] = []
     /// 바텀시트가 화면 하단을 덮는 높이. detent에 따라 핀 포커싱 중심을 위로 보정하는 데 쓴다.
     @State private var sheetCoveredHeight: CGFloat = 0
 
+    /// 핀 재구성 트리거. 포커싱 장소 또는 근처 장소 목록이 바뀌면 핀을 다시 만든다.
+    private var pinInput: PinInput {
+        PinInput(focusedPlace: store.focusedPlace, nearbyPlaces: store.nearbyPlaceList.visibleNearbyPlaces)
+    }
+
     /// 포커싱 대상이 있으면 그 좌표, 없으면 기본 중심.
     private var mapCenter: MapCoordinate {
         guard let place = store.focusedPlace else { return Constant.defaultCenter }
+
+        return MapCoordinate(latitude: place.latitude, longitude: place.longitude)
+    }
+
+    /// 포커싱 장소가 있으면 그 좌표. 이미 살아있는 지도의 카메라를 애니메이션 이동시키는 데 쓴다.
+    private var focusedCoordinate: MapCoordinate? {
+        guard let place = store.focusedPlace else { return nil }
 
         return MapCoordinate(latitude: place.latitude, longitude: place.longitude)
     }
@@ -33,13 +45,16 @@ struct MyPlaceTab: View {
             KakaoMap(
                 pins: pins,
                 initialCenter: mapCenter,
+                focusedCoordinate: focusedCoordinate,
                 focusBottomInset: sheetCoveredHeight
             )
             .onPinTapped { pin in
                 Log.debug("핀 선택: id=\(pin.id), title=\(pin.title), coordinate=(\(pin.coordinate.latitude), \(pin.coordinate.longitude))")
             }
             .onCenterChanged { viewport in
-                Log.debug("중심 좌표 변경: center=(\(viewport.center.latitude), \(viewport.center.longitude)), zoomLevel=\(viewport.zoomLevel)")
+                store.send(.mapCenterChanged(
+                    MapCoordinate(latitude: viewport.center.latitude, longitude: viewport.center.longitude)
+                ))
             }
             .ignoresSafeArea()
             
@@ -59,20 +74,23 @@ struct MyPlaceTab: View {
             }
             .onVisibleHeightChanged { sheetCoveredHeight = $0 }
         }
-        .task(id: store.focusedPlace) {
+        .task(id: pinInput) {
             buildPins()
         }
     }
 
     // MARK: - Pin 구성
 
-    /// 포커싱 장소가 있으면 그 핀 하나만, 없으면 디버깅용 샘플 핀을 구성한다.
+    /// 포커싱 장소가 있으면 그 핀 하나만, 없으면 역 기반 근처 장소 핀을 구성한다.
     @MainActor
     private func buildPins() {
         guard let place = store.focusedPlace else {
-            pins = Constant.samplePlaces.map { place in
-                MapPinLabel(assetName: place.iconAsset, title: place.name)
-                    .makePin(id: place.name, coordinate: place.coordinate)
+            pins = store.nearbyPlaceList.visibleNearbyPlaces.map { place in
+                MapPinLabel(image: place.categoryLabel.pinIcon, title: place.name)
+                    .makePin(
+                        id: String(place.placeId),
+                        coordinate: MapCoordinate(latitude: place.latitude, longitude: place.longitude)
+                    )
             }
             return
         }
@@ -85,12 +103,12 @@ struct MyPlaceTab: View {
     }
 }
 
-// MARK: - SamplePlace
+// MARK: - PinInput
 
-private struct SamplePlace {
-    let name: String
-    let coordinate: MapCoordinate
-    let iconAsset: String
+/// `.task(id:)` 트리거 키. 두 값 중 하나라도 바뀌면 핀을 재구성한다.
+private struct PinInput: Equatable {
+    let focusedPlace: ConfirmedPlace?
+    let nearbyPlaces: [NearbyPlace]
 }
 
 // MARK: - Constants
@@ -98,13 +116,4 @@ private struct SamplePlace {
 private enum Constant {
     /// 좌표 정보가 없을 때 사용하는 기본 지도 중심(서울 시청).
     static let defaultCenter = MapCoordinate(latitude: 37.5665, longitude: 126.9780)
-
-    /// 디버깅용 임시 샘플 장소. 실제 데이터 연동 시 제거한다.
-    static let samplePlaces: [SamplePlace] = [
-        SamplePlace(name: "감성카페", coordinate: MapCoordinate(latitude: 37.5665, longitude: 126.9780), iconAsset: "ic_map_pin_cafe"),
-        SamplePlace(name: "남산다이닝", coordinate: MapCoordinate(latitude: 37.5512, longitude: 126.9882), iconAsset: "ic_map_pin_buffet"),
-        SamplePlace(name: "경복궁디저트", coordinate: MapCoordinate(latitude: 37.5796, longitude: 126.9770), iconAsset: "ic_map_pin_dessert"),
-        SamplePlace(name: "명동포차", coordinate: MapCoordinate(latitude: 37.5637, longitude: 126.9850), iconAsset: "ic_map_pin_pub"),
-        SamplePlace(name: "광화문식당", coordinate: MapCoordinate(latitude: 37.5759, longitude: 126.9769), iconAsset: "ic_map_pin_restaurant"),
-    ]
 }
