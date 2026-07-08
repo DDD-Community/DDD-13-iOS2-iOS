@@ -15,6 +15,9 @@ public struct RecommendedPlace: Equatable, Sendable, Identifiable {
     public let nearestStationId: Int
     public let latitude: Double
     public let longitude: Double
+    // TODO: 백엔드 추천 응답에 주차/예약 필드 추가 시 non-optional 로 변경
+    public let hasParking: Bool?
+    public let reservable: Bool?
 
     public var id: Int { placeId }
 
@@ -27,7 +30,9 @@ public struct RecommendedPlace: Equatable, Sendable, Identifiable {
         score: Double,
         nearestStationId: Int,
         latitude: Double,
-        longitude: Double
+        longitude: Double,
+        hasParking: Bool? = nil,
+        reservable: Bool? = nil
     ) {
         self.rank = rank
         self.placeId = placeId
@@ -38,5 +43,7 @@ public struct RecommendedPlace: Equatable, Sendable, Identifiable {
         self.nearestStationId = nearestStationId
         self.latitude = latitude
         self.longitude = longitude
+        self.hasParking = hasParking
+        self.reservable = reservable
     }
 }

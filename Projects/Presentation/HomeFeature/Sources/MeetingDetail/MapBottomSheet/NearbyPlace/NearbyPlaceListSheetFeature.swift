@@ -34,11 +34,17 @@ public struct NearbyPlaceListSheetFeature {
         /// pickPlace 모드에서 segmented control에 표시할 역 목록.
         public var stations: [MidpointStation] { stationGroups.map(\.station) }
 
-        /// pickPlace 모드에서 현재 노출할 추천 장소 목록(선택된 역 기준).
+        /// pickPlace 모드에서 현재 노출할 추천 장소 목록(선택된 역 + selectedCategory·주차·예약 필터 반영).
+        /// 각 필터는 선택됐을 때만 적용되고, 여러 필터는 AND로 결합된다.
         public var visibleRecommendedPlaces: [RecommendedPlace] {
             guard stationGroups.indices.contains(selectedStationIndex) else { return [] }
 
-            return stationGroups[selectedStationIndex].places
+            return stationGroups[selectedStationIndex].places.filter { place in
+                let matchesCategory = selectedCategory == .all || place.categoryLabel == selectedCategory
+                let matchesParking = !isParkingAvailableSelected || (place.hasParking ?? false)
+                let matchesReservable = !isReservableSelected || (place.reservable ?? false)
+                return matchesCategory && matchesParking && matchesReservable
+            }
         }
 
         /// selectedCategory·주차·예약 필터를 모두 반영해 노출할 근처 장소 목록.
