@@ -4,27 +4,31 @@
 //
 
 import ComposableArchitecture
+import CoreDependencies
 import Entity
 import Foundation
 import UIKit
+import Utill
 
 @Reducer
 public struct SelectedPlaceDetailSheetFeature {
     @ObservableState
     public struct State: Equatable, Sendable {
-        public let name: String
-        public let distanceText: String
-        public let categoryName: String
-        public let closedDayText: String
-        public let businessHoursText: String
-        public let roadAddress: String
-        public let lotAddress: String
+        public var placeId: Int
+        public var name: String
+        public var distanceText: String
+        public var categoryName: String
+        public var closedDayText: String
+        public var businessHoursText: String
+        public var roadAddress: String
+        public var lotAddress: String
 
         var naverMapSearchQuery: String {
             name
         }
 
         public init(
+            placeId: Int,
             name: String,
             distanceText: String,
             categoryName: String,
@@ -33,6 +37,7 @@ public struct SelectedPlaceDetailSheetFeature {
             roadAddress: String,
             lotAddress: String
         ) {
+            self.placeId = placeId
             self.name = name
             self.distanceText = distanceText
             self.categoryName = categoryName
@@ -43,6 +48,7 @@ public struct SelectedPlaceDetailSheetFeature {
         }
 
         public static let mock = State(
+            placeId: 0,
             name: "서촌김씨",
             distanceText: "18km",
             categoryName: "디저트",
@@ -55,9 +61,12 @@ public struct SelectedPlaceDetailSheetFeature {
 
     public enum Action: Equatable {
         case placeFocused(ConfirmedPlace)
+        case placeDetailResponse(PlaceDetail)
         case closeButtonTapped
         case naverMapButtonTapped
     }
+
+    @Dependency(\.placeDetailsClient) private var placeDetailsClient
 
     public init() {}
 
@@ -66,6 +75,7 @@ public struct SelectedPlaceDetailSheetFeature {
             switch action {
             case let .placeFocused(place):
                 state = State(
+                    placeId: place.placeId,
                     name: place.name,
                     distanceText: Constant.placeholder,
                     categoryName: place.categoryLabel.title,
@@ -74,6 +84,27 @@ public struct SelectedPlaceDetailSheetFeature {
                     roadAddress: place.address,
                     lotAddress: Constant.placeholder
                 )
+
+                let placeDetailsClient = self.placeDetailsClient
+                let placeId = place.placeId
+                return .run { send in
+                    do {
+                        let details = try await placeDetailsClient.fetchPlaceDetails(ids: [placeId])
+                        guard let detail = details.first else { return }
+
+                        await send(.placeDetailResponse(detail))
+                    } catch {
+                        Log.debug("장소 상세 조회 실패: \(error.localizedDescription)")
+                    }
+                }
+                .cancellable(id: CancelID.detail, cancelInFlight: true)
+
+            case let .placeDetailResponse(detail):
+                state.categoryName = detail.categoryLabel.title
+                state.closedDayText = detail.holiday
+                state.businessHoursText = detail.businessHours
+                state.roadAddress = detail.roadAddress
+                state.lotAddress = detail.address
                 return .none
 
             case .closeButtonTapped:
@@ -94,6 +125,10 @@ public struct SelectedPlaceDetailSheetFeature {
 private enum Constant {
     /// `ConfirmedPlace`에 대응 정보가 없는 필드의 표시값.
     static let placeholder = "-"
+}
+
+private enum CancelID {
+    case detail
 }
 
 @MainActor
