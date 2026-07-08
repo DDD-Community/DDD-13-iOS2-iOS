@@ -10,7 +10,7 @@ public extension InfoPlist {
   static let appInfoPlist: Self = .extendingDefault(
     with: InfoPlistDictionary()
       .setUIUserInterfaceStyle("Light")
-      .setUILaunchScreens()
+      .setUILaunchStoryboardName("LaunchScreen")
       .setCFBundleDevelopmentRegion()
       .setCFBundleDevelopmentRegion("$(DEVELOPMENT_LANGUAGE)")
       .setCFBundleLocalizations(["ko"])

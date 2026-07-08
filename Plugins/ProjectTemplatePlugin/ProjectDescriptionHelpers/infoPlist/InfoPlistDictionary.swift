@@ -176,16 +176,6 @@ extension InfoPlistDictionary {
     return self.merging(["NSPhotoLibraryUsageDescription": .string(value)]) { (_, new) in new }
   }
   
-  func setUILaunchScreens() -> InfoPlistDictionary {
-    let dict: InfoPlistDictionary = [
-      "UILaunchScreen": .dictionary([
-        "UIColorName": .string(""),
-        "UIImageName": .string("")
-      ])
-    ]
-    return self.merging(dict) { _, new in new }
-  }
-  
   func setAppUseExemptEncryption(value: Bool) -> InfoPlistDictionary {
     return self.merging(["ITSAppUsesNonExemptEncryption": .boolean(value)]) { (_, new) in new }
   }
