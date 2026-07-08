@@ -75,7 +75,7 @@ private struct PickPlaceViewPreview: View {
         pickedPlaces: [PickedPlace] = PickedPlace.mock,
         isHost: Bool = false
     ) {
-        var state = PickPlaceFeature.State(pickedPlaces: pickedPlaces, isHost: isHost)
+        var state = PickPlaceFeature.State(members: PickPlaceMember.mock, pickedPlaces: pickedPlaces, isHost: isHost)
         state.selectedSubTabIndex = selectedSubTabIndex
         state.recommendedPlaceMap.stationRecommendations = StationRecommendation.mock
         state.recommendedPlaceMap.nearbyPlaceList.stationGroups = StationRecommendation.mock

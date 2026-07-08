@@ -18,8 +18,8 @@ public struct PickedPlaceTabFeature {
         public let isHost: Bool
 
         public init(
-            members: [PickPlaceMember] = PickPlaceMember.mock,
-            pickedPlaces: [PickedPlace] = PickedPlace.mock,
+            members: [PickPlaceMember] = [],
+            pickedPlaces: [PickedPlace] = [],
             isHost: Bool = false
         ) {
             self.members = members
