@@ -15,6 +15,10 @@ public struct RecommendedPlaceMapTabFeature {
         public var stationRecommendations: [StationRecommendation] = []
         /// 시트에서 선택된 역 인덱스. `nearbyPlaceList`의 선택을 미러링한다.
         public var selectedStationIndex: Int = 0
+        /// 포커싱할 장소. 설정 시 지도 카메라를 이 장소로 맞추고 상세 시트로 전환한다.
+        public var focusedPlace: ConfirmedPlace?
+        /// 포커싱 장소가 있을 때 표시할 장소 상세 시트.
+        public var selectedPlaceDetail: SelectedPlaceDetailSheetFeature.State = .mock
 
         public init() {}
 
@@ -32,7 +36,9 @@ public struct RecommendedPlaceMapTabFeature {
     }
 
     public enum Action {
+        case placeFocused(ConfirmedPlace)
         case nearbyPlaceList(NearbyPlaceListSheetFeature.Action)
+        case selectedPlaceDetail(SelectedPlaceDetailSheetFeature.Action)
     }
 
     public init() {}
@@ -42,13 +48,31 @@ public struct RecommendedPlaceMapTabFeature {
             NearbyPlaceListSheetFeature()
         }
 
+        Scope(state: \.selectedPlaceDetail, action: \.selectedPlaceDetail) {
+            SelectedPlaceDetailSheetFeature()
+        }
+
         Reduce { state, action in
             switch action {
             case let .nearbyPlaceList(.stationSelected(index)):
                 state.selectedStationIndex = index
                 return .none
 
+            case let .nearbyPlaceList(.delegate(.placeTapped(place))):
+                return .send(.placeFocused(place))
+
             case .nearbyPlaceList:
+                return .none
+
+            case let .placeFocused(place):
+                state.focusedPlace = place
+                return .send(.selectedPlaceDetail(.placeFocused(place)))
+
+            case .selectedPlaceDetail(.closeButtonTapped):
+                state.focusedPlace = nil
+                return .none
+
+            case .selectedPlaceDetail:
                 return .none
             }
         }
