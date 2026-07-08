@@ -24,6 +24,8 @@ struct PlaceRow<Trailing: View>: View {
     private let displayAddress: String
     private let tooltipAnimationDuration = 0.2
     private let trailing: Trailing
+    /// row 전체 영역 탭 핸들러. `nil`이면 row 자체는 탭에 반응하지 않는다.
+    private let onTap: (() -> Void)?
 
     /// 더미 데이터를 사용하는 기본 init. 서버 모델 확정 전 mock 용도.
     init(@ViewBuilder trailing: () -> Trailing = { EmptyView() }) {
@@ -40,20 +42,42 @@ struct PlaceRow<Trailing: View>: View {
         placeName: String,
         category: PlaceCategory?,
         displayAddress: String,
+        onTap: (() -> Void)? = nil,
         @ViewBuilder trailing: () -> Trailing = { EmptyView() }
     ) {
         self.placeName = placeName
         self.category = category
         self.displayAddress = displayAddress
+        self.onTap = onTap
         self.trailing = trailing()
     }
 
     /// `RecommendedPlace` 실데이터를 표시하는 init.
-    init(place: RecommendedPlace, @ViewBuilder trailing: () -> Trailing = { EmptyView() }) {
+    init(
+        place: RecommendedPlace,
+        onTap: (() -> Void)? = nil,
+        @ViewBuilder trailing: () -> Trailing = { EmptyView() }
+    ) {
         self.init(
             placeName: place.name,
             category: place.categoryLabel,
             displayAddress: place.address,
+            onTap: onTap,
+            trailing: trailing
+        )
+    }
+
+    /// `NearbyPlace` 실데이터를 표시하는 init.
+    init(
+        place: NearbyPlace,
+        onTap: (() -> Void)? = nil,
+        @ViewBuilder trailing: () -> Trailing = { EmptyView() }
+    ) {
+        self.init(
+            placeName: place.name,
+            category: place.categoryLabel,
+            displayAddress: place.address,
+            onTap: onTap,
             trailing: trailing
         )
     }
@@ -118,6 +142,24 @@ struct PlaceRow<Trailing: View>: View {
         .zIndex(isTooltipLayerElevated ? 1 : 0)
         .padding(.horizontal, Spacing.spacing400)
         .padding(.vertical, Spacing.spacing300)
+        // 내부 주소/trailing 버튼은 innermost 우선 디스패치로 유지되고, 빈 영역 탭만 onTap으로 전달됩니다.
+        .contentShape(Rectangle())
+        .modifier(RowTapModifier(onTap: onTap))
+    }
+}
+
+// MARK: - Row Tap
+
+/// `onTap`이 있을 때만 전체 row 탭 제스처를 붙입니다. `nil`이면 제스처를 달지 않아 기존 동작을 보존합니다.
+private struct RowTapModifier: ViewModifier {
+    let onTap: (() -> Void)?
+
+    func body(content: Content) -> some View {
+        if let onTap {
+            content.onTapGesture { onTap() }
+        } else {
+            content
+        }
     }
 }
 

@@ -45,21 +45,34 @@ struct RecommendedPlaceMapTab: View {
         return MapCoordinate(latitude: station.latitude, longitude: station.longitude)
     }
 
+    /// 지도 카메라 포커싱 좌표. 포커싱 장소가 있으면 그 좌표, 없으면 선택된 역 좌표.
+    private var focusedCoordinate: MapCoordinate? {
+        guard let place = store.focusedPlace else { return selectedStationCoordinate }
+
+        return MapCoordinate(latitude: place.latitude, longitude: place.longitude)
+    }
+
     var body: some View {
         ZStack(alignment: .bottom) {
             KakaoMap(
                 pins: recommendedPlacePins,
                 initialCenter: initialCenter,
-                focusedCoordinate: selectedStationCoordinate,
+                focusedCoordinate: focusedCoordinate,
                 focusBottomInset: sheetCoveredHeight
             )
             .ignoresSafeArea()
 
             MapBottomSheet(detents: [.ratio(0.4), .full], initialDetent: .ratio(0.4)) {
-                NearbyPlaceListSheet(
-                    store: store.scope(state: \.nearbyPlaceList, action: \.nearbyPlaceList),
-                    mode: .pickPlace
-                )
+                if store.focusedPlace != nil {
+                    SelectedPlaceDetailSheet(
+                        store: store.scope(state: \.selectedPlaceDetail, action: \.selectedPlaceDetail)
+                    )
+                } else {
+                    NearbyPlaceListSheet(
+                        store: store.scope(state: \.nearbyPlaceList, action: \.nearbyPlaceList),
+                        mode: .pickPlace
+                    )
+                }
             }
             .onVisibleHeightChanged { sheetCoveredHeight = $0 }
         }

@@ -5,7 +5,14 @@
 
 import ComposableArchitecture
 
+import CoreDependencies
+import DesignSystem
 import Entity
+import Utill
+
+private enum CancelID {
+    case nearby
+}
 
 @Reducer
 public struct MyPlaceTabFeature {
@@ -22,9 +29,14 @@ public struct MyPlaceTabFeature {
 
     public enum Action {
         case placeFocused(ConfirmedPlace)
+        case mapCenterChanged(MapCoordinate)
+        case nearbyPlacesResponse(stationName: String?, places: [NearbyPlace])
         case nearbyPlaceList(NearbyPlaceListSheetFeature.Action)
         case selectedPlaceDetail(SelectedPlaceDetailSheetFeature.Action)
     }
+
+    @Dependency(\.searchStationsClient) var searchStationsClient
+    @Dependency(\.nearbyPlacesClient) var nearbyPlacesClient
 
     public init() {}
 
@@ -44,6 +56,15 @@ public struct MyPlaceTabFeature {
                 state.focusedPlace = place
                 return .send(.selectedPlaceDetail(.placeFocused(place)))
 
+            case let .mapCenterChanged(coordinate):
+                return fetchNearbyPlaces(latitude: coordinate.latitude, longitude: coordinate.longitude)
+
+            case let .nearbyPlacesResponse(stationName, places):
+                return .send(.nearbyPlaceList(.nearbyPlacesUpdated(stationName: stationName, places: places)))
+
+            case let .nearbyPlaceList(.delegate(.placeTapped(place))):
+                return .send(.placeFocused(place))
+
             case .nearbyPlaceList:
                 return .none
 
@@ -55,5 +76,25 @@ public struct MyPlaceTabFeature {
                 return .none
             }
         }
+    }
+
+    private func fetchNearbyPlaces(latitude: Double, longitude: Double) -> Effect<Action> {
+        let searchStationsClient = self.searchStationsClient
+        let nearbyPlacesClient = self.nearbyPlacesClient
+
+        return .run { send in
+            do {
+                guard let station = try await searchStationsClient.findNearestStation(longitude, latitude) else {
+                    await send(.nearbyPlacesResponse(stationName: nil, places: []))
+                    return
+                }
+
+                let places = try await nearbyPlacesClient.fetchNearbyPlaces(station.y, station.x, 1000, nil)
+                await send(.nearbyPlacesResponse(stationName: station.name, places: places))
+            } catch {
+                Log.debug("근처 장소 조회 실패: \(error.localizedDescription)")
+            }
+        }
+        .cancellable(id: CancelID.nearby, cancelInFlight: true)
     }
 }

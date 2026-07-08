@@ -31,6 +31,8 @@ struct BangawoApp: App {
             $0.placePickClient = PlacePickFactory.makeClient()
             $0.themeTagClient = ThemeTagFactory.makeClient()
             $0.departurePlaceClient = DeparturePlaceFactory.makeClient()
+            $0.nearbyPlacesClient = NearbyPlacesFactory.makeClient()
+            $0.placeDetailsClient = PlaceDetailsFactory.makeClient()
         }
 
         store = Store(initialState: RootFeature.State()) {

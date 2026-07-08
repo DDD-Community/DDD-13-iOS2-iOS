@@ -18,6 +18,9 @@ public struct RecommendedPlaceResponseDTO: Decodable, Sendable {
         public let address: String
         public let latitude: Double
         public let longitude: Double
+        // TODO: 백엔드 추천 응답에 주차/예약 필드 추가 시 optional 제거
+        public let hasParking: Bool?
+        public let reservable: Bool?
     }
 }
 
@@ -32,7 +35,9 @@ public extension RecommendedPlaceResponseDTO {
             score: score,
             nearestStationId: nearestStationId,
             latitude: place.latitude,
-            longitude: place.longitude
+            longitude: place.longitude,
+            hasParking: place.hasParking,
+            reservable: place.reservable
         )
     }
 }

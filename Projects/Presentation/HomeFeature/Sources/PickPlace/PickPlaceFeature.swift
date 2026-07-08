@@ -30,8 +30,8 @@ public struct PickPlaceFeature {
         public var hasLoadedRecommendations = false
 
         public init(
-            members: [PickPlaceMember] = PickPlaceMember.mock,
-            pickedPlaces: [PickedPlace] = PickedPlace.mock,
+            members: [PickPlaceMember] = [],
+            pickedPlaces: [PickedPlace] = [],
             isHost: Bool = false,
             meetingId: Int = 0
         ) {
