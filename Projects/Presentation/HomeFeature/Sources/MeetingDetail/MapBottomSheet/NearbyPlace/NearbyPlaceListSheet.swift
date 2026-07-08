@@ -60,11 +60,13 @@ private struct NearbyPlaceListHeader: View {
     var body: some View {
         switch mode {
         case .default:
-            Text("신사역")
-                .pretendardCustomFont(textStyle: .titleLarge)
-                .foregroundStyle(Colors.gray900)
-                .padding(.horizontal, Spacing.spacing400)
-                .padding(.bottom, Spacing.spacing250)
+            if let stationName = store.stationName {
+                Text(stationName)
+                    .pretendardCustomFont(textStyle: .titleLarge)
+                    .foregroundStyle(Colors.gray900)
+                    .padding(.horizontal, Spacing.spacing400)
+                    .padding(.bottom, Spacing.spacing250)
+            }
 
         case .pickPlace:
             StationSegmentedControl(
@@ -85,8 +87,18 @@ private struct NearbyPlaceList: View {
     var body: some View {
         switch mode {
         case .default:
-            ForEach(0..<store.placeCount, id: \.self) { _ in
-                PlaceRow()
+            if store.visibleNearbyPlaces.isEmpty {
+                Text("근처 장소가 없어요")
+                    .pretendardCustomFont(textStyle: .bodyMedium)
+                    .foregroundStyle(Colors.gray500)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, Spacing.spacing600)
+            } else {
+                ForEach(store.visibleNearbyPlaces) { place in
+                    PlaceRow(place: place, onTap: {
+                        store.send(.placeRowTapped(place.toConfirmedPlace()))
+                    })
+                }
             }
 
         case .pickPlace:
@@ -98,7 +110,9 @@ private struct NearbyPlaceList: View {
                     .padding(.vertical, Spacing.spacing600)
             } else {
                 ForEach(store.visibleRecommendedPlaces) { place in
-                    PlaceRow(place: place) {
+                    PlaceRow(place: place, onTap: {
+                        store.send(.placeRowTapped(place.toConfirmedPlace()))
+                    }) {
                         PlaceAddButton(
                             isPicked: store.pickedPlaceIds.contains(place.placeId),
                             onTap: { store.send(.placeAddTapped(placeId: place.placeId)) }
@@ -327,5 +341,35 @@ private struct NearbyPlaceOptionFilterButton: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+    }
+}
+
+// MARK: - ConfirmedPlace 변환
+
+/// row 탭을 공통 `placeRowTapped(ConfirmedPlace)`로 흘려보내기 위한 변환.
+/// `ConfirmedPlace`는 두 타입의 공통 부분집합이라 무손실이다.
+private extension NearbyPlace {
+    func toConfirmedPlace() -> ConfirmedPlace {
+        ConfirmedPlace(
+            placeId: placeId,
+            name: name,
+            categoryLabel: categoryLabel,
+            address: address,
+            latitude: latitude,
+            longitude: longitude
+        )
+    }
+}
+
+private extension RecommendedPlace {
+    func toConfirmedPlace() -> ConfirmedPlace {
+        ConfirmedPlace(
+            placeId: placeId,
+            name: name,
+            categoryLabel: categoryLabel,
+            address: address,
+            latitude: latitude,
+            longitude: longitude
+        )
     }
 }
