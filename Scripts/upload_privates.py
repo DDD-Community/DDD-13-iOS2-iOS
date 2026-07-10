@@ -12,8 +12,7 @@ REPO_SLUG = "khyeji98/DDD-iOS2-iOS-private"
 BRANCH = "main"
 CONFIG_DIR = Path("Config")
 FILES = [
-    "Dev.xcconfig",
-    "Stage.xcconfig",
+    "Debug.xcconfig",
     "Prod.xcconfig",
     "Release.xcconfig",
     "Secrets.xcconfig",

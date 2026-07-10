@@ -23,9 +23,8 @@ public extension Project {
     private static let teamId = ProcessInfo.processInfo.environment["TEAM_ID"] ?? ProjectConfig.teamId
 
     public static let appName = projectName
-    public static let appStageName = "\(projectName)-Stage"
     public static let appProdName = "\(projectName)-Prod"
-    public static let appDevName = "\(projectName)-Dev"
+    public static let appDebugName = "\(projectName)-Debug"
     public static let deploymentTarget = ProjectConfig.deploymentTarget
     public static let deploymentDestination = ProjectConfig.deploymentDestination
     public static let organizationTeamId = teamId

@@ -54,21 +54,6 @@ public extension Project {
     )
 
 
-    let appStageTarget: Target = .target(
-      name: "\(name)-Stage",
-      destinations: destinations,
-      product: product,
-      bundleId: "\(bundleId)",
-      deploymentTargets: deploymentTarget,
-      infoPlist: infoPlist,
-      sources: sources,
-      resources: resources,
-      entitlements: entitlements,
-      scripts: scripts,
-      dependencies: dependencies
-    )
-
-
     let appDevTarget: Target = .target(
       name: "\(name)-Debug",
       destinations: destinations,
@@ -94,7 +79,7 @@ public extension Project {
       dependencies: [.target(name: name)]
     )
 
-    let targets = [appTarget, appDevTarget, appStageTarget, appProdTarget ,appTestTarget]
+    let targets = [appTarget, appDevTarget, appProdTarget, appTestTarget]
 
     return Project(
       name: name,
