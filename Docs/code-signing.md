@@ -103,7 +103,7 @@ xcodebuild -workspace Bangawo.xcworkspace -scheme Bangawo \
 | --- | --- |
 | `match_development` | 개발용 인증서·프로파일 로컬 설치 (readonly) |
 | `match_appstore` | 배포용 인증서·프로파일 로컬 설치 (readonly) |
-| `beta` | Bangawo-Stage → TestFlight 업로드 |
+| `beta` | Bangawo-Prod → TestFlight 업로드 |
 | `release` | Bangawo-Prod → App Store 심사 제출 |
 
 > `fastlane/README.md`는 fastlane이 매 실행 시 자동 재생성하므로 수동으로 수정하지 않는다. 설명은 이 문서에 둔다.
