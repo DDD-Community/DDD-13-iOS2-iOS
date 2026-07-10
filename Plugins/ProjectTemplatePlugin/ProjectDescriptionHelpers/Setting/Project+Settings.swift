@@ -61,18 +61,7 @@ extension Settings {
             provisioningProfile: "match Development \(Project.Environment.bundlePrefix)",
             setSkipInstall: false
           ),
-        xcconfig: .path(.dev)
-      ),
-      .release(
-        name: .stage,
-        settings:
-          commonSettings(
-            appName: Project.Environment.appStageName,
-            displayName: Project.Environment.appName,
-            provisioningProfile: "match AppStore \(Project.Environment.bundlePrefix)",
-            setSkipInstall: false
-          ),
-        xcconfig: .path(.stage)
+        xcconfig: .path(.debug)
       ),
       .release(
         name: .release,
@@ -119,7 +108,7 @@ extension Settings {
               appName: appName
             ),
           xcconfig:
-              .relativeToRoot("./Config/Dev.xcconfig")
+              .relativeToRoot("./Config/Debug.xcconfig")
         ),
         .release(
           name: .release,

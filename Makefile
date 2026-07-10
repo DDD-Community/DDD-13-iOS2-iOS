@@ -30,8 +30,7 @@ regenerate:
 BASE_URL=https://raw.githubusercontent.com/khyeji98/DDD-iOS2-iOS-private/main
 
 XCCONFIG_FILES = \
-	Dev.xcconfig \
-	Stage.xcconfig \
+	Debug.xcconfig \
 	Prod.xcconfig \
 	Release.xcconfig \
 	Secrets.xcconfig

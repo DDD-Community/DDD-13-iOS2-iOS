@@ -1038,7 +1038,7 @@ let project = Project.makeAppModule(
 private func updateXConfigFiles(newName: String) {
     print("🔧 xconfig 파일들 업데이트 중...")
 
-    let configFiles = ["Dev.xcconfig", "Stage.xcconfig", "Prod.xcconfig", "Release.xcconfig"]
+    let configFiles = ["Debug.xcconfig", "Prod.xcconfig", "Release.xcconfig"]
 
     for configFile in configFiles {
         let configPath = "Config/\(configFile)"
@@ -1061,12 +1061,10 @@ private func updateXConfigFiles(newName: String) {
             // 하드코딩된 프로젝트 이름을 동적 참조로 변경
             let patterns = [
                 (#"PRODUCT_NAME = [^$\n\r]*$"#, "PRODUCT_NAME = $(PROJECT_NAME)"),
-                (#"PRODUCT_NAME = [^$\n\r]*-Dev$"#, "PRODUCT_NAME = $(PROJECT_NAME)-Dev"),
-                (#"PRODUCT_NAME = [^$\n\r]*-Stage$"#, "PRODUCT_NAME = $(PROJECT_NAME)-Stage"),
+                (#"PRODUCT_NAME = [^$\n\r]*-Debug$"#, "PRODUCT_NAME = $(PROJECT_NAME)-Debug"),
                 (#"PRODUCT_NAME = [^$\n\r]*-Prod$"#, "PRODUCT_NAME = $(PROJECT_NAME)-Prod"),
                 (#"BUNDLE_DISPLAY_NAME = [^$\n\r]*$"#, "BUNDLE_DISPLAY_NAME = $(PROJECT_NAME)"),
-                (#"BUNDLE_DISPLAY_NAME = [^$\n\r]*\(Dev\)$"#, "BUNDLE_DISPLAY_NAME = $(PROJECT_NAME)(Dev)"),
-                (#"BUNDLE_DISPLAY_NAME = [^$\n\r]*\(Stage\)$"#, "BUNDLE_DISPLAY_NAME = $(PROJECT_NAME)(Stage)"),
+                (#"BUNDLE_DISPLAY_NAME = [^$\n\r]*\(Debug\)$"#, "BUNDLE_DISPLAY_NAME = $(PROJECT_NAME)(Debug)"),
                 (#"BUNDLE_DISPLAY_NAME = [^$\n\r]*\(Prod\)$"#, "BUNDLE_DISPLAY_NAME = $(PROJECT_NAME)(Prod)")
             ]
 
