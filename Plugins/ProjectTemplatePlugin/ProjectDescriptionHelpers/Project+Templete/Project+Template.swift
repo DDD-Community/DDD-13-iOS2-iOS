@@ -54,7 +54,7 @@ public extension Project {
     )
 
 
-    let appDevTarget: Target = .target(
+    let appDebugTarget: Target = .target(
       name: "\(name)-Debug",
       destinations: destinations,
       product: product,
@@ -79,7 +79,7 @@ public extension Project {
       dependencies: [.target(name: name)]
     )
 
-    let targets = [appTarget, appDevTarget, appProdTarget, appTestTarget]
+    let targets = [appTarget, appDebugTarget, appProdTarget, appTestTarget]
 
     return Project(
       name: name,
