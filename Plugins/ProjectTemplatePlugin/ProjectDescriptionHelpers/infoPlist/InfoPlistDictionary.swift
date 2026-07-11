@@ -96,6 +96,10 @@ extension InfoPlistDictionary {
   func setUIAppFonts(_ value: [String]) -> InfoPlistDictionary {
     return self.merging(["UIAppFonts": .array(value.map { .string($0) })]) { (_, new) in new }
   }
+
+  func setUIBackgroundModes(_ value: [String]) -> InfoPlistDictionary {
+    return self.merging(["UIBackgroundModes": .array(value.map { .string($0) })]) { (_, new) in new }
+  }
   
   func setAppTransportSecurity() -> InfoPlistDictionary {
     let dict: [String: Plist.Value] = [

@@ -29,6 +29,7 @@ public extension InfoPlist {
       .setCFBundleVersion("$(CURRENT_PROJECT_VERSION)")
       .setLSRequiresIPhoneOS(true)
       .setUIAppFonts(["PretendardVariable.ttf"])
+      .setUIBackgroundModes(["remote-notification"])
       .setUIApplicationSceneManifest([
         "UIApplicationSupportsMultipleScenes": true,
         "UISceneConfigurations": [
