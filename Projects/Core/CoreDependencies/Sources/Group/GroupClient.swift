@@ -41,6 +41,7 @@ public extension GroupClient {
             },
             updateAttendance: { meetingId, attendanceStatus in
                 try await updateAttendanceUseCase.execute(meetingId: meetingId, attendanceStatus: attendanceStatus)
+            },
             issueInviteCode: { groupId in
                 try await issueInviteCodeUseCase.execute(groupId: groupId)
             }
