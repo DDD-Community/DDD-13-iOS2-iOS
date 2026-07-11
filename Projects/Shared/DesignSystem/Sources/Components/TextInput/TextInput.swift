@@ -16,6 +16,8 @@ public struct TextInput: View {
     private let helperText: String?
     private let maxCount: Int?
     private let state: TextInputState
+    private let axis: Axis
+    private let lineLimit: ClosedRange<Int>
 
     @Binding private var text: String
     @FocusState private var isFocused: Bool
@@ -29,6 +31,8 @@ public struct TextInput: View {
         helperText: String? = nil,
         maxCount: Int? = nil,
         state: TextInputState = .default,
+        axis: Axis = .horizontal,
+        lineLimit: ClosedRange<Int> = 1...1,
         text: Binding<String>
     ) {
         self.type = type
@@ -39,6 +43,8 @@ public struct TextInput: View {
         self.helperText = helperText
         self.maxCount = maxCount
         self.state = state
+        self.axis = axis
+        self.lineLimit = lineLimit
         self._text = text
     }
 
@@ -70,6 +76,8 @@ public struct TextInput: View {
                     placeholder: placeholder,
                     state: effectiveState,
                     maxCount: maxCount,
+                    axis: axis,
+                    lineLimit: lineLimit,
                     text: $text,
                     isFocused: $isFocused
                 )
@@ -130,6 +138,8 @@ private struct TextInputFieldArea: View {
     let placeholder: String
     let state: TextInputState
     let maxCount: Int?
+    let axis: Axis
+    let lineLimit: ClosedRange<Int>
     @Binding var text: String
     @FocusState.Binding var isFocused: Bool
 
@@ -166,11 +176,13 @@ private struct TextInputFieldArea: View {
                         text: $text,
                         prompt: Text(placeholder)
                             .font(.pretendardFontFamily(family: .Regular, size: Typography.typographySize300))
-                            .foregroundStyle(Colors.gray500)
+                            .foregroundStyle(Colors.gray500),
+                        axis: axis
                     ) {
                         EmptyView()
                     }
                     .maxCount(text: $text, maxCount)
+                    .lineLimit(lineLimit)
                     .pretendardFont(family: .Regular, size: Typography.typographySize300)
                     .foregroundStyle(textColor)
                     .padding(.vertical, Spacing.spacing50)

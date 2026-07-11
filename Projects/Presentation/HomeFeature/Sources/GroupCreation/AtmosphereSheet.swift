@@ -8,7 +8,6 @@ import SwiftUI
 import ComposableArchitecture
 
 import DesignSystem
-import Entity
 
 // MARK: - Modifier
 
@@ -49,9 +48,9 @@ private struct AtmosphereSheetContent: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ForEach(PlaceAtmosphere.allCases) { atmosphere in
+            ForEach(store.vibes, id: \.self) { atmosphere in
                 AtmosphereRow(
-                    title: atmosphere.rawValue,
+                    title: atmosphere,
                     isSelected: store.atmosphereDraft.contains(atmosphere),
                     onTap: { store.send(.atmosphereToggled(atmosphere)) }
                 )

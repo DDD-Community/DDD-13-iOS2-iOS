@@ -96,7 +96,7 @@ private struct GroupCreationContent: View {
     private var atmosphereBadgeTitle: String {
         store.selectedAtmospheres.isEmpty
             ? "편안한"
-            : store.selectedAtmospheres.map(\.rawValue).joined(separator: ", ")
+            : store.selectedAtmospheres.joined(separator: ", ")
     }
 }
 
@@ -143,7 +143,8 @@ private struct ListField<Content: View>: View {
                     state.groupTitle = "주말 등산 모임"
                     state.themeTags = [ThemeTag(code: "SOCIAL", displayName: "친목")]
                     state.selectedThemeTag = ThemeTag(code: "SOCIAL", displayName: "친목")
-                    state.selectedAtmospheres = [.openView, .spacious]
+                    state.vibes = ["야경", "넓은매장"]
+                    state.selectedAtmospheres = ["야경", "넓은매장"]
                     return state
                 }()
             ) {

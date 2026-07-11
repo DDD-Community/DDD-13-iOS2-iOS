@@ -7,28 +7,17 @@ import ComposableArchitecture
 import CoreDependencies
 import Entity
 import Foundation
-
+import Utill
 private enum Constant {
     static let groupNameMaxCount = 30
     static let atmosphereMaxSelection = 3
-}
-
-public enum PlaceAtmosphere: String, CaseIterable, Equatable, Identifiable {
-    case nice        = "분위기 좋은"
-    case quiet       = "조용한 공간"
-    case comfortable = "편안한 좌석"
-    case talkative   = "대화하기 좋은"
-    case photogenic  = "사진 맛집"
-    case openView    = "탁 트인 뷰"
-    case spacious    = "넓은 공간"
-
-    public var id: String { rawValue }
 }
 
 @Reducer
 public struct GroupCreationFeature {
     @Dependency(\.groupClient) private var groupClient
     @Dependency(\.themeTagClient) private var themeTagClient
+    @Dependency(\.placeOptionsClient) private var placeOptionsClient
 
     @ObservableState
     public struct State: Equatable {
@@ -37,8 +26,9 @@ public struct GroupCreationFeature {
         public var themeTags: [ThemeTag] = []
         public var selectedThemeTag: ThemeTag? = nil
         public var purposeDraft: ThemeTag? = nil
-        public var selectedAtmospheres: [PlaceAtmosphere] = []
-        public var atmosphereDraft: [PlaceAtmosphere] = []
+        public var vibes: [String] = []
+        public var selectedAtmospheres: [String] = []
+        public var atmosphereDraft: [String] = []
         public var isGroupNameSheetPresented: Bool = false
         public var isPurposeSheetPresented: Bool = false
         public var isAtmosphereSheetPresented: Bool = false
@@ -71,6 +61,7 @@ public struct GroupCreationFeature {
         case binding(BindingAction<State>)
         case onAppear
         case themeTagsResponse(Result<[ThemeTag], Error>)
+        case vibesResponse(Result<[String], Error>)
         case groupNameFieldTapped
         case groupNameConfirmed
         case groupNameSheetDismissed
@@ -79,7 +70,7 @@ public struct GroupCreationFeature {
         case purposeConfirmed
         case purposeSheetDismissed
         case atmosphereFieldTapped
-        case atmosphereToggled(PlaceAtmosphere)
+        case atmosphereToggled(String)
         case atmosphereConfirmed
         case atmosphereSheetDismissed
         case createButtonTapped
@@ -104,20 +95,34 @@ public struct GroupCreationFeature {
                 return .none
 
             case .onAppear:
-                guard state.themeTags.isEmpty else { return .none }
-
-                let client = themeTagClient
-                return .run { send in
-                    await send(.themeTagsResponse(
-                        Result { try await client.fetchThemeTags() }
-                    ))
-                }
+                let themeTagClient = themeTagClient
+                let placeOptionsClient = placeOptionsClient
+                return .merge(
+                    state.themeTags.isEmpty
+                        ? .run { send in
+                            await send(.themeTagsResponse(Result { try await themeTagClient.fetchThemeTags() }))
+                        }
+                        : .none,
+                    state.vibes.isEmpty
+                        ? .run { send in
+                            await send(.vibesResponse(Result { try await placeOptionsClient.fetchVibes() }))
+                        }
+                        : .none
+                )
 
             case let .themeTagsResponse(.success(themeTags)):
                 state.themeTags = themeTags
                 return .none
 
             case .themeTagsResponse(.failure):
+                return .none
+
+            case let .vibesResponse(.success(vibes)):
+                state.vibes = vibes
+                return .none
+
+            case let .vibesResponse(.failure(error)):
+                Log.debug("장소 분위기 조회 실패: \(error.localizedDescription)")
                 return .none
 
             case .groupNameFieldTapped:
@@ -150,6 +155,8 @@ public struct GroupCreationFeature {
 
                 state.selectedThemeTag = purposeDraft
                 state.isPurposeSheetPresented = false
+                let selectedPurposes: [String] = [purposeDraft.code]
+                Log.debug("선택된 모임 목적: \(selectedPurposes)")
                 return .none
 
             case .purposeSheetDismissed:
@@ -174,6 +181,8 @@ public struct GroupCreationFeature {
 
                 state.selectedAtmospheres = state.atmosphereDraft
                 state.isAtmosphereSheetPresented = false
+                let selectedAtmospheres: [String] = state.selectedAtmospheres
+                Log.debug("선택된 장소 분위기: \(selectedAtmospheres)")
                 return .none
 
             case .atmosphereSheetDismissed:

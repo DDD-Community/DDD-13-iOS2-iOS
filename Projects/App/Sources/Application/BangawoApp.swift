@@ -31,6 +31,7 @@ struct BangawoApp: App {
             $0.placeRecommendationClient = PlaceRecommendationFactory.makeClient()
             $0.placePickClient = PlacePickFactory.makeClient()
             $0.themeTagClient = ThemeTagFactory.makeClient()
+            $0.placeOptionsClient = PlaceOptionsFactory.makeClient()
             $0.departurePlaceClient = DeparturePlaceFactory.makeClient()
             $0.nearbyPlacesClient = NearbyPlacesFactory.makeClient()
             $0.placeDetailsClient = PlaceDetailsFactory.makeClient()
