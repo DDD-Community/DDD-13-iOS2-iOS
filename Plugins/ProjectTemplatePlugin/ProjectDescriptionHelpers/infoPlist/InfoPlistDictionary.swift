@@ -96,6 +96,10 @@ extension InfoPlistDictionary {
   func setUIAppFonts(_ value: [String]) -> InfoPlistDictionary {
     return self.merging(["UIAppFonts": .array(value.map { .string($0) })]) { (_, new) in new }
   }
+
+  func setUIBackgroundModes(_ value: [String]) -> InfoPlistDictionary {
+    return self.merging(["UIBackgroundModes": .array(value.map { .string($0) })]) { (_, new) in new }
+  }
   
   func setAppTransportSecurity() -> InfoPlistDictionary {
     let dict: [String: Plist.Value] = [
@@ -174,16 +178,6 @@ extension InfoPlistDictionary {
 
   func setNSPhotoLibraryUsageDescription(_ value: String) -> InfoPlistDictionary {
     return self.merging(["NSPhotoLibraryUsageDescription": .string(value)]) { (_, new) in new }
-  }
-  
-  func setUILaunchScreens() -> InfoPlistDictionary {
-    let dict: InfoPlistDictionary = [
-      "UILaunchScreen": .dictionary([
-        "UIColorName": .string(""),
-        "UIImageName": .string("")
-      ])
-    ]
-    return self.merging(dict) { _, new in new }
   }
   
   func setAppUseExemptEncryption(value: Bool) -> InfoPlistDictionary {
