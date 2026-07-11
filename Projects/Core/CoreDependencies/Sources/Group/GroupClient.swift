@@ -15,7 +15,7 @@ public struct GroupClient: Sendable {
     public var createGroup: @Sendable (_ name: String, _ themeTagCode: String) async throws -> CreateGroupResult
     public var hostPickMeetingDate: @Sendable (_ meetingId: Int, _ date: String) async throws -> Void
     public var fetchGroupDetail: @Sendable (_ meetingId: Int) async throws -> GroupDetail
-    public var updateAttendance: @Sendable (_ groupId: Int, _ attendanceStatus: AttendanceStatus) async throws -> Void
+    public var updateAttendance: @Sendable (_ meetingId: Int, _ attendanceStatus: AttendanceStatus) async throws -> Void
     public var issueInviteCode: @Sendable (_ groupId: Int) async throws -> String
 }
 
@@ -39,9 +39,8 @@ public extension GroupClient {
             fetchGroupDetail: { meetingId in
                 try await fetchDetailUseCase.execute(meetingId: meetingId)
             },
-            updateAttendance: { groupId, attendanceStatus in
-                try await updateAttendanceUseCase.execute(groupId: groupId, attendanceStatus: attendanceStatus)
-            },
+            updateAttendance: { meetingId, attendanceStatus in
+                try await updateAttendanceUseCase.execute(meetingId: meetingId, attendanceStatus: attendanceStatus)
             issueInviteCode: { groupId in
                 try await issueInviteCodeUseCase.execute(groupId: groupId)
             }

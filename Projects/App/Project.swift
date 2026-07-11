@@ -20,6 +20,8 @@ let project = Project.makeAppModule(
     .Network(implements: .ThirdPartys),
     .SPM.kakaoMapsSDK,
     .SPM.nidThirdPartyLogin,
+    .SPM.firebaseCore,
+    .SPM.firebaseMessaging,
     .SPM.composableArchitecture
   ],
   sources: ["Sources/**"],
