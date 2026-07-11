@@ -19,7 +19,11 @@ struct MemberList: View {
 
     var body: some View {
         // 상세 로드 전에는 멤버 영역을 비워 두고, 로드 후 멤버 유무에 따라 분기한다.
-        if let members = store.groupDetail?.members {
+        if let groupDetail = store.groupDetail {
+            let members = groupDetail.members
+            // 날짜 투표를 마치면 "나" 영역 출발지 수정 진입을 막는다.
+            let canEditDeparture = groupDetail.dateVoteStatus != .completed
+
             if members.isEmpty {
                 InviteFriendButton {
                     store.send(.inviteFriendTapped)
@@ -29,6 +33,7 @@ struct MemberList: View {
                     if let me = members.first(where: { $0.isMe }) {
                         MeArea(
                             member: me,
+                            canEditDeparture: canEditDeparture,
                             onCardTap: {
                                 store.send(.myMemberCardTapped)
                             },
@@ -53,6 +58,7 @@ struct MemberList: View {
 /// "나" 영역. 공통 멤버 행에 좌우 패딩과 카드 배경을 더한다.
 private struct MeArea: View {
     let member: GroupDetailMember
+    let canEditDeparture: Bool
     let onCardTap: () -> Void
     let onAttendanceTap: () -> Void
 
@@ -60,6 +66,7 @@ private struct MeArea: View {
         MemberRow(
             member: member,
             isMe: true,
+            canEditDeparture: canEditDeparture,
             onCardTap: onCardTap,
             onAttendanceTap: onAttendanceTap
         )
@@ -82,7 +89,13 @@ private struct MembersListArea: View {
                 .padding(.horizontal, Spacing.spacing100)
 
             ForEach(members) { member in
-                MemberRow(member: member, isMe: false, onCardTap: {}, onAttendanceTap: {})
+                MemberRow(
+                    member: member,
+                    isMe: false,
+                    canEditDeparture: false,
+                    onCardTap: {},
+                    onAttendanceTap: {}
+                )
             }
         }
         .padding(Spacing.spacing300)
@@ -96,12 +109,18 @@ private struct MembersListArea: View {
 private struct MemberRow: View {
     let member: GroupDetailMember
     let isMe: Bool
+    let canEditDeparture: Bool
     let onCardTap: () -> Void
     let onAttendanceTap: () -> Void
 
     var body: some View {
         HStack(spacing: Spacing.spacing200) {
-            cardContent
+            CardContent(
+                member: member,
+                isMe: isMe,
+                canEditDeparture: canEditDeparture,
+                onCardTap: onCardTap
+            )
 
             AttendanceBadge(
                 status: member.attendanceStatus,
@@ -112,15 +131,44 @@ private struct MemberRow: View {
             .padding(.vertical, Spacing.spacing300)
         }
     }
+}
 
-    @ViewBuilder
-    private var cardContent: some View {
-        memberInfo
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.vertical, Spacing.spacing300)
+// MARK: - Card Content
+
+/// 멤버 행의 좌측 정보 영역. 멤버 정보에 세로 패딩과 가로 확장을 더한다.
+private struct CardContent: View {
+    let member: GroupDetailMember
+    let isMe: Bool
+    let canEditDeparture: Bool
+    let onCardTap: () -> Void
+
+    var body: some View {
+        MemberInfo(
+            member: member,
+            isMe: isMe,
+            canEditDeparture: canEditDeparture,
+            onCardTap: onCardTap
+        )
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, Spacing.spacing300)
+    }
+}
+
+// MARK: - Member Info
+
+/// 프로필 이미지 / 이름(+칩) / 출발지로 구성된 멤버 정보 영역.
+private struct MemberInfo: View {
+    let member: GroupDetailMember
+    let isMe: Bool
+    let canEditDeparture: Bool
+    let onCardTap: () -> Void
+
+    // TODO: profileImageUrl 비동기 이미지 로드 연동 시 교체
+    private var profileImage: Image {
+        Image.Asset.imgAvatarPlaceholder
     }
 
-    private var memberInfo: some View {
+    var body: some View {
         HStack(spacing: Spacing.spacing250) {
             Asset(assetType: .image(profileImage), size: .s40, isSelected: false)
 
@@ -134,18 +182,33 @@ private struct MemberRow: View {
                     }
                 }
 
-                departureContent
+                DepartureContent(
+                    member: member,
+                    isMe: isMe,
+                    canEditDeparture: canEditDeparture,
+                    onCardTap: onCardTap
+                )
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
+}
 
-    @ViewBuilder
-    private var departureContent: some View {
-        if isMe {
+// MARK: - Departure Content
+
+/// 출발지 표시 영역. "나"이면서 출발지 수정이 가능할 때만 수정 버튼과 화살표를 노출한다.
+/// 수정이 불가능한 상태(예: 날짜 투표 완료)에서는 버튼 동작과 화살표를 감추고 출발지 텍스트만 노출한다.
+private struct DepartureContent: View {
+    let member: GroupDetailMember
+    let isMe: Bool
+    let canEditDeparture: Bool
+    let onCardTap: () -> Void
+
+    var body: some View {
+        if isMe && canEditDeparture {
             Button(action: onCardTap) {
                 HStack(spacing: Spacing.spacing100) {
-                    departureText
+                    DepartureText(member: member)
 
                     Image.Asset.icArrowSmallRight24
                         .resizable()
@@ -156,14 +219,16 @@ private struct MemberRow: View {
             }
             .buttonStyle(.plain)
         } else {
-            departureText
+            DepartureText(member: member)
         }
     }
+}
 
-    private var departureText: some View {
-        BangawoText(departureLabel, textStyle: .bodyMedium)
-            .foregroundStyle(Colors.gray700)
-    }
+// MARK: - Departure Text
+
+/// 기본 출발지(없으면 첫 출발지)의 장소명을 노출하는 텍스트.
+private struct DepartureText: View {
+    let member: GroupDetailMember
 
     /// 기본 출발지(없으면 첫 출발지)의 장소명. 출발지가 없으면 안내 문구를 노출한다.
     private var departureLabel: String {
@@ -172,9 +237,9 @@ private struct MemberRow: View {
         return place?.placeName ?? Constant.emptyDepartureLabel
     }
 
-    // TODO: profileImageUrl 비동기 이미지 로드 연동 시 교체
-    private var profileImage: Image {
-        Image.Asset.imgAvatarPlaceholder
+    var body: some View {
+        BangawoText(departureLabel, textStyle: .bodyMedium)
+            .foregroundStyle(Colors.gray700)
     }
 }
 
@@ -206,14 +271,22 @@ private struct AttendanceBadge: View {
 
     var body: some View {
         if isInteractive {
-            Button(action: onTap) { badge }
-                .buttonStyle(.plain)
+            Button(action: onTap) {
+                AttendanceBadgeContent(status: status, showTrailingIcon: showTrailingIcon)
+            }
+            .buttonStyle(.plain)
         } else {
-            badge
+            AttendanceBadgeContent(status: status, showTrailingIcon: showTrailingIcon)
         }
     }
+}
 
-    private var badge: some View {
+/// 참여 여부 뱃지의 실제 내용. 상태별 컬러 dot과 라벨, 선택적 trailing 화살표를 노출한다.
+private struct AttendanceBadgeContent: View {
+    let status: AttendanceStatus
+    let showTrailingIcon: Bool
+
+    var body: some View {
         Badge(
             status.displayLabel,
             leadingIcon: status.dotIcon,
