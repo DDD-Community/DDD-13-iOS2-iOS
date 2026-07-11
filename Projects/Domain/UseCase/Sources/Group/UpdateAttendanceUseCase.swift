@@ -6,5 +6,5 @@
 import Entity
 
 public protocol UpdateAttendanceUseCase: Sendable {
-    func execute(groupId: Int, attendanceStatus: AttendanceStatus) async throws
+    func execute(meetingId: Int, attendanceStatus: AttendanceStatus) async throws
 }

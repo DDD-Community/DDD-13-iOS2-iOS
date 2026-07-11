@@ -226,14 +226,14 @@ public struct HomeTabFeature {
                 return .none
 
             case let .myAttendanceStatusSelected(status):
-                let groupId = state.group.id
+                let meetingId = state.group.meetingId
                 let client = groupClient
                 Log.debug("참여 상태 선택: \(status.displayLabel)")
                 state.isMyAttendanceStatusSheetPresented = false
                 return .run { send in
                     await send(.myAttendanceStatusUpdateResponse(
                         Result {
-                            try await client.updateAttendance(groupId, status)
+                            try await client.updateAttendance(meetingId, status)
                             return status
                         }
                     ))

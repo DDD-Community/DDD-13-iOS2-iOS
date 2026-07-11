@@ -16,4 +16,6 @@ public extension TargetDependency.SPM {
   static let kakaoSDKShare = TargetDependency.external(name: "KakaoSDKShare", condition: .none)
   static let kakaoSDKTemplate = TargetDependency.external(name: "KakaoSDKTemplate", condition: .none)
   static let nidThirdPartyLogin = TargetDependency.external(name: "NidThirdPartyLogin", condition: .none)
+  static let firebaseCore = TargetDependency.external(name: "FirebaseCore", condition: .none)
+  static let firebaseMessaging = TargetDependency.external(name: "FirebaseMessaging", condition: .none)
 }
