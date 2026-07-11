@@ -68,7 +68,10 @@ private struct Card: View {
             PlaceRow(
                 placeName: placeName,
                 category: placeCategory,
-                displayAddress: placeAddress
+                displayAddress: placeAddress,
+                roadAddress: nil,
+                lotAddress: nil,
+                distance: nil
             )
 
             KakaoMap(
