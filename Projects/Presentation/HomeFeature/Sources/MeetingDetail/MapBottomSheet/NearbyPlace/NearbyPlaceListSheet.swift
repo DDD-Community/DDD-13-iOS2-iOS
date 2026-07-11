@@ -6,6 +6,7 @@
 import ComposableArchitecture
 import DesignSystem
 import Entity
+import Foundation
 import SwiftUI
 
 /// 시트의 사용 용도.
@@ -95,9 +96,20 @@ private struct NearbyPlaceList: View {
                     .padding(.vertical, Spacing.spacing600)
             } else {
                 ForEach(store.visibleNearbyPlaces) { place in
-                    PlaceRow(place: place, onTap: {
-                        store.send(.placeRowTapped(place.toConfirmedPlace()))
-                    })
+                    PlaceRow(
+                        placeName: place.name,
+                        category: place.categoryLabel,
+                        displayAddress: place.address,
+                        reservable: place.reservable,
+                        parkingAvailable: place.hasParking,
+                        vibes: place.vibe,
+                        roadAddress: nil,
+                        lotAddress: nil,
+                        distance: place.distanceText,
+                        onTap: {
+                            store.send(.placeRowTapped(place.toConfirmedPlace()))
+                        }
+                    )
                 }
             }
 
@@ -110,9 +122,20 @@ private struct NearbyPlaceList: View {
                     .padding(.vertical, Spacing.spacing600)
             } else {
                 ForEach(store.visibleRecommendedPlaces) { place in
-                    PlaceRow(place: place, onTap: {
-                        store.send(.placeRowTapped(place.toConfirmedPlace()))
-                    }) {
+                    PlaceRow(
+                        placeName: place.name,
+                        category: place.categoryLabel,
+                        displayAddress: place.roadAddress ?? place.address,
+                        reservable: place.reservable,
+                        parkingAvailable: place.hasParking,
+                        vibes: place.vibe,
+                        roadAddress: place.roadAddress,
+                        lotAddress: place.address,
+                        distance: nil,
+                        onTap: {
+                            store.send(.placeRowTapped(place.toConfirmedPlace()))
+                        }
+                    ) {
                         PlaceAddButton(
                             isPicked: store.pickedPlaceIds.contains(place.placeId),
                             onTap: { store.send(.placeAddTapped(placeId: place.placeId)) }
@@ -358,6 +381,13 @@ private extension NearbyPlace {
             latitude: latitude,
             longitude: longitude
         )
+    }
+
+    /// 1km 이상은 소수 첫째 자리 km, 미만은 m로 표기한다.
+    var distanceText: String {
+        distanceMeters >= 1000
+            ? String(format: "%.1fkm", distanceMeters / 1000)
+            : "\(Int(distanceMeters))m"
     }
 }
 

@@ -192,7 +192,10 @@ private struct PickedPlaceList: View {
                 PlaceRow(
                     placeName: place.name,
                     category: place.category,
-                    displayAddress: place.address
+                    displayAddress: place.address,
+                    roadAddress: nil,
+                    lotAddress: nil,
+                    distance: nil
                 ) {
                     if place.pickedCount > 1 {
                         BangawoText("\(place.pickedCount)명 선택", textStyle: .labelXSmall)

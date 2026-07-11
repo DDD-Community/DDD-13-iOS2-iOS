@@ -134,10 +134,19 @@ public extension StationRecommendation {
                     name: "감성카페",
                     categoryLabel: .cafe,
                     address: "서울 강남구 도산대로 1",
+                    roadAddress: "서울 강남구 도산대로 1",
                     score: 4.5,
                     nearestStationId: 1,
                     latitude: 37.5163,
-                    longitude: 127.0204
+                    longitude: 127.0204,
+                    vibe: ["아늑한"],
+                    occasion: ["데이트"],
+                    reservable: true,
+                    hasParking: false,
+                    rating: 4.5,
+                    businessHours: "11:00 - 22:00",
+                    holiday: "연중무휴",
+                    naverUrl: ""
                 ),
                 RecommendedPlace(
                     rank: 2,
@@ -145,10 +154,19 @@ public extension StationRecommendation {
                     name: "신사다이닝",
                     categoryLabel: .koreaFood,
                     address: "서울 강남구 강남대로 2",
+                    roadAddress: "서울 강남구 강남대로 2",
                     score: 4.2,
                     nearestStationId: 1,
                     latitude: 37.5165,
-                    longitude: 127.0206
+                    longitude: 127.0206,
+                    vibe: ["활기찬"],
+                    occasion: ["모임"],
+                    reservable: true,
+                    hasParking: true,
+                    rating: 4.2,
+                    businessHours: "11:00 - 22:00",
+                    holiday: "연중무휴",
+                    naverUrl: ""
                 )
             ]
         ),
@@ -169,10 +187,19 @@ public extension StationRecommendation {
                     name: "강남브런치",
                     categoryLabel: .cafe,
                     address: "서울 강남구 테헤란로 1",
+                    roadAddress: "서울 강남구 테헤란로 1",
                     score: 4.3,
                     nearestStationId: 2,
                     latitude: 37.4979,
-                    longitude: 127.0276
+                    longitude: 127.0276,
+                    vibe: ["감각적인"],
+                    occasion: ["브런치"],
+                    reservable: false,
+                    hasParking: true,
+                    rating: 4.3,
+                    businessHours: "10:00 - 21:00",
+                    holiday: "월요일 휴무",
+                    naverUrl: ""
                 )
             ]
         ),
@@ -193,10 +220,19 @@ public extension StationRecommendation {
                     name: "선릉포차",
                     categoryLabel: .bar,
                     address: "서울 강남구 선릉로 1",
+                    roadAddress: "서울 강남구 선릉로 1",
                     score: 4.0,
                     nearestStationId: 3,
                     latitude: 37.5045,
-                    longitude: 127.0492
+                    longitude: 127.0492,
+                    vibe: ["편안한"],
+                    occasion: ["회식"],
+                    reservable: false,
+                    hasParking: false,
+                    rating: 4.0,
+                    businessHours: "17:00 - 02:00",
+                    holiday: "일요일 휴무",
+                    naverUrl: ""
                 )
             ]
         )
