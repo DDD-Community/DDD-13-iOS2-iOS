@@ -22,21 +22,23 @@ public struct HomeView: View {
         NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
             ZStack(alignment: .bottomTrailing) {
                 VStack(spacing: 0) {
-                    NavigationMain(
-                        background: .clear,
-                        trailingIcons: [
-                            NavigationIconItem(
-                                icon: .bell24,
-                                showsBadge: store.hasUnreadNotifications
-                            ) { store.send(.notificationButtonTapped) },
-                            NavigationIconItem(icon: .user24) {
-                                store.send(.myPageButtonTapped)
-                            }
-                        ]
-                    )
+                    // FIXME: 알림/마이페이지 버튼은 동작이 정의되지 않아(탭 시 no-op) 심사 리젝 방지를 위해 임시 숨김.
+                    // 각 기능 구현 시 아래 trailingIcons 를 복구한다.
+                    // trailingIcons: [
+                    //     NavigationIconItem(
+                    //         icon: .bell24,
+                    //         showsBadge: store.hasUnreadNotifications
+                    //     ) { store.send(.notificationButtonTapped) },
+                    //     NavigationIconItem(icon: .user24) {
+                    //         store.send(.myPageButtonTapped)
+                    //     }
+                    // ]
+                    NavigationMain(background: .clear)
 
                     Tab(
-                        labels: ["모임", "리마인더"],
+                        // FIXME: 리마인더 탭은 화면 미구현(선택 시 빈 화면)으로 심사 리젝 방지를 위해 임시 숨김.
+                        // 리마인더 화면 구현 시 labels 에 "리마인더" 를 복구한다.
+                        labels: ["모임"],
                         selectedIndex: Binding(
                             get: { store.selectedTabIndex },
                             set: { store.send(.tabSelected($0)) }
