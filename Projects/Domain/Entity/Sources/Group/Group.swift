@@ -67,14 +67,14 @@ public struct GroupMember: Identifiable, Equatable, Sendable {
 public enum GroupListStatus: Equatable, Sendable {
     case inProgress
     case confirmed
-    case ended
+    case closed
     case unknown(String)
 
     public init(rawValue: String) {
         switch rawValue {
         case "IN_PROGRESS": self = .inProgress
         case "CONFIRMED": self = .confirmed
-        case "ENDED": self = .ended
+        case "CLOSED": self = .closed
         default: self = .unknown(rawValue)
         }
     }
