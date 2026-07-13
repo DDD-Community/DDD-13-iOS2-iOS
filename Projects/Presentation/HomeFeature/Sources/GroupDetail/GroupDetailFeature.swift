@@ -122,6 +122,7 @@ public struct GroupDetailFeature {
                 }
 
             case .groupClosed(.success):
+                let dismiss = dismiss
                 return .run { _ in await dismiss() }
 
             case .groupClosed(.failure):
