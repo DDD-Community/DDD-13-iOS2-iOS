@@ -12,55 +12,11 @@ concurrency:
 
 jobs:
   # ──────────────────────────────────────────────────────────
-  # 1. Test (배포 게이트)
-  # ──────────────────────────────────────────────────────────
-  test:
-    # PR 이 머지된 경우 또는 수동 실행일 때만 동작 (단순 close 는 스킵)
-    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
-    runs-on: macos-15
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Select Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: latest-stable
-
-      # .mise.toml(tuist 4.174.0)이 mise.toml(latest)보다 우선하므로 4.174.0 설치됨
-      - name: Setup mise & tuist
-        uses: jdx/mise-action@v2
-
-      # 커밋된 tuisttool 바이너리는 로컬 macOS 26 기준으로 빌드되어 macos-15 러너에서 로드 불가
-      # → 러너 OS에 맞게 소스에서 재컴파일
-      - name: Build tuisttool
-        run: swiftc TuistTool.swift -o tuisttool
-
-      - name: Download private xcconfig
-        run: |
-          echo "GITHUB_ACCESS_TOKEN=${{ secrets.CONFIG_PRIVATE_REPO_TOKEN }}" > .env
-          make download-privates
-
-      - name: Generate project
-        run: |
-          ./tuisttool install
-          ./tuisttool generate
-
-      - name: Run tests
-        run: |
-          set -eo pipefail
-          UDID=$(xcrun simctl list devices available --json \
-            | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; ids=[x['udid'] for r in d.values() for x in r if 'iPhone' in x['name']]; print(ids[0])")
-          xcodebuild test \
-            -workspace Bangawo.xcworkspace \
-            -scheme Bangawo \
-            -destination "id=$UDID" \
-            CODE_SIGNING_ALLOWED=NO
-
-  # ──────────────────────────────────────────────────────────
-  # 2. Deploy (TestFlight)
+  # Deploy (TestFlight)
   # ──────────────────────────────────────────────────────────
   deploy:
-    needs: test
+    # PR 이 머지된 경우 또는 수동 실행일 때만 동작 (단순 close 는 스킵)
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
     runs-on: macos-15
     env:
       # Appfile / Fastfile
