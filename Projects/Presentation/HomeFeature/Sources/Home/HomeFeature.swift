@@ -81,9 +81,8 @@ public struct HomeFeature {
                 return fetchGroupsEffect()
 
             case .groupsResponse(.success(let groups)):
-                let visibleGroups = groups.filter { $0.listStatus != .closed }
-                state.groups = visibleGroups
-                if (1...2).contains(visibleGroups.count) {
+                state.groups = groups
+                if (1...2).contains(groups.count) {
                     state.inviteCardDesign = withRandomNumberGenerator {
                         Bool.random(using: &$0) ? .design1 : .design2
                     }
