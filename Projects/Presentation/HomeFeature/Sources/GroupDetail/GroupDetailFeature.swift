@@ -47,6 +47,7 @@ public struct GroupDetailFeature {
         case kakaoShareTapped
         case endGroupTapped
         case leaveGroupTapped
+        case groupClosed(Result<Void, Error>)
         case inviteCodeIssued(Result<String, Error>, InviteIntent)
         case alert(PresentationAction<Alert>)
         case home(HomeTabFeature.Action)
@@ -114,15 +115,18 @@ public struct GroupDetailFeature {
             case .alert(.presented(.confirmEndGroup)):
                 let groupId = state.home.group.id
                 let groupClient = groupClient
-                let dismiss = dismiss
-                return .run { _ in
-                    do {
+                return .run { send in
+                    await send(.groupClosed(Result {
                         try await groupClient.closeGroup(groupId)
-                        await dismiss()
-                    } catch {
-                        Log.debug("그룹 종료 실패: \(error.localizedDescription)")
-                    }
+                    }))
                 }
+
+            case .groupClosed(.success):
+                return .run { _ in await dismiss() }
+
+            case .groupClosed(.failure):
+                state.alert = Self.closeGroupErrorAlert()
+                return .none
 
             case .alert(.presented(.confirmLeaveGroup)):
                 return .none
@@ -196,6 +200,16 @@ public struct GroupDetailFeature {
             }
             ButtonState(role: .cancel) {
                 TextState("아니요")
+            }
+        }
+    }
+
+    private static func closeGroupErrorAlert() -> AlertState<Action.Alert> {
+        AlertState {
+            TextState("그룹 종료에 실패했습니다.")
+        } actions: {
+            ButtonState(role: .cancel) {
+                TextState("확인")
             }
         }
     }
