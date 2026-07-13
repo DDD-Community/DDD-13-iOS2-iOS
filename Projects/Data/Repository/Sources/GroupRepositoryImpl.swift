@@ -50,4 +50,10 @@ public final class GroupRepositoryImpl: GroupRepositoryProtocol {
         )
         return response.inviteCode
     }
+
+    public func closeGroup(groupId: Int) async throws {
+        try await NetworkManager.shared.requestVoid(
+            GroupEndpoint.closeGroup(groupId: groupId)
+        )
+    }
 }

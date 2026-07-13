@@ -21,6 +21,7 @@ public struct GroupDetailFeature {
         public var isInviteSheetPresented = false
         /// 발급받은 초대코드. 최초 발급 후 재사용해 중복 호출을 막는다.
         public var inviteCode: String?
+        @Presents public var alert: AlertState<Action.Alert>?
 
         public init(group: Group) {
             self.home = HomeTabFeature.State(group: group)
@@ -44,7 +45,11 @@ public struct GroupDetailFeature {
         case inviteButtonTapped
         case inviteLinkCopyTapped
         case kakaoShareTapped
+        case endGroupTapped
+        case leaveGroupTapped
+        case groupClosed(Result<Void, Error>)
         case inviteCodeIssued(Result<String, Error>, InviteIntent)
+        case alert(PresentationAction<Alert>)
         case home(HomeTabFeature.Action)
         case myPlace(MyPlaceTabFeature.Action)
         case delegate(Delegate)
@@ -56,6 +61,11 @@ public struct GroupDetailFeature {
         /// 장소 투표 후보 담기 화면으로 진입.
         case startPickPlace(isHost: Bool, meetingId: Int)
         }
+
+        public enum Alert: Equatable {
+            case confirmEndGroup
+            case confirmLeaveGroup
+        }
     }
 
     /// 초대코드 발급 후 수행할 동작.
@@ -66,6 +76,7 @@ public struct GroupDetailFeature {
 
     @Dependency(\.groupClient) private var groupClient
     @Dependency(\.groupInvitationShareClient) private var groupInvitationShareClient
+    @Dependency(\.dismiss) private var dismiss
 
     public init() {}
 
@@ -91,6 +102,36 @@ public struct GroupDetailFeature {
 
             case .inviteButtonTapped:
                 state.isInviteSheetPresented = true
+                return .none
+
+            case .endGroupTapped:
+                state.alert = Self.endGroupAlert(groupName: state.home.group.name)
+                return .none
+
+            case .leaveGroupTapped:
+                state.alert = Self.leaveGroupAlert(groupName: state.home.group.name)
+                return .none
+
+            case .alert(.presented(.confirmEndGroup)):
+                let groupId = state.home.group.id
+                let groupClient = groupClient
+                return .run { send in
+                    await send(.groupClosed(Result {
+                        try await groupClient.closeGroup(groupId)
+                    }))
+                }
+
+            case .groupClosed(.success):
+                return .run { _ in await dismiss() }
+
+            case .groupClosed(.failure):
+                state.alert = Self.closeGroupErrorAlert()
+                return .none
+
+            case .alert(.presented(.confirmLeaveGroup)):
+                return .none
+
+            case .alert:
                 return .none
 
             case .inviteLinkCopyTapped:
@@ -132,6 +173,43 @@ public struct GroupDetailFeature {
 
             case .home, .myPlace, .delegate:
                 return .none
+            }
+        }
+        .ifLet(\.$alert, action: \.alert)
+    }
+
+    private static func endGroupAlert(groupName: String) -> AlertState<Action.Alert> {
+        AlertState {
+            TextState("\(groupName)을 종료하시겠습니까?")
+        } actions: {
+            ButtonState(action: .confirmEndGroup) {
+                TextState("종료할래요")
+            }
+            ButtonState(role: .cancel) {
+                TextState("아니요")
+            }
+        }
+    }
+
+    private static func leaveGroupAlert(groupName: String) -> AlertState<Action.Alert> {
+        AlertState {
+            TextState("\(groupName)을 나가시겠습니까?")
+        } actions: {
+            ButtonState(action: .confirmLeaveGroup) {
+                TextState("나갈래요")
+            }
+            ButtonState(role: .cancel) {
+                TextState("아니요")
+            }
+        }
+    }
+
+    private static func closeGroupErrorAlert() -> AlertState<Action.Alert> {
+        AlertState {
+            TextState("그룹 종료에 실패했습니다.")
+        } actions: {
+            ButtonState(role: .cancel) {
+                TextState("확인")
             }
         }
     }

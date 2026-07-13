@@ -12,4 +12,5 @@ public protocol GroupRepositoryProtocol: Sendable {
     func fetchGroupDetail(meetingId: Int) async throws -> GroupDetail
     func updateAttendance(meetingId: Int, attendanceStatus: AttendanceStatus) async throws
     func issueInviteCode(groupId: Int) async throws -> String
+    func closeGroup(groupId: Int) async throws
 }

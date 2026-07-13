@@ -17,6 +17,7 @@ public struct GroupClient: Sendable {
     public var fetchGroupDetail: @Sendable (_ meetingId: Int) async throws -> GroupDetail
     public var updateAttendance: @Sendable (_ meetingId: Int, _ attendanceStatus: AttendanceStatus) async throws -> Void
     public var issueInviteCode: @Sendable (_ groupId: Int) async throws -> String
+    public var closeGroup: @Sendable (_ groupId: Int) async throws -> Void
 }
 
 public extension GroupClient {
@@ -26,7 +27,8 @@ public extension GroupClient {
         hostPickMeetingDateUseCase: any HostPickMeetingDateUseCase,
         fetchDetailUseCase: any FetchGroupDetailUseCase,
         updateAttendanceUseCase: any UpdateAttendanceUseCase,
-        issueInviteCodeUseCase: any IssueInviteCodeUseCase
+        issueInviteCodeUseCase: any IssueInviteCodeUseCase,
+        closeGroupUseCase: any CloseGroupUseCase
     ) -> Self {
         Self(
             fetchGroups: { try await fetchUseCase.execute() },
@@ -44,6 +46,9 @@ public extension GroupClient {
             },
             issueInviteCode: { groupId in
                 try await issueInviteCodeUseCase.execute(groupId: groupId)
+            },
+            closeGroup: { groupId in
+                try await closeGroupUseCase.execute(groupId: groupId)
             }
         )
     }
@@ -57,7 +62,8 @@ extension GroupClient: DependencyKey {
             hostPickMeetingDate: { _, _ in throw GroupClientError.notImplemented },
             fetchGroupDetail: { _ in throw GroupClientError.notImplemented },
             updateAttendance: { _, _ in throw GroupClientError.notImplemented },
-            issueInviteCode: { _ in throw GroupClientError.notImplemented }
+            issueInviteCode: { _ in throw GroupClientError.notImplemented },
+            closeGroup: { _ in throw GroupClientError.notImplemented }
         )
     }
 
@@ -71,7 +77,8 @@ extension GroupClient: DependencyKey {
         hostPickMeetingDate: { _, _ in },
         fetchGroupDetail: { _ in previewGroupDetail },
         updateAttendance: { _, _ in },
-        issueInviteCode: { _ in "PREVIEW-INVITE-CODE" }
+        issueInviteCode: { _ in "PREVIEW-INVITE-CODE" },
+        closeGroup: { _ in }
     )
 }
 

@@ -16,7 +16,7 @@ extension Settings {
   ) -> SettingsDictionary {
     return SettingsDictionary()
       .setProductName(appName)
-      .setCFBundleDisplayName(displayName)
+      .setBundleDisplayName(displayName)
       .setOtherLdFlags("-ObjC -all_load")
       .setDebugInformationFormat("dwarf-with-dsym")
       .setCodeSignStyle(codeSignStyle)
@@ -37,7 +37,7 @@ extension Settings {
   public static let appMainSetting: Settings = .settings(
     base: SettingsDictionary()
       .setProductName(Project.Environment.appName)
-      .setCFBundleDisplayName(Project.Environment.appName)
+      .setBundleDisplayName(Project.Environment.appName)
       .setMarketingVersion(.appVersion())
       .setEnableBackgroundModes()
       .setArchs()

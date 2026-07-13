@@ -15,6 +15,6 @@ public final class FetchGroupsUseCaseImpl: FetchGroupsUseCase {
     }
 
     public func execute() async throws -> [Group] {
-        try await repository.fetchGroups()
+        try await repository.fetchGroups().filter { $0.listStatus != .closed }
     }
 }
