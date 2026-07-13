@@ -26,7 +26,8 @@ jobs:
       # match
       MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
       MATCH_KEYCHAIN_PASSWORD: ${{ secrets.MATCH_KEYCHAIN_PASSWORD }}
-      MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+      # 인증서 repo(private) 클론용 토큰 — Deploy 스텝에서 MATCH_GIT_BASIC_AUTHORIZATION 로 인코딩
+      CONFIG_PRIVATE_REPO_TOKEN: ${{ secrets.CONFIG_PRIVATE_REPO_TOKEN }}
       # App Store Connect API (Fastfile 변수명)
       APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
       APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
@@ -58,7 +59,7 @@ jobs:
 
       - name: Download private xcconfig
         run: |
-          echo "GITHUB_ACCESS_TOKEN=${{ secrets.CONFIG_PRIVATE_REPO_TOKEN }}" > .env
+          echo "GITHUB_ACCESS_TOKEN=${CONFIG_PRIVATE_REPO_TOKEN}" > .env
           make download-privates
 
       # Matchfile 이 keychain_name("login") 을 고정 사용하므로 CI 에서 login 키체인을 준비
@@ -75,4 +76,8 @@ jobs:
         run: ./tuisttool install
 
       - name: Deploy to TestFlight
-        run: bundle exec fastlane beta
+        run: |
+          # match 가 private 인증서 repo 를 클론할 때 사용할 basic auth 헤더 생성
+          # (base64 는 긴 토큰에서 줄바꿈이 삽입되므로 제거)
+          export MATCH_GIT_BASIC_AUTHORIZATION=$(printf 'x-access-token:%s' "${CONFIG_PRIVATE_REPO_TOKEN}" | base64 | tr -d '\n')
+          bundle exec fastlane beta
