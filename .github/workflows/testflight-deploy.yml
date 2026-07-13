@@ -30,6 +30,11 @@ jobs:
       - name: Setup mise & tuist
         uses: jdx/mise-action@v2
 
+      # 커밋된 tuisttool 바이너리는 로컬 macOS 26 기준으로 빌드되어 macos-15 러너에서 로드 불가
+      # → 러너 OS에 맞게 소스에서 재컴파일
+      - name: Build tuisttool
+        run: swiftc TuistTool.swift -o tuisttool
+
       - name: Download private xcconfig
         run: |
           echo "GITHUB_ACCESS_TOKEN=${{ secrets.CONFIG_PRIVATE_REPO_TOKEN }}" > .env
@@ -83,6 +88,11 @@ jobs:
 
       - name: Setup mise & tuist
         uses: jdx/mise-action@v2
+
+      # 커밋된 tuisttool 바이너리는 로컬 macOS 26 기준으로 빌드되어 macos-15 러너에서 로드 불가
+      # → 러너 OS에 맞게 소스에서 재컴파일 (Install dependencies·fastlane 의 ./tuisttool 호출 대비)
+      - name: Build tuisttool
+        run: swiftc TuistTool.swift -o tuisttool
 
       - name: Setup Ruby & fastlane
         uses: ruby/setup-ruby@v1
