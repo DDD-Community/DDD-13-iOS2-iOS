@@ -2,8 +2,6 @@
 //  BangawoTests.swift
 //  BangawoTests
 //
-//  Created by TuistTool.
-//
 
 import XCTest
 

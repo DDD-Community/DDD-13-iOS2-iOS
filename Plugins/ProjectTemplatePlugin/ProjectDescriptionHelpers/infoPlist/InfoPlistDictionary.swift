@@ -2,8 +2,6 @@
 //  InfoPlistDictionary.swift
 //  Plugins
 //
-//  Created by DDD-iOS2 on 4/7/26.
-//
 
 import Foundation
 import ProjectDescription
@@ -37,6 +35,10 @@ extension InfoPlistDictionary {
 
   func setCFBundleDisplayName(_ value: String) -> InfoPlistDictionary {
     return self.merging(["CFBundleDisplayName": .string(value)]) { (_, new) in new }
+  }
+
+  func setCFBundleIconName(_ value: String) -> InfoPlistDictionary {
+    return self.merging(["CFBundleIconName": .string(value)]) { (_, new) in new }
   }
 
   func setCFBundlePackageType(_ value: String) -> InfoPlistDictionary {
@@ -75,6 +77,10 @@ extension InfoPlistDictionary {
     return self.merging(dict) { (_, new) in new }
   }
   
+  func setCFBundleLocalizations(_ value: [String]) -> InfoPlistDictionary {
+    return self.merging(["CFBundleLocalizations": .array(value.map { .string($0) })]) { (_, new) in new }
+  }
+
   func setCFBundleVersion(_ value: String) -> InfoPlistDictionary {
     return self.merging(["CFBundleVersion": .string(value)]) { (_, new) in new }
   }
@@ -90,6 +96,10 @@ extension InfoPlistDictionary {
   func setUIAppFonts(_ value: [String]) -> InfoPlistDictionary {
     return self.merging(["UIAppFonts": .array(value.map { .string($0) })]) { (_, new) in new }
   }
+
+  func setUIBackgroundModes(_ value: [String]) -> InfoPlistDictionary {
+    return self.merging(["UIBackgroundModes": .array(value.map { .string($0) })]) { (_, new) in new }
+  }
   
   func setAppTransportSecurity() -> InfoPlistDictionary {
     let dict: [String: Plist.Value] = [
@@ -100,16 +110,30 @@ extension InfoPlistDictionary {
     return self.merging(dict) { (_, new) in new }
   }
 
-  // 매개변수 없는 URL 타입 (예: 카카오)
+  // 매개변수 없는 URL 타입
   func setCFBundleURLTypes() -> InfoPlistDictionary {
     let dict: [String: Plist.Value] = [
       "CFBundleURLTypes": .array([
         .dictionary([
           "CFBundleURLSchemes": .array([
-            .string("${REVERSED_CLIENT_ID}")
-//            .string("com.googleusercontent.apps.882277748169-glpolfiecue4lqqps6hmgj9t8lm1g5qp")
+            .string("$(REVERSED_CLIENT_ID)"),
+            .string("kakao$(KAKAO_APP_KEY)"),
+            .string("$(NAVER_URL_SCHEME)")
           ])
         ])
+      ])
+    ]
+    return self.merging(dict) { (_, new) in new }
+  }
+
+  func setLSApplicationQueriesSchemes() -> InfoPlistDictionary {
+    let dict: [String: Plist.Value] = [
+      "LSApplicationQueriesSchemes": .array([
+        .string("kakaokompassauth"),
+        .string("kakaolink"),
+        .string("naversearchapp"),
+        .string("naversearchthirdlogin"),
+        .string("nmap")
       ])
     ]
     return self.merging(dict) { (_, new) in new }
@@ -151,15 +175,9 @@ extension InfoPlistDictionary {
   func setNSCameraUsageDescription(_ value: String) -> InfoPlistDictionary {
     return self.merging(["NSCameraUsageDescription": .string(value)]) { (_, new) in new }
   }
-  
-  func setUILaunchScreens() -> InfoPlistDictionary {
-    let dict: InfoPlistDictionary = [
-      "UILaunchScreen": .dictionary([
-        "UIColorName": .string(""),
-        "UIImageName": .string("")
-      ])
-    ]
-    return self.merging(dict) { _, new in new }
+
+  func setNSPhotoLibraryUsageDescription(_ value: String) -> InfoPlistDictionary {
+    return self.merging(["NSPhotoLibraryUsageDescription": .string(value)]) { (_, new) in new }
   }
   
   func setAppUseExemptEncryption(value: Bool) -> InfoPlistDictionary {
@@ -184,5 +202,29 @@ extension InfoPlistDictionary {
   
   func setBaseURL(_ value: String) -> InfoPlistDictionary {
     return self.merging(["BASE_URL": .string(value)]) { (_, new) in new }
+  }
+
+  func setServerBaseURL(_ value: String) -> InfoPlistDictionary {
+    return self.merging(["SERVER_BASE_URL": .string(value)]) { (_, new) in new }
+  }
+
+  func setKakaoAppKey(_ value: String) -> InfoPlistDictionary {
+    return self.merging(["KAKAO_APP_KEY": .string(value)]) { (_, new) in new }
+  }
+
+  func setNaverClientID(_ value: String) -> InfoPlistDictionary {
+    return self.merging(["NAVER_CLIENT_ID": .string(value)]) { (_, new) in new }
+  }
+
+  func setNaverClientSecret(_ value: String) -> InfoPlistDictionary {
+    return self.merging(["NAVER_CLIENT_SECRET": .string(value)]) { (_, new) in new }
+  }
+
+  func setNaverURLScheme(_ value: String) -> InfoPlistDictionary {
+    return self.merging(["NAVER_URL_SCHEME": .string(value)]) { (_, new) in new }
+  }
+
+  func setKakaoRestAPIKey(_ value: String) -> InfoPlistDictionary {
+    return self.merging(["KAKAO_REST_API_KEY": .string(value)]) { (_, new) in new }
   }
 }

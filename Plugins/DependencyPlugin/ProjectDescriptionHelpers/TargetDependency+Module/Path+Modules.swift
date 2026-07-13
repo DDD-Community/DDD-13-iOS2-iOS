@@ -2,8 +2,6 @@
 //  Path+Modules.swift
 //  Plugins
 //
-//  Created by DDD-iOS2 on 4/7/26.
-//
 
 import Foundation
 import ProjectDescription
@@ -62,5 +60,16 @@ public extension ProjectDescription.Path {
 
   static func Data(implementation module: ModulePath.Datas) -> Self {
     return .relativeToRoot("Projects/\(ModulePath.Datas.name)/\(module.rawValue)")
+  }
+}
+
+// MARK: - Core
+public extension ProjectDescription.Path {
+  static var Core: Self {
+    return .relativeToRoot("Projects/\(ModulePath.Cores.name)")
+  }
+
+  static func Core(implementation module: ModulePath.Cores) -> Self {
+    return .relativeToRoot("Projects/\(ModulePath.Cores.name)/\(module.rawValue)")
   }
 }

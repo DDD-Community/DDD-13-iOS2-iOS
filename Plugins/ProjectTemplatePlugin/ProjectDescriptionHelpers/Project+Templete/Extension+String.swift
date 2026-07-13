@@ -2,8 +2,6 @@
 //  Extension+String.swift
 //  MyPlugin
 //
-//  Created by DDD-iOS2 on 4/7/26.
-//
 
 import Foundation
 import ProjectDescription
@@ -17,7 +15,7 @@ extension String {
     return Project.Environment.bundlePrefix
   }
   
-  public static func appBuildVersion(buildVersion: String = "10") -> String {
+  public static func appBuildVersion(buildVersion: String = "1") -> String {
     return buildVersion
   }
   

@@ -1,0 +1,193 @@
+default_platform(:ios)
+
+ENV["FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT"] = "600"
+
+APP_NAME        = "Bangawo"
+WORKSPACE       = "#{APP_NAME}.xcworkspace"
+BUNDLE_ID       = ENV["APP_IDENTIFIER"] || "com.ddd-ios2.Bangawo"
+TEAM_ID         = ENV["TEAM_ID"]
+OUTPUT_DIR      = "./fastlane/output"
+IPA_FILENAME    = "#{APP_NAME}.ipa"
+MATCH_GIT_URL   = "https://github.com/Roy-wonji/FastlaneMatch.git"
+
+platform :ios do
+
+  # ──────────────────────────────────────────────────────────
+  # Match
+  # ──────────────────────────────────────────────────────────
+
+  desc "개발용 인증서 로컬 설치 (readonly)"
+  lane :match_development do
+    match(
+      type:         "development",
+      readonly:     true,
+      git_url:      MATCH_GIT_URL,
+      storage_mode: "git",
+      app_identifier: [BUNDLE_ID]
+    )
+  end
+
+  desc "배포용 인증서 로컬 설치 (readonly)"
+  lane :match_appstore do
+    match(
+      type:         "appstore",
+      readonly:     true,
+      git_url:      MATCH_GIT_URL,
+      storage_mode: "git",
+      app_identifier: [BUNDLE_ID]
+    )
+  end
+
+  # ──────────────────────────────────────────────────────────
+  # Beta (TestFlight)
+  # ──────────────────────────────────────────────────────────
+
+  desc "Bangawo-Prod → TestFlight 업로드"
+  lane :beta do
+    app_store_connect_api_key(
+      key_id:                ENV["APP_STORE_CONNECT_API_KEY_ID"],
+      issuer_id:             ENV["APP_STORE_CONNECT_ISSUER_ID"],
+      key_content:           ENV["APP_STORE_CONNECT_API_KEY_CONTENT"],
+      is_key_content_base64: true,
+      in_house:              false
+    )
+
+    match(
+      type:        "appstore",
+      readonly:    true,
+      git_url:     MATCH_GIT_URL,
+      storage_mode: "git",
+      app_identifier: [BUNDLE_ID]
+    )
+
+    ensure_workspace
+
+    # 코드의 MARKETING_VERSION 기준으로 TestFlight 최신 빌드 넘버 +1 계산
+    # (해당 버전이 없으면 initial_build_number(0) + 1 = 1)
+    version = get_version_number(
+      xcodeproj:     "Projects/App/#{APP_NAME}.xcodeproj",
+      target:        APP_NAME,
+      configuration: "Prod"
+    )
+
+    build_number = latest_testflight_build_number(
+      app_identifier:       BUNDLE_ID,
+      version:              version,
+      initial_build_number: 0
+    ) + 1
+
+    UI.message("📦 #{version} 버전 빌드 넘버: #{build_number}")
+
+    increment_build_number(
+      xcodeproj:    "Projects/App/#{APP_NAME}.xcodeproj",
+      build_number: build_number
+    )
+
+    build_app(
+      workspace:        WORKSPACE,
+      scheme:           "#{APP_NAME}-Prod",
+      configuration:    "Release",
+      export_method:    "app-store",
+      output_directory: OUTPUT_DIR,
+      output_name:      IPA_FILENAME,
+      clean:            true,
+      silent:           true,
+      xcargs:           xcargs_flags,
+      export_options:   export_options_hash
+    )
+
+    upload_to_testflight(
+      ipa:                              "#{OUTPUT_DIR}/#{IPA_FILENAME}",
+      skip_waiting_for_build_processing: true,
+      notify_external_testers:          false,
+      uses_non_exempt_encryption:       false
+    )
+  end
+
+  # ──────────────────────────────────────────────────────────
+  # Release (App Store)
+  # ──────────────────────────────────────────────────────────
+
+  desc "Bangawo-Prod → App Store 심사 제출"
+  lane :release do |options|
+    UI.user_error!("version 옵션을 지정해주세요. 예: fastlane release version:1.0.0") unless options[:version]
+
+    app_store_connect_api_key(
+      key_id:                ENV["APP_STORE_CONNECT_API_KEY_ID"],
+      issuer_id:             ENV["APP_STORE_CONNECT_ISSUER_ID"],
+      key_content:           ENV["APP_STORE_CONNECT_API_KEY_CONTENT"],
+      is_key_content_base64: true,
+      in_house:              false
+    )
+
+    match(
+      type:         "appstore",
+      readonly:     true,
+      git_url:      MATCH_GIT_URL,
+      storage_mode: "git",
+      app_identifier: [BUNDLE_ID]
+    )
+
+    ensure_workspace
+
+    build_app(
+      workspace:        WORKSPACE,
+      scheme:           "#{APP_NAME}-Prod",
+      configuration:    "Release",
+      export_method:    "app-store",
+      output_directory: OUTPUT_DIR,
+      output_name:      IPA_FILENAME,
+      clean:            true,
+      silent:           false,
+      xcargs:           xcargs_flags,
+      export_options:   export_options_hash
+    )
+
+    upload_to_app_store(
+      app_version:                    options[:version],
+      ipa:                            "#{OUTPUT_DIR}/#{IPA_FILENAME}",
+      skip_metadata:                  true,
+      skip_screenshots:               true,
+      force:                          true,
+      submit_for_review:              true,
+      automatic_release:              false,
+      precheck_include_in_app_purchases: false,
+      reject_if_possible:             true
+    )
+
+    UI.success("🎉 #{options[:version]} 버전 심사 제출 완료!")
+  end
+
+end
+
+# ──────────────────────────────────────────────────────────
+# Private helpers
+# ──────────────────────────────────────────────────────────
+
+private_lane :ensure_workspace do
+  Dir.chdir("..") do
+    next unless Dir.glob("*.xcworkspace").empty?
+
+    UI.message("워크스페이스가 없어 tuist generate를 실행합니다...")
+    sh("./tuisttool generate")
+    UI.user_error!("워크스페이스 생성 실패") if Dir.glob("*.xcworkspace").empty?
+  end
+end
+
+def xcargs_flags
+  "CODE_SIGN_IDENTITY='Apple Distribution' " \
+  "CODE_SIGN_STYLE=Manual " \
+  "DEVELOPMENT_TEAM=#{TEAM_ID} " \
+  "COMPILER_INDEX_STORE_ENABLE=NO " \
+  "ENABLE_BITCODE=NO " \
+  "-allowProvisioningUpdates"
+end
+
+def export_options_hash
+  {
+    signingStyle:         "manual",
+    uploadBitcode:        false,
+    teamID:               TEAM_ID,
+    provisioningProfiles: { BUNDLE_ID => "match AppStore #{BUNDLE_ID}" }
+  }
+end

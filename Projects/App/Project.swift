@@ -10,15 +10,27 @@ let project = Project.makeAppModule(
   settings: .appMainSetting,
   scripts: [],
   dependencies: [
-    .Presentation(implements: .Presentation)
+    .Presentation(implements: .Presentation),
+    .Domain(implements: .UseCase),
+    .Data(implements: .Repository),
+    .Data(implements: .Service),
+    .Data(implements: .DataUseCase),
+    .Core(implements: .CoreDependencies),
+    .Shared(implements: .Utill),
+    .Network(implements: .ThirdPartys),
+    .SPM.kakaoMapsSDK,
+    .SPM.nidThirdPartyLogin,
+    .SPM.firebaseCore,
+    .SPM.firebaseMessaging,
+    .SPM.composableArchitecture
   ],
   sources: ["Sources/**"],
   resources: ["Resources/**"],
   infoPlist: .appInfoPlist,
+  entitlements: .file(path: "Bangawo.entitlements"),
   schemes: [
-    // 테스트 플랜 스킴: 커스텀 구성명 사용 (.dev / .stage / .prod 중 택1)
-    Scheme.makeTestPlanScheme(target: .dev, name: Project.Environment.appName),
+    // 테스트 플랜 스킴: 커스텀 구성명 사용 (.debug / .prod 중 택1)
+    Scheme.makeTestPlanScheme(target: .debug, name: Project.Environment.appName),
 
   ]
 )
-

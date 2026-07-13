@@ -2,8 +2,6 @@
 //  SettingDictionary.swift
 //  ProjectTemplatePlugin
 //
-//  Created by DDD-iOS2 on 4/7/26.
-//
 
 import Foundation
 import ProjectDescription
@@ -17,8 +15,8 @@ public extension SettingsDictionary {
     return self.merging(["PRODUCT_NAME": SettingValue(stringLiteral: value)]) { (_, new) in new }
   }
   
-  func setCFBundleDisplayName(_ value: String) -> SettingsDictionary {
-    return self.merging(["CFBundleDisplayName": SettingValue(stringLiteral: value)]) { (_, new) in new }
+  func setBundleDisplayName(_ value: String) -> SettingsDictionary {
+    return self.merging(["BUNDLE_DISPLAY_NAME": SettingValue(stringLiteral: value)]) { (_, new) in new }
   }
   
   func setMarketingVersion(_ value: String) -> SettingsDictionary {

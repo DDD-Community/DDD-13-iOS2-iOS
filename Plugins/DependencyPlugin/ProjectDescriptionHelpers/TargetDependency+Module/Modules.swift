@@ -2,8 +2,6 @@
 //  Modules.swift
 //  Plugins
 //
-//  Created by DDD-iOS2 on 4/7/26.
-//
 
 import Foundation
 import ProjectDescription
@@ -14,12 +12,17 @@ public enum ModulePath {
   case Domain(Domains)
   case Data(Datas)
   case Shared(Shareds)
+  case Core(Cores)
 }
 
 // MARK: FeatureModule
 public extension ModulePath {
   enum Presentations: String, CaseIterable {
     case Presentation
+    case AuthFlowFeature
+    case HomeFeature
+    case RootFeature
+    case StationSearchFeature
 
 
     public static let name: String = "Presentation"
@@ -33,6 +36,7 @@ public extension ModulePath {
   enum Networks: String, CaseIterable {
     case Networking
     case Foundations
+    case ThirdPartys
 
     public static let name: String = "Network"
   }
@@ -46,6 +50,7 @@ public extension ModulePath {
     case Repository
     case API
     case Service
+    case DataUseCase
 
     public static let name: String = "Data"
   }
@@ -72,8 +77,18 @@ public extension ModulePath {
     case Shared
     case DesignSystem
     case Utill
-    
+
     public static let name: String = "Shared"
+  }
+}
+
+
+//MARK: -  CoreModule
+public extension ModulePath {
+  enum Cores: String, CaseIterable {
+    case CoreDependencies
+
+    public static let name: String = "Core"
   }
 }
 

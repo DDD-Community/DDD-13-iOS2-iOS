@@ -15,6 +15,10 @@ xcuserdata/
 *.DS_Store
 *.xcworkspace
 
+## Tuist 생성 산출물
+*.xcodeproj
+Derived/
+
 ## Playgrounds
 timeline.xctimeline
 playground.xcworkspace
@@ -66,5 +70,27 @@ fastlane/test_output
 # Compiled binaries
 tuisttool
 
+
+# Config (may contain secrets)
+Config/
+*.xcconfig
+
+# Secrets
+.env
+fastlane/.env
+
+# Bundler
+Gemfile.lock
+
+# Docs
+README.md
+
 # Claude Code
 CLAUDE.md
+.claude/
+
+# Claude feature 오케스트레이션용 휘발성 스펙
+.claude/specs/
+
+# AI 작업 인수인계 노트 (로컬 WIP)
+.handoff/

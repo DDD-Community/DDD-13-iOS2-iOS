@@ -2,11 +2,11 @@
 //  EndPoint.swift
 //  Foundations
 //
-//  Created by DDD-iOS2 on 4/13/26.
 //  Copyright © 2025 DDD, Ltd., All rights reserved.
 //
 
 import Foundation
+
 import Alamofire
 
 /// API 엔드포인트를 정의하기 위한 프로토콜

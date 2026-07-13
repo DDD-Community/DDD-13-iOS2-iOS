@@ -2,8 +2,6 @@
 //  Project+Template.swift
 //  MyPlugin
 //
-//  Created by DDD-iOS2 on 4/7/26.
-//
 
 import ProjectDescription
 
@@ -23,7 +21,8 @@ public extension Project {
     resources: ProjectDescription.ResourceFileElements? = nil,
     infoPlist: ProjectDescription.InfoPlist = .default,
     entitlements: ProjectDescription.Entitlements? = nil,
-    schemes: [ProjectDescription.Scheme] = []
+    schemes: [ProjectDescription.Scheme] = [],
+    resourceSynthesizers: [ProjectDescription.ResourceSynthesizer]? = nil
   ) -> Project {
 
     let appTarget: Target = .target(
@@ -55,22 +54,7 @@ public extension Project {
     )
 
 
-    let appStageTarget: Target = .target(
-      name: "\(name)-Stage",
-      destinations: destinations,
-      product: product,
-      bundleId: "\(bundleId)",
-      deploymentTargets: deploymentTarget,
-      infoPlist: infoPlist,
-      sources: sources,
-      resources: resources,
-      entitlements: entitlements,
-      scripts: scripts,
-      dependencies: dependencies
-    )
-
-
-    let appDevTarget: Target = .target(
+    let appDebugTarget: Target = .target(
       name: "\(name)-Debug",
       destinations: destinations,
       product: product,
@@ -95,18 +79,19 @@ public extension Project {
       dependencies: [.target(name: name)]
     )
 
-    let targets = [appTarget, appDevTarget, appStageTarget, appProdTarget ,appTestTarget]
+    let targets = [appTarget, appDebugTarget, appProdTarget, appTestTarget]
 
     return Project(
       name: name,
       options: .options(
-        defaultKnownRegions: ["en", "ko"],
+        defaultKnownRegions: ["ko"],
         developmentRegion: "ko"
       ),
       packages: packages,
       settings: settings,
       targets: targets,
-      schemes: schemes
+      schemes: schemes,
+      resourceSynthesizers: resourceSynthesizers ?? .default
     )
   }
 
@@ -126,7 +111,8 @@ public extension Project {
     infoPlist: ProjectDescription.InfoPlist = .default,
     entitlements: ProjectDescription.Entitlements? = nil,
     schemes: [ProjectDescription.Scheme] = [],
-    hasTests: Bool = false
+    hasTests: Bool = false,
+    resourceSynthesizers: [ProjectDescription.ResourceSynthesizer]? = nil
   ) -> Project {
     
     let appTarget: Target = .target(
@@ -164,7 +150,8 @@ public extension Project {
       packages: packages,
       settings: settings,
       targets: targets,
-      schemes: schemes
+      schemes: schemes,
+      resourceSynthesizers: resourceSynthesizers ?? .default
     )
   }
 }

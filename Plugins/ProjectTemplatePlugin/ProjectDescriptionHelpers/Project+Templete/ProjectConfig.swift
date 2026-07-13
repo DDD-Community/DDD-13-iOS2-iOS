@@ -2,8 +2,6 @@
 //  ProjectConfig.swift
 //  MultiModuleTemplate
 //
-//  Created by DDD-iOS2 on 4/7/26.
-//
 
 import Foundation
 import ProjectDescription
@@ -19,14 +17,14 @@ public struct ProjectConfig {
     // MARK: - 📱 앱 정보 (자동 생성됨)
     public static let appName = projectName
     public static let appDisplayName = projectName  // 🎯 앱 화면에 표시될 이름
-    public static let appStageName = "\(projectName)-Stage"
     public static let appProdName = "\(projectName)-Prod"
-    public static let appDevName = "\(projectName)-Dev"
+    public static let appDebugName = "\(projectName)-Debug"
 
     // MARK: - 🔧 기타 설정
     public static let bundleIdPrefix = "com.ddd-ios2.Bangawo"
-    public static let teamId = "8NJPCU8Y7S"
-    public static let deploymentTarget: ProjectDescription.DeploymentTargets = .iOS("17.0")
+
+    public static let teamId = "N94CS4N6VR"
+    public static let deploymentTarget: ProjectDescription.DeploymentTargets = .iOS("26.0")
     public static let deploymentDestination: ProjectDescription.Destinations = [.iPhone]
     public static let appVersion = "1.0.0"
 

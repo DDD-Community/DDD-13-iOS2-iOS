@@ -25,8 +25,6 @@ let template = Template(
 //  Project+Enviorment.swift
 //  MyPlugin
 //
-//  Created by DDD-iOS2 on 4/7/26.
-//
 
 import Foundation
 import ProjectDescription
@@ -34,9 +32,8 @@ import ProjectDescription
 public extension Project {
   enum Environment {
     public static let appName = "\(nameAttribute)"
-    public static let appStageName = "\(nameAttribute)-Stage"
     public static let appProdName = "\(nameAttribute)-Prod"
-    public static let appDevName = "\(nameAttribute)-Dev"
+    public static let appDebugName = "\(nameAttribute)-Debug"
     public static let deploymentTarget : ProjectDescription.DeploymentTargets = .iOS("17.0")
     public static let deploymentDestination: ProjectDescription.Destinations = [.iPhone]
     public static let organizationTeamId = "\(teamIdAttribute)"

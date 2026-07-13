@@ -2,9 +2,6 @@
 //  StorageKey.swift
 //  Utill
 //
-//  Created by DDD-iOS2 on 4/16/26.
-//  Copyright (c) 2025 DDD, Ltd., All rights reserved.
-//
 
 import Foundation
 
@@ -18,4 +15,5 @@ public enum KeyChainKey {
 public enum UserDefaultsKey {
     public static let isLogin = "isLogin"
     public static let tokenIssueDate = "tokenIssueDate"
+    public static let registrationCompleted = "registrationCompleted"
 }

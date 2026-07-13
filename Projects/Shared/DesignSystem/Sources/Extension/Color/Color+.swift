@@ -1,11 +1,13 @@
 //
 //  Color+.swift
-//  DDDAttendance
-//
-//  Created by DDD-iOS2 on 4/7/26.
+//  DesignSystem
 //
 
 import SwiftUI
+
+public extension Color {
+    var uiColor: UIColor { UIColor(self) }
+}
 
 public extension Color {
   init(hex: String) {

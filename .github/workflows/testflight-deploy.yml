@@ -1,0 +1,112 @@
+name: TestFlight Deploy
+
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
+  workflow_dispatch:
+
+concurrency:
+  group: testflight-deploy
+  cancel-in-progress: false
+
+jobs:
+  # ──────────────────────────────────────────────────────────
+  # 1. Test (배포 게이트)
+  # ──────────────────────────────────────────────────────────
+  test:
+    # PR 이 머지된 경우 또는 수동 실행일 때만 동작 (단순 close 는 스킵)
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      # .mise.toml(tuist 4.174.0)이 mise.toml(latest)보다 우선하므로 4.174.0 설치됨
+      - name: Setup mise & tuist
+        uses: jdx/mise-action@v2
+
+      - name: Download private xcconfig
+        run: |
+          echo "GITHUB_ACCESS_TOKEN=${{ secrets.CONFIG_PRIVATE_REPO_TOKEN }}" > .env
+          make download-privates
+
+      - name: Generate project
+        run: |
+          ./tuisttool install
+          ./tuisttool generate
+
+      - name: Run tests
+        run: |
+          set -eo pipefail
+          UDID=$(xcrun simctl list devices available --json \
+            | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; ids=[x['udid'] for r in d.values() for x in r if 'iPhone' in x['name']]; print(ids[0])")
+          xcodebuild test \
+            -workspace Bangawo.xcworkspace \
+            -scheme Bangawo \
+            -destination "id=$UDID" \
+            CODE_SIGNING_ALLOWED=NO
+
+  # ──────────────────────────────────────────────────────────
+  # 2. Deploy (TestFlight)
+  # ──────────────────────────────────────────────────────────
+  deploy:
+    needs: test
+    runs-on: macos-15
+    env:
+      # Appfile / Fastfile
+      APP_IDENTIFIER: ${{ secrets.APP_IDENTIFIER }}
+      APPLE_ID: ${{ secrets.APPLE_ID }}
+      TEAM_ID: ${{ secrets.TEAM_ID }}
+      # match
+      MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      MATCH_KEYCHAIN_PASSWORD: ${{ secrets.MATCH_KEYCHAIN_PASSWORD }}
+      MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+      # App Store Connect API (Fastfile 변수명)
+      APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+      # App Store Connect API (Matchfile 변수명 호환)
+      APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      APP_STORE_CONNECT_API_KEY_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Setup mise & tuist
+        uses: jdx/mise-action@v2
+
+      - name: Setup Ruby & fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Download private xcconfig
+        run: |
+          echo "GITHUB_ACCESS_TOKEN=${{ secrets.CONFIG_PRIVATE_REPO_TOKEN }}" > .env
+          make download-privates
+
+      # Matchfile 이 keychain_name("login") 을 고정 사용하므로 CI 에서 login 키체인을 준비
+      - name: Prepare keychain
+        run: |
+          security create-keychain -p "$MATCH_KEYCHAIN_PASSWORD" login.keychain-db || true
+          security set-keychain-settings -lut 21600 login.keychain-db
+          security unlock-keychain -p "$MATCH_KEYCHAIN_PASSWORD" login.keychain-db
+          security list-keychains -d user -s login.keychain-db
+          security default-keychain -s login.keychain-db
+
+      # SPM 의존성 설치 (fastlane 의 ensure_workspace 가 generate 하기 전 선행)
+      - name: Install dependencies
+        run: ./tuisttool install
+
+      - name: Deploy to TestFlight
+        run: bundle exec fastlane beta

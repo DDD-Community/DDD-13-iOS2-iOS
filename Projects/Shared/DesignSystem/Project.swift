@@ -10,9 +10,23 @@ let project = Project.makeModule(
   product: .staticFramework,
   settings:  .settings(),
   dependencies: [
-
+    .SPM.kakaoMapsSDK,
+    .Shared(implements: .Utill)
   ],
   sources: ["Sources/**"],
   resources: ["Resources/**", "FontAsset/**"],
-  hasTests: false
+  hasTests: false,
+  resourceSynthesizers: [
+    .custom(
+      name: "Images",
+      parser: .assets,
+      extensions: ["xcassets"]
+    ),
+    .fonts(),
+    .custom(
+      name: "Localizable",
+      parser: .strings,
+      extensions: ["strings", "stringsdict"]
+    ),
+  ]
 )

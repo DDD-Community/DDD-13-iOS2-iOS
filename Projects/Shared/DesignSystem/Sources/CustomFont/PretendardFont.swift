@@ -2,8 +2,6 @@
 //  PretendardFont.swift
 //  DDDAttendance
 //
-//  Created by DDD-iOS2 on 4/7/26.
-//
 
 import SwiftUI
 
@@ -22,7 +20,9 @@ public extension View {
   }
   
   func pretendardCustomFont(textStyle: CustomSizeFont) -> some View {
-    return self.modifier(PretendardFont(family: textStyle.fontFamily, size: textStyle.size))
+    modifier(PretendardFont(family: textStyle.fontFamily, size: textStyle.size))
+      .kerning(textStyle.letterSpacing * textStyle.size)
+      .lineSpacing(textStyle.lineHeight - textStyle.size)
   }
 }
 

@@ -2,8 +2,6 @@
 //  AuthError.swift
 //  Networking
 //
-//  Created by yeosong on 4/16/26.
-//
 
 import Foundation
 

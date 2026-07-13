@@ -2,8 +2,6 @@
 //  Project+Settings.swift
 //  MyPlugin
 //
-//  Created by DDD-iOS2 on 4/7/26.
-//
 
 import Foundation
 import ProjectDescription
@@ -13,13 +11,15 @@ extension Settings {
     appName: String,
     displayName: String,
     provisioningProfile: String,
-    setSkipInstall: Bool
+    setSkipInstall: Bool,
+    codeSignStyle: String = "Manual"
   ) -> SettingsDictionary {
     return SettingsDictionary()
       .setProductName(appName)
-      .setCFBundleDisplayName(displayName)
+      .setBundleDisplayName(displayName)
       .setOtherLdFlags("-ObjC -all_load")
       .setDebugInformationFormat("dwarf-with-dsym")
+      .setCodeSignStyle(codeSignStyle)
       .setProvisioningProfileSpecifier(provisioningProfile)
       .setSkipInstall(setSkipInstall)
       .setCFBundleDevelopmentRegion("ko")
@@ -37,7 +37,7 @@ extension Settings {
   public static let appMainSetting: Settings = .settings(
     base: SettingsDictionary()
       .setProductName(Project.Environment.appName)
-      .setCFBundleDisplayName(Project.Environment.appName)
+      .setBundleDisplayName(Project.Environment.appName)
       .setMarketingVersion(.appVersion())
       .setEnableBackgroundModes()
       .setArchs()
@@ -61,18 +61,7 @@ extension Settings {
             provisioningProfile: "match Development \(Project.Environment.bundlePrefix)",
             setSkipInstall: false
           ),
-        xcconfig: .path(.dev)
-      ),
-      .release(
-        name: .stage,
-        settings:
-          commonSettings(
-            appName: Project.Environment.appStageName,
-            displayName: Project.Environment.appName,
-            provisioningProfile: "match AppStore \(Project.Environment.bundlePrefix)",
-            setSkipInstall: false
-          ),
-        xcconfig: .path(.stage)
+        xcconfig: .path(.debug)
       ),
       .release(
         name: .release,
@@ -119,7 +108,7 @@ extension Settings {
               appName: appName
             ),
           xcconfig:
-              .relativeToRoot("./Config/Dev.xcconfig")
+              .relativeToRoot("./Config/Debug.xcconfig")
         ),
         .release(
           name: .release,

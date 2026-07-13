@@ -10,8 +10,11 @@ let project = Project.makeModule(
   product: .staticFramework,
   settings:  .settings(),
   dependencies: [
-    .SPM.asyncMoya,
-    .SPM.weaveDI
+    .SPM.kakaoSDKCommon,
+    .SPM.kakaoSDKAuth,
+    .SPM.kakaoSDKUser,
+    .SPM.kakaoSDKShare,
+    .SPM.kakaoSDKTemplate
   ],
   sources: ["Sources/**"],
   hasTests: false

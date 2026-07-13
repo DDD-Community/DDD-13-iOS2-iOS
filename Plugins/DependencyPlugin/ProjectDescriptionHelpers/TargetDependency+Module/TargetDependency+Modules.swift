@@ -2,8 +2,6 @@
 //  TargetDependency+Modules.swift
 //  Plugins
 //
-//  Created by DDD-iOS2 on 4/7/26.
-//
 
 import Foundation
 import ProjectDescription
@@ -49,6 +47,13 @@ public extension TargetDependency {
 public extension TargetDependency {
   static func Data(implements module: ModulePath.Datas) -> Self {
     projectTarget(module.rawValue, path: .Data(implementation: module))
+  }
+}
+
+// Core
+public extension TargetDependency {
+  static func Core(implements module: ModulePath.Cores) -> Self {
+    projectTarget(module.rawValue, path: .Core(implementation: module))
   }
 }
 

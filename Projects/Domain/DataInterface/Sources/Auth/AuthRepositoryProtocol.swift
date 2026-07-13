@@ -1,0 +1,18 @@
+//
+//  AuthRepositoryProtocol.swift
+//  DataInterface
+//
+
+import Entity
+
+/// 인증 관련 데이터 소스 접근을 추상화하는 Repository 프로토콜
+public protocol AuthRepositoryProtocol: Sendable {
+    /// 소셜 로그인 토큰으로 서버 로그인을 요청합니다.
+    func login(provider: String, providerToken: String) async throws -> LoginResult
+    func saveAuthTokens(_ tokens: AuthTokens) // 토큰 저장
+    func saveRegistrationCompleted(_ completed: Bool) // 회원 가입 완료 여부
+    func validateNickname(_ nickname: String) async throws
+    func registerMember(
+        _ member: RegisterMember
+    ) async throws -> RegisterMemberResult
+}
