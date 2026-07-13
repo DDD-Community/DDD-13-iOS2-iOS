@@ -16,6 +16,8 @@ public struct GroupDetailView: View {
 
     @Environment(\.dismiss) private var dismiss
 
+    @State private var isMoreMenuPresented = false
+
     public init(store: StoreOf<GroupDetailFeature>) {
         self.store = store
     }
@@ -27,7 +29,7 @@ public struct GroupDetailView: View {
                 leadingAction: { dismiss() },
                 trailingIcons: [
                     NavigationIconItem(icon: .userPlus24) { store.send(.inviteButtonTapped) },
-                    NavigationIconItem(icon: .verticalMenu24) {}
+                    NavigationIconItem(icon: .verticalMenu24) { isMoreMenuPresented.toggle() }
                 ]
             )
 
@@ -42,6 +44,23 @@ public struct GroupDetailView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .background(Colors.gray200)
+        .overlay {
+            if isMoreMenuPresented {
+                ZStack(alignment: .topTrailing) {
+                    Color.clear
+                        .contentShape(Rectangle())
+                        .onTapGesture { isMoreMenuPresented = false }
+
+                    DesignSystem.Menu(items: [
+                        .init(label: store.home.isMeHost ? "그룹 종료" : "그룹 나가기") {
+                            store.send(store.home.isMeHost ? .endGroupTapped : .leaveGroupTapped)
+                            isMoreMenuPresented = false
+                        }
+                    ])
+                    .offset(x: Metric.moreMenuOffsetX, y: Metric.moreMenuOffsetY)
+                }
+            }
+        }
         .toolbar(.hidden, for: .navigationBar)
         .menuSheet(
             isPresented: $store.isInviteSheetPresented,
@@ -55,6 +74,7 @@ public struct GroupDetailView: View {
                 }
             ]
         )
+        .alert($store.scope(state: \.alert, action: \.alert))
     }
 
     private var tabBinding: Binding<Int> {
@@ -63,6 +83,15 @@ public struct GroupDetailView: View {
             set: { store.send(.tabSelected($0)) }
         )
     }
+}
+
+// MARK: - Metric
+
+private enum Metric {
+    /// 케밥 아이콘 트레일링 인셋(`NavigationPage`의 trailing padding)만큼 우측에서 안쪽으로 정렬.
+    static let moreMenuOffsetX: CGFloat = -Spacing.spacing300
+    /// `NavigationPage` 높이(`Sizing.sizing450` + 상하 `Spacing.spacing150`) 아래로 내려 아이콘 바로 밑에 배치.
+    static let moreMenuOffsetY: CGFloat = Sizing.sizing450 + Spacing.spacing150 * 2 + Spacing.spacing100
 }
 
 // MARK: - Tab Content
