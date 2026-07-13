@@ -27,6 +27,7 @@ let project = Project.makeAppModule(
   sources: ["Sources/**"],
   resources: ["Resources/**"],
   infoPlist: .appInfoPlist,
+  entitlements: .file(path: "Bangawo.entitlements"),
   schemes: [
     // 테스트 플랜 스킴: 커스텀 구성명 사용 (.debug / .prod 중 택1)
     Scheme.makeTestPlanScheme(target: .debug, name: Project.Environment.appName),
