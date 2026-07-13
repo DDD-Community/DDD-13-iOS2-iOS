@@ -50,6 +50,8 @@ private struct GroupNameSheetContent: View {
             title: "모임명",
             placeholder: "ex: 삼총사 모임, 26기 대학동기",
             maxCount: 30,
+            axis: .vertical,
+            lineLimit: 1...2,
             text: $store.groupNameDraft
         )
         .dismissKeyboardOnTap()
