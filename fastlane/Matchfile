@@ -6,7 +6,8 @@ include_all_certificates(true)
 shallow_clone(true)
 skip_certificate_matching(true)
 skip_confirmation(true)
-keychain_name("login")
+# 로컬은 login 키체인을 그대로 쓰고, CI 는 MATCH_KEYCHAIN_NAME 으로 전용 키체인을 지정한다
+keychain_name(ENV["MATCH_KEYCHAIN_NAME"] || "login")
 keychain_password(ENV["MATCH_KEYCHAIN_PASSWORD"])
 
 # .env 파일에서 API 키가 있으면 임시 JSON 파일 생성 후 사용 완료시 자동 삭제
