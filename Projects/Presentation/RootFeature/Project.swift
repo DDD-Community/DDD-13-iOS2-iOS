@@ -15,5 +15,6 @@ let project = Project.makeModule(
     .Shared(implements: .Utill),
     .SPM.composableArchitecture,
   ],
-  sources: ["Sources/**"]
+  sources: ["Sources/**"],
+  hasTests: true
 )

@@ -16,8 +16,10 @@ let project = Project.makeModule(
     .Domain(implements: .UseCase),
     .Domain(implements: .Entity),
     .Core(implements: .CoreDependencies),
+    .Presentation(implements: .ProfileInputFeature),
     .Presentation(implements: .StationSearchFeature),
     .SPM.composableArchitecture,
   ],
-  sources: ["Sources/**"]
+  sources: ["Sources/**"],
+  hasTests: true
 )

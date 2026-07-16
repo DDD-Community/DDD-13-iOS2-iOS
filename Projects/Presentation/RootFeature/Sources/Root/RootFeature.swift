@@ -72,6 +72,12 @@ public struct RootFeature {
             case .auth:
                 return .none
 
+            case .home(.delegate(.loggedOut)):
+                state.mode = .auth
+                state.auth = AuthFlowFeature.State(entryPoint: .login)
+                state.home = HomeFeature.State()
+                return .none
+
             case .home:
                 return .none
 
