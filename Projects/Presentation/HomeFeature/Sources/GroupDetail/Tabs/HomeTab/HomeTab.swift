@@ -39,7 +39,12 @@ struct HomeTab: View {
                 onClose: { store.send(.myDeparturePlaceEditSheetDismissed) }
             )
         ) {
-            MyDeparturePlaceEditSheetContent(store: store)
+            DeparturePlaceEditSheetContent(
+                departurePlaces: store.groupDetail?.members.first(where: \.isMe)?.departurePlaces ?? [],
+                onSelect: { store.send(.departurePlaceCardTapped(id: $0)) },
+                onEdit: { store.send(.editDeparturePlaceTapped(id: $0)) },
+                onAdd: { store.send(.addDeparturePlaceTapped) }
+            )
         }
         .bottomSheet(
             isPresented: Binding(
