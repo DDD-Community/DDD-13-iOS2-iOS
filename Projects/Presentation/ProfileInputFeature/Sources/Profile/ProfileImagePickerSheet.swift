@@ -1,12 +1,6 @@
-//
-//  ProfileImagePickerSheet.swift
-//  Presentation
-//
-
 import SwiftUI
 
 import ComposableArchitecture
-
 import DesignSystem
 
 struct ProfileImagePickerSheet: View {
@@ -29,13 +23,8 @@ struct ProfileImagePickerSheet: View {
 }
 
 private struct ProfileTileGrid: View {
-    private let selectedIndex: Int?
-    private let onPresetTapped: (Int) -> Void
-
-    init(selectedIndex: Int?, onPresetTapped: @escaping (Int) -> Void) {
-        self.selectedIndex = selectedIndex
-        self.onPresetTapped = onPresetTapped
-    }
+    let selectedIndex: Int?
+    let onPresetTapped: (Int) -> Void
 
     var body: some View {
         let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 5)
@@ -58,11 +47,7 @@ private struct ProfileTileGrid: View {
 }
 
 private struct ProfileImageDisplay: View {
-    private let image: ProfileImage
-
-    init(image: ProfileImage) {
-        self.image = image
-    }
+    let image: ProfileImage
 
     var body: some View {
         Group {
@@ -70,7 +55,7 @@ private struct ProfileImageDisplay: View {
             case .none:
                 Asset(assetType: .d3(.avatarPlaceholder), size: .s104)
 
-            case let .data(data):
+            case let .data(data, _):
                 if let uiImage = UIImage(data: data) {
                     Asset(assetType: .image(Image(uiImage: uiImage)), size: .s104)
                 } else {
@@ -82,6 +67,12 @@ private struct ProfileImageDisplay: View {
                     ? Asset.D3.profileFaces[index]
                     : .avatarPlaceholder
                 Asset(assetType: .d3(face), size: .s104)
+
+            case let .remote(urlString):
+                Avatar(
+                    avatarType: URL(string: urlString).map(Avatar.AvatarType.image) ?? .placeholder,
+                    size: .s104
+                )
             }
         }
         .background(Circle().fill(backgroundColor))
@@ -89,16 +80,6 @@ private struct ProfileImageDisplay: View {
 
     private var backgroundColor: Color {
         if case .preset = image { return Colors.gray300 }
-
         return Colors.gray200
     }
-}
-
-#Preview {
-    ProfileImagePickerSheet(
-        store: Store(initialState: ProfileImagePickerFeature.State(initialImage: .none)) {
-            ProfileImagePickerFeature()
-        }
-    )
-    .padding()
 }

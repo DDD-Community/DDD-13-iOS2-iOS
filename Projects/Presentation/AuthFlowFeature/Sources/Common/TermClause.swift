@@ -10,13 +10,13 @@ import Foundation
 public struct TermClause: Equatable, Identifiable, Sendable {
     public let id: Int
     public let title: String
-    public let body: String
+    public let urlString: String
     public let isRequired: Bool
 
-    public init(id: Int, title: String, body: String, isRequired: Bool = true) {
+    public init(id: Int, title: String, urlString: String, isRequired: Bool = true) {
         self.id = id
         self.title = title
-        self.body = body
+        self.urlString = urlString
         self.isRequired = isRequired
     }
 
@@ -26,24 +26,32 @@ public struct TermClause: Equatable, Identifiable, Sendable {
         return isRequired ? "(필수) \(title)" : "(선택) \(title)"
 
     }
+
+    public var url: URL? {
+        URL(string: urlString)
+    }
 }
 
-//public extension TermClause {
-//    static let allRequired: [TermClause] = [
-//        TermClause(
-//            id: "service",
-//            title: "(필수) 서비스 이용 약관",
-//            body: "본 약관은 Bangawo 서비스 이용과 관련된 권리와 의무를 정합니다.\n\n[임시 placeholder]\n실제 약관 본문은 추후 교체됩니다."
-//        ),
-//        TermClause(
-//            id: "privacy",
-//            title: "(필수) 개인정보 수집 및 이용 동의",
-//            body: "본 약관은 Bangawo가 수집하는 개인정보 항목과 이용 목적을 정합니다.\n\n[임시 placeholder]\n실제 약관 본문은 추후 교체됩니다."
-//        ),
-//        TermClause(
-//            id: "location",
-//            title: "(필수) 위치정보 수집 이용 동의",
-//            body: "본 약관은 Bangawo가 출발지 검색을 위해 수집하는 위치 정보를 정합니다.\n\n[임시 placeholder]\n실제 약관 본문은 추후 교체됩니다."
-//        )
-//    ]
-//}
+public extension TermClause {
+    // 실제 약관 본문 API 확정 전까지 사용하는 임시 고정 항목
+    static let temporaryClauses: [TermClause] = [
+        TermClause(
+            id: 1,
+            title: "개인정보처리방침",
+            urlString: "https://kimhyeji-dev.notion.site/48c9a7dac7408215a43d01ddf14942f2?source=copy_link",
+            isRequired: true
+        ),
+        TermClause(
+            id: 2,
+            title: "이용약관",
+            urlString: "https://kimhyeji-dev.notion.site/a1c9a7dac7408391befe0108a872fe6c?source=copy_link",
+            isRequired: true
+        ),
+        TermClause(
+            id: 3,
+            title: "마케팅 정보 수신 동의",
+            urlString: "https://kimhyeji-dev.notion.site/3a39a7dac74080ce9580f3a0aa14739f?source=copy_link",
+            isRequired: false
+        )
+    ]
+}

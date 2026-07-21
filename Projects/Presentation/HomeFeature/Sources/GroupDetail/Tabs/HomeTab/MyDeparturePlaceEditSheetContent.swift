@@ -3,14 +3,15 @@
 //  HomeFeature
 //
 
-import ComposableArchitecture
 import DesignSystem
 import Entity
 import SwiftUI
-import Utill
 
-struct MyDeparturePlaceEditSheetContent: View {
-    let store: StoreOf<HomeTabFeature>
+struct DeparturePlaceEditSheetContent: View {
+    let departurePlaces: [DeparturePlace]
+    let onSelect: (Int) -> Void
+    let onEdit: (Int) -> Void
+    let onAdd: () -> Void
 
     var body: some View {
         VStack(spacing: Spacing.spacing400) {
@@ -20,21 +21,14 @@ struct MyDeparturePlaceEditSheetContent: View {
                         placeName: departurePlace.placeName,
                         roadAddress: departurePlace.roadAddress,
                         isSelected: departurePlace.isDefault,
-                        onTap: {
-                            store.send(.departurePlaceCardTapped(id: departurePlace.id))
-                        },
-                        onEditTap: {
-                            Log.debug("출발지 수정 버튼 클릭: \(departurePlace.id)")
-                            store.send(.editDeparturePlaceTapped(id: departurePlace.id))
-                        }
+                        onTap: { onSelect(departurePlace.id) },
+                        onEditTap: { onEdit(departurePlace.id) }
                     )
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            AddDeparturePlaceButton(onTap: {
-                store.send(.addDeparturePlaceTapped)
-            })
+            AddDeparturePlaceButton(onTap: onAdd)
         }
         .padding(.horizontal, Metric.horizontalPadding)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -42,10 +36,6 @@ struct MyDeparturePlaceEditSheetContent: View {
 
     private enum Metric {
         static let horizontalPadding: CGFloat = -Spacing.spacing250
-    }
-
-    private var departurePlaces: [DeparturePlace] {
-        store.groupDetail?.members.first(where: \.isMe)?.departurePlaces ?? []
     }
 }
 

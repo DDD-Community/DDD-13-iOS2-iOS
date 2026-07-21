@@ -1,18 +1,20 @@
+import DependencyPackagePlugin
+import DependencyPlugin
 import Foundation
 import ProjectDescription
-import DependencyPlugin
 import ProjectTemplatePlugin
-import DependencyPackagePlugin
 
 let project = Project.makeModule(
-  name: "RootFeature",
-  bundleId: .appBundleID(name: ".RootFeature"),
+  name: "ProfileInputFeature",
+  bundleId: .appBundleID(name: ".ProfileInputFeature"),
   product: .staticFramework,
   settings: .settings(),
   dependencies: [
-    .Presentation(implements: .AuthFlowFeature),
-    .Presentation(implements: .HomeFeature),
+    .Shared(implements: .Shared),
     .Shared(implements: .Utill),
+    .Shared(implements: .DesignSystem),
+    .Domain(implements: .Entity),
+    .Core(implements: .CoreDependencies),
     .SPM.composableArchitecture,
   ],
   sources: ["Sources/**"],

@@ -8,6 +8,7 @@ import SwiftUI
 import ComposableArchitecture
 import DesignSystem
 import Entity
+import ProfileInputFeature
 import StationSearchFeature
 
 public struct HomeView: View {
@@ -22,18 +23,14 @@ public struct HomeView: View {
         NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
             ZStack(alignment: .bottomTrailing) {
                 VStack(spacing: 0) {
-                    // FIXME: 알림/마이페이지 버튼은 동작이 정의되지 않아(탭 시 no-op) 심사 리젝 방지를 위해 임시 숨김.
-                    // 각 기능 구현 시 아래 trailingIcons 를 복구한다.
-                    // trailingIcons: [
-                    //     NavigationIconItem(
-                    //         icon: .bell24,
-                    //         showsBadge: store.hasUnreadNotifications
-                    //     ) { store.send(.notificationButtonTapped) },
-                    //     NavigationIconItem(icon: .user24) {
-                    //         store.send(.myPageButtonTapped)
-                    //     }
-                    // ]
-                    NavigationMain(background: .clear)
+                    NavigationMain(
+                        background: .clear,
+                        trailingIcons: [
+                            NavigationIconItem(icon: .user24) {
+                                store.send(.myPageButtonTapped)
+                            }
+                        ]
+                    )
 
                     Tab(
                         // FIXME: 리마인더 탭은 화면 미구현(선택 시 빈 화면)으로 심사 리젝 방지를 위해 임시 숨김.
@@ -94,6 +91,12 @@ public struct HomeView: View {
 
             case let .dateSelection(dateSelectionStore):
                 MeetingDateSelectionView(store: dateSelectionStore)
+
+            case let .profile(profileStore):
+                ProfileView(store: profileStore)
+
+            case let .profileInput(profileInputStore):
+                ProfileInputView(store: profileInputStore)
 
             case let .stationSearch(stationSearchStore):
                 StationSearchSheet(store: stationSearchStore)

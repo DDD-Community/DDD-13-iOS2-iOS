@@ -1,12 +1,3 @@
-//
-//  ProfileImagePickerFeature.swift
-//  Presentation
-//
-//  프로필 이미지 선택 바텀시트 Feature
-//
-
-import Foundation
-
 import ComposableArchitecture
 
 @Reducer
@@ -49,8 +40,7 @@ public struct ProfileImagePickerFeature {
                 return .send(.delegate(.dismissWithDiscard))
 
             case .saveButtonTapped:
-                let candidate = state.candidate
-                return .send(.delegate(.dismissWithSave(candidate)))
+                return .send(.delegate(.dismissWithSave(state.candidate)))
 
             case .delegate:
                 return .none

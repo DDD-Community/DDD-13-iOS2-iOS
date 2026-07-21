@@ -16,6 +16,7 @@ let project = Project.makeModule(
     .Domain(implements: .Entity),
     .Domain(implements: .DomainInterface),
     .Core(implements: .CoreDependencies),
+    .Presentation(implements: .ProfileInputFeature),
     .Presentation(implements: .StationSearchFeature),
   ],
   sources: ["Sources/**"]

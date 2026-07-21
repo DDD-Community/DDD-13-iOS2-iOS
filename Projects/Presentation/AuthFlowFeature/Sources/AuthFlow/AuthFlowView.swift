@@ -7,6 +7,7 @@ import SwiftUI
 
 import ComposableArchitecture
 
+import ProfileInputFeature
 import StationSearchFeature
 
 public struct AuthFlowView: View {
