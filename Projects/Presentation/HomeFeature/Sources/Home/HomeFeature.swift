@@ -8,6 +8,7 @@ import Foundation
 import ComposableArchitecture
 import CoreDependencies
 import Entity
+import ProfileInputFeature
 import StationSearchFeature
 import Utill
 
@@ -21,6 +22,8 @@ public struct HomeFeature {
     public enum Path {
         case detail(GroupDetailFeature)
         case dateSelection(MeetingDateSelectionFeature)
+        case profile(ProfileFeature)
+        case profileInput(ProfileInputFeature)
         case stationSearch(StationSearchSheetFeature)
         case pickPlace(PickPlaceFeature)
     }
@@ -31,8 +34,10 @@ public struct HomeFeature {
     }
 
     enum DeparturePlaceSearchPurpose: Equatable {
-        case add
-        case edit(id: Int)
+        case groupDetailAdd
+        case groupDetailEdit(id: Int)
+        case profileAdd(profileID: StackElementID)
+        case profileEdit(profileID: StackElementID, departurePlaceID: Int)
     }
 
     @ObservableState
@@ -70,6 +75,11 @@ public struct HomeFeature {
         case updateDeparturePlaceResponse(Result<DeparturePlace, Error>)
         case creationView(PresentationAction<GroupCreationFeature.Action>)
         case path(StackActionOf<Path>)
+        case delegate(Delegate)
+
+        public enum Delegate: Equatable {
+            case loggedOut
+        }
     }
 
     public init() {}
@@ -100,6 +110,7 @@ public struct HomeFeature {
                 return .none
 
             case .myPageButtonTapped:
+                state.path.append(.profile(ProfileFeature.State()))
                 return .none
 
             case .createGroupRowTapped:
@@ -158,20 +169,55 @@ public struct HomeFeature {
                 return .none
 
             case .path(.element(id: _, action: .detail(.delegate(.departurePlaceStationSearchRequested)))):
-                state.departurePlaceSearchPurpose = .add
+                state.departurePlaceSearchPurpose = .groupDetailAdd
                 state.path.append(.stationSearch(StationSearchSheetFeature.State()))
                 return .none
 
             case let .path(.element(id: _, action: .detail(.delegate(.departurePlaceEditStationSearchRequested(id))))):
-                state.departurePlaceSearchPurpose = .edit(id: id)
+                state.departurePlaceSearchPurpose = .groupDetailEdit(id: id)
                 state.path.append(.stationSearch(StationSearchSheetFeature.State()))
+                return .none
+
+            case let .path(.element(id: _, action: .profile(.delegate(.editProfileRequested(profile))))):
+                state.path.append(.profileInput(ProfileInputFeature.State(context: .editing(profile))))
+                return .none
+
+            case let .path(.element(id: profileID, action: .profile(.delegate(.addDeparturePlaceRequested)))):
+                state.departurePlaceSearchPurpose = .profileAdd(profileID: profileID)
+                state.path.append(.stationSearch(StationSearchSheetFeature.State()))
+                return .none
+
+            case let .path(.element(
+                id: profileID,
+                action: .profile(.delegate(.editDeparturePlaceRequested(departurePlaceID)))
+            )):
+                state.departurePlaceSearchPurpose = .profileEdit(
+                    profileID: profileID,
+                    departurePlaceID: departurePlaceID
+                )
+                state.path.append(.stationSearch(StationSearchSheetFeature.State()))
+                return .none
+
+            case .path(.element(id: _, action: .profile(.delegate(.loggedOut)))):
+                return .send(.delegate(.loggedOut))
+
+            case let .path(.element(id: _, action: .profileInput(.delegate(.profileUpdated(profile))))):
+                guard let profileID = state.currentProfileID else { return .none }
+                state.path.removeLast()
+                return .send(.path(.element(
+                    id: profileID,
+                    action: .profile(.profileUpdated(profile))
+                )))
+
+            case .path(.element(id: _, action: .profileInput(.delegate(.navigateBack)))):
+                state.path.removeLast()
                 return .none
 
             case let .path(.element(id: _, action: .stationSearch(.delegate(.stationSelected(station))))):
                 Log.debug("출발지 역 선택: \(station.name)")
                 let client = departurePlaceClient
                 switch state.departurePlaceSearchPurpose {
-                case .add:
+                case .groupDetailAdd, .profileAdd:
                     return .run { send in
                         await send(.addDeparturePlaceResponse(
                             Result {
@@ -188,12 +234,29 @@ public struct HomeFeature {
                         ))
                     }
 
-                case let .edit(id):
+                case let .groupDetailEdit(id):
                     return .run { send in
                         await send(.updateDeparturePlaceResponse(
                             Result {
                                 try await client.updateDeparturePlace(
                                     id,
+                                    station.name,
+                                    station.addressName,
+                                    station.roadAddressName,
+                                    station.name,
+                                    station.y,
+                                    station.x
+                                )
+                            }
+                        ))
+                    }
+
+                case let .profileEdit(_, departurePlaceID):
+                    return .run { send in
+                        await send(.updateDeparturePlaceResponse(
+                            Result {
+                                try await client.updateDeparturePlace(
+                                    departurePlaceID,
                                     station.name,
                                     station.addressName,
                                     station.roadAddressName,
@@ -230,6 +293,9 @@ public struct HomeFeature {
 
             case .path:
                 return .none
+
+            case .delegate:
+                return .none
             }
         }
         .ifLet(\.$creationView, action: \.creationView) {
@@ -248,11 +314,24 @@ public struct HomeFeature {
     }
 
     private func finishDeparturePlaceSearch(state: inout State) -> Effect<Action> {
+        let purpose = state.departurePlaceSearchPurpose
         state.departurePlaceSearchPurpose = nil
         state.path.removeLast()
 
-        guard let detailID = state.currentDetailID else { return .none }
-        return .send(.path(.element(id: detailID, action: .detail(.home(.onAppear)))))
+        switch purpose {
+        case .groupDetailAdd, .groupDetailEdit:
+            guard let detailID = state.currentDetailID else { return .none }
+            return .send(.path(.element(id: detailID, action: .detail(.home(.onAppear)))))
+
+        case let .profileAdd(profileID), let .profileEdit(profileID, _):
+            return .send(.path(.element(
+                id: profileID,
+                action: .profile(.departurePlacesRefreshRequested)
+            )))
+
+        case nil:
+            return .none
+        }
     }
 
     private func updateDateVoteStatus(
@@ -287,6 +366,13 @@ private extension HomeFeature.State {
     var currentDetailID: StackElementID? {
         path.ids.last { id in
             if case .detail = path[id: id] { return true }
+            return false
+        }
+    }
+
+    var currentProfileID: StackElementID? {
+        path.ids.last { id in
+            if case .profile = path[id: id] { return true }
             return false
         }
     }

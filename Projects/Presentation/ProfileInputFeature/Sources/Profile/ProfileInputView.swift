@@ -1,13 +1,8 @@
-//
-//  ProfileInputView.swift
-//  Presentation
-//
-
 import PhotosUI
 import SwiftUI
+import UniformTypeIdentifiers
 
 import ComposableArchitecture
-
 import DesignSystem
 
 public struct ProfileInputView: View {
@@ -25,7 +20,7 @@ public struct ProfileInputView: View {
             NavigationPage(
                 background: .clear,
                 leadingAction: { store.send(.backButtonTapped) },
-                title: "프로필 설정"
+                title: store.navigationTitle
             )
 
             VStack(spacing: 0) {
@@ -49,41 +44,19 @@ public struct ProfileInputView: View {
                 Color.clear.frame(maxHeight: .infinity)
             }
             .overlay {
-                if isShowingMenu {
-                    GeometryReader { geo in
-                        DesignSystem.Menu(items: [
-                            .init(
-                                label: "프로필 설정하기",
-                                icon: .Asset.icStar24,
-                                iconColor: Colors.gray600
-                            ) {
-                                store.send(.avatarMenuProfileSetupTapped)
-                                isShowingMenu = false
-                            },
-                            .init(
-                                label: "앨범에서 선택하기",
-                                icon: .Asset.icAlbum24,
-                                iconColor: Colors.gray600
-                            ) {
-                                isPhotosPickerPresented = true
-                                isShowingMenu = false
-                            }
-                        ])
-                        .frame(width: Metric.menuWidth)
-                        .offset(
-                            // 아바타 오른쪽 끝 기준 정렬: (전체 너비 + 아바타 크기) / 2 - 메뉴 너비
-                            x: (geo.size.width + Metric.avatarSize) / 2 - Metric.menuWidth,
-                            y: Spacing.spacing400 + Metric.avatarSize + Spacing.spacing200
-                        )
-                    }
-                }
+                ProfileMenu(
+                    isShowingMenu: $isShowingMenu,
+                    isPhotosPickerPresented: $isPhotosPickerPresented,
+                    store: store
+                )
             }
 
             BangawoButton(
-                "다음",
+                store.submitButtonTitle,
                 variant: .solid,
                 size: .large,
                 widthType: .maxWidth,
+                isLoading: store.isProfileUpdating,
                 isDisabled: !store.isNextEnabled
             ) {
                 store.send(.nextButtonTapped)
@@ -92,14 +65,7 @@ public struct ProfileInputView: View {
             .padding(.bottom, Spacing.spacing400)
         }
         .bottomSheet(
-            isPresented: Binding(
-                get: { store.imagePicker != nil },
-                set: {
-                    if !$0, store.imagePicker != nil {
-                        store.send(.imagePicker(.dismiss))
-                    }
-                }
-            ),
+            isPresented: imagePickerBinding,
             header: .init(
                 title: "프로필 설정",
                 onClose: { store.send(.imagePicker(.dismiss)) }
@@ -125,8 +91,9 @@ public struct ProfileInputView: View {
 
             Task {
                 let data = try? await newItem.loadTransferable(type: Data.self)
+                let contentType = newItem.supportedContentTypes.first?.preferredMIMEType ?? "image/jpeg"
                 await MainActor.run {
-                    store.send(.avatarMenuAlbumImagePicked(data))
+                    store.send(.avatarMenuAlbumImagePicked(data, contentType: contentType))
                     photoItem = nil
                 }
             }
@@ -135,10 +102,21 @@ public struct ProfileInputView: View {
             if isShowingMenu { isShowingMenu = false }
         }
         .dismissKeyboardOnTap()
+        .toolbar(.hidden, for: .navigationBar)
+        .alert($store.scope(state: \.alert, action: \.alert))
+    }
+
+    private var imagePickerBinding: Binding<Bool> {
+        Binding(
+            get: { store.imagePicker != nil },
+            set: {
+                if !$0, store.imagePicker != nil {
+                    store.send(.imagePicker(.dismiss))
+                }
+            }
+        )
     }
 }
-
-// MARK: - Metric
 
 private enum Metric {
     static let maxNameCount = 7
@@ -146,7 +124,41 @@ private enum Metric {
     static let avatarSize: CGFloat = 124
 }
 
-// MARK: - ProfileImageContainer
+private struct ProfileMenu: View {
+    @Binding var isShowingMenu: Bool
+    @Binding var isPhotosPickerPresented: Bool
+    let store: StoreOf<ProfileInputFeature>
+
+    var body: some View {
+        if isShowingMenu {
+            GeometryReader { geo in
+                DesignSystem.Menu(items: [
+                    .init(
+                        label: "프로필 설정하기",
+                        icon: .Asset.icStar24,
+                        iconColor: Colors.gray600
+                    ) {
+                        store.send(.avatarMenuProfileSetupTapped)
+                        isShowingMenu = false
+                    },
+                    .init(
+                        label: "앨범에서 선택하기",
+                        icon: .Asset.icAlbum24,
+                        iconColor: Colors.gray600
+                    ) {
+                        isPhotosPickerPresented = true
+                        isShowingMenu = false
+                    }
+                ])
+                .frame(width: Metric.menuWidth)
+                .offset(
+                    x: (geo.size.width + Metric.avatarSize) / 2 - Metric.menuWidth,
+                    y: Spacing.spacing400 + Metric.avatarSize + Spacing.spacing200
+                )
+            }
+        }
+    }
+}
 
 private struct ProfileImageContainer: View {
     let profileImage: ProfileImage
@@ -154,7 +166,7 @@ private struct ProfileImageContainer: View {
 
     var body: some View {
         Avatar(
-            avatarType: avatarType(for: profileImage),
+            avatarType: avatarType,
             size: .s124,
             iconType: .edit { isShowingMenu.toggle() }
         )
@@ -162,28 +174,21 @@ private struct ProfileImageContainer: View {
         .padding(.bottom, Spacing.spacing300)
     }
 
-    private func avatarType(for profileImage: ProfileImage) -> Avatar.AvatarType {
+    private var avatarType: Avatar.AvatarType {
         switch profileImage {
         case .none:
             return .placeholder
-        case .data(let data):
+        case let .data(data, _):
             guard let uiImage = UIImage(data: data) else { return .placeholder }
             return .localImage(Image(uiImage: uiImage))
-        case .preset(let index):
+        case let .preset(index):
             let face = Asset.D3.profileFaces.indices.contains(index)
                 ? Asset.D3.profileFaces[index]
                 : .avatarPlaceholder
             return .d3(face)
+        case let .remote(urlString):
+            guard let url = URL(string: urlString) else { return .placeholder }
+            return .image(url)
         }
-    }
-}
-
-#Preview {
-    BangawoPreview {
-        ProfileInputView(
-            store: Store(initialState: ProfileInputFeature.State()) {
-                ProfileInputFeature()
-            }
-        )
     }
 }

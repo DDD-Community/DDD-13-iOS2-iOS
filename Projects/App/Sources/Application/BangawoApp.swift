@@ -25,6 +25,8 @@ struct BangawoApp: App {
             $0.signupTermsClient = AuthFactory.makeSignupTermsClient()
             $0.nicknameClient = AuthFactory.makeNicknameClient()
             $0.registerMemberClient = AuthFactory.makeRegisterMemberClient()
+            $0.memberProfileClient = MemberProfileFactory.makeClient()
+            $0.sessionClient = SessionFactory.makeClient()
             $0.groupClient = GroupFactory.makeClient()
             $0.groupInvitationShareClient = GroupInvitationShareFactory.makeClient()
             $0.voteClient = VoteFactory.makeClient()

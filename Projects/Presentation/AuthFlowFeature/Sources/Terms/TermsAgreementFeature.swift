@@ -6,16 +6,10 @@
 //
 
 import ComposableArchitecture
-import CoreDependencies
-import Entity
 import Foundation
 
 @Reducer
 public struct TermsAgreementFeature {
-    public struct FetchError: Error, Equatable, Sendable {
-        public let message: String
-    }
-
     @ObservableState
     public struct State: Equatable {
         public var clauses: [TermClause]
@@ -25,7 +19,7 @@ public struct TermsAgreementFeature {
         public var errorMessage: String?
 
         public init(
-            clauses: [TermClause] = [],
+            clauses: [TermClause] = TermClause.temporaryClauses,
             agreedIDs: Set<Int> = [],
             pdfClause: TermClause? = nil,
             isLoading: Bool = false,
@@ -49,8 +43,7 @@ public struct TermsAgreementFeature {
     }
 
     public enum Action {
-        case onAppear // appear상태에서 이용약관 조회하기
-        case signupTermsResponse(Result<[TermClause], FetchError>)
+        case onAppear
         case agreeAllToggleTapped
         case clauseToggleTapped(id: Int)
         case clausePDFTapped(id: Int)
@@ -69,33 +62,11 @@ public struct TermsAgreementFeature {
 
     public init() {}
 
-    @Dependency(\.signupTermsClient) private var signupTermsClient
-
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                state.isLoading = true
-                state.errorMessage = nil
-                let signupTermsClient = signupTermsClient
-                return .run { send in
-                    do {
-                        let terms = try await signupTermsClient.fetchSignupTerms() // 이용약관 조회 api
-                        await send(.signupTermsResponse(.success(terms.map(TermClause.init))))
-                    } catch {
-                        await send(.signupTermsResponse(.failure(FetchError(message: error.localizedDescription))))
-                    }
-                }
-
-            case let .signupTermsResponse(.success(clauses)):
-                state.isLoading = false
-                state.clauses = clauses
-                state.agreedIDs =  state.agreedIDs.intersection(Set(clauses.map(\.id)))
-                return .none
-
-            case let .signupTermsResponse(.failure(error)):
-                state.isLoading = false
-                state.errorMessage = error.message
+                // 약관 항목은 임시로 고정된 값(TermClause.temporaryClauses)을 사용한다
                 return .none
 
             case .agreeAllToggleTapped:
@@ -137,16 +108,5 @@ public struct TermsAgreementFeature {
                 return .none
             }
         }
-    }
-}
-
-private extension TermClause {
-    init(_ term: SignupTerm) {
-        self.init(
-            id: term.id,
-            title: term.title,
-            body: term.content,
-            isRequired: term.isRequired
-        )
     }
 }

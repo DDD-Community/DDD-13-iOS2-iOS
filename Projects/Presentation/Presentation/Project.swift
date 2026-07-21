@@ -12,6 +12,7 @@ let project = Project.makeModule(
   dependencies: [
     .Presentation(implements: .AuthFlowFeature),
     .Presentation(implements: .HomeFeature),
+    .Presentation(implements: .ProfileInputFeature),
     .Presentation(implements: .RootFeature),
     .Presentation(implements: .StationSearchFeature),
   ],

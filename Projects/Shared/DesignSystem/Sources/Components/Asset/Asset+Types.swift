@@ -71,6 +71,11 @@ extension Asset.D3 {
         case .groupDetail: return Image.Asset.imgGroupDetail3d
         }
     }
+
+    @MainActor
+    public var profileSnapshot: UIImage {
+        image.snapshot()
+    }
 }
 
 // MARK: - Size Token Mapping

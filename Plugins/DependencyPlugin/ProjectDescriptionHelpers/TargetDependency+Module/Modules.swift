@@ -21,6 +21,7 @@ public extension ModulePath {
     case Presentation
     case AuthFlowFeature
     case HomeFeature
+    case ProfileInputFeature
     case RootFeature
     case StationSearchFeature
 
@@ -91,5 +92,4 @@ public extension ModulePath {
     public static let name: String = "Core"
   }
 }
-
 
