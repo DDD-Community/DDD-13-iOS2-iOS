@@ -314,7 +314,7 @@ private extension ProfileImage {
     }
 
     @MainActor
-    func makeUploadPayload() throws -> ProfileImageUpload? {
+    func makeUploadPayload() async throws -> ProfileImageUpload? {
         switch self {
         case .none, .remote:
             return nil
@@ -326,9 +326,14 @@ private extension ProfileImage {
             guard Asset.D3.profileFaces.indices.contains(index) else {
                 throw ProfileImageConversionError.invalidPreset
             }
-            guard let data = Asset.D3.profileFaces[index].profilePNGData else {
+
+            let snapshot = Asset.D3.profileFaces[index].profileSnapshot
+            guard let data = await Task.detached(priority: .userInitiated, operation: {
+                snapshot.pngData()
+            }).value else {
                 throw ProfileImageConversionError.pngEncodingFailed
             }
+
             return ProfileImageUpload(data: data, contentType: "image/png")
         }
     }

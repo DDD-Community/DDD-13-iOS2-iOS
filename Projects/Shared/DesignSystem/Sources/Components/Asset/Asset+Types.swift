@@ -73,8 +73,8 @@ extension Asset.D3 {
     }
 
     @MainActor
-    public var profilePNGData: Data? {
-        image.snapshot().pngData()
+    public var profileSnapshot: UIImage {
+        image.snapshot()
     }
 }
 
