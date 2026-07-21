@@ -108,9 +108,9 @@ public struct TermsAgreementView: View {
                 }
             )
         ) {
-            if let clause = store.pdfClause {
+            if let clause = store.pdfClause, let url = clause.url {
                 NavigationStack {
-                    TermPDFViewer(clause: clause)
+                    TermWebView(url: url)
                         .navigationTitle(clause.displayTitle)
                         .navigationBarTitleDisplayMode(.inline)
                         .toolbar {
