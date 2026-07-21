@@ -43,7 +43,13 @@ public struct ProfileInputView: View {
 
                 Color.clear.frame(maxHeight: .infinity)
             }
-            .overlay { profileMenu }
+            .overlay {
+                ProfileMenu(
+                    isShowingMenu: $isShowingMenu,
+                    isPhotosPickerPresented: $isPhotosPickerPresented,
+                    store: store
+                )
+            }
 
             BangawoButton(
                 store.submitButtonTitle,
@@ -100,8 +106,30 @@ public struct ProfileInputView: View {
         .alert($store.scope(state: \.alert, action: \.alert))
     }
 
-    @ViewBuilder
-    private var profileMenu: some View {
+    private var imagePickerBinding: Binding<Bool> {
+        Binding(
+            get: { store.imagePicker != nil },
+            set: {
+                if !$0, store.imagePicker != nil {
+                    store.send(.imagePicker(.dismiss))
+                }
+            }
+        )
+    }
+}
+
+private enum Metric {
+    static let maxNameCount = 7
+    static let menuWidth: CGFloat = 200
+    static let avatarSize: CGFloat = 124
+}
+
+private struct ProfileMenu: View {
+    @Binding var isShowingMenu: Bool
+    @Binding var isPhotosPickerPresented: Bool
+    let store: StoreOf<ProfileInputFeature>
+
+    var body: some View {
         if isShowingMenu {
             GeometryReader { geo in
                 DesignSystem.Menu(items: [
@@ -130,23 +158,6 @@ public struct ProfileInputView: View {
             }
         }
     }
-
-    private var imagePickerBinding: Binding<Bool> {
-        Binding(
-            get: { store.imagePicker != nil },
-            set: {
-                if !$0, store.imagePicker != nil {
-                    store.send(.imagePicker(.dismiss))
-                }
-            }
-        )
-    }
-}
-
-private enum Metric {
-    static let maxNameCount = 7
-    static let menuWidth: CGFloat = 200
-    static let avatarSize: CGFloat = 124
 }
 
 private struct ProfileImageContainer: View {

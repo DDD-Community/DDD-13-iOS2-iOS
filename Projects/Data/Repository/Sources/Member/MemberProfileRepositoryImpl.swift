@@ -59,6 +59,7 @@ public final class MemberProfileRepositoryImpl: MemberProfileRepositoryProtocol 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw ProfileImageUploadError.invalidResponse
         }
+
         guard (200..<300).contains(httpResponse.statusCode) else {
             throw ProfileImageUploadError.uploadFailed(statusCode: httpResponse.statusCode)
         }
