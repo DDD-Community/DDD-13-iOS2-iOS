@@ -38,19 +38,19 @@ public extension TermClause {
         TermClause(
             id: 1,
             title: "개인정보처리방침",
-            urlString: "https://kimhyeji-dev.notion.site/48c9a7dac7408215a43d01ddf14942f2?source=copy_link",
+            urlString: "https://lightning-weight-c0c.notion.site/3a619ccc6d3a80089f59dcb19af2b673?source=copy_link",
             isRequired: true
         ),
         TermClause(
             id: 2,
             title: "이용약관",
-            urlString: "https://kimhyeji-dev.notion.site/a1c9a7dac7408391befe0108a872fe6c?source=copy_link",
+            urlString: "https://lightning-weight-c0c.notion.site/3a619ccc6d3a80d6af97f6503a959b1b?source=copy_link",
             isRequired: true
         ),
         TermClause(
             id: 3,
             title: "마케팅 정보 수신 동의",
-            urlString: "https://kimhyeji-dev.notion.site/3a39a7dac74080ce9580f3a0aa14739f?source=copy_link",
+            urlString: "https://lightning-weight-c0c.notion.site/3a619ccc6d3a80f0b334dde67ec0e5b0?source=copy_link",
             isRequired: false
         )
     ]
