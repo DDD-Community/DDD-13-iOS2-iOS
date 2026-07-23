@@ -15,6 +15,8 @@
 | `xcodebuild -workspace Bangawo.xcworkspace -scheme Bangawo build` | 빌드 |
 | `xcodebuild -workspace Bangawo.xcworkspace -scheme Bangawo test` | 테스트 |
 | `fastlane match_development` | 개발용 인증서·프로파일 로컬 설치 |
+| `fastlane verify_metadata` | App Store 메타데이터 사전 검증 |
+| `fastlane release version:1.0.0` | App Store 메타데이터 업로드 + 심사 제출 |
 
 > 파일 생성/삭제, `Project.swift` 수정, 의존성 추가/제거 시 반드시 `./tuisttool generate` 실행.
 > Tuist는 glob으로 소스를 수집하므로, generate 없이는 Xcode에 반영되지 않는다.
