@@ -65,6 +65,9 @@ Carthage/Build/
 fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
+# App Store 등록용 스크린샷은 snapshot 자동 생성물이 아니라 카피가 얹힌 마케팅 이미지라
+# 재생성이 불가능하다. CI 러너가 체크아웃만으로 업로드할 수 있도록 예외로 추적한다
+!fastlane/screenshots/ko/*.png
 fastlane/test_output
 
 # Compiled binaries

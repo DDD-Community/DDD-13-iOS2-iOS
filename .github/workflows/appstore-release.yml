@@ -1,0 +1,127 @@
+name: App Store Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "출시 버전 (예: 1.0.0)"
+        required: true
+        type: string
+      release_notes:
+        description: "이번 버전 변경사항 (비워두면 metadata/ko/release_notes.txt 사용)"
+        required: false
+        type: string
+
+concurrency:
+  group: appstore-release
+  cancel-in-progress: false
+
+jobs:
+  # ──────────────────────────────────────────────────────────
+  # Validate (메타데이터·버전 사전 검증 — 빌드 전에 실패시킨다)
+  # ──────────────────────────────────────────────────────────
+  validate:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # 태그 실행이면 태그명(v1.0.0)에서, 수동 실행이면 입력값에서 버전을 확정한다
+      - name: Resolve version
+        id: resolve
+        # 입력값은 셸에 직접 보간하지 않고 env 로 넘긴다 (스크립트 인젝션 방지)
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [ "$EVENT_NAME" = "push" ]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION="$INPUT_VERSION"
+          fi
+
+          if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::버전 형식이 올바르지 않습니다: $VERSION (예: 1.0.0)"
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "🚀 배포 버전: $VERSION"
+
+      - name: Setup Ruby & fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Verify metadata
+        # 심사 담당자 연락처는 개인정보라 저장소에 두지 않고 Secrets 에서 주입한다
+        env:
+          APP_REVIEW_FIRST_NAME: ${{ secrets.APP_REVIEW_FIRST_NAME }}
+          APP_REVIEW_LAST_NAME: ${{ secrets.APP_REVIEW_LAST_NAME }}
+          APP_REVIEW_PHONE_NUMBER: ${{ secrets.APP_REVIEW_PHONE_NUMBER }}
+          APP_REVIEW_EMAIL: ${{ secrets.APP_REVIEW_EMAIL }}
+        run: bundle exec fastlane verify_metadata
+
+  # ──────────────────────────────────────────────────────────
+  # Release (TestFlight 검증 빌드 선택 → 메타데이터 업로드 → 심사 제출)
+  # ──────────────────────────────────────────────────────────
+  release:
+    needs: validate
+    # 새 아카이브를 만들지 않고 기존 TestFlight 빌드를 선택해 제출하므로 macOS·서명이 필요 없다
+    runs-on: ubuntu-latest
+    # deliver 가 매달려도 러너를 오래 점유하지 않도록 상한을 둔다
+    # (concurrency 가 cancel-in-progress: false 라 멈춘 잡이 후속 배포를 전부 막는다)
+    timeout-minutes: 20
+    env:
+      # Appfile / Fastfile
+      APP_IDENTIFIER: ${{ secrets.APP_IDENTIFIER }}
+      APPLE_ID: ${{ secrets.APPLE_ID }}
+      TEAM_ID: ${{ secrets.TEAM_ID }}
+      # App Store Connect API (Fastfile 변수명)
+      APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+      # deliver 가 대화형 확인을 요구하지 않도록 (CI 에서 입력 불가)
+      FASTLANE_SKIP_UPDATE_CHECK: "1"
+      # App Review 담당자 연락처 (개인정보라 metadata 파일이 아닌 Secrets 로만 관리)
+      APP_REVIEW_FIRST_NAME: ${{ secrets.APP_REVIEW_FIRST_NAME }}
+      APP_REVIEW_LAST_NAME: ${{ secrets.APP_REVIEW_LAST_NAME }}
+      APP_REVIEW_PHONE_NUMBER: ${{ secrets.APP_REVIEW_PHONE_NUMBER }}
+      APP_REVIEW_EMAIL: ${{ secrets.APP_REVIEW_EMAIL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Ruby & fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      # 수동 실행에서 변경사항을 넘겼으면 이번 배포에 한해 릴리즈 노트를 덮어쓴다 (커밋하지 않음)
+      - name: Override release notes
+        if: github.event_name == 'workflow_dispatch' && inputs.release_notes != ''
+        env:
+          RELEASE_NOTES: ${{ inputs.release_notes }}
+        run: |
+          printf '%s\n' "$RELEASE_NOTES" > fastlane/metadata/ko/release_notes.txt
+          echo "릴리즈 노트를 입력값으로 교체했습니다."
+
+      - name: Submit to App Store
+        env:
+          RELEASE_VERSION: ${{ needs.validate.outputs.version }}
+        run: bundle exec fastlane release version:"$RELEASE_VERSION"
+
+      # 심사 반려·업로드 실패 원인 추적용
+      - name: Upload fastlane logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastlane-logs-${{ needs.validate.outputs.version }}
+          path: fastlane/report.xml
+          retention-days: 14
+          if-no-files-found: ignore
