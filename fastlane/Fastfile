@@ -118,13 +118,13 @@ platform :ios do
   # Release (App Store)
   # ──────────────────────────────────────────────────────────
 
-  desc "Bangawo-Prod → App Store 메타데이터 업로드 + 심사 제출 + 자동 출시"
+  desc "TestFlight 검증 빌드를 App Store 심사 제출 + 자동 출시"
   lane :release do |options|
     version = options[:version]
     UI.user_error!("version 옵션을 지정해주세요. 예: fastlane release version:1.0.0") unless version
     UI.user_error!("version 형식이 올바르지 않습니다: #{version} (예: 1.0.0)") unless version =~ /\A\d+\.\d+(\.\d+)?\z/
 
-    # 미기입 메타데이터가 그대로 심사에 올라가지 않도록 빌드 전에 차단한다
+    # 미기입 메타데이터가 그대로 심사에 올라가지 않도록 제출 전에 차단한다
     verify_metadata
 
     app_store_connect_api_key(
@@ -135,52 +135,25 @@ platform :ios do
       in_house:              false
     )
 
-    match(
-      type:         "appstore",
-      readonly:     true,
-      git_url:      MATCH_GIT_URL,
-      storage_mode: "git",
-      app_identifier: [BUNDLE_ID]
-    )
-
-    ensure_workspace
-
-    # 요청받은 버전을 코드에 반영한 뒤, 해당 버전의 TestFlight 최신 빌드 넘버 +1 을 부여한다
-    # (같은 버전으로 이미 올라간 빌드가 있으면 충돌하므로 반드시 조회 후 증가시킨다)
-    increment_version_number(
-      xcodeproj:      "Projects/App/#{APP_NAME}.xcodeproj",
-      version_number: version
-    )
-
+    # 새로 아카이브하지 않고, TestFlight 에서 검증 끝난 RC 빌드를 그대로 제출한다.
+    # version 에 해당하는 TestFlight 최신 빌드를 선택한다 (없으면 검증 안 된 채 올라가므로 즉시 실패).
     build_number = latest_testflight_build_number(
       app_identifier:       BUNDLE_ID,
       version:              version,
-      initial_build_number: 0
-    ) + 1
-
-    UI.message("📦 #{version} 버전 빌드 넘버: #{build_number}")
-
-    increment_build_number(
-      xcodeproj:    "Projects/App/#{APP_NAME}.xcodeproj",
-      build_number: build_number
+      initial_build_number: -1
     )
 
-    build_app(
-      workspace:        WORKSPACE,
-      scheme:           "#{APP_NAME}-Prod",
-      configuration:    "Release",
-      export_method:    "app-store",
-      output_directory: OUTPUT_DIR,
-      output_name:      IPA_FILENAME,
-      clean:            true,
-      silent:           false,
-      xcargs:           xcargs_flags,
-      export_options:   export_options_hash
-    )
+    if build_number < 0
+      UI.user_error!("#{version} 버전 빌드가 TestFlight 에 없습니다. 먼저 `fastlane beta` 로 RC 를 올려 검증하세요.")
+    end
+
+    UI.message("📦 심사 제출 대상: #{version} (#{build_number})")
 
     upload_to_app_store(
       app_version:                    version,
-      ipa:                            "#{OUTPUT_DIR}/#{IPA_FILENAME}",
+      build_number:                   build_number.to_s,
+      # 새 아카이브 대신 위에서 고른 기존 TestFlight 빌드를 선택한다
+      skip_binary_upload:             true,
       skip_metadata:                  false,
       metadata_path:                  METADATA_DIR,
       skip_screenshots:               false,
@@ -201,7 +174,7 @@ platform :ios do
       }
     )
 
-    UI.success("🎉 #{version} 버전 심사 제출 완료! (승인 시 자동 출시)")
+    UI.success("🎉 #{version} (#{build_number}) 심사 제출 완료! (승인 시 자동 출시)")
   end
 
   desc "메타데이터 미기입/누락 검증 (배포 전 사전 점검)"
