@@ -1,6 +1,8 @@
 default_platform(:ios)
 
 ENV["FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT"] = "600"
+# sync_screenshots 는 베타 기능이라 이 플래그가 없으면 실행이 즉시 중단된다
+ENV["FASTLANE_ENABLE_BETA_DELIVER_SYNC_SCREENSHOTS"] = "1"
 
 APP_NAME        = "Bangawo"
 WORKSPACE       = "#{APP_NAME}.xcworkspace"
@@ -10,6 +12,8 @@ OUTPUT_DIR      = "./fastlane/output"
 IPA_FILENAME    = "#{APP_NAME}.ipa"
 METADATA_DIR    = "./fastlane/metadata"
 SCREENSHOTS_DIR = "./fastlane/screenshots"
+RATING_CONFIG   = "#{METADATA_DIR}/rating.json"
+PRIVACY_CONFIG  = "./fastlane/app_data_usages.json"
 
 # 심사 담당자 연락처는 개인정보라 metadata 파일로 커밋하지 않고 환경변수로만 다룬다
 REVIEW_CONTACT_ENV_KEYS = %w[
@@ -149,6 +153,13 @@ platform :ios do
 
     UI.message("📦 심사 제출 대상: #{version} (#{build_number})")
 
+    # 앱 개인정보 보호(데이터 수집) 신고는 미게시면 심사 제출이 막히므로 제출 전에 업로드+게시한다
+    upload_app_privacy_details_to_app_store(
+      app_identifier:        BUNDLE_ID,
+      json_path:             PRIVACY_CONFIG,
+      skip_json_file_saving: true
+    )
+
     upload_to_app_store(
       app_version:                    version,
       build_number:                   build_number.to_s,
@@ -156,9 +167,15 @@ platform :ios do
       skip_binary_upload:             true,
       skip_metadata:                  false,
       metadata_path:                  METADATA_DIR,
+      # 첫 제출 + 무료(0 티어)면 deliver 가 전 국가 이용 가능까지 자동 활성화한다
+      # (레거시 가격 API 라 실패할 수 있으며, 그 경우 ASC 에서 가격을 수동 설정한다)
+      price_tier:                     0,
+      # 연령 등급 질문지는 첫 제출 시 미설정이면 심사 제출이 막히므로 API 로 자동 채운다
+      app_rating_config_path:         RATING_CONFIG,
       skip_screenshots:               false,
       screenshots_path:               SCREENSHOTS_DIR,
-      overwrite_screenshots:          true,
+      # MD5 체크섬 diff 로 동일 스크린샷은 재업로드하지 않는다 (overwrite 전체 재업로드 대체)
+      sync_screenshots:               true,
       force:                          true,
       submit_for_review:              true,
       automatic_release:              true,
@@ -177,6 +194,95 @@ platform :ios do
     UI.success("🎉 #{version} (#{build_number}) 심사 제출 완료! (승인 시 자동 출시)")
   end
 
+  desc "App Store Connect 의 중복 스크린샷 제거 (파일명당 1장만 남김, 재업로드 안 함)"
+  lane :dedupe_screenshots do
+    require "spaceship"
+
+    app_store_connect_api_key(
+      key_id:                ENV["APP_STORE_CONNECT_API_KEY_ID"],
+      issuer_id:             ENV["APP_STORE_CONNECT_ISSUER_ID"],
+      key_content:           ENV["APP_STORE_CONNECT_API_KEY_CONTENT"],
+      is_key_content_base64: true,
+      in_house:              false
+    )
+
+    app = Spaceship::ConnectAPI::App.find(BUNDLE_ID)
+    UI.user_error!("앱을 찾지 못했습니다: #{BUNDLE_ID}") unless app
+
+    versions = app.get_app_store_versions(
+      filter: { platform: Spaceship::ConnectAPI::Platform::IOS }
+    )
+
+    deleted = 0
+    versions.each do |version|
+      version.get_app_store_version_localizations.each do |localization|
+        localization.get_app_screenshot_sets(includes: "appScreenshots").each do |set|
+          # 같은 파일명이 여러 번 있으면 첫 장만 남기고 나머지를 삭제한다.
+          # (overwrite 재업로드로 생긴 완전 동일 중복은 sync/overwrite 로는 못 지우므로 직접 삭제)
+          seen = []
+          (set.app_screenshots || []).each do |shot|
+            if seen.include?(shot.file_name)
+              UI.message("🗑  #{localization.locale}/#{set.screenshot_display_type}/#{shot.file_name} 중복 삭제")
+              shot.delete!
+              deleted += 1
+            else
+              seen << shot.file_name
+            end
+          end
+        end
+      end
+    end
+
+    UI.success("🧹 중복 스크린샷 #{deleted}장 삭제 완료")
+  end
+
+  desc "App Store Connect 에 올라간 스크린샷 전체 목록 출력 (읽기 전용 진단)"
+  lane :list_screenshots do
+    require "spaceship"
+
+    app_store_connect_api_key(
+      key_id:                ENV["APP_STORE_CONNECT_API_KEY_ID"],
+      issuer_id:             ENV["APP_STORE_CONNECT_ISSUER_ID"],
+      key_content:           ENV["APP_STORE_CONNECT_API_KEY_CONTENT"],
+      is_key_content_base64: true,
+      in_house:              false
+    )
+
+    app = Spaceship::ConnectAPI::App.find(BUNDLE_ID)
+    UI.user_error!("앱을 찾지 못했습니다: #{BUNDLE_ID}") unless app
+
+    # 편집 버전뿐 아니라 모든 버전을 순회해 중복이 어느 버전/로케일/타입에 있는지 드러낸다
+    versions = app.get_app_store_versions(
+      filter: { platform: Spaceship::ConnectAPI::Platform::IOS }
+    )
+
+    versions.each do |version|
+      UI.important("📦 버전 #{version.version_string} (#{version.app_store_state})")
+      localizations = version.get_app_store_version_localizations
+
+      localizations.each do |localization|
+        sets = localization.get_app_screenshot_sets(includes: "appScreenshots")
+
+        if sets.empty?
+          UI.message("  #{localization.locale}: (스크린샷 세트 없음)")
+          next
+        end
+
+        sets.each do |set|
+          shots = set.app_screenshots || []
+          UI.message("  #{localization.locale} / #{set.screenshot_display_type} — #{shots.size}장")
+          shots.each do |shot|
+            UI.message("      · #{shot.file_name}  md5=#{shot.source_file_checksum}")
+          end
+
+          checksums = shots.map(&:source_file_checksum)
+          dups = checksums.tally.select { |_, count| count > 1 }
+          UI.error("      ⚠️ 중복 체크섬: #{dups.keys.join(", ")}") unless dups.empty?
+        end
+      end
+    end
+  end
+
   desc "메타데이터 미기입/누락 검증 (배포 전 사전 점검)"
   lane :verify_metadata do
     Dir.chdir("..") do
@@ -189,7 +295,9 @@ platform :ios do
         "fastlane/metadata/ko/release_notes.txt",
         "fastlane/metadata/ko/support_url.txt",
         "fastlane/metadata/ko/privacy_url.txt",
-        "fastlane/metadata/review_information/notes.txt"
+        "fastlane/metadata/review_information/notes.txt",
+        "fastlane/metadata/rating.json",
+        "fastlane/app_data_usages.json"
       ]
 
       missing = required_files.reject { |path| File.exist?(path) && !File.read(path).strip.empty? }

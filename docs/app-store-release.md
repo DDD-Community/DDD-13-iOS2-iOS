@@ -5,6 +5,7 @@ TestFlight 업로드(`beta`)와 별개로, App Store 심사 제출·출시까지
 | 대상 | lane | 워크플로 |
 | --- | --- | --- |
 | TestFlight | `fastlane beta` | `.github/workflows/testflight-deploy.yml` |
+| 태그·릴리즈 노트 | — | `.github/workflows/release-tag.yml` |
 | App Store | `fastlane release version:1.0.0` | `.github/workflows/appstore-release.yml` |
 
 > **`release` 는 새로 아카이브하지 않는다.** TestFlight 에서 검증 끝난 RC 빌드를 그대로 심사에 올린다. 즉 출시하려는 버전의 빌드가 먼저 `beta` 로 TestFlight 에 올라가 있어야 하며, 없으면 release 는 즉시 실패한다.
@@ -59,14 +60,28 @@ bundle exec fastlane verify_metadata
 
 ### 3. 배포 실행
 
-**태그 방식(권장)**
+**Release Tag 워크플로(권장)**
+
+GitHub Actions → `Release Tag` → `Run workflow` → 배포할 브랜치(보통 `main`) 선택 → 버전 입력(예: `1.0.1`). 실행하면:
+
+1. 직전 태그 이후 커밋을 커밋 컨벤션 헤더(`[FEAT]`, `[FIX]`, …)별로 묶어 릴리즈 노트를 자동 생성한다(`.github/scripts/generate-release-notes.sh`).
+2. `v{version}` 태그와 GitHub Release 를 만든다.
+3. 태그 push 가 `App Store Release` 워크플로를 이어서 트리거한다.
+
+> GitHub Release 노트는 개발자용 변경 이력이다. **App Store 심사에 노출되는 `release_notes.txt` 는 자동 생성 대상이 아니므로**, 사용자용 문구는 2단계 이전에 직접 갱신한다.
+>
+> ⚠️ 태그를 기본 `GITHUB_TOKEN` 으로 push 하면 downstream 워크플로가 트리거되지 않는다(GitHub 정책). 그래서 이 워크플로는 `RELEASE_PAT`(contents:write PAT)로 태그를 만든다. 이 Secret 이 없으면 태그·Release 는 생기지만 App Store Release 가 자동 실행되지 않는다.
+
+**직접 태그 방식**
 
 ```sh
 git tag v1.0.0
 git push origin v1.0.0
 ```
 
-**수동 방식**
+로컬에서 태그를 직접 밀면 GitHub Release·자동 릴리즈 노트 없이 App Store Release 만 트리거된다.
+
+**App Store Release 수동 실행**
 
 GitHub Actions → `App Store Release` → `Run workflow` → 버전 입력. 이때 변경사항을 함께 입력하면 이번 배포에 한해 `release_notes.txt` 를 덮어쓴다(커밋되지는 않는다).
 
@@ -96,5 +111,8 @@ TestFlight 워크플로와 동일한 값에 더해, 심사 연락처 4개를 추
 | `CONFIG_PRIVATE_REPO_TOKEN` | 인증서 repo·비공개 xcconfig 접근 (TestFlight 전용, release 잡에는 불필요) |
 | `APP_STORE_CONNECT_API_KEY_ID` / `_ISSUER_ID` / `_API_KEY_CONTENT` | App Store Connect API (키는 base64) |
 | `APP_REVIEW_FIRST_NAME` / `_LAST_NAME` / `_PHONE_NUMBER` / `_EMAIL` | App Review 담당자 연락처 |
+| `RELEASE_PAT` | `Release Tag` 워크플로 전용. 태그 push 가 App Store Release 를 트리거하도록 하는 PAT(contents:write) |
+
+> **`RELEASE_PAT` 발급**: GitHub → Settings → Developer settings → Fine-grained tokens → 이 저장소 대상, `Contents: Read and write` 권한으로 발급해 저장소 Secret 에 등록한다. 기본 `GITHUB_TOKEN` 이 만든 태그는 다른 워크플로를 트리거하지 못하기 때문에 필요하다.
 
 > release 잡은 아카이브·서명을 하지 않으므로 `MATCH_*` 와 `CONFIG_PRIVATE_REPO_TOKEN` 을 쓰지 않는다. 다만 이 값들은 TestFlight 워크플로에 여전히 필요하니 삭제하지 않는다.

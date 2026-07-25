@@ -1,0 +1,82 @@
+name: Release Tag
+
+# 수동 실행으로 버전을 입력하면
+#   1) 직전 태그 이후 커밋을 커밋 컨벤션 헤더별로 묶어 릴리즈 노트를 생성하고
+#   2) v{version} 태그 + GitHub Release 를 만든다.
+# 생성된 태그 push 가 App Store Release 워크플로(appstore-release.yml)를 이어서 트리거한다.
+#
+# ⚠️ 태그를 기본 GITHUB_TOKEN 으로 push 하면 downstream 워크플로가 트리거되지 않는다(GitHub 정책).
+#    따라서 contents:write 권한을 가진 PAT(secrets.RELEASE_PAT)로 태그를 만든다.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "출시 버전 (예: 1.0.1)"
+        required: true
+        type: string
+
+concurrency:
+  group: release-tag
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      # 릴리즈 노트 생성(git describe / git log)에 전체 히스토리와 태그가 필요하다.
+      # PAT 로 체크아웃해야 이후 gh 로 만드는 태그 push 가 appstore-release 를 트리거한다.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          token: ${{ secrets.RELEASE_PAT }}
+
+      - name: Resolve & validate version
+        id: resolve
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          VERSION="$INPUT_VERSION"
+
+          if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::버전 형식이 올바르지 않습니다: $VERSION (예: 1.0.1)"
+            exit 1
+          fi
+
+          TAG="v$VERSION"
+          # 이미 존재하는 태그면 재배포 사고를 막기 위해 즉시 실패시킨다.
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "::error::이미 존재하는 태그입니다: $TAG"
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "🏷️  생성할 태그: $TAG"
+
+      - name: Generate release notes
+        id: notes
+        env:
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          chmod +x .github/scripts/generate-release-notes.sh
+          .github/scripts/generate-release-notes.sh "${{ steps.resolve.outputs.version }}" \
+            > release-notes.md
+          echo "----- 생성된 릴리즈 노트 -----"
+          cat release-notes.md
+
+      # gh release create 가 태그(--target 커밋)와 Release 를 함께 만든다.
+      # PAT 를 GH_TOKEN 으로 써야 태그 push 가 App Store Release 워크플로를 트리거한다.
+      - name: Create tag & GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PAT }}
+          TAG: ${{ steps.resolve.outputs.tag }}
+        run: |
+          gh release create "$TAG" \
+            --target "${{ github.sha }}" \
+            --title "$TAG" \
+            --notes-file release-notes.md
+          echo "✅ $TAG Release 생성 완료 → App Store Release 워크플로가 이어서 실행됩니다."
