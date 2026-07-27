@@ -13,7 +13,6 @@ IPA_FILENAME    = "#{APP_NAME}.ipa"
 METADATA_DIR    = "./fastlane/metadata"
 SCREENSHOTS_DIR = "./fastlane/screenshots"
 RATING_CONFIG   = "#{METADATA_DIR}/rating.json"
-PRIVACY_CONFIG  = "./fastlane/app_data_usages.json"
 
 # 심사 담당자 연락처는 개인정보라 metadata 파일로 커밋하지 않고 환경변수로만 다룬다
 REVIEW_CONTACT_ENV_KEYS = %w[
@@ -153,13 +152,8 @@ platform :ios do
 
     UI.message("📦 심사 제출 대상: #{version} (#{build_number})")
 
-    # 앱 개인정보 보호(데이터 수집) 신고는 미게시면 심사 제출이 막히므로 제출 전에 업로드+게시한다
-    upload_app_privacy_details_to_app_store(
-      app_identifier:        BUNDLE_ID,
-      json_path:             PRIVACY_CONFIG,
-      skip_json_file_saving: true
-    )
-
+    # 앱 개인정보 보호(데이터 수집) 라벨은 App Store Connect 에서 admin 이 직접 설정·게시한다.
+    # 심사 제출 전 라벨이 게시되어 있어야 하므로, release 실행 전 게시 완료를 확인할 것.
     upload_to_app_store(
       app_version:                    version,
       build_number:                   build_number.to_s,
@@ -296,8 +290,7 @@ platform :ios do
         "fastlane/metadata/ko/support_url.txt",
         "fastlane/metadata/ko/privacy_url.txt",
         "fastlane/metadata/review_information/notes.txt",
-        "fastlane/metadata/rating.json",
-        "fastlane/app_data_usages.json"
+        "fastlane/metadata/rating.json"
       ]
 
       missing = required_files.reject { |path| File.exist?(path) && !File.read(path).strip.empty? }
