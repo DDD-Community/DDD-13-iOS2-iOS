@@ -12,6 +12,34 @@ TestFlight 업로드(`beta`)와 별개로, App Store 심사 제출·출시까지
 >
 > App Store Connect 는 빌드의 마케팅 버전(`CFBundleShortVersionString`)과 같은 App Store 버전에만 그 빌드를 붙일 수 있고 빌드 버전은 빌드 시점에 고정된다. 따라서 **마케팅 버전은 RC 빌드를 만들기 전에 정해져야 한다.** 현재 마케팅 버전 소스는 `Plugins/ProjectTemplatePlugin/ProjectDescriptionHelpers/Project+Templete/Extension+String.swift` 의 `appVersion(version:)` 기본값(`1.0.0`)이므로, 다음 버전을 출시하려면 이 값을 올려 `tuist generate` 후 커밋하고 `beta` 로 RC 를 올린 뒤 같은 버전으로 release 한다.
 
+## 첫 배포 전 App Store Connect 설정
+
+아래 항목은 앱 버전 메타데이터와 별개인 계정·앱 단위 설정이거나 Fastlane에서 안정적으로 지원하지 않으므로, 첫 심사 제출 전에 App Store Connect에서 직접 완료한다.
+
+- **가격·판매 지역·세금 카테고리**: `Monetization > Pricing and Availability`에서 무료 가격, 기준 국가/지역, 판매 국가, 세금 카테고리를 확정한다. `price_tier` 자동화는 현재 App Store Connect API와 호환되지 않아 사용하지 않는다.
+- **앱 개인정보 보호**: 앱과 포함된 제3자 SDK(Kakao, Naver, Firebase 등)의 데이터 수집·연결·추적 여부를 모두 반영하고 답변을 게시한다.
+- **Privacy Manifest**: 배포 아카이브의 개인정보 보호 리포트를 확인하고, 앱 코드와 FirebaseCore·FirebaseMessaging 등 필수 대상 SDK의 `PrivacyInfo.xcprivacy` 및 서명이 포함됐는지 검증한다.
+- **콘텐츠 권리**: 지도·장소 검색·프로필 이미지 등 제3자 콘텐츠를 표시할 권리가 있는지 답변한다.
+- **EU 디지털 서비스법(DSA)**: EU 판매 여부와 관계없이 trader 여부를 선언하고, trader라면 연락처 인증을 완료한다.
+- **계약·규정 준수**: 최신 Apple Developer Program 계약과 보류 중인 compliance review가 없는지 확인한다. 유료 앱이나 인앱 결제가 있으면 Paid Apps Agreement와 세금·은행 정보도 완료한다.
+- **심사용 계정·백엔드**: 모든 기능을 확인할 수 있는 활성 데모 계정 또는 완전한 데모 모드를 준비하고, 심사 기간 동안 운영 서버와 외부 로그인 설정을 유지한다.
+- **계정 삭제**: 앱에서 계정을 생성한다면 앱 내부에서 계정과 관련 데이터를 삭제할 수 있어야 한다. Apple 로그인을 사용한 계정은 삭제 시 토큰도 해지한다.
+- **공개 URL**: 개인정보 처리방침과 고객지원 URL이 로그인 없이 열리고 실제 내용을 제공하는지 확인한다.
+- **수출 규정·IDFA**: 앱 동작이 `ITSAppUsesNonExemptEncryption=false`, `export_compliance_uses_encryption=false`, `add_id_info_uses_idfa=false` 답변과 일치하는지 확인한다.
+
+현재 Fastlane `release` lane이 자동화하는 범위는 다음과 같다.
+
+| 자동 설정·처리 | 수동 확인 |
+| --- | --- |
+| TestFlight 최신 빌드 선택 | 가격·판매 지역·세금 카테고리 |
+| 앱 버전 메타데이터·카테고리 업로드 | 앱 개인정보 보호 답변 게시 |
+| 스크린샷 동기화 | 콘텐츠 권리·DSA·계약 상태 |
+| 연령 등급 질문지 업로드 | 데모 계정·계정 삭제·백엔드 접근성 |
+| 심사 연락처·심사 노트 업로드 | 개인정보 처리방침·지원 URL 실제 접근 |
+| 수출 규정·IDFA 답변 및 심사 제출 | Fastlane 답변과 실제 SDK 동작의 일치 |
+
+> 최초 버전은 App Store Connect가 `release_notes`를 사용하지 않으므로 Fastlane이 업로드를 건너뛴다. 두 번째 버전부터 `fastlane/metadata/ko/release_notes.txt`가 반영된다.
+
 ## 배포 절차
 
 ### 1. 메타데이터 갱신
