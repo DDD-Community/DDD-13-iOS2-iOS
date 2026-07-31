@@ -161,9 +161,8 @@ platform :ios do
       skip_binary_upload:             true,
       skip_metadata:                  false,
       metadata_path:                  METADATA_DIR,
-      # 첫 제출 + 무료(0 티어)면 deliver 가 전 국가 이용 가능까지 자동 활성화한다
-      # (레거시 가격 API 라 실패할 수 있으며, 그 경우 ASC 에서 가격을 수동 설정한다)
-      price_tier:                     0,
+      # 가격·판매 지역·세금 카테고리는 첫 제출 전에 App Store Connect 에서 직접 설정한다.
+      # deliver 의 price_tier 는 제거된 레거시 API 필드를 사용해 첫 가격 설정 시 실패할 수 있다.
       # 연령 등급 질문지는 첫 제출 시 미설정이면 심사 제출이 막히므로 API 로 자동 채운다
       app_rating_config_path:         RATING_CONFIG,
       skip_screenshots:               false,

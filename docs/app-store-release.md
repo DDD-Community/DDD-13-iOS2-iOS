@@ -97,6 +97,7 @@ GitHub Actions → `App Store Release` → `Run workflow` → 버전 입력. 이
 - 버전은 `v1.0.0` 형식만 허용한다. 태그명에서 `v` 를 뗀 값이 **제출할 TestFlight 빌드를 고르는 키**가 된다(버전을 코드에 주입하지 않으므로, 그 버전의 빌드가 TestFlight 에 미리 올라가 있어야 한다).
 - 이미 심사 대기 중인 빌드가 있으면 `reject_if_possible: true` 설정에 따라 기존 제출을 반려하고 새로 올린다.
 - 수출 규정·IDFA 답변은 `submission_information` 에 하드코딩돼 있다. 광고 SDK를 도입하면 `add_id_info_uses_idfa` 를 갱신해야 한다.
+- 가격·판매 지역·세금 카테고리는 App Store Connect에서 관리한다. `Fastfile`에 `price_tier`를 다시 추가하지 않는다.
 - 앱 이름(`ko/name.txt`)은 App Store 전체에서 고유해야 한다. 최초 등록명과 다르면 업로드가 거절된다.
 - 실패 시 `fastlane-logs-{버전}` 아티팩트에 `report.xml` 이 남는다(14일 보관).
 
