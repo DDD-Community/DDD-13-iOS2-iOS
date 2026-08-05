@@ -35,9 +35,9 @@ import SwiftUI
 guard let number else { return }
 
 guard
-  let name,
-  let number,
-  isFavorited
+    let name,
+    let number,
+    isFavorited
 else { return }
 
 // Not Preferred
@@ -57,19 +57,19 @@ guard let number = number else { return }
 ```swift
 // Preferred
 func changeChannel(
-  name: String,
-  number: Int,
-  isFavorited: Bool
+    name: String,
+    number: Int,
+    isFavorited: Bool
 ) {
-  ...
+    ...
 }
 
 // Not Preferred
 func changeChannel(
-  name: String,
-  number: Int,
-  isFavorited: Bool) {
-  ...
+    name: String,
+    number: Int,
+    isFavorited: Bool) {
+    ...
 }
 ```
 
@@ -87,11 +87,11 @@ case .sub: return 1
 // 로직 포함
 switch checkChannel {
 case .main:
-  guard channel.number != 0 else { return }
-  channel.changeChannel(number: 0)
+    guard channel.number != 0 else { return }
+    channel.changeChannel(number: 0)
 
 case .sub:
-  channel.changeChannel(number: 1)
+    channel.changeChannel(number: 1)
 }
 ```
 
@@ -101,13 +101,13 @@ case .sub:
 ```swift
 // Preferred
 let isSuccess = !channel.isEmpty
-  && isFavorited
-  && channel.number > 0
+    && isFavorited
+    && channel.number > 0
 
 // Not Preferred
 let isSuccess = !channel.isEmpty &&
-  isFavorited &&
-  channel.number > 0
+    isFavorited &&
+    channel.number > 0
 ```
 
 ### 삼항연산자 규칙
@@ -121,11 +121,11 @@ let isSuccess = !channel.isEmpty &&
 return number == 0 ? .main : .sub
 
 return number == 0
-  ? .main : .sub
+    ? .main : .sub
 
 // Not Preferred
 return number == 0 ?
-  .main : .sub
+    .main : .sub
 ```
 
 ### Array 선언 규칙
@@ -146,8 +146,8 @@ var counts = [String: Int]()
 
 ```swift
 self.closePopup { [weak self] _ in
-  guard let self else { return }
-  self.popAllController()
+    guard let self else { return }
+    self.popAllController()
 }
 ```
 
@@ -157,11 +157,11 @@ self.closePopup { [weak self] _ in
 
 ```swift
 private enum Metric {
-  static let avatarLength: CGFloat = 3
+    static let avatarLength: CGFloat = 3
 }
 
 private enum Constant {
-  static let maxLines = 2
+    static let maxLines = 2
 }
 ```
 
@@ -174,13 +174,13 @@ private enum Constant {
 ```swift
 // Preferred
 struct SubView: View {
-  @Binding private var isFavorited: Bool
+    @Binding private var isFavorited: Bool
 
-  init(isFavorited: Binding<Bool>) {
-    self._isFavorited = isFavorited
-  }
+    init(isFavorited: Binding<Bool>) {
+        self._isFavorited = isFavorited
+    }
 
-  var body: some View { ... }
+    var body: some View { ... }
 }
 
 // Not Preferred
@@ -207,11 +207,11 @@ struct ChannelButtonView: View { ... }
 ```swift
 // Preferred
 HStack { ... }
-  .frame(maxWidth: .infinity, alignment: .leading)
+    .frame(maxWidth: .infinity, alignment: .leading)
 
 // Not Preferred
 HStack {
-  ...
-  Spacer()
+    ...
+    Spacer()
 }
 ```
