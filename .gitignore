@@ -85,9 +85,6 @@ fastlane/.env
 # Bundler
 Gemfile.lock
 
-# Docs
-README.md
-
 # Claude Code
 CLAUDE.md
 .claude/
