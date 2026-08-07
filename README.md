@@ -212,15 +212,32 @@ HEADER 목록과 상세 규칙은 [커밋 컨벤션](docs/commit-convention.md) 
 - 스킴은 코드 커버리지가 켜진 상태로 생성된다(`Scheme.makeScheme`).
 - **테스트는 시뮬레이터에서 실행한다.** `BangawoTests` 번들 ID에 대응하는 match 프로파일이 없어 디바이스 대상 실행은 사이닝에서 실패한다.
 - 현재 테스트 프레임워크는 XCTest다.
+- `develop` · `main` 대상 PR에서는 CI가 빌드와 테스트를 자동 실행한다(`pr-validate.yml`). 로컬에서 깨진 채로 PR을 올리면 머지 전에 걸린다.
 
 ### CI/CD
 
 | 워크플로 | 트리거 | 동작 |
 | --- | --- | --- |
 | `gemini-code-review.yml` | `develop` 대상 PR | 자동 코드 리뷰 코멘트 |
+| `pr-validate.yml` | `develop` · `main` 대상 PR | 빌드 + 테스트 (머지 전 검증) |
 | `testflight-deploy.yml` | `main` PR 머지 · 수동 | TestFlight 업로드 |
 | `release-tag.yml` | 수동(버전 입력) | 릴리즈 노트 생성 + `v*.*.*` 태그 |
 | `appstore-release.yml` | `v*.*.*` 태그 push · 수동 | 메타데이터 업로드 + 심사 제출 |
+
+`develop` 이 1차 방어선, `main` 이 2차 방어선이다. `main` 대상 검증은 `develop` → `main` 사이에 쌓인 여러 PR의 조합에서만 나는 문제를 잡는다.
+
+#### 빌드 · 배포가 스킵되는 변경
+
+`pr-validate` 와 `testflight-deploy` 는 변경 파일이 **전부** 아래에 해당하면 빌드를 건너뛴다. 판정 기준은 `.github/scripts/has-app-changes.sh` 한 곳에 있다.
+
+```
+*.md   ·   docs/**   ·   .github/ISSUE_TEMPLATE/**
+.github/scripts/**   ·   .gitignore   ·   .editorconfig
+```
+
+`.mise.toml`(Tuist 버전 고정)과 `.github/workflows/**`(배포 로직 자체)는 의도적으로 제외 목록에 없다. 스킵 여부와 사유는 Actions 실행 요약에 남는다.
+
+TestFlight 배포만 따로 건너뛰려면 PR에 `skip-testflight` 라벨을 붙인다.
 
 App Store 메타데이터(앱 이름 · 설명 · 키워드 · 스크린샷)의 원본은 `fastlane/metadata/` 다.
 App Store Connect 웹에서 수정하지 말고 이 파일들을 고쳐 커밋한다. 배포 시 덮어쓰기된다.
