@@ -6,18 +6,74 @@ on:
     types: [closed]
   workflow_dispatch:
 
-concurrency:
-  group: testflight-deploy
-  cancel-in-progress: false
+permissions:
+  contents: read
+  pull-requests: read
 
 jobs:
+  # ──────────────────────────────────────────────────────────
+  # Check (배포가 필요한 변경인지 판정)
+  # ──────────────────────────────────────────────────────────
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.decide.outputs.should_deploy }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Decide whether to deploy
+        id: decide
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          MERGED: ${{ github.event.pull_request.merged }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+        run: |
+          set -euo pipefail
+
+          emit() {
+            echo "should_deploy=$1" >> "$GITHUB_OUTPUT"
+            echo "$2" >> "$GITHUB_STEP_SUMMARY"
+            echo "$2"
+            exit 0
+          }
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            emit true "✅ 수동 실행 — TestFlight 배포를 진행합니다."
+          fi
+
+          if [ "$MERGED" != "true" ]; then
+            emit false "⏭️ 머지되지 않고 닫힌 PR 이라 배포를 건너뜁니다."
+          fi
+
+          if echo "$LABELS" | jq -e 'index("skip-testflight")' >/dev/null; then
+            emit false "⏭️ \`skip-testflight\` 라벨이 붙어 있어 배포를 건너뜁니다."
+          fi
+
+          # 파일 목록 조회가 실패하면 판정 근거가 없으므로 안전한 쪽(배포)으로 떨어뜨린다
+          files=$(gh pr view "$PR_NUMBER" --json files --jq '.files[].path' || true)
+          if [ -z "$files" ]; then
+            emit true "✅ 변경 파일 목록을 확인하지 못해 배포를 진행합니다."
+          fi
+
+          if printf '%s\n' "$files" | .github/scripts/has-app-changes.sh; then
+            emit true "✅ 앱에 영향을 주는 변경이 있어 배포를 진행합니다."
+          else
+            emit false "⏭️ 문서·설정 파일만 변경되어 배포를 건너뜁니다."
+          fi
+
   # ──────────────────────────────────────────────────────────
   # Deploy (TestFlight)
   # ──────────────────────────────────────────────────────────
   deploy:
-    # PR 이 머지된 경우 또는 수동 실행일 때만 동작 (단순 close 는 스킵)
-    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+    needs: check
+    if: needs.check.outputs.should_deploy == 'true'
     runs-on: macos-15
+    # 실제 배포끼리만 직렬화한다 (판정 job 까지 배포 큐 뒤에 세우지 않도록 job 레벨에 둔다)
+    concurrency:
+      group: testflight-deploy
+      cancel-in-progress: false
     # 서명 단계가 매달려도 러너를 오래 점유하지 않도록 상한을 둔다
     # (concurrency 가 cancel-in-progress: false 라 멈춘 잡이 후속 배포를 전부 막는다)
     timeout-minutes: 60

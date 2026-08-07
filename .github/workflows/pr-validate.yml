@@ -1,0 +1,150 @@
+name: PR Validate
+
+# 통합 브랜치(develop · main)로 들어가는 PR 을 머지 전에 컴파일·테스트로 검증한다.
+#   develop — 1차 방어선. 실제 코드 통합이 여기서 일어난다.
+#   main    — 2차 방어선. develop→main 사이에 쌓인 PR 조합에서만 나는 문제를 잡는다.
+on:
+  pull_request:
+    branches: [develop, main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+# 같은 PR 에 새 커밋이 오면 이전 실행은 의미가 없다 (배포와 달리 취소해도 부작용이 없다)
+concurrency:
+  group: pr-validate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # ──────────────────────────────────────────────────────────
+  # Check (빌드가 필요한 변경인지 판정)
+  # ──────────────────────────────────────────────────────────
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      should_build: ${{ steps.decide.outputs.should_build }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Decide whether to build
+        id: decide
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+
+          emit() {
+            echo "should_build=$1" >> "$GITHUB_OUTPUT"
+            echo "$2" >> "$GITHUB_STEP_SUMMARY"
+            echo "$2"
+            exit 0
+          }
+
+          # 파일 목록 조회가 실패하면 판정 근거가 없으므로 안전한 쪽(빌드)으로 떨어뜨린다
+          files=$(gh pr view "$PR_NUMBER" --json files --jq '.files[].path' || true)
+          if [ -z "$files" ]; then
+            emit true "✅ 변경 파일 목록을 확인하지 못해 검증을 진행합니다."
+          fi
+
+          if printf '%s\n' "$files" | .github/scripts/has-app-changes.sh; then
+            emit true "✅ 앱에 영향을 주는 변경이 있어 빌드·테스트를 진행합니다."
+          else
+            emit false "⏭️ 문서·설정 파일만 변경되어 빌드·테스트를 건너뜁니다."
+          fi
+
+  # ──────────────────────────────────────────────────────────
+  # Validate (빌드 + 테스트)
+  # ──────────────────────────────────────────────────────────
+  validate:
+    needs: check
+    if: needs.check.outputs.should_build == 'true'
+    runs-on: macos-15
+    timeout-minutes: 45
+    env:
+      # 비공개 xcconfig(API 키) 를 내려받기 위한 토큰
+      CONFIG_PRIVATE_REPO_TOKEN: ${{ secrets.CONFIG_PRIVATE_REPO_TOKEN }}
+      DERIVED_DATA: .build-ci
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Setup mise & tuist
+        uses: jdx/mise-action@v2
+
+      # 커밋된 tuisttool 바이너리는 로컬 macOS 26 기준으로 빌드되어 macos-15 러너에서 로드 불가
+      # → 러너 OS에 맞게 소스에서 재컴파일
+      - name: Build tuisttool
+        run: swiftc TuistTool.swift -o tuisttool
+
+      - name: Download private xcconfig
+        run: |
+          echo "GITHUB_ACCESS_TOKEN=${CONFIG_PRIVATE_REPO_TOKEN}" > .env
+          make download-privates
+
+      # fastlane 의 ensure_workspace 를 거치지 않으므로 install·generate 를 직접 호출한다
+      - name: Generate Xcode project
+        run: |
+          ./tuisttool install
+          ./tuisttool generate
+
+      # 배포 타겟이 iOS 26.0 이라 하위 런타임 시뮬레이터로는 테스트가 뜨지 않는다.
+      # 러너 이미지마다 제공 런타임이 달라, 이름을 고정하지 않고 실행 시점에 고른다.
+      - name: Resolve simulator
+        id: sim
+        run: |
+          set -euo pipefail
+          cat > /tmp/resolve-simulator.py <<'PY'
+          import json, sys
+
+          devices = json.load(sys.stdin)["devices"]
+          candidates = []
+
+          for runtime, devs in devices.items():
+              if "SimRuntime.iOS-" not in runtime:
+                  continue
+              version = tuple(int(p) for p in runtime.split("SimRuntime.iOS-")[1].split("-"))
+              if version < (26,):
+                  continue
+              for dev in devs:
+                  if dev.get("isAvailable") and dev["name"].startswith("iPhone"):
+                      candidates.append((version, dev["udid"], dev["name"]))
+
+          if candidates:
+              version, udid, name = max(candidates)
+              sys.stderr.write("선택된 시뮬레이터: %s (iOS %s)\n" % (name, ".".join(map(str, version))))
+              print(udid)
+          PY
+
+          UDID=$(xcrun simctl list devices available -j | python3 /tmp/resolve-simulator.py)
+
+          if [ -z "$UDID" ]; then
+            echo "::error::iOS 26 이상 iPhone 시뮬레이터를 찾지 못했습니다."
+            xcrun simctl list runtimes
+            exit 1
+          fi
+
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+
+      - name: Build for testing
+        run: |
+          xcodebuild build-for-testing \
+            -workspace Bangawo.xcworkspace \
+            -scheme Bangawo \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath "$DERIVED_DATA" \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Test
+        run: |
+          xcodebuild test-without-building \
+            -workspace Bangawo.xcworkspace \
+            -scheme Bangawo \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath "$DERIVED_DATA"

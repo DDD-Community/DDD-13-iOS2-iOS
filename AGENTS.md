@@ -132,6 +132,9 @@ prefix: `ic`(아이콘) / `sym`(로고·브랜드) / `img`(일반 이미지) / `
 예: `ic_arrow_right_24`, `sym_kakao`, `img_onboarding_01`
 Tuist가 camelCase로 변환하므로 코드에서는 `Image.Asset.icArrowRight24` 형태로 접근한다.
 
+## Handoff Protocol
+세션 시작 시 `.handoff/CURRENT.md` 가 있으면 미완료 인수인계다. 먼저 읽고 목표·진행 상태·제약을 복원한 뒤 "다음 액션"부터 이어서 진행하라. 작업을 마치거나 중단할 때는 이 파일을 최신화하라(없으면 `.handoff/README.md` 참고). 노트는 코드·git으로 복원 가능한 내용은 경로/커맨드로만 참조하는 경량 문서다.
+
 ## Git Rules
 
 ### Branch

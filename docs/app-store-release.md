@@ -86,6 +86,16 @@ bundle exec fastlane verify_metadata
 
 필수 파일 누락, `TODO_` 자리표시자, 글자 수 초과, 스크린샷 부재, 심사 연락처 환경변수 누락을 잡는다. 빌드는 30분 이상 걸리므로 반드시 먼저 통과시킨다.
 
+**함께 확인할 것 — 출시할 버전의 RC 빌드가 TestFlight 에 있는가.**
+
+`release` lane 은 새로 아카이브하지 않고 그 버전의 TestFlight 빌드를 골라 제출한다. 빌드가 없으면 태그를 만든 뒤 `App Store Release` 가 실패하고, 태그를 지우고 다시 만들어야 한다.
+
+TestFlight 배포는 `main` 머지마다 자동으로 돌지만 **문서·설정만 바뀐 머지에서는 건너뛴다**(아래 "주의 사항" 참고). 마지막 머지가 문서였다면 그 버전의 RC 가 없을 수 있으므로, App Store Connect 에서 확인하고 없으면 배포 전에 한 번 올린다.
+
+```
+GitHub Actions → TestFlight Deploy → Run workflow
+```
+
 ### 3. 배포 실행
 
 **Release Tag 워크플로(권장)**
@@ -123,6 +133,7 @@ GitHub Actions → `App Store Release` → `Run workflow` → 버전 입력. 이
 ## 주의 사항
 
 - 버전은 `v1.0.0` 형식만 허용한다. 태그명에서 `v` 를 뗀 값이 **제출할 TestFlight 빌드를 고르는 키**가 된다(버전을 코드에 주입하지 않으므로, 그 버전의 빌드가 TestFlight 에 미리 올라가 있어야 한다).
+- **`main` 머지가 항상 TestFlight 배포를 트리거하지는 않는다.** 변경 파일이 전부 문서·설정(`*.md`, `docs/**`, `.github/ISSUE_TEMPLATE/**`, `.github/scripts/**`, `.gitignore`, `.editorconfig`)이면 건너뛴다. 판정 기준은 `.github/scripts/has-app-changes.sh` 한 곳에 있고, 스킵 여부와 사유는 Actions 실행 요약에 남는다. 코드 변경이 있는데도 배포를 막고 싶으면 PR에 `skip-testflight` 라벨을 붙인다.
 - 이미 심사 대기 중인 빌드가 있으면 `reject_if_possible: true` 설정에 따라 기존 제출을 반려하고 새로 올린다.
 - 수출 규정·IDFA 답변은 `submission_information` 에 하드코딩돼 있다. 광고 SDK를 도입하면 `add_id_info_uses_idfa` 를 갱신해야 한다.
 - 가격·판매 지역·세금 카테고리는 App Store Connect에서 관리한다. `Fastfile`에 `price_tier`를 다시 추가하지 않는다.
